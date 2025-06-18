@@ -1,4 +1,6 @@
 //! this module allows to display paginated highscores and publish new scores
+
+use reqwest::{blocking, header::CONTENT_TYPE};
 use std::{
     env,
     sync::{Arc, Mutex, mpsc::Receiver},
@@ -68,6 +70,7 @@ impl Highscore {
     /// create a new instance of highscore and default to a loading state
     pub fn new_loading() -> Self {
         let highscore = Self::new();
+        highscore.fetch_data();
         highscore
     }
 
@@ -151,7 +154,7 @@ impl Highscore {
         *self.state.lock().unwrap() = State::Loading;
         self.render_loading();
         println!("{}", Self::render_loading_screen());
-        None
+        self.submit_name(&name, score, level)
     }
 
     /// scroll down
@@ -180,6 +183,166 @@ impl Highscore {
             State::Idle => Self::render_score(screen_array.clone(), self.scroll),
             State::Error => String::new(),
             State::Quit => String::new(),
+        }
+    }
+
+    /// fetch the data from the server
+    pub fn fetch_data(&self) {
+        let state_clone = Arc::clone(&self.state);
+        let screen_array_clone = Arc::clone(&self.screen_array);
+        let scroll_clone = self.scroll;
+
+        thread::spawn(move || {
+            let mut url = env::var("HIGHSCORE_URL")
+                .unwrap_or(String::from("https://dominik-wilkowski.com/beast"));
+            url.push_str("/highscore");
+
+            match blocking::get(url) {
+                Ok(responds) => match responds.text() {
+                    Ok(body) => {
+                        if let Ok(mut state) = state_clone.lock() {
+                            if let Ok(mut screen_array) = screen_array_clone.lock() {
+                                match Highscores::ron_from_str(&body) {
+                                    Ok(data) => {
+                                        Self::inject_score_into_screen_array(
+                                            &mut screen_array,
+                                            &data,
+                                        );
+                                        if *state == State::Loading {
+                                            *state = State::Idle;
+                                            println!(
+                                                "{}",
+                                                Self::render_score(
+                                                    screen_array.clone(),
+                                                    scroll_clone
+                                                )
+                                            );
+                                        }
+                                    }
+                                    Err(error) => {
+                                        if *state == State::Loading {
+                                            *state = State::Error;
+                                            println!(
+                                                "{}{}",
+                                                Self::render_loading_screen(),
+                                                Self::render_error(format!(
+                                                    "Failed to parse highscores file: {error}"
+                                                ))
+                                            );
+                                        }
+                                    }
+                                }
+                            };
+                        }
+                    }
+                    Err(error) => {
+                        if let Ok(mut state) = state_clone.lock() {
+                            if *state == State::Loading {
+                                *state = State::Error;
+                                println!(
+                                    "{}{}",
+                                    Self::render_loading_screen(),
+                                    Self::render_error(format!(
+                                        "Error reading highscore data: {error}"
+                                    ))
+                                );
+                            }
+                        }
+                    }
+                },
+                Err(error) => {
+                    if let Ok(mut state) = state_clone.lock() {
+                        if *state == State::Loading {
+                            *state = State::Error;
+                            println!(
+                                "{}{}",
+                                Self::render_loading_screen(),
+                                Self::render_error(format!("Fetching highscore failed: {error}"))
+                            );
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    fn submit_name(&self, name: &str, score: u16, level: Level) -> Option<()> {
+        let state_clone = Arc::clone(&self.state);
+        let name_clone = name.to_string();
+
+        let mut url = env::var("HIGHSCORE_URL")
+            .unwrap_or(String::from("https://dominik-wilkowski.com/beast"));
+        url.push_str("/highscore");
+
+        match Highscores::ron_to_str(&Score {
+            name: name_clone,
+            score,
+            level,
+        }) {
+            Ok(payload) => {
+                match blocking::Client::new()
+                    .post(&url)
+                    .header(CONTENT_TYPE, "application/x-ron")
+                    .body(payload)
+                    .send()
+                {
+                    Ok(response) => {
+                        if let Ok(mut state) = state_clone.lock() {
+                            if *state == State::Loading {
+                                if response.status().is_success() {
+                                    *state = State::Idle;
+                                    Some(())
+                                } else {
+                                    *state = State::Error;
+                                    let error = response.text().unwrap_or_else(|_| {
+                                        String::from("Could not read error response")
+                                    });
+                                    println!(
+                                        "{}{}",
+                                        Self::render_loading_screen(),
+                                        Self::render_error(format!(
+                                            "Failed to post highscore: {error}"
+                                        ))
+                                    );
+                                    None
+                                }
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    }
+                    Err(error) => {
+                        if let Ok(mut state) = state_clone.lock() {
+                            if *state == State::Loading {
+                                *state = State::Error;
+                                println!(
+                                    "{}{}",
+                                    Self::render_loading_screen(),
+                                    Self::render_error(format!(
+                                        "Failed to parse highscores file: {error}"
+                                    ))
+                                );
+                            }
+                        }
+                        None
+                    }
+                }
+            }
+            Err(error) => {
+                if let Ok(mut state) = state_clone.lock() {
+                    if *state == State::Loading {
+                        *state = State::Error;
+                        println!(
+                            "{}{}",
+                            Self::render_loading_screen(),
+                            Self::render_error(format!("Failed to parse highscores file: {error}"))
+                        );
+                    }
+                }
+                None
+            }
         }
     }
 

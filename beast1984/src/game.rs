@@ -1,22 +1,23 @@
 //! this module contains the main struct that orchestrates the game
 
-use std::{
-    io::{self, Read},
-    sync::mpsc,
-    thread,
-    time::{Duration, Instant},
-};
-
 use crate::{
+    help::Help,
+    highscore::{Highscore, State},
+    stty::{RawMode, install_raw_mode_signal_handler},
+};
+use game_logic::{
     ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
     BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
     board::Board,
     common::levels::Level,
-    help::Help,
-    highscore::{Highscore, State},
     player::{Player, PlayerAction},
-    stty::{RawMode, install_raw_mode_signal_handler},
+};
+use std::{
+    io::{self, Read},
+    sync::mpsc,
+    thread,
+    time::{Duration, Instant},
 };
 
 /// the height of the board

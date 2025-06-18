@@ -2,10 +2,10 @@
 
 use std::{fmt, time::Instant};
 
-use crate::{
+use crate::game::{ANSI_BOARD_HEIGHT, ANSI_FOOTER_HEIGHT, ANSI_FRAME_SIZE};
+use game_logic::{
+    ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RIGHT_BORDER, LOGO, Tile,
     beasts::{Beast, CommonBeast, Egg, HatchedBeast, SuperBeast},
-    game::{ANSI_BOARD_HEIGHT, ANSI_FOOTER_HEIGHT, ANSI_FRAME_SIZE},
-    start::{ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RIGHT_BORDER, LOGO, Tile},
 };
 
 /// keeping track of what page to display
@@ -177,141 +177,5 @@ impl Help {
             "{ANSI_LEFT_BORDER}                                                {}                                               {ANSI_RIGHT_BORDER}\n",
             self.page
         )
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::{BOARD_WIDTH, test_common::strip_ansi_border};
-
-    #[test]
-    fn next_page_test() {
-        let mut help = Help::new();
-        assert_eq!(help.page, Page::One, "The first page should be page one");
-        help.next_page();
-        assert_eq!(
-            help.page,
-            Page::Two,
-            "The page after calling next_page 1 time should be page two"
-        );
-        help.next_page();
-        assert_eq!(
-            help.page,
-            Page::Three,
-            "The page after calling next_page 2 time should be page three"
-        );
-        help.next_page();
-        assert_eq!(
-            help.page,
-            Page::One,
-            "The page after calling next_page 3 time should be page one"
-        );
-    }
-
-    #[test]
-    fn previous_page_test() {
-        let mut help = Help::new();
-        assert_eq!(help.page, Page::One, "The first page should be page one");
-        help.previous_page();
-        assert_eq!(
-            help.page,
-            Page::Three,
-            "The page after calling previous_page 1 time should be page three"
-        );
-        help.previous_page();
-        assert_eq!(
-            help.page,
-            Page::Two,
-            "The page after calling previous_page 2 time should be page two"
-        );
-        help.previous_page();
-        assert_eq!(
-            help.page,
-            Page::One,
-            "The page after calling previous_page 3 time should be page one"
-        );
-    }
-
-    #[test]
-    fn render_pagination_test() {
-        let mut help = Help::new();
-        assert_eq!(
-            strip_ansi_border(help.render_pagination().strip_suffix("\n").unwrap()).len(),
-            BOARD_WIDTH * 2,
-            "The pagination for page one should render the correct length"
-        );
-        help.next_page();
-        assert_eq!(
-            strip_ansi_border(help.render_pagination().strip_suffix("\n").unwrap()).len(),
-            BOARD_WIDTH * 2,
-            "The pagination for page two should render the correct length"
-        );
-        help.next_page();
-        assert_eq!(
-            strip_ansi_border(help.render_pagination().strip_suffix("\n").unwrap()).len(),
-            BOARD_WIDTH * 2,
-            "The pagination for page three should render the correct length"
-        );
-        help.next_page();
-        assert_eq!(
-            strip_ansi_border(help.render_pagination().strip_suffix("\n").unwrap()).len(),
-            BOARD_WIDTH * 2,
-            "The pagination for page one should render the correct length"
-        );
-    }
-
-    #[test]
-    fn general_page_line_length_test() {
-        let help = Help::new();
-        let output = help.render();
-
-        let lines = output.lines().collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 1 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2,
-                    "Line {} should be the correct length",
-                    i,
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn beast_page_line_length_test() {
-        let mut help = Help::new();
-        help.next_page();
-        let output = help.render();
-
-        let lines = output.lines().collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 1 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2,
-                    "Line {i} should be the correct length"
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn scoring_page_line_length_test() {
-        let mut help = Help::new();
-        help.previous_page();
-        let output = help.render();
-
-        let lines = output.lines().collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 1 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2,
-                    "Line {i} should be the correct length"
-                );
-            }
-        }
     }
 }

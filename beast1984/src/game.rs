@@ -331,8 +331,8 @@ impl Game {
             self.eggs
                 .retain_mut(|egg| match egg.hatch(self.level.get_config()) {
                     HatchingState::Incubating => true,
-                    HatchingState::Hatching(position, instant) => {
-                        self.board[&position] = Tile::EggHatching(instant);
+                    HatchingState::Hatching(position, _instant) => {
+                        self.board[&position] = Tile::EggHatching;
                         true
                     }
                     HatchingState::Hatched(position) => {

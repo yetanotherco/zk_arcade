@@ -1,4 +1,6 @@
-use std::{fmt, time::Instant};
+use std::fmt;
+
+use serde::{Deserialize, Serialize};
 
 /// the board width
 pub const BOARD_WIDTH: usize = 50;
@@ -36,14 +38,14 @@ pub const LOGO: [&str; 10] = [
 ];
 
 /// a data structure to place items on a board
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Coord {
     pub column: usize,
     pub row: usize,
 }
 
 /// the items that can be found on the baord
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Tile {
     /// empty space
     Empty,
@@ -58,9 +60,9 @@ pub enum Tile {
     /// a super beast `╟╢`
     SuperBeast,
     /// an egg `○○`
-    Egg(Instant),
+    Egg,
     /// an egg hatching `○○` (in a different color)
-    EggHatching(Instant),
+    EggHatching,
     /// a hatched beast `╬╬`
     HatchedBeast,
 }
@@ -75,8 +77,8 @@ impl Tile {
             Tile::Player => "◀▶",
             Tile::CommonBeast => "├┤",
             Tile::SuperBeast => "╟╢",
-            Tile::Egg(_) => "○○",
-            Tile::EggHatching(_) => "○○",
+            Tile::Egg => "○○",
+            Tile::EggHatching => "○○",
             Tile::HatchedBeast => "╬╬",
         }
     }
@@ -91,8 +93,8 @@ impl fmt::Display for Tile {
             Tile::Player => write!(f, "\x1b[36m{}\x1b[39m", self.raw_symbol()),
             Tile::CommonBeast => write!(f, "\x1b[31m{}\x1b[39m", self.raw_symbol()),
             Tile::SuperBeast => write!(f, "\x1b[31m{}\x1b[39m", self.raw_symbol()),
-            Tile::Egg(_) => write!(f, "\x1b[31m{}\x1b[39m", self.raw_symbol()),
-            Tile::EggHatching(_) => write!(f, "\x1b[35m{}\x1b[39m", self.raw_symbol()),
+            Tile::Egg => write!(f, "\x1b[31m{}\x1b[39m", self.raw_symbol()),
+            Tile::EggHatching => write!(f, "\x1b[35m{}\x1b[39m", self.raw_symbol()),
             Tile::HatchedBeast => write!(f, "\x1b[31m{}\x1b[39m", self.raw_symbol()),
         }
     }

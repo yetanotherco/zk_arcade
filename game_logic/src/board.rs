@@ -3,6 +3,7 @@ use std::ops::{Index, IndexMut};
 
 #[cfg(not(feature = "zkvm"))]
 use rand::{seq::SliceRandom, Rng};
+use serde::{Deserialize, Serialize};
 #[cfg(not(feature = "zkvm"))]
 use std::{
     fmt::Write,
@@ -135,7 +136,7 @@ impl Board {
                 let mut rng = rand::rng();
                 let time = Instant::now() - Duration::from_millis(rng.random_range(0..3000));
                 eggs.push(Egg::new(coord, time));
-                buffer[coord.row][coord.column] = Tile::Egg(time);
+                buffer[coord.row][coord.column] = Tile::Egg;
                 placed_eggs += 1;
             } else if placed_beasts < level_config.common_beasts {
                 common_beasts.push(CommonBeast::new(coord));

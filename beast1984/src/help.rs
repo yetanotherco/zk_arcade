@@ -1,6 +1,6 @@
 //! this module allows to display paginated help in the CLI
 
-use std::{fmt, time::Instant};
+use std::fmt;
 
 use crate::game::{ANSI_BOARD_HEIGHT, ANSI_FOOTER_HEIGHT, ANSI_FRAME_SIZE};
 use game_logic::{
@@ -130,7 +130,7 @@ impl Help {
         output.push_str(&format!("{ANSI_LEFT_BORDER}  This beast is vicious and smart and will find you if you leave an opening.                        {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  It can only be killed by squishing it against a {}.                                               {ANSI_RIGHT_BORDER}\n", Tile::StaticBlock));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
-        output.push_str(&format!("{ANSI_LEFT_BORDER}  The {ANSI_BOLD}Egg{ANSI_RESET} {} and the {ANSI_BOLD}Hatched Beast{ANSI_RESET} {}                                                               {ANSI_RIGHT_BORDER}\n", Tile::Egg(Instant::now()), Tile::HatchedBeast));
+        output.push_str(&format!("{ANSI_LEFT_BORDER}  The {ANSI_BOLD}Egg{ANSI_RESET} {} and the {ANSI_BOLD}Hatched Beast{ANSI_RESET} {}                                                               {ANSI_RIGHT_BORDER}\n", Tile::Egg, Tile::HatchedBeast));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  Towards the end you will encounter eggs which hatch into Hatched Beasts. These beasts can push {} {ANSI_RIGHT_BORDER}\n", Tile::Block));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  and will try to squish YOU with them. They can be killed like the common beasts though.           {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
@@ -162,7 +162,7 @@ impl Help {
         output.push_str(&format!("{ANSI_LEFT_BORDER}  ----------------------------                                                                      {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  {}     | {}                                                                                        {ANSI_RIGHT_BORDER}\n", Tile::CommonBeast, CommonBeast::get_score()));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  {}     | {}                                                                                        {ANSI_RIGHT_BORDER}\n", Tile::SuperBeast, SuperBeast::get_score()));
-        output.push_str(&format!("{ANSI_LEFT_BORDER}  {}     | {}                                                                                        {ANSI_RIGHT_BORDER}\n", Tile::Egg(Instant::now()), Egg::get_score()));
+        output.push_str(&format!("{ANSI_LEFT_BORDER}  {}     | {}                                                                                        {ANSI_RIGHT_BORDER}\n", Tile::Egg, Egg::get_score()));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  {}     | {}                                                                                        {ANSI_RIGHT_BORDER}\n", Tile::HatchedBeast, HatchedBeast::get_score()));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));

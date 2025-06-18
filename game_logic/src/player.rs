@@ -1,5 +1,7 @@
 //! this module contains the player struct which manages the player movements
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     beasts::{Beast, CommonBeast, Egg, HatchedBeast, SuperBeast},
     board::Board,
@@ -24,6 +26,7 @@ pub enum PlayerAction {
 }
 
 /// the player struct which manages the player movements, score, statistics and lives
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Player {
     pub position: Coord,
     pub lives: u8,
@@ -71,8 +74,8 @@ impl Player {
                             }
                             Tile::CommonBeast
                             | Tile::HatchedBeast
-                            | Tile::Egg(_)
-                            | Tile::EggHatching(_) => {
+                            | Tile::Egg
+                            | Tile::EggHatching => {
                                 // can be squished against the frame of the board
                                 if get_next_coord(&end_coord, dir).is_none_or(|coord| {
                                     board[&coord] == Tile::Block
@@ -92,7 +95,7 @@ impl Player {
                                             self.score += CommonBeast::get_score();
                                             PlayerAction::KillCommonBeast(end_coord)
                                         }
-                                        Tile::Egg(_) | Tile::EggHatching(_) => {
+                                        Tile::Egg | Tile::EggHatching => {
                                             self.score += Egg::get_score();
                                             PlayerAction::KillEgg(end_coord)
                                         }
@@ -156,7 +159,7 @@ impl Player {
                     self.lives -= 1;
                     PlayerAction::KillPlayer
                 }
-                Tile::Egg(_) | Tile::EggHatching(_) | Tile::StaticBlock | Tile::Player => {
+                Tile::Egg | Tile::EggHatching | Tile::StaticBlock | Tile::Player => {
                     /* nothing happens */
                     PlayerAction::None
                 }

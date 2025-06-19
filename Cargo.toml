@@ -1,5 +1,5 @@
 [workspace]
 resolver = "2"
-members = ["game_logic", "zkvm_program", "beast1984"]
+members = ["game_logic", "beast1984", "beast1984/zkvm_program"]
 
 [workspace.dependencies]

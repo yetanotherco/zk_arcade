@@ -7,6 +7,7 @@ use risc0_zkvm::{ExecutorEnv, ProverOpts, Receipt, default_prover};
 
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 
+#[derive(Debug, Clone)]
 pub enum ProvingError {
     WriteInput(String),
     BuildExecutor(String),

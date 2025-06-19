@@ -5,7 +5,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum GameLogEntry {
     CommonBeastMoved { idx: usize, new_pos: Coord },
     SuperBeastMoved { idx: usize, new_pos: Coord },

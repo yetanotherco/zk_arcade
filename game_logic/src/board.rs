@@ -1,10 +1,7 @@
 //! this module contains the board logic including terrain generation and rendering the board
 use std::ops::{Index, IndexMut};
 
-#[cfg(not(feature = "zkvm"))]
 use rand::{seq::SliceRandom, Rng};
-use serde::{Deserialize, Serialize};
-#[cfg(not(feature = "zkvm"))]
 use std::{
     fmt::Write,
     time::{Duration, Instant},
@@ -39,6 +36,7 @@ impl IndexMut<&Coord> for Board {
 }
 
 /// data that is returned from the terrain generation to be used by the game struct
+#[derive(Clone)]
 pub struct BoardTerrainInfo {
     /// the board itself
     pub buffer: [[Tile; BOARD_WIDTH]; BOARD_HEIGHT],
@@ -60,7 +58,21 @@ impl Board {
         Self { buffer }
     }
 
-    #[cfg(not(feature = "zkvm"))]
+    pub fn new_from_matrix(map: Vec<Vec<Tile>>) -> Self {
+        let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
+
+        let width = std::cmp::min(BOARD_WIDTH, buffer.len());
+        for i in 0..width {
+            let height = std::cmp::min(buffer[i].len(), BOARD_HEIGHT);
+
+            for e in 0..height {
+                buffer[i][e] = map[i][e];
+            }
+        }
+
+        Self { buffer }
+    }
+
     /// generate the terrain of the board according to the level config we pass in
     pub fn generate_terrain(level: Level) -> BoardTerrainInfo {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
@@ -159,7 +171,6 @@ impl Board {
     }
 
     /// render the board to the screen
-    #[cfg(not(feature = "zkvm"))]
     pub fn render(&self) -> String {
         let mut output = String::with_capacity(BOARD_WIDTH * BOARD_HEIGHT * 2 + BOARD_HEIGHT);
 

@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// the common beast is the simplest beast out there
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CommonBeast {
     pub position: Coord,
 }
@@ -32,6 +32,39 @@ impl Beast for CommonBeast {
         Self { position }
     }
 
+    /// TODO verify that the coord is a possible movement from the current position
+    fn advance_to(
+        &mut self,
+        board: &mut Board,
+        _player_position: Coord,
+        coord: Coord,
+    ) -> BeastAction {
+        match board[&coord] {
+            Tile::Player => {
+                board[&coord] = Tile::CommonBeast;
+                board[&self.position] = Tile::Empty;
+                self.position = coord;
+                return BeastAction::PlayerKilled;
+            }
+            Tile::Empty => {
+                board[&coord] = Tile::CommonBeast;
+                board[&self.position] = Tile::Empty;
+                self.position = coord;
+                return BeastAction::Moved;
+            }
+            Tile::Block
+            | Tile::StaticBlock
+            | Tile::CommonBeast
+            | Tile::SuperBeast
+            | Tile::HatchedBeast
+            | Tile::Egg
+            | Tile::EggHatching => {
+                // we can't move here
+                BeastAction::Stayed
+            }
+        }
+    }
+
     // this is the simplest path finding that I could come up with
     // the beasts just move in your direction without checking for a path all the way to the player
     // this means they can get stuck behind a flat wall
@@ -45,28 +78,10 @@ impl Beast for CommonBeast {
         ));
 
         for coord in possible_moves {
-            match board[&coord] {
-                Tile::Player => {
-                    board[&coord] = Tile::CommonBeast;
-                    board[&self.position] = Tile::Empty;
-                    self.position = coord;
-                    return BeastAction::PlayerKilled;
-                }
-                Tile::Empty => {
-                    board[&coord] = Tile::CommonBeast;
-                    board[&self.position] = Tile::Empty;
-                    self.position = coord;
-                    return BeastAction::Moved;
-                }
-                Tile::Block
-                | Tile::StaticBlock
-                | Tile::CommonBeast
-                | Tile::SuperBeast
-                | Tile::HatchedBeast
-                | Tile::Egg
-                | Tile::EggHatching => {
-                    // we can't move here
-                }
+            let action = self.advance_to(board, player_position, coord);
+            // If the action is stayed, try with the
+            if action != BeastAction::Stayed {
+                return action;
             }
         }
 

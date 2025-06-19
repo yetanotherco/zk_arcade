@@ -12,7 +12,7 @@ use crate::{
 };
 
 /// the hatched beasts are most advanced in how it finds the player and can move blocks and even squish the player with blocks
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct HatchedBeast {
     pub position: Coord,
 }
@@ -156,6 +156,64 @@ impl Beast for HatchedBeast {
     /// create a new instance of hatched beast
     fn new(position: Coord) -> Self {
         Self { position }
+    }
+
+    fn advance_to(
+        &mut self,
+        board: &mut Board,
+        _player_position: Coord,
+        new_pos: Coord,
+    ) -> BeastAction {
+        match board[&new_pos] {
+            Tile::Player => {
+                board[&new_pos] = Tile::HatchedBeast;
+                board[&self.position] = Tile::Empty;
+                self.position = new_pos;
+                return BeastAction::PlayerKilled;
+            }
+            Tile::Empty => {
+                board[&new_pos] = Tile::HatchedBeast;
+                board[&self.position] = Tile::Empty;
+                self.position = new_pos;
+                return BeastAction::Moved;
+            }
+            Tile::Block => {
+                let dir = Self::get_dir(self.position, new_pos);
+                if let Some((end_coord, _)) = get_end_of_block_chain(board, &new_pos, &dir) {
+                    match board[&end_coord] {
+                        Tile::Empty => {
+                            board[&self.position] = Tile::Empty;
+                            board[&new_pos] = Tile::HatchedBeast;
+                            board[&end_coord] = Tile::Block;
+                            self.position = new_pos;
+                            return BeastAction::Moved;
+                        }
+                        Tile::Player => {
+                            if get_next_coord(&end_coord, &dir).is_none_or(|coord| {
+                                board[&coord] == Tile::Block || board[&coord] == Tile::StaticBlock
+                            }) {
+                                // this code path should also not be hit since we check for it in step 2
+                                board[&self.position] = Tile::Empty;
+                                board[&new_pos] = Tile::HatchedBeast;
+                                board[&end_coord] = Tile::Block;
+                                self.position = new_pos;
+                                return BeastAction::PlayerKilled;
+                            } else {
+                                return BeastAction::Stayed;
+                            }
+                        }
+                        _ => {
+                            return BeastAction::Stayed;
+                        }
+                    }
+                }
+            }
+            _ => {
+                return BeastAction::Stayed;
+            }
+        };
+
+        BeastAction::Stayed
     }
 
     /// call this method to move the hatched beast per tick

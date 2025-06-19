@@ -6,3 +6,4 @@ pub mod player;
 mod tile;
 
 pub use tile::*;
+pub mod proving;

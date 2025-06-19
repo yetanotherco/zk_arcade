@@ -11,7 +11,7 @@ use crate::{
 };
 
 /// the super beast is more advanced than the common beast in how it finds the player
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SuperBeast {
     pub position: Coord,
 }
@@ -64,6 +64,38 @@ impl Beast for SuperBeast {
     /// create a new instance of the super beast
     fn new(position: Coord) -> Self {
         Self { position }
+    }
+
+    fn advance_to(
+        &mut self,
+        board: &mut Board,
+        _player_position: Coord,
+        new_pos: Coord,
+    ) -> BeastAction {
+        match board[&new_pos] {
+            Tile::Empty | Tile::Player => match board[&new_pos] {
+                Tile::Player => {
+                    board[&new_pos] = Tile::SuperBeast;
+                    board[&self.position] = Tile::Empty;
+                    self.position = new_pos;
+                    return BeastAction::PlayerKilled;
+                }
+                Tile::Empty => {
+                    board[&new_pos] = Tile::SuperBeast;
+                    board[&self.position] = Tile::Empty;
+                    self.position = new_pos;
+                    return BeastAction::Moved;
+                }
+                _ => BeastAction::Stayed,
+            },
+            Tile::Block
+            | Tile::StaticBlock
+            | Tile::CommonBeast
+            | Tile::SuperBeast
+            | Tile::HatchedBeast
+            | Tile::Egg
+            | Tile::EggHatching => BeastAction::Stayed,
+        }
     }
 
     /// call this method to move the super beast per tick

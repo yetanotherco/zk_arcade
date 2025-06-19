@@ -26,7 +26,7 @@ pub enum PlayerAction {
 }
 
 /// the player struct which manages the player movements, score, statistics and lives
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Player {
     pub position: Coord,
     pub lives: u8,

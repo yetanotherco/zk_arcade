@@ -20,6 +20,14 @@ pub trait Beast {
     /// creates a new instance of the beast and stores its position
     fn new(position: Coord) -> Self;
 
+    /// advances the beast's position to the given coord and returns the action taken
+    fn advance_to(
+        &mut self,
+        board: &mut Board,
+        player_position: Coord,
+        new_pos: Coord,
+    ) -> BeastAction;
+
     /// advances the beast's position and returns the action taken
     fn advance(&mut self, board: &mut Board, player_position: Coord) -> BeastAction;
 

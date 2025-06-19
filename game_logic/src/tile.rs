@@ -101,7 +101,7 @@ impl fmt::Display for Tile {
 }
 
 /// the allowed directions an entity can move
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Dir {
     /// moving up
     Up,

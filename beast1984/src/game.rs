@@ -3,6 +3,7 @@
 use crate::{
     help::Help,
     highscore::{Highscore, State},
+    prover,
     stty::{RawMode, install_raw_mode_signal_handler},
 };
 use game_logic::{
@@ -498,11 +499,18 @@ impl Game {
         let total_duration = 5000;
 
         print!("{}", Self::alert("LEVEL COMPLETED", 0));
+        // let _ = prover::prove(
+        //     self.initial_board_conditions.clone(),
+        //     self.movements_log.clone(),
+        // )
+        // .unwrap();
         loop {
             let elapsed = time.elapsed().as_millis();
             if elapsed > total_duration {
                 if let Some(level) = self.level.next() {
                     let board_terrain_info = Board::generate_terrain(level);
+                    self.initial_board_conditions = board_terrain_info.clone();
+                    self.movements_log = vec![];
                     self.level = level;
                     self.board = Board::new(board_terrain_info.buffer);
                     self.level_start = Instant::now();

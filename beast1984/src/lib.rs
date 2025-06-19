@@ -10,6 +10,7 @@
 pub mod game;
 pub mod help;
 pub mod highscore;
+pub mod prover;
 pub mod start;
 pub mod stty;
 

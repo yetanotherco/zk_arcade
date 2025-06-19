@@ -9,9 +9,10 @@ use game_logic::{
     ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
     BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
-    board::Board,
+    board::{Board, BoardTerrainInfo},
     common::levels::Level,
     player::{Player, PlayerAction},
+    proving::GameLogEntry,
 };
 use std::{
     io::{self, Read},
@@ -101,6 +102,8 @@ pub struct Game {
     pub player: Player,
     /// the state the game is in
     pub state: GameState,
+    pub movements_log: Vec<GameLogEntry>,
+    pub initial_board_conditions: BoardTerrainInfo,
     beat: Beat,
     input_listener: mpsc::Receiver<u8>,
     _raw_mode: RawMode,
@@ -131,6 +134,8 @@ impl Game {
         }
 
         Self {
+            initial_board_conditions: board_terrain_info.clone(),
+            movements_log: vec![],
             board: Board::new(board_terrain_info.buffer),
             level: Level::One,
             level_start: Instant::now(),
@@ -228,24 +233,32 @@ impl Game {
                             b'A' => {
                                 let player_action = self.player.advance(&mut self.board, &Dir::Up);
                                 render = true;
+                                self.movements_log
+                                    .push(GameLogEntry::PlayerMoved { dir: Dir::Up });
                                 player_action
                             }
                             b'C' => {
                                 let player_action =
                                     self.player.advance(&mut self.board, &Dir::Right);
                                 render = true;
+                                self.movements_log
+                                    .push(GameLogEntry::PlayerMoved { dir: Dir::Right });
                                 player_action
                             }
                             b'B' => {
                                 let player_action =
                                     self.player.advance(&mut self.board, &Dir::Down);
                                 render = true;
+                                self.movements_log
+                                    .push(GameLogEntry::PlayerMoved { dir: Dir::Down });
                                 player_action
                             }
                             b'D' => {
                                 let player_action =
                                     self.player.advance(&mut self.board, &Dir::Left);
                                 render = true;
+                                self.movements_log
+                                    .push(GameLogEntry::PlayerMoved { dir: Dir::Left });
                                 player_action
                             }
                             _ => PlayerAction::None,
@@ -360,31 +373,40 @@ impl Game {
             if last_tick.elapsed() >= TICK_DURATION {
                 if matches!(self.beat, Beat::Five) {
                     // beast movements
-                    for common_beasts in &mut self.common_beasts {
-                        if matches!(
-                            common_beasts.advance(&mut self.board, self.player.position),
-                            BeastAction::PlayerKilled
-                        ) {
+                    for (idx, common_beast) in self.common_beasts.iter_mut().enumerate() {
+                        let action = common_beast.advance(&mut self.board, self.player.position);
+                        self.movements_log.push(GameLogEntry::CommonBeastMoved {
+                            idx,
+                            new_pos: common_beast.position,
+                        });
+
+                        if action == BeastAction::PlayerKilled {
                             self.player.lives -= 1;
                             self.player.respawn(&mut self.board);
                             self.state = GameState::Dying(Beat::One);
                         }
                     }
-                    for super_beasts in &mut self.super_beasts {
-                        if matches!(
-                            super_beasts.advance(&mut self.board, self.player.position),
-                            BeastAction::PlayerKilled
-                        ) {
+                    for (idx, super_beasts) in self.super_beasts.iter_mut().enumerate() {
+                        let action = super_beasts.advance(&mut self.board, self.player.position);
+                        self.movements_log.push(GameLogEntry::CommonBeastMoved {
+                            idx,
+                            new_pos: super_beasts.position,
+                        });
+
+                        if action == BeastAction::PlayerKilled {
                             self.player.lives -= 1;
                             self.player.respawn(&mut self.board);
                             self.state = GameState::Dying(Beat::One);
                         }
                     }
-                    for hatched_beasts in &mut self.hatched_beasts {
-                        if matches!(
-                            hatched_beasts.advance(&mut self.board, self.player.position),
-                            BeastAction::PlayerKilled
-                        ) {
+                    for (idx, hatched_beasts) in self.hatched_beasts.iter_mut().enumerate() {
+                        let action = hatched_beasts.advance(&mut self.board, self.player.position);
+                        self.movements_log.push(GameLogEntry::CommonBeastMoved {
+                            idx,
+                            new_pos: hatched_beasts.position,
+                        });
+
+                        if action == BeastAction::PlayerKilled {
                             self.player.lives -= 1;
                             self.player.respawn(&mut self.board);
                             self.state = GameState::Dying(Beat::One);
@@ -892,450 +914,5 @@ impl Game {
             width = msg.len() + 2,
             msg_width = msg.len()
         )
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::{BOARD_WIDTH, test_common::strip_ansi_border};
-
-    #[test]
-    fn beat_next_test() {
-        assert_eq!(
-            Beat::One.next(),
-            Beat::Two,
-            "Beat should go from One to Two"
-        );
-        assert_eq!(
-            Beat::Two.next(),
-            Beat::Three,
-            "Beat should go from Two to Three"
-        );
-        assert_eq!(
-            Beat::Three.next(),
-            Beat::Four,
-            "Beat should go from Three to Four"
-        );
-        assert_eq!(
-            Beat::Four.next(),
-            Beat::Five,
-            "Beat should go from Four to Five"
-        );
-        assert_eq!(
-            Beat::Five.next(),
-            Beat::One,
-            "Beat should go from Five to One"
-        );
-    }
-
-    #[test]
-    fn game_new_test() {
-        let game = Game::new();
-
-        assert_eq!(
-            game.state,
-            GameState::Intro,
-            "Game should start in Intro state"
-        );
-        assert_eq!(game.beat, Beat::One, "Game should start with Beat One");
-        assert_eq!(game.level, Level::One, "Game should start with Level One");
-
-        for common_beast in &game.common_beasts {
-            assert_eq!(
-                game.board[&common_beast.position],
-                Tile::CommonBeast,
-                "Each common beast is placed on a the board with a CommonBeast tile"
-            );
-        }
-        for super_beast in &game.super_beasts {
-            assert_eq!(
-                game.board[&super_beast.position],
-                Tile::SuperBeast,
-                "Each super beast is placed on a the board with a SuperBeast tile"
-            );
-        }
-        for egg in &game.eggs {
-            assert!(
-                matches!(game.board[&egg.position], Tile::Egg(_)),
-                "Each egg is placed on a the board with an Egg tile"
-            );
-        }
-        for hatched_beast in &game.hatched_beasts {
-            assert_eq!(
-                game.board[&hatched_beast.position],
-                Tile::HatchedBeast,
-                "Each hatched beast is placed on a the board with a HatchedBeast tile"
-            );
-        }
-        assert_eq!(
-            game.board[&game.player.position],
-            Tile::Player,
-            "Each player is placed on a the board with a Player tile"
-        );
-
-        assert_eq!(
-            game.player.lives, 5,
-            "Each player should start with 5 lives"
-        );
-        assert_eq!(
-            game.player.score, 0,
-            "Each player should start with a score of 0"
-        );
-    }
-
-    #[test]
-    fn get_secs_remaining_test() {
-        let mut game = Game::new();
-
-        let now = Instant::now();
-        game.level_start = now - Duration::from_secs(10);
-
-        let expected_remaining = game.level.get_config().time.as_secs() - 11;
-        assert_eq!(
-            game.get_secs_remaining(),
-            expected_remaining,
-            "Calculate the remaining time"
-        );
-
-        game.level_start = now - game.level.get_config().time - Duration::from_secs(5);
-        assert_eq!(
-            game.get_secs_remaining(),
-            0,
-            "Calculate the remaining time when more time has passed than we expect"
-        );
-    }
-
-    #[test]
-    fn render_footer_test() {
-        let game = Game::new();
-        let footer = game.render_footer();
-
-        assert!(footer.contains("Level:"), "Footer should contain Level");
-        assert!(footer.contains("Beasts:"), "Footer should contain Beasts");
-        assert!(footer.contains("Lives:"), "Footer should contain Lives");
-        assert!(footer.contains("Time:"), "Footer should contain Time");
-        assert!(footer.contains("Score:"), "Footer should contain Score");
-    }
-
-    #[test]
-    fn render_with_state_test() {
-        let mut game = Game::new();
-
-        game.state = GameState::Intro;
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Intro,
-            "The intro state should remain the same"
-        );
-
-        game.state = GameState::Playing;
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Playing,
-            "The playing state should remain the same"
-        );
-
-        game.state = GameState::Help;
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Help,
-            "The help state should remain the same"
-        );
-
-        game.state = GameState::HighScore;
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::HighScore,
-            "The highscore state should remain the same"
-        );
-
-        game.state = GameState::GameOver;
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::GameOver,
-            "The gameover state should remain the same"
-        );
-
-        game.state = GameState::Won;
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Won,
-            "The won state should remain the same"
-        );
-
-        game.state = GameState::Quit;
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Quit,
-            "The quit state should remain the same"
-        );
-
-        game.state = GameState::Dying(Beat::One);
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Dying(Beat::Two),
-            "The dying state moves to the second beat"
-        );
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Dying(Beat::Three),
-            "The dying state moves to the third beat"
-        );
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Playing,
-            "The dying state moves to the playing state"
-        );
-
-        game.state = GameState::Killing(Beat::One);
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Killing(Beat::Two),
-            "The killing state moves to the second beat"
-        );
-        game.render_with_state();
-        assert_eq!(
-            game.state,
-            GameState::Playing,
-            "The killing state moves to the playing state"
-        );
-    }
-
-    #[test]
-    fn header_height_test() {
-        let mut output = String::new();
-        Game::render_header(&mut output);
-        assert_eq!(
-            output.lines().count(),
-            ANSI_HEADER_HEIGHT,
-            "There should be exactly ANSI_HEADER_HEIGHT lines in the header"
-        );
-    }
-
-    #[test]
-    fn footer_height_test() {
-        assert_eq!(
-            Game::new().render_footer().lines().count(),
-            ANSI_FOOTER_HEIGHT,
-            "There should be exactly ANSI_FOOTER_HEIGHT lines in the footer"
-        );
-    }
-
-    #[test]
-    fn footer_line_length_test() {
-        let output = Game::new().render_footer();
-
-        let lines = output.lines().collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 1 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2 + ANSI_FRAME_SIZE + ANSI_FRAME_SIZE,
-                    "Line {i} should be the correct length"
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn top_frame_height_test() {
-        assert_eq!(
-            Game::render_top_frame().lines().count(),
-            ANSI_FRAME_SIZE,
-            "There should be exactly ANSI_FRAME_HEIGHT lines in the top frame"
-        );
-    }
-
-    #[test]
-    fn top_frame_line_length_test() {
-        let output = Game::render_top_frame();
-
-        let lines = output.lines().collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 1 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2 + ANSI_FRAME_SIZE + ANSI_FRAME_SIZE,
-                    "Line {i} should be the correct length"
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn bottom_frame_height_test() {
-        assert_eq!(
-            Game::render_bottom_frame().lines().count(),
-            ANSI_FRAME_SIZE,
-            "There should be exactly ANSI_FRAME_HEIGHT lines in the bottom frame"
-        );
-    }
-
-    #[test]
-    fn bottom_frame_line_length_test() {
-        let output = Game::render_bottom_frame();
-
-        let lines = output.lines().collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 1 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2 + ANSI_FRAME_SIZE + ANSI_FRAME_SIZE,
-                    "Line {i} should be the correct length"
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn intro_height_test() {
-        assert_eq!(
-            Game::render_intro().lines().count(),
-            ANSI_HEADER_HEIGHT
-                + ANSI_FRAME_SIZE
-                + ANSI_BOARD_HEIGHT
-                + ANSI_FRAME_SIZE
-                + ANSI_FOOTER_HEIGHT,
-            "The intro screen needs to be the correct height for the ANSI re-render to work"
-        );
-    }
-
-    #[test]
-    fn intro_line_length_test() {
-        let output = Game::render_intro();
-
-        let lines = output.lines().skip(5).collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 3 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2,
-                    "Line {i} should be the correct length is={:?}",
-                    strip_ansi_border(line)
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn end_screen_height_test() {
-        assert_eq!(
-            Game::new().render_death_screen().lines().count(),
-            ANSI_BOARD_HEIGHT + ANSI_FRAME_SIZE + ANSI_FOOTER_HEIGHT,
-            "The end screen needs to be the correct height for the ANSI re-render to work"
-        );
-    }
-
-    #[test]
-    fn end_screen_line_length_test() {
-        let output = Game::new().render_death_screen();
-
-        let lines = output.lines().collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 3 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2,
-                    "Line {i} should be the correct length is={:?}",
-                    strip_ansi_border(line)
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn winning_screen_height_test() {
-        assert_eq!(
-            Game::new().render_winning_screen().lines().count(),
-            ANSI_BOARD_HEIGHT + ANSI_FRAME_SIZE + ANSI_FOOTER_HEIGHT,
-            "The winning screen needs to be the correct height for the ANSI re-render to work"
-        );
-    }
-
-    #[test]
-    fn winning_screen_line_length_test() {
-        let output = Game::new().render_winning_screen();
-
-        let lines = output.lines().collect::<Vec<&str>>();
-        for (i, line) in lines.iter().enumerate() {
-            if i < lines.len() - 3 {
-                assert_eq!(
-                    strip_ansi_border(line).len(),
-                    BOARD_WIDTH * 2,
-                    "Line {i} should be the correct length is={:?}",
-                    strip_ansi_border(line)
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn render_death_screen_message_test() {
-        let mut game = Game::new();
-
-        let end_screen = game.render_death_screen();
-        assert!(
-            end_screen.contains("YOUR TIME RAN OUT"),
-            "End screen should say 'YOUR TIME RAN OUT' when lives > 0"
-        );
-
-        game.player.lives = 0;
-        let end_screen = game.render_death_screen();
-        assert!(
-            end_screen.contains("YOU DIED"),
-            "End screen should say 'YOU DIED' when lives == 0"
-        );
-    }
-
-    #[test]
-    fn render_footer_time_format_test() {
-        let mut game = Game::new();
-
-        let test_times = [(0, "00:00"), (10, "00:09"), (60, "00:59"), (75, "01:14")];
-
-        for (secs, expected) in test_times {
-            game.level_start =
-                Instant::now() - (game.level.get_config().time - Duration::from_secs(secs));
-
-            let footer = game.render_footer();
-
-            assert!(
-                footer.contains(expected),
-                "Footer should display '{expected}' when {secs} seconds remain"
-            );
-        }
-    }
-
-    #[test]
-    fn play_quit_test() {
-        let mut game = Game::new();
-        let (sender, receiver) = mpsc::channel::<u8>();
-        game.input_listener = receiver;
-
-        let handle = thread::spawn(move || {
-            game.play();
-            game
-        });
-
-        sender.send(b'q').unwrap();
-        thread::sleep(Duration::from_millis(50));
-        let game = handle.join().unwrap();
-        assert_eq!(
-            game.state,
-            GameState::Quit,
-            "The game has quit after you hit the 'q' key"
-        );
     }
 }

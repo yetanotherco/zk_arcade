@@ -18,7 +18,7 @@ use game_logic::{
 use std::{
     io::{self, Read},
     sync::mpsc,
-    thread,
+    thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
 
@@ -494,44 +494,29 @@ impl Game {
     }
 
     fn handle_level_complete(&mut self) {
-        let time = Instant::now();
-        let mut last_update = time;
-        let total_duration = 5000;
+        Self::render_loader_in_new_thread("LEVEL COMPLETED, PROVING...", 10000);
+        let _ = prover::prove(
+            self.initial_board_conditions.clone(),
+            self.movements_log.clone(),
+        )
+        .unwrap();
 
-        print!("{}", Self::alert("LEVEL COMPLETED", 0));
-        // let _ = prover::prove(
-        //     self.initial_board_conditions.clone(),
-        //     self.movements_log.clone(),
-        // )
-        // .unwrap();
-        loop {
-            let elapsed = time.elapsed().as_millis();
-            if elapsed > total_duration {
-                if let Some(level) = self.level.next() {
-                    let board_terrain_info = Board::generate_terrain(level);
-                    self.initial_board_conditions = board_terrain_info.clone();
-                    self.movements_log = vec![];
-                    self.level = level;
-                    self.board = Board::new(board_terrain_info.buffer);
-                    self.level_start = Instant::now();
-                    self.common_beasts = board_terrain_info.common_beasts;
-                    self.super_beasts = board_terrain_info.super_beasts;
-                    self.eggs = board_terrain_info.eggs;
-                    self.hatched_beasts = board_terrain_info.hatched_beasts;
-                    self.player.position = board_terrain_info.player.position;
-                    self.player.score += self.level.get_config().completion_score;
-                    self.state = GameState::Playing;
-                } else {
-                    self.state = GameState::Won;
-                }
-                break;
-            }
-
-            if last_update.elapsed().as_millis() > 500 {
-                let progress = ((elapsed * 100) / total_duration) as usize + 8;
-                print!("{}", Self::alert("LEVEL COMPLETED", progress));
-                last_update = Instant::now();
-            }
+        if let Some(level) = self.level.next() {
+            let board_terrain_info = Board::generate_terrain(level);
+            self.initial_board_conditions = board_terrain_info.clone();
+            self.movements_log = vec![];
+            self.level = level;
+            self.board = Board::new(board_terrain_info.buffer);
+            self.level_start = Instant::now();
+            self.common_beasts = board_terrain_info.common_beasts;
+            self.super_beasts = board_terrain_info.super_beasts;
+            self.eggs = board_terrain_info.eggs;
+            self.hatched_beasts = board_terrain_info.hatched_beasts;
+            self.player.position = board_terrain_info.player.position;
+            self.player.score += self.level.get_config().completion_score;
+            self.state = GameState::Playing;
+        } else {
+            self.state = GameState::Won;
         }
     }
 
@@ -903,6 +888,26 @@ impl Game {
             _ => {}
         }
         print!("{}", self.render_board());
+    }
+
+    fn render_loader_in_new_thread(message: &str, total_duration_ms: u128) -> JoinHandle<()> {
+        let message = message.to_string();
+        std::thread::spawn(move || {
+            let time = Instant::now();
+            let mut last_update = time;
+            print!("{}", Self::alert(&message, 0));
+            loop {
+                let elapsed = time.elapsed().as_millis();
+                if elapsed > total_duration_ms {
+                    break;
+                }
+                if last_update.elapsed().as_millis() > 500 {
+                    let progress = ((elapsed * 100) / total_duration_ms) as usize + 8;
+                    print!("{}", Self::alert(&message, progress));
+                    last_update = Instant::now();
+                }
+            }
+        })
     }
 
     fn alert(msg: &str, progress: usize) -> String {

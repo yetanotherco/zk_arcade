@@ -497,6 +497,7 @@ impl Game {
         Self::render_loader_in_new_thread("LEVEL COMPLETED, PROVING...", 10000);
         let _ = prover::prove(
             self.initial_board_conditions.clone(),
+            self.level,
             self.movements_log.clone(),
         )
         .unwrap();

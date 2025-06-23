@@ -1,6 +1,7 @@
 use game_logic::{
     BOARD_HEIGHT, BOARD_WIDTH, Tile,
     board::BoardTerrainInfo,
+    common::levels::Level,
     proving::{GameLogEntry, ProgramInput},
 };
 use risc0_zkvm::{ExecutorEnv, ProverOpts, Receipt, default_prover};
@@ -17,6 +18,7 @@ pub enum ProvingError {
 
 pub fn prove(
     initial_board: BoardTerrainInfo,
+    level: Level,
     movements_log: Vec<GameLogEntry>,
 ) -> Result<Receipt, ProvingError> {
     let mut env_builder = ExecutorEnv::builder();
@@ -32,12 +34,7 @@ pub fn prove(
     // write input data
     let input = ProgramInput {
         board,
-        board_height: BOARD_HEIGHT as u16,
-        board_width: BOARD_WIDTH as u16,
-        common_beasts: initial_board.common_beasts,
-        hatched_beasts: initial_board.hatched_beasts,
-        super_beasts: initial_board.super_beasts,
-        player: initial_board.player,
+        level,
         game_log: movements_log,
     };
     env_builder

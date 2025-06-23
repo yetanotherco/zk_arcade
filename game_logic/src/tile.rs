@@ -38,7 +38,9 @@ pub const LOGO: [&str; 10] = [
 ];
 
 /// a data structure to place items on a board
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize,
+)]
 pub struct Coord {
     pub column: usize,
     pub row: usize,

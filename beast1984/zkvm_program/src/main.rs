@@ -1,46 +1,96 @@
 #![no_main]
 
 use game_logic::{
-    beasts::{Beast, BeastAction},
+    beasts::{Beast, BeastAction, CommonBeast, HatchedBeast, SuperBeast},
     board::Board,
-    player::PlayerAction,
+    player::{Player, PlayerAction},
     proving::{GameLogEntry, ProgramInput, ProgramOutput},
+    Coord, Tile,
 };
 use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
 fn main() {
-    let mut game_state = env::read::<ProgramInput>();
+    let input = env::read::<ProgramInput>();
 
-    let mut board = Board::new_from_matrix(game_state.board);
+    let mut board = Board::new_from_matrix(input.board);
 
-    // TODO:
-    // check: level rules
-    // remove time running out
-    // check the new position to move for the beast is valid
-    for log in game_state.game_log {
+    /*
+     * We need to make sure the given initial conditions match against the level configuration:
+     *
+     * 1. Count the tile types + push enemies
+     * 2. Verify they match with the config
+     * 3. Verify the distance between the player and the enemies match
+     */
+    let level_config = input.level.get_config();
+    let mut player: Option<Player> = None;
+    let mut common_beasts: Vec<CommonBeast> = vec![];
+    let mut super_beasts: Vec<SuperBeast> = vec![];
+    let mut hatched_beasts: Vec<HatchedBeast> = vec![];
+    // let mut eggs: Vec<Egg> = vec![];
+    let mut blocks_tiles_count: usize = 0;
+    let mut static_blocks_tiles_count: usize = 0;
+
+    for (i, row) in board.buffer.iter().enumerate() {
+        for (e, tile) in row.iter().enumerate() {
+            let coord = Coord { row: i, column: e };
+
+            match tile {
+                Tile::Block => {
+                    blocks_tiles_count += 1;
+                }
+                Tile::StaticBlock => {
+                    static_blocks_tiles_count += 1;
+                }
+                Tile::CommonBeast => {
+                    common_beasts.push(CommonBeast::new(coord));
+                }
+                Tile::SuperBeast => {
+                    super_beasts.push(SuperBeast::new(coord));
+                }
+                Tile::Egg => {
+                    // eggs.push(Egg::new(coord));
+                }
+                Tile::Player => {
+                    if player.is_none() {
+                        player = Some(Player::new(coord));
+                    } else {
+                        panic!("There can only one player tile");
+                    }
+                }
+                _ => {}
+            };
+        }
+    }
+    let mut player = player.expect("A player to be in the board");
+
+    assert!(common_beasts.len() == level_config.common_beasts);
+    assert!(super_beasts.len() == level_config.super_beasts);
+    assert!(blocks_tiles_count == level_config.blocks);
+    assert!(static_blocks_tiles_count == level_config.static_blocks);
+    assert!(super_beasts.len() == level_config.super_beasts);
+
+    for log in input.game_log {
         match log {
             GameLogEntry::PlayerMoved { dir } => {
-                let player_action = game_state.player.advance(&mut board, &dir);
+                let player_action = player.advance(&mut board, &dir);
 
                 match player_action {
                     PlayerAction::KillCommonBeast(coord) => {
-                        if let Some(idx) = game_state
-                            .common_beasts
+                        if let Some(idx) = common_beasts
                             .iter()
                             .position(|beast| beast.position == coord)
                         {
-                            game_state.common_beasts.swap_remove(idx);
+                            common_beasts.swap_remove(idx);
                         }
                     }
                     PlayerAction::KillSuperBeast(coord) => {
-                        if let Some(idx) = game_state
-                            .super_beasts
+                        if let Some(idx) = super_beasts
                             .iter()
                             .position(|beast| beast.position == coord)
                         {
-                            game_state.super_beasts.swap_remove(idx);
+                            super_beasts.swap_remove(idx);
                         }
                     }
                     PlayerAction::KillEgg(_coord) => {
@@ -49,12 +99,11 @@ fn main() {
                         // }
                     }
                     PlayerAction::KillHatchedBeast(coord) => {
-                        if let Some(idx) = game_state
-                            .hatched_beasts
+                        if let Some(idx) = hatched_beasts
                             .iter()
                             .position(|beast| beast.position == coord)
                         {
-                            game_state.hatched_beasts.swap_remove(idx);
+                            hatched_beasts.swap_remove(idx);
                         }
                     }
                     PlayerAction::KillPlayer => {}
@@ -62,60 +111,50 @@ fn main() {
                 }
             }
             GameLogEntry::CommonBeastMoved { idx, new_pos } => {
-                let beast_action = game_state.common_beasts.get_mut(idx).unwrap().advance_to(
+                let beast_action = common_beasts.get_mut(idx).unwrap().advance_to(
                     &mut board,
-                    game_state.player.position,
+                    player.position,
                     new_pos,
                 );
 
                 if beast_action == BeastAction::PlayerKilled {
-                    game_state.player.lives -= 1;
-                    game_state.player.respawn(&mut board);
+                    player.lives -= 1;
+                    player.respawn(&mut board);
                 }
             }
             GameLogEntry::SuperBeastMoved { idx, new_pos } => {
-                let beast_action = game_state.super_beasts.get_mut(idx).unwrap().advance_to(
+                let beast_action = super_beasts.get_mut(idx).unwrap().advance_to(
                     &mut board,
-                    game_state.player.position,
+                    player.position,
                     new_pos,
                 );
 
                 if beast_action == BeastAction::PlayerKilled {
-                    game_state.player.lives -= 1;
-                    game_state.player.respawn(&mut board);
+                    player.lives -= 1;
+                    player.respawn(&mut board);
                 }
             }
             GameLogEntry::HatchedBeastMoved { idx, new_pos } => {
-                let beast_action = game_state.hatched_beasts.get_mut(idx).unwrap().advance_to(
+                let beast_action = hatched_beasts.get_mut(idx).unwrap().advance_to(
                     &mut board,
-                    game_state.player.position,
+                    player.position,
                     new_pos,
                 );
 
                 if beast_action == BeastAction::PlayerKilled {
-                    game_state.player.lives -= 1;
-                    game_state.player.respawn(&mut board);
+                    player.lives -= 1;
+                    player.respawn(&mut board);
                 }
             }
         }
     }
 
-    // CHECK USER HAS ENOUGH LIVES AND HAS KILLED ALL ENEMIES
-    if game_state.common_beasts.len()
-        + game_state.super_beasts.len()
-        + game_state.hatched_beasts.len()
-        == 0
-        && game_state.player.lives > 0
-    {
-        // TODO Consider a better way of giving points
-        // use level points from config
-        let output = ProgramOutput { score: 1000 };
+    if common_beasts.len() + super_beasts.len() + hatched_beasts.len() == 0 && player.lives > 0 {
+        let output = ProgramOutput {
+            score: level_config.completion_score,
+        };
         env::commit(&output);
     } else {
-        panic!(
-            "Invalid solution {} {}",
-            game_state.common_beasts.len(),
-            game_state.player.lives
-        );
+        panic!("Invalid solution {} {}", common_beasts.len(), player.lives);
     }
 }

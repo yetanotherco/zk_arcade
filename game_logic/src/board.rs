@@ -58,6 +58,20 @@ impl Board {
         Self { buffer }
     }
 
+    /// Returns a vectorized form of the board buffer
+    /// This is required for serialization the input for the zkvm program
+    pub fn to_vec(&self) -> Vec<Vec<Tile>> {
+        let mut board = vec![vec![Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
+
+        for i in 0..BOARD_HEIGHT {
+            for e in 0..BOARD_WIDTH {
+                board[i][e] = self.buffer[i][e];
+            }
+        }
+
+        board
+    }
+
     pub fn new_from_matrix(map: &Vec<Vec<Tile>>) -> Self {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
 

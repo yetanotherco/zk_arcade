@@ -10,10 +10,10 @@ use game_logic::{
     ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
     BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
-    board::{Board, BoardTerrainInfo},
+    board::Board,
     common::levels::Level,
     player::{Player, PlayerAction},
-    proving::GameLogEntry,
+    proving::{GameLogEntry, LevelLog},
 };
 use std::{
     io::{self, Read},
@@ -103,8 +103,8 @@ pub struct Game {
     pub player: Player,
     /// the state the game is in
     pub state: GameState,
-    pub movements_log: Vec<GameLogEntry>,
-    pub initial_board_conditions: BoardTerrainInfo,
+    /// Store the log for proving the completion of games in the zkvm
+    pub leve_completion_log: Vec<LevelLog>,
     beat: Beat,
     input_listener: mpsc::Receiver<u8>,
     _raw_mode: RawMode,
@@ -134,9 +134,16 @@ impl Game {
             });
         }
 
+        let board = Board::new(board_terrain_info.buffer);
+
+        let fist_level_log = LevelLog {
+            level: Level::One,
+            board: board.to_vec(),
+            game_log: vec![],
+        };
+
         Self {
-            initial_board_conditions: board_terrain_info.clone(),
-            movements_log: vec![],
+            leve_completion_log: vec![fist_level_log],
             board: Board::new(board_terrain_info.buffer),
             level: Level::One,
             level_start: Instant::now(),
@@ -234,32 +241,28 @@ impl Game {
                             b'A' => {
                                 let player_action = self.player.advance(&mut self.board, &Dir::Up);
                                 render = true;
-                                self.movements_log
-                                    .push(GameLogEntry::PlayerMoved { dir: Dir::Up });
+                                self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Up });
                                 player_action
                             }
                             b'C' => {
                                 let player_action =
                                     self.player.advance(&mut self.board, &Dir::Right);
                                 render = true;
-                                self.movements_log
-                                    .push(GameLogEntry::PlayerMoved { dir: Dir::Right });
+                                self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Right });
                                 player_action
                             }
                             b'B' => {
                                 let player_action =
                                     self.player.advance(&mut self.board, &Dir::Down);
                                 render = true;
-                                self.movements_log
-                                    .push(GameLogEntry::PlayerMoved { dir: Dir::Down });
+                                self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Down });
                                 player_action
                             }
                             b'D' => {
                                 let player_action =
                                     self.player.advance(&mut self.board, &Dir::Left);
                                 render = true;
-                                self.movements_log
-                                    .push(GameLogEntry::PlayerMoved { dir: Dir::Left });
+                                self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Left });
                                 player_action
                             }
                             _ => PlayerAction::None,
@@ -374,11 +377,13 @@ impl Game {
             if last_tick.elapsed() >= TICK_DURATION {
                 if matches!(self.beat, Beat::Five) {
                     // beast movements
-                    for (idx, common_beast) in self.common_beasts.iter_mut().enumerate() {
-                        let action = common_beast.advance(&mut self.board, self.player.position);
-                        self.movements_log.push(GameLogEntry::CommonBeastMoved {
+                    for idx in 0..self.common_beasts.len() {
+                        let action =
+                            self.common_beasts[idx].advance(&mut self.board, self.player.position);
+
+                        self.push_to_log(GameLogEntry::CommonBeastMoved {
                             idx,
-                            new_pos: common_beast.position,
+                            new_pos: self.common_beasts[idx].position,
                         });
 
                         if action == BeastAction::PlayerKilled {
@@ -387,11 +392,12 @@ impl Game {
                             self.state = GameState::Dying(Beat::One);
                         }
                     }
-                    for (idx, super_beasts) in self.super_beasts.iter_mut().enumerate() {
-                        let action = super_beasts.advance(&mut self.board, self.player.position);
-                        self.movements_log.push(GameLogEntry::CommonBeastMoved {
+                    for idx in 0..self.super_beasts.len() {
+                        let action =
+                            self.super_beasts[idx].advance(&mut self.board, self.player.position);
+                        self.push_to_log(GameLogEntry::CommonBeastMoved {
                             idx,
-                            new_pos: super_beasts.position,
+                            new_pos: self.super_beasts[idx].position,
                         });
 
                         if action == BeastAction::PlayerKilled {
@@ -400,11 +406,12 @@ impl Game {
                             self.state = GameState::Dying(Beat::One);
                         }
                     }
-                    for (idx, hatched_beasts) in self.hatched_beasts.iter_mut().enumerate() {
-                        let action = hatched_beasts.advance(&mut self.board, self.player.position);
-                        self.movements_log.push(GameLogEntry::CommonBeastMoved {
+                    for idx in 0..self.hatched_beasts.len() {
+                        let action =
+                            self.super_beasts[idx].advance(&mut self.board, self.player.position);
+                        self.push_to_log(GameLogEntry::CommonBeastMoved {
                             idx,
-                            new_pos: hatched_beasts.position,
+                            new_pos: self.super_beasts[idx].position,
                         });
 
                         if action == BeastAction::PlayerKilled {
@@ -494,20 +501,21 @@ impl Game {
     }
 
     fn handle_level_complete(&mut self) {
-        Self::render_loader_in_new_thread("LEVEL COMPLETED, PROVING...", 10000);
-        let _ = prover::prove(
-            self.initial_board_conditions.clone(),
-            self.level,
-            self.movements_log.clone(),
-        )
-        .unwrap();
+        let handle = Self::render_loader_in_new_thread("LEVEL COMPLETED, PROVING...", 10000);
+        let _ = handle.join();
 
         if let Some(level) = self.level.next() {
             let board_terrain_info = Board::generate_terrain(level);
-            self.initial_board_conditions = board_terrain_info.clone();
-            self.movements_log = vec![];
+            let board = Board::new(board_terrain_info.buffer);
+
+            let level_log = LevelLog {
+                level,
+                board: board.to_vec(),
+                game_log: vec![],
+            };
+            self.leve_completion_log.push(level_log);
+            self.board = board;
             self.level = level;
-            self.board = Board::new(board_terrain_info.buffer);
             self.level_start = Instant::now();
             self.common_beasts = board_terrain_info.common_beasts;
             self.super_beasts = board_terrain_info.super_beasts;
@@ -928,5 +936,11 @@ impl Game {
             width = msg.len() + 2,
             msg_width = msg.len()
         )
+    }
+
+    fn push_to_log(&mut self, log: GameLogEntry) {
+        self.leve_completion_log[self.level.number() as usize - 1]
+            .game_log
+            .push(log);
     }
 }

@@ -10,6 +10,7 @@ use crate::{
 };
 
 /// actions a player can take
+#[derive(Debug)]
 pub enum PlayerAction {
     /// killed a common beast
     KillCommonBeast(Coord),

@@ -15,6 +15,10 @@ fn main() {
 
     let mut board = Board::new_from_matrix(game_state.board);
 
+    // TODO:
+    // check: level rules
+    // remove time running out
+    // check the new position to move for the beast is valid
     for log in game_state.game_log {
         match log {
             GameLogEntry::PlayerMoved { dir } => {
@@ -94,19 +98,24 @@ fn main() {
                 }
             }
         }
+    }
 
-        // CHECK USER HAS ENOUGH LIVES AND HAS KILLED ALL ENEMIES
-        if game_state.common_beasts.len()
-            + game_state.super_beasts.len()
-            + game_state.hatched_beasts.len()
-            == 0
-            && game_state.player.lives > 0
-        {
-            // TODO Consider a better way of giving points
-            let output = ProgramOutput { score: 1000 };
-            env::commit(&output);
-        } else {
-            panic!("Invalid solution");
-        }
+    // CHECK USER HAS ENOUGH LIVES AND HAS KILLED ALL ENEMIES
+    if game_state.common_beasts.len()
+        + game_state.super_beasts.len()
+        + game_state.hatched_beasts.len()
+        == 0
+        && game_state.player.lives > 0
+    {
+        // TODO Consider a better way of giving points
+        // use level points from config
+        let output = ProgramOutput { score: 1000 };
+        env::commit(&output);
+    } else {
+        panic!(
+            "Invalid solution {} {}",
+            game_state.common_beasts.len(),
+            game_state.player.lives
+        );
     }
 }

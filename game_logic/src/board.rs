@@ -61,11 +61,11 @@ impl Board {
     pub fn new_from_matrix(map: Vec<Vec<Tile>>) -> Self {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
 
-        let width = std::cmp::min(BOARD_WIDTH, buffer.len());
-        for i in 0..width {
-            let height = std::cmp::min(buffer[i].len(), BOARD_HEIGHT);
+        let height = std::cmp::min(buffer.len(), BOARD_HEIGHT);
+        for i in 0..height {
+            let width = std::cmp::min(buffer[i].len(), BOARD_WIDTH);
 
-            for e in 0..height {
+            for e in 0..width {
                 buffer[i][e] = map[i][e];
             }
         }

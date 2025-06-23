@@ -61,6 +61,21 @@ impl Level {
             Self::Ten => None,
         }
     }
+
+    pub fn number(&self) -> u16 {
+        match self {
+            Self::One => 1,
+            Self::Two => 2,
+            Self::Three => 3,
+            Self::Four => 4,
+            Self::Five => 5,
+            Self::Six => 6,
+            Self::Seven => 7,
+            Self::Eight => 8,
+            Self::Nine => 9,
+            Self::Ten => 10,
+        }
+    }
 }
 
 impl fmt::Display for Level {

@@ -151,6 +151,7 @@ fn main() {
 
     if common_beasts.len() + super_beasts.len() + hatched_beasts.len() == 0 && player.lives > 0 {
         let output = ProgramOutput {
+            level: input.level.number(),
             score: level_config.completion_score,
         };
         env::commit(&output);

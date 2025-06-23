@@ -21,5 +21,6 @@ pub struct ProgramInput {
 
 #[derive(Serialize, Deserialize)]
 pub struct ProgramOutput {
+    pub level: u16,
     pub score: u16,
 }

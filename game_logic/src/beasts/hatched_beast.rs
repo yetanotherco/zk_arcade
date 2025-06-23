@@ -5,7 +5,7 @@ use std::{cmp::Ordering, collections::HashMap};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    beasts::{Beast, BeastAction},
+    beasts::{Beast, BeastAction, BeastAdvanceError},
     board::Board,
     pathing::{get_end_of_block_chain, get_next_coord},
     Coord, Dir, Tile,
@@ -161,24 +161,33 @@ impl Beast for HatchedBeast {
     fn advance_to(
         &mut self,
         board: &mut Board,
-        _player_position: Coord,
+        player_position: Coord,
         new_pos: Coord,
-    ) -> BeastAction {
-        match board[&new_pos] {
+    ) -> Result<BeastAction, BeastAdvanceError> {
+        let possible_moves =
+            Self::get_walkable_coords(board, &self.position, &player_position, false);
+
+        let move_is_valid = possible_moves.into_iter().find(|i| *i == new_pos).is_some();
+        if !move_is_valid {
+            return Err(BeastAdvanceError::InvalidMovement);
+        }
+
+        let action = match board[&new_pos] {
             Tile::Player => {
                 board[&new_pos] = Tile::HatchedBeast;
                 board[&self.position] = Tile::Empty;
                 self.position = new_pos;
-                return BeastAction::PlayerKilled;
+                BeastAction::PlayerKilled
             }
             Tile::Empty => {
                 board[&new_pos] = Tile::HatchedBeast;
                 board[&self.position] = Tile::Empty;
                 self.position = new_pos;
-                return BeastAction::Moved;
+                BeastAction::Moved
             }
             Tile::Block => {
                 let dir = Self::get_dir(self.position, new_pos);
+
                 if let Some((end_coord, _)) = get_end_of_block_chain(board, &new_pos, &dir) {
                     match board[&end_coord] {
                         Tile::Empty => {
@@ -186,7 +195,7 @@ impl Beast for HatchedBeast {
                             board[&new_pos] = Tile::HatchedBeast;
                             board[&end_coord] = Tile::Block;
                             self.position = new_pos;
-                            return BeastAction::Moved;
+                            BeastAction::Moved
                         }
                         Tile::Player => {
                             if get_next_coord(&end_coord, &dir).is_none_or(|coord| {
@@ -197,23 +206,21 @@ impl Beast for HatchedBeast {
                                 board[&new_pos] = Tile::HatchedBeast;
                                 board[&end_coord] = Tile::Block;
                                 self.position = new_pos;
-                                return BeastAction::PlayerKilled;
+                                BeastAction::PlayerKilled
                             } else {
-                                return BeastAction::Stayed;
+                                BeastAction::Stayed
                             }
                         }
-                        _ => {
-                            return BeastAction::Stayed;
-                        }
+                        _ => BeastAction::Stayed,
                     }
+                } else {
+                    BeastAction::Stayed
                 }
             }
-            _ => {
-                return BeastAction::Stayed;
-            }
+            _ => BeastAction::Stayed,
         };
 
-        BeastAction::Stayed
+        Ok(action)
     }
 
     /// call this method to move the hatched beast per tick

@@ -15,6 +15,10 @@ pub enum BeastAction {
     Stayed,
 }
 
+#[derive(Debug, Clone)]
+pub enum BeastAdvanceError {
+    InvalidMovement,
+}
 /// this trait defines the common behavior of all beasts in the game
 pub trait Beast {
     /// creates a new instance of the beast and stores its position
@@ -26,7 +30,7 @@ pub trait Beast {
         board: &mut Board,
         player_position: Coord,
         new_pos: Coord,
-    ) -> BeastAction;
+    ) -> Result<BeastAction, BeastAdvanceError>;
 
     /// advances the beast's position and returns the action taken
     fn advance(&mut self, board: &mut Board, player_position: Coord) -> BeastAction;

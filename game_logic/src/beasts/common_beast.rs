@@ -4,7 +4,7 @@ use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    beasts::{Beast, BeastAction},
+    beasts::{Beast, BeastAction, BeastAdvanceError},
     board::Board,
     Coord, Tile,
 };
@@ -32,25 +32,32 @@ impl Beast for CommonBeast {
         Self { position }
     }
 
-    /// TODO verify that the coord is a possible movement from the current position
     fn advance_to(
         &mut self,
         board: &mut Board,
-        _player_position: Coord,
+        player_position: Coord,
         coord: Coord,
-    ) -> BeastAction {
-        match board[&coord] {
+    ) -> Result<BeastAction, BeastAdvanceError> {
+        let possible_moves =
+            Self::get_walkable_coords(board, &self.position, &player_position, false);
+
+        let move_is_valid = possible_moves.into_iter().find(|i| *i == coord).is_some();
+        if !move_is_valid {
+            return Err(BeastAdvanceError::InvalidMovement);
+        }
+
+        let action = match board[&coord] {
             Tile::Player => {
                 board[&coord] = Tile::CommonBeast;
                 board[&self.position] = Tile::Empty;
                 self.position = coord;
-                return BeastAction::PlayerKilled;
+                BeastAction::PlayerKilled
             }
             Tile::Empty => {
                 board[&coord] = Tile::CommonBeast;
                 board[&self.position] = Tile::Empty;
                 self.position = coord;
-                return BeastAction::Moved;
+                BeastAction::Moved
             }
             Tile::Block
             | Tile::StaticBlock
@@ -62,7 +69,9 @@ impl Beast for CommonBeast {
                 // we can't move here
                 BeastAction::Stayed
             }
-        }
+        };
+
+        Ok(action)
     }
 
     // this is the simplest path finding that I could come up with
@@ -78,8 +87,9 @@ impl Beast for CommonBeast {
         ));
 
         for coord in possible_moves {
-            let action = self.advance_to(board, player_position, coord);
-            // If the action is stayed, try with the
+            // safe unwrap as these are possible moves
+            let action = self.advance_to(board, player_position, coord).unwrap();
+            // If the action is stayed, try with the next one
             if action != BeastAction::Stayed {
                 return action;
             }
@@ -88,7 +98,7 @@ impl Beast for CommonBeast {
         BeastAction::Stayed
     }
 
-    /// this method is called when the common beast is killed to determin how much score the kill was worth
+    /// this method is called when the common beast is killed to determine how much score the kill was worth
     fn get_score() -> u16 {
         2
     }

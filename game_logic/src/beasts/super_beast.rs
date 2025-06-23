@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    beasts::{Beast, BeastAction},
+    beasts::{Beast, BeastAction, BeastAdvanceError},
     board::Board,
     Coord, Tile,
 };
@@ -69,33 +69,34 @@ impl Beast for SuperBeast {
     fn advance_to(
         &mut self,
         board: &mut Board,
-        _player_position: Coord,
+        player_position: Coord,
         new_pos: Coord,
-    ) -> BeastAction {
-        match board[&new_pos] {
-            Tile::Empty | Tile::Player => match board[&new_pos] {
-                Tile::Player => {
-                    board[&new_pos] = Tile::SuperBeast;
-                    board[&self.position] = Tile::Empty;
-                    self.position = new_pos;
-                    return BeastAction::PlayerKilled;
-                }
-                Tile::Empty => {
-                    board[&new_pos] = Tile::SuperBeast;
-                    board[&self.position] = Tile::Empty;
-                    self.position = new_pos;
-                    return BeastAction::Moved;
-                }
-                _ => BeastAction::Stayed,
-            },
-            Tile::Block
-            | Tile::StaticBlock
-            | Tile::CommonBeast
-            | Tile::SuperBeast
-            | Tile::HatchedBeast
-            | Tile::Egg
-            | Tile::EggHatching => BeastAction::Stayed,
+    ) -> Result<BeastAction, BeastAdvanceError> {
+        let possible_moves =
+            Self::get_walkable_coords(board, &self.position, &player_position, false);
+
+        let move_is_valid = possible_moves.into_iter().find(|i| *i == new_pos).is_some();
+        if !move_is_valid {
+            return Err(BeastAdvanceError::InvalidMovement);
         }
+
+        let action = match board[&new_pos] {
+            Tile::Player => {
+                board[&new_pos] = Tile::SuperBeast;
+                board[&self.position] = Tile::Empty;
+                self.position = new_pos;
+                BeastAction::PlayerKilled
+            }
+            Tile::Empty => {
+                board[&new_pos] = Tile::SuperBeast;
+                board[&self.position] = Tile::Empty;
+                self.position = new_pos;
+                BeastAction::Moved
+            }
+            _ => BeastAction::Stayed,
+        };
+
+        Ok(action)
     }
 
     /// call this method to move the super beast per tick

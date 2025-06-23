@@ -111,11 +111,11 @@ fn main() {
                 }
             }
             GameLogEntry::CommonBeastMoved { idx, new_pos } => {
-                let beast_action = common_beasts.get_mut(idx).unwrap().advance_to(
-                    &mut board,
-                    player.position,
-                    new_pos,
-                );
+                let beast_action = common_beasts
+                    .get_mut(idx)
+                    .unwrap()
+                    .advance_to(&mut board, player.position, new_pos)
+                    .unwrap();
 
                 if beast_action == BeastAction::PlayerKilled {
                     player.lives -= 1;
@@ -123,11 +123,11 @@ fn main() {
                 }
             }
             GameLogEntry::SuperBeastMoved { idx, new_pos } => {
-                let beast_action = super_beasts.get_mut(idx).unwrap().advance_to(
-                    &mut board,
-                    player.position,
-                    new_pos,
-                );
+                let beast_action = super_beasts
+                    .get_mut(idx)
+                    .unwrap()
+                    .advance_to(&mut board, player.position, new_pos)
+                    .unwrap();
 
                 if beast_action == BeastAction::PlayerKilled {
                     player.lives -= 1;
@@ -135,11 +135,11 @@ fn main() {
                 }
             }
             GameLogEntry::HatchedBeastMoved { idx, new_pos } => {
-                let beast_action = hatched_beasts.get_mut(idx).unwrap().advance_to(
-                    &mut board,
-                    player.position,
-                    new_pos,
-                );
+                let beast_action = hatched_beasts
+                    .get_mut(idx)
+                    .unwrap()
+                    .advance_to(&mut board, player.position, new_pos)
+                    .unwrap();
 
                 if beast_action == BeastAction::PlayerKilled {
                     player.lives -= 1;

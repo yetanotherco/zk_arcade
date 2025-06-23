@@ -4,17 +4,15 @@ use game_logic::{
     beasts::{Beast, BeastAction, CommonBeast, HatchedBeast, SuperBeast},
     board::Board,
     player::{Player, PlayerAction},
-    proving::{GameLogEntry, ProgramInput, ProgramOutput},
+    proving::{GameLogEntry, LevelLog, ProgramInput, ProgramOutput},
     Coord, Tile,
 };
 use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
-fn main() {
-    let input = env::read::<ProgramInput>();
-
-    let mut board = Board::new_from_matrix(input.board);
+fn prove_level_completed(input: &LevelLog) -> bool {
+    let mut board = Board::new_from_matrix(&input.board);
 
     /*
      * We need to make sure the given initial conditions match against the level configuration:
@@ -71,7 +69,7 @@ fn main() {
     assert!(static_blocks_tiles_count == level_config.static_blocks);
     assert!(super_beasts.len() == level_config.super_beasts);
 
-    for log in input.game_log {
+    for log in &input.game_log {
         match log {
             GameLogEntry::PlayerMoved { dir } => {
                 let player_action = player.advance(&mut board, &dir);
@@ -112,9 +110,9 @@ fn main() {
             }
             GameLogEntry::CommonBeastMoved { idx, new_pos } => {
                 let beast_action = common_beasts
-                    .get_mut(idx)
+                    .get_mut(*idx)
                     .unwrap()
-                    .advance_to(&mut board, player.position, new_pos)
+                    .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
 
                 if beast_action == BeastAction::PlayerKilled {
@@ -124,9 +122,9 @@ fn main() {
             }
             GameLogEntry::SuperBeastMoved { idx, new_pos } => {
                 let beast_action = super_beasts
-                    .get_mut(idx)
+                    .get_mut(*idx)
                     .unwrap()
-                    .advance_to(&mut board, player.position, new_pos)
+                    .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
 
                 if beast_action == BeastAction::PlayerKilled {
@@ -136,9 +134,9 @@ fn main() {
             }
             GameLogEntry::HatchedBeastMoved { idx, new_pos } => {
                 let beast_action = hatched_beasts
-                    .get_mut(idx)
+                    .get_mut(*idx)
                     .unwrap()
-                    .advance_to(&mut board, player.position, new_pos)
+                    .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
 
                 if beast_action == BeastAction::PlayerKilled {
@@ -149,13 +147,28 @@ fn main() {
         }
     }
 
-    if common_beasts.len() + super_beasts.len() + hatched_beasts.len() == 0 && player.lives > 0 {
-        let output = ProgramOutput {
-            level: input.level.number(),
-            score: level_config.completion_score,
+    common_beasts.len() + super_beasts.len() + hatched_beasts.len() == 0 && player.lives > 0
+}
+
+fn main() {
+    let input = env::read::<ProgramInput>();
+
+    let mut score = 0;
+    let current_level_number = 0;
+    for level_completion in input.levels_log {
+        if current_level_number + 1 != level_completion.level.number() {
+            panic!("Level completion must be in order")
         };
-        env::commit(&output);
-    } else {
-        panic!("Invalid solution {} {}", common_beasts.len(), player.lives);
+        if prove_level_completed(&level_completion) {
+            score += level_completion.level.get_config().completion_score;
+        } else {
+            panic!("Level {} proving failed", level_completion.level.number());
+        }
     }
+
+    let output = ProgramOutput {
+        max_level: current_level_number,
+        score: score,
+    };
+    env::commit(&output);
 }

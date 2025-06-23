@@ -58,7 +58,7 @@ impl Board {
         Self { buffer }
     }
 
-    pub fn new_from_matrix(map: Vec<Vec<Tile>>) -> Self {
+    pub fn new_from_matrix(map: &Vec<Vec<Tile>>) -> Self {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
 
         let height = std::cmp::min(buffer.len(), BOARD_HEIGHT);

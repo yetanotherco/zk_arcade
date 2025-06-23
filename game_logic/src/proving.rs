@@ -10,7 +10,7 @@ pub enum GameLogEntry {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct ProgramInput {
+pub struct LevelLog {
     /// The level to prove and check the board against
     pub level: Level,
     /// The initial game board
@@ -20,7 +20,12 @@ pub struct ProgramInput {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct ProgramInput {
+    pub levels_log: Vec<LevelLog>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct ProgramOutput {
-    pub level: u16,
+    pub max_level: u16,
     pub score: u16,
 }

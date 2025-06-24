@@ -41,6 +41,10 @@ impl Beast for CommonBeast {
         let possible_moves =
             Self::get_walkable_coords(board, &self.position, &player_position, false);
 
+        if coord == self.position {
+            return Ok(BeastAction::Stayed);
+        }
+
         let move_is_valid = possible_moves.into_iter().find(|i| *i == coord).is_some();
         if !move_is_valid {
             return Err(BeastAdvanceError::InvalidMovement);

@@ -2,8 +2,7 @@
 
 use crate::{
     help::Help,
-    highscore::{Highscore, State},
-    prover,
+    prover::{prove, save_proof},
     stty::{RawMode, install_raw_mode_signal_handler},
 };
 use game_logic::{
@@ -71,10 +70,8 @@ pub enum GameState {
     LevelComplete,
     /// displaying the help screen
     Help,
-    /// displaying the highscore screen
-    HighScore,
-    /// entering your name into the highscore
-    EnterHighScore,
+    /// Display the prove execution screen
+    ProveExecution,
     /// the game is over and we quit the game entirely
     GameOver,
     /// the game was won
@@ -104,7 +101,8 @@ pub struct Game {
     /// the state the game is in
     pub state: GameState,
     /// Store the log for proving the completion of games in the zkvm
-    pub leve_completion_log: Vec<LevelLog>,
+    pub levels_completion_log: Vec<LevelLog>,
+    pub has_won: bool,
     beat: Beat,
     input_listener: mpsc::Receiver<u8>,
     _raw_mode: RawMode,
@@ -143,7 +141,7 @@ impl Game {
         };
 
         Self {
-            leve_completion_log: vec![fist_level_log],
+            levels_completion_log: vec![fist_level_log],
             board: Board::new(board_terrain_info.buffer),
             level: Level::One,
             level_start: Instant::now(),
@@ -154,9 +152,34 @@ impl Game {
             player: board_terrain_info.player,
             state: GameState::Intro,
             beat: Beat::One,
+            has_won: false,
             input_listener: receiver,
             _raw_mode,
         }
+    }
+
+    pub fn restart(&mut self) {
+        let board_terrain_info = Board::generate_terrain(Level::One);
+        let board = Board::new(board_terrain_info.buffer);
+        let fist_level_log = LevelLog {
+            level: Level::One,
+            board: board.to_vec(),
+            game_log: vec![],
+        };
+
+        self.levels_completion_log = vec![fist_level_log];
+        self.board = board;
+        self.level = Level::One;
+        self.level_start = Instant::now();
+        self.common_beasts = board_terrain_info.common_beasts;
+        self.super_beasts = board_terrain_info.super_beasts;
+        self.eggs = board_terrain_info.eggs;
+        self.hatched_beasts = board_terrain_info.hatched_beasts;
+        self.player = board_terrain_info.player;
+        self.player.score = 0;
+        self.has_won = false;
+        self.beat = Beat::One;
+        self.state = GameState::Intro;
     }
 
     /// play the game
@@ -177,11 +200,8 @@ impl Game {
                 GameState::Help => {
                     self.handle_help_state();
                 }
-                GameState::HighScore => {
-                    self.handle_highscore_state();
-                }
-                GameState::EnterHighScore => {
-                    self.handle_enter_highscore_state();
+                GameState::ProveExecution => {
+                    self.handle_prove_execution_state();
                 }
                 GameState::GameOver => {
                     self.handle_death_state();
@@ -211,10 +231,6 @@ impl Game {
                     'h' | 'H' => {
                         self.level_start = Into::into(Instant::now());
                         self.state = GameState::Help;
-                        break;
-                    }
-                    's' | 'S' => {
-                        self.state = GameState::HighScore;
                         break;
                     }
                     'q' | 'Q' => {
@@ -328,10 +344,6 @@ impl Game {
                             self.state = GameState::Help;
                             break;
                         }
-                        's' | 'S' => {
-                            self.state = GameState::HighScore;
-                            break;
-                        }
                         _ => {}
                     }
                 }
@@ -395,7 +407,7 @@ impl Game {
                     for idx in 0..self.super_beasts.len() {
                         let action =
                             self.super_beasts[idx].advance(&mut self.board, self.player.position);
-                        self.push_to_log(GameLogEntry::CommonBeastMoved {
+                        self.push_to_log(GameLogEntry::SuperBeastMoved {
                             idx,
                             new_pos: self.super_beasts[idx].position,
                         });
@@ -409,7 +421,7 @@ impl Game {
                     for idx in 0..self.hatched_beasts.len() {
                         let action =
                             self.super_beasts[idx].advance(&mut self.board, self.player.position);
-                        self.push_to_log(GameLogEntry::CommonBeastMoved {
+                        self.push_to_log(GameLogEntry::HatchedBeastMoved {
                             idx,
                             new_pos: self.super_beasts[idx].position,
                         });
@@ -447,15 +459,11 @@ impl Game {
                         break;
                     }
                     '\n' => {
-                        self.state = GameState::EnterHighScore;
+                        self.state = GameState::ProveExecution;
                         break;
                     }
                     'h' | 'H' => {
                         self.state = GameState::Help;
-                        break;
-                    }
-                    's' | 'S' => {
-                        self.state = GameState::HighScore;
                         break;
                     }
                     'q' | 'Q' => {
@@ -479,15 +487,11 @@ impl Game {
                         break;
                     }
                     '\n' => {
-                        self.state = GameState::EnterHighScore;
+                        self.state = GameState::ProveExecution;
                         break;
                     }
                     'h' | 'H' => {
                         self.state = GameState::Help;
-                        break;
-                    }
-                    's' | 'S' => {
-                        self.state = GameState::HighScore;
                         break;
                     }
                     'q' | 'Q' => {
@@ -501,7 +505,7 @@ impl Game {
     }
 
     fn handle_level_complete(&mut self) {
-        let handle = Self::render_loader_in_new_thread("LEVEL COMPLETED, PROVING...", 10000);
+        let handle = Self::render_loader_in_new_thread("LEVEL COMPLETED.", 5000, true);
         let _ = handle.join();
 
         if let Some(level) = self.level.next() {
@@ -513,7 +517,7 @@ impl Game {
                 board: board.to_vec(),
                 game_log: vec![],
             };
-            self.leve_completion_log.push(level_log);
+            self.levels_completion_log.push(level_log);
             self.board = board;
             self.level = level;
             self.level_start = Instant::now();
@@ -525,6 +529,7 @@ impl Game {
             self.player.score += self.level.get_config().completion_score;
             self.state = GameState::Playing;
         } else {
+            self.has_won = true;
             self.state = GameState::Won;
         }
     }
@@ -564,10 +569,6 @@ impl Game {
                             self.state = GameState::Playing;
                             break;
                         }
-                        's' | 'S' => {
-                            self.state = GameState::HighScore;
-                            break;
-                        }
                         'q' | 'Q' => {
                             self.state = GameState::Quit;
                             break;
@@ -579,77 +580,43 @@ impl Game {
         }
     }
 
-    fn handle_highscore_state(&mut self) {
-        let pause = Instant::now();
-        let mut highscore = Highscore::new_loading();
-        println!("{}", highscore.render());
+    fn handle_prove_execution_state(&mut self) {
+        Self::render_loader_in_new_thread("Proving this can take a few minutes...", 30000, true);
 
-        loop {
-            if let Ok(byte) = self.input_listener.try_recv() {
-                if byte == 0x1B {
-                    let second = self.input_listener.recv().unwrap_or(0);
-                    let third = self.input_listener.recv().unwrap_or(0);
-                    if second == b'[' {
-                        let mut render = false;
-                        match third {
-                            b'A' => {
-                                if *highscore.state.lock().unwrap() == State::Idle {
-                                    highscore.scroll_up();
-                                    render = true;
-                                }
-                            }
-                            b'B' => {
-                                if *highscore.state.lock().unwrap() == State::Idle {
-                                    highscore.scroll_down();
-                                    render = true;
-                                }
-                            }
-                            _ => {}
-                        }
+        // If it hasn't won, then don't include the last level as it wasn't completed
+        let levels_completion_log = if self.has_won {
+            self.levels_completion_log.clone()
+        } else {
+            let mut levels_log = self.levels_completion_log.clone();
+            levels_log.pop();
+            levels_log
+        };
 
-                        if render {
-                            println!("{}", highscore.render());
-                        }
-                    }
-                } else {
-                    match byte as char {
-                        'r' | 'R' => {
-                            if let Ok(mut state) = highscore.state.lock() {
-                                if *state == State::Idle || *state == State::Error {
-                                    *state = State::Loading;
-                                    highscore.render_loading();
-                                    println!("{}", Highscore::render_loading_screen());
-                                }
-                            }
-                        }
-                        ' ' => {
-                            if let Ok(mut state) = highscore.state.lock() {
-                                *state = State::Quit;
-                            }
-                            self.level_start += pause.elapsed();
-                            self.state = GameState::Playing;
-                            break;
-                        }
-                        'h' | 'H' => {
-                            if let Ok(mut state) = highscore.state.lock() {
-                                *state = State::Quit;
-                            }
-                            self.state = GameState::Help;
-                            break;
-                        }
-                        'q' | 'Q' => {
-                            self.state = GameState::Quit;
-                            break;
-                        }
-                        _ => {}
-                    }
-                }
+        let handle = std::thread::spawn(move || {
+            let res = prove(levels_completion_log);
+            if let Ok(receipt) = res {
+                save_proof(receipt).expect("To be able to write proof");
+            } else {
+                panic!("Could prove program")
             }
-        }
-    }
+        });
 
-    fn handle_enter_highscore_state(&mut self) {
-        self.state = GameState::HighScore;
+        let res = handle.join();
+
+        if self.has_won {
+            println!("{}", self.render_winning_screen());
+        } else {
+            println!("{}", self.render_death_screen());
+        }
+
+        let msg = if let Ok(_) = res {
+            "Execution proven and stored!"
+        } else {
+            "Could not prove program, try again..."
+        };
+        let handle = Self::render_loader_in_new_thread(msg, 5000, false);
+        let _ = handle.join();
+        self.restart();
     }
 
     fn get_secs_remaining(&self) -> u64 {
@@ -806,7 +773,7 @@ impl Game {
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
-        output.push_str(&format!("{ANSI_LEFT_BORDER}                  PRESS {ANSI_BOLD}[ENTER]{ANSI_RESET} TO LOG YOUR SCORE IN THE GLOBAL HIGHSCORE REGISTER                  {ANSI_RIGHT_BORDER}\n"));
+        output.push_str(&format!("{ANSI_LEFT_BORDER}                               PRESS {ANSI_BOLD}[ENTER]{ANSI_RESET} TO PROVE YOUR EXECUTION                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                  Press {ANSI_BOLD}[SPACE]{ANSI_RESET} key to play again                                   {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                     Press {ANSI_BOLD}[Q]{ANSI_RESET} to exit the game                                     {ANSI_RIGHT_BORDER}\n"));
@@ -838,7 +805,7 @@ impl Game {
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
-        output.push_str(&format!("{ANSI_LEFT_BORDER}                  PRESS {ANSI_BOLD}[ENTER]{ANSI_RESET} TO LOG YOUR SCORE IN THE GLOBAL HIGHSCORE REGISTER                  {ANSI_RIGHT_BORDER}\n"));
+        output.push_str(&format!("{ANSI_LEFT_BORDER}                                PRESS {ANSI_BOLD}[ENTER]{ANSI_RESET} TO PROVE YOUR EXECUTION                           {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                  Press {ANSI_BOLD}[SPACE]{ANSI_RESET} key to play again                                   {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                     Press {ANSI_BOLD}[Q]{ANSI_RESET} to exit the game                                     {ANSI_RIGHT_BORDER}\n"));
@@ -899,7 +866,11 @@ impl Game {
         print!("{}", self.render_board());
     }
 
-    fn render_loader_in_new_thread(message: &str, total_duration_ms: u128) -> JoinHandle<()> {
+    fn render_loader_in_new_thread(
+        message: &str,
+        total_duration_ms: u128,
+        show_progress: bool,
+    ) -> JoinHandle<()> {
         let message = message.to_string();
         std::thread::spawn(move || {
             let time = Instant::now();
@@ -911,7 +882,11 @@ impl Game {
                     break;
                 }
                 if last_update.elapsed().as_millis() > 500 {
-                    let progress = ((elapsed * 100) / total_duration_ms) as usize + 8;
+                    let progress = if show_progress {
+                        std::cmp::min(100, ((elapsed * 100) / total_duration_ms) as usize + 8)
+                    } else {
+                        0
+                    };
                     print!("{}", Self::alert(&message, progress));
                     last_update = Instant::now();
                 }
@@ -939,7 +914,7 @@ impl Game {
     }
 
     fn push_to_log(&mut self, log: GameLogEntry) {
-        self.leve_completion_log[self.level.number() as usize - 1]
+        self.levels_completion_log[self.level.number() as usize - 1]
             .game_log
             .push(log);
     }

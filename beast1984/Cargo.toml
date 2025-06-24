@@ -37,6 +37,7 @@ time = { version = "0.3", features = [
 ] }
 game_logic = { path = "../game_logic", features = [] }
 risc0-zkvm = "2.0.1"
+bincode = "1.3.3"
 
 [package.metadata.risc0]
 methods = ["./zkvm_program/"]

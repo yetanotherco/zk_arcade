@@ -9,7 +9,7 @@ pub enum GameLogEntry {
     PlayerMoved { dir: Dir },
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct LevelLog {
     /// The level to prove and check the board against
     pub level: Level,

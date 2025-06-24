@@ -581,7 +581,11 @@ impl Game {
     }
 
     fn handle_prove_execution_state(&mut self) {
-        Self::render_loader_in_new_thread("Proving this can take a few minutes...", 30000, true);
+        let proving_alert_handle = Self::render_loader_in_new_thread(
+            "Proving this can take a few minutes...",
+            30000,
+            true,
+        );
 
         // If it hasn't won, then don't include the last level as it wasn't completed
         let levels_completion_log = if self.has_won {
@@ -602,6 +606,7 @@ impl Game {
         });
 
         let res = handle.join();
+        let _ = proving_alert_handle.join();
 
         if self.has_won {
             println!("{}", self.render_winning_screen());

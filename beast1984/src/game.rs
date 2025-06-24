@@ -158,7 +158,7 @@ impl Game {
         }
     }
 
-    pub fn restart(&mut self) {
+    pub fn start_new_game(&mut self) {
         let board_terrain_info = Board::generate_terrain(Level::One);
         let board = Board::new(board_terrain_info.buffer);
         let fist_level_log = LevelLog {
@@ -179,7 +179,7 @@ impl Game {
         self.player.score = 0;
         self.has_won = false;
         self.beat = Beat::One;
-        self.state = GameState::Intro;
+        self.state = GameState::Playing;
     }
 
     /// play the game
@@ -614,9 +614,9 @@ impl Game {
         } else {
             "Could not prove program, try again..."
         };
-        let handle = Self::render_loader_in_new_thread(msg, 5000, false);
+        let handle = Self::render_loader_in_new_thread(msg, 3000, false);
         let _ = handle.join();
-        self.restart();
+        self.start_new_game();
     }
 
     fn get_secs_remaining(&self) -> u64 {
@@ -638,20 +638,6 @@ impl Game {
         output.push_str(&format!("{ANSI_LEFT_BORDER}     BLOCKS MOVED:      {ANSI_BOLD}{:<6}{ANSI_RESET}                                                                      {ANSI_RIGHT_BORDER}\n", self.player.blocks_moved.to_string()));
         output.push_str(&format!("{ANSI_LEFT_BORDER}     DISTANCE TRAVELED: {ANSI_BOLD}{:<6}{ANSI_RESET}                                                                      {ANSI_RIGHT_BORDER}\n", self.player.distance_traveled.to_string()));
         output
-    }
-
-    fn start_new_game(&mut self) {
-        let board_terrain_info = Board::generate_terrain(Level::One);
-        self.board = Board::new(board_terrain_info.buffer);
-        self.level = Level::One;
-        self.level_start = Instant::now();
-        self.common_beasts = board_terrain_info.common_beasts;
-        self.super_beasts = board_terrain_info.super_beasts;
-        self.eggs = board_terrain_info.eggs;
-        self.hatched_beasts = board_terrain_info.hatched_beasts;
-        self.player = board_terrain_info.player;
-
-        self.state = GameState::Playing;
     }
 
     fn render_header(output: &mut String) {
@@ -740,7 +726,7 @@ impl Game {
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                     Press {ANSI_BOLD}[SPACE]{ANSI_RESET} key to start                                     {ANSI_RIGHT_BORDER}\n"));
-        output.push_str(&format!("{ANSI_LEFT_BORDER}                                 {ANSI_BOLD}[Q]{ANSI_RESET} Quit  {ANSI_BOLD}[H]{ANSI_RESET} Help  {ANSI_BOLD}[S]{ANSI_RESET} Highscores                                 {ANSI_RIGHT_BORDER}\n"));
+        output.push_str(&format!("{ANSI_LEFT_BORDER}                                         {ANSI_BOLD}[Q]{ANSI_RESET} Quit  {ANSI_BOLD}[H]{ANSI_RESET} Help  {ANSI_BOLD}                                       {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&Self::render_bottom_frame());
         output.push_str("\n\n");
@@ -773,7 +759,7 @@ impl Game {
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
-        output.push_str(&format!("{ANSI_LEFT_BORDER}                               PRESS {ANSI_BOLD}[ENTER]{ANSI_RESET} TO PROVE YOUR EXECUTION                                    {ANSI_RIGHT_BORDER}\n"));
+        output.push_str(&format!("{ANSI_LEFT_BORDER}                               PRESS {ANSI_BOLD}[ENTER]{ANSI_RESET} TO PROVE YOUR EXECUTION                                {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                  Press {ANSI_BOLD}[SPACE]{ANSI_RESET} key to play again                                   {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                     Press {ANSI_BOLD}[Q]{ANSI_RESET} to exit the game                                     {ANSI_RIGHT_BORDER}\n"));
@@ -805,7 +791,7 @@ impl Game {
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
-        output.push_str(&format!("{ANSI_LEFT_BORDER}                                PRESS {ANSI_BOLD}[ENTER]{ANSI_RESET} TO PROVE YOUR EXECUTION                           {ANSI_RIGHT_BORDER}\n"));
+        output.push_str(&format!("{ANSI_LEFT_BORDER}                                PRESS {ANSI_BOLD}[ENTER]{ANSI_RESET} TO PROVE YOUR EXECUTION                               {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                  Press {ANSI_BOLD}[SPACE]{ANSI_RESET} key to play again                                   {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                     Press {ANSI_BOLD}[Q]{ANSI_RESET} to exit the game                                     {ANSI_RIGHT_BORDER}\n"));

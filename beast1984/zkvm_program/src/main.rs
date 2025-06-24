@@ -154,9 +154,10 @@ fn main() {
     let input = env::read::<ProgramInput>();
 
     let mut score = 0;
-    let current_level_number = 0;
+    let mut current_level_number = 0;
     for level_completion in input.levels_log {
-        if current_level_number + 1 != level_completion.level.number() {
+        current_level_number += 1;
+        if current_level_number != level_completion.level.number() {
             panic!("Level completion must be in order")
         };
         if prove_level_completed(&level_completion) {

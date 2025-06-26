@@ -8,9 +8,8 @@ play_beast:
 	cd beast1984 && cargo run --release --bin beast
 
 submit_beast_solution:
-	cd beast1984 && cargo run --release --bin submit_proof
+	cargo run --manifest-path ./beast1984/Cargo.toml --release --bin submit_solution
 
 __CONTRACTS__:
 deploy_contract:
-	@. .$(NETWORK).env && . contracts/scripts/deploy_contracts.sh
-
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh

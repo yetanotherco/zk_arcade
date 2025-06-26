@@ -1,12 +1,17 @@
-use std::str::FromStr;
+use std::{env, str::FromStr};
 
+use aligned_sdk::common::types::{AlignedVerificationData, Network};
 use alloy::{
-    network::EthereumWallet,
+    hex,
+    network::{EthereumWallet, ReceiptResponse},
     primitives::{Address, Bytes, U256},
     providers::ProviderBuilder,
     signers::local::LocalSigner,
     sol,
 };
+use beast1984::aligned_client::AlignedClient;
+use tracing::info;
+use tracing_subscriber::FmtSubscriber;
 
 sol!(
     #[sol(rpc)]
@@ -14,95 +19,23 @@ sol!(
     "cmd/abi/Leaderboard.json"
 );
 
-use aligned_sdk::{
-    common::types::{AlignedVerificationData, Network, Signer, VerificationData, Wallet},
-    verification_layer::estimate_fee,
-};
+const PROOF_FILE_PATH: &str = "./beast1984/proof.bin";
+const PUBLIC_INPUTS_FILE_PATH: &str = "./beast1984/public_inputs.bin";
+const PROGRAM_ID_FILE_PATH: &str = "./beast1984/proof_id.bin";
 
-pub struct AlignedClient {
-    chain_id: u64,
+async fn send_solution_to_leaderboard(
+    aligned_verification_data: AlignedVerificationData,
+    pub_input: Vec<u8>,
     eth_rpc_url: String,
-    network: Network,
-    wallet_key_path: String,
-    wallet_password: String,
-}
-
-impl AlignedClient {
-    pub async fn send_proof_to_be_verified_on_aligned(
-        &self,
-        proof: Vec<u8>,
-        image_id: Vec<u8>,
-        pub_input: Vec<u8>,
-    ) -> AlignedVerificationData {
-        let wallet = Wallet::decrypt_keystore(&self.wallet_key_path, &self.wallet_password)
-            .expect("Keystore to be `cast wallet` compliant")
-            .with_chain_id(self.chain_id);
-
-        let verification_data = VerificationData {
-            proof_generator_addr: wallet.address(),
-            proving_system: aligned_sdk::common::types::ProvingSystemId::Risc0,
-            proof,
-            vm_program_code: Some(image_id),
-            pub_input: Some(pub_input),
-            verification_key: None,
-        };
-
-        let nonce = aligned_sdk::verification_layer::get_nonce_from_batcher(
-            self.network.clone(),
-            wallet.address(),
-        )
-        .await
-        .expect("Retrieve nonce from aligned batcher");
-
-        let max_fee = estimate_fee(
-            &self.eth_rpc_url,
-            aligned_sdk::common::types::FeeEstimationType::Instant,
-        )
-        .await
-        .expect("Max fee to be retrieved");
-
-        aligned_sdk::verification_layer::submit_and_wait_verification(
-            &self.eth_rpc_url,
-            self.network.clone(),
-            &verification_data,
-            max_fee,
-            wallet,
-            nonce,
-        )
-        .await
-        .expect("Proof to be sent")
-    }
-}
-
-#[tokio::main]
-async fn main() {
-    let eth_rpc_url = "https://ethereum-holesky-rpc.publicnode.com/".to_string();
-    let wallet_key_path = "sender".to_string();
-    let wallet_password = "".to_string();
-
-    let aligned_client = AlignedClient {
-        chain_id: 17000,
-        eth_rpc_url: eth_rpc_url.clone(),
-        network: Network::HoleskyStage,
-        wallet_key_path: wallet_key_path.clone(),
-        wallet_password: wallet_password.clone(),
-    };
-    let proof = std::fs::read("./beast1984/proof.bin").expect("proof to exist");
-    let image_id = std::fs::read("./beast1984/proof_id.bin").expect("image id file to exist");
-    let pub_input =
-        std::fs::read("./beast1984/public_inputs.bin").expect("public inputs file to exist");
-
-    let aligned_verification_data = aligned_client
-        .send_proof_to_be_verified_on_aligned(proof, image_id, pub_input.clone())
-        .await;
-
+    wallet_private_key: String,
+    leaderboard_contract_address: String,
+) -> [u8; 32] {
     let rpc_url = eth_rpc_url.parse().expect("RPC URL should be valid");
-    let signer = LocalSigner::decrypt_keystore(wallet_key_path, wallet_password)
-        .expect("Keystore signer should be `cast wallet` compliant");
-    let wallet = EthereumWallet::from(signer);
+    let signer = LocalSigner::from_str(&wallet_private_key).expect("Valid private key");
+    let wallet = EthereumWallet::new(signer);
     let rpc_provider = ProviderBuilder::new().wallet(wallet).connect_http(rpc_url);
     let leaderboard = Leaderboard::new(
-        Address::from_str("0xA2F6042A7f33214D30319202AF5E6f2b257F5F61")
+        Address::from_str(&leaderboard_contract_address)
             .expect("Leaderboard address should be valid"),
         rpc_provider,
     );
@@ -142,5 +75,63 @@ async fn main() {
         .await
         .expect("To be able to send the transaction");
 
-    res.get_receipt().await.expect("to get transaction receipt");
+    res.get_receipt()
+        .await
+        .expect("to get transaction receipt")
+        .transaction_hash()
+        .0
+}
+
+#[tokio::main]
+async fn main() {
+    let subscriber = FmtSubscriber::builder().finish();
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
+    info!("Reading config...");
+    let chain_id: u64 = env::var("CHAIN_ID")
+        .ok()
+        .map(|s| s.parse().expect("CHAIN_ID must be a valid u64"))
+        .expect("CHAIN_ID must b e set");
+    let eth_rpc_url = env::var("ETH_RPC_URL").expect("ETH_RPC_URL must be set");
+    let network = env::var("NETWORK").expect("NETWORK must be set");
+    let wallet_private_key =
+        env::var("WALLET_PRIVATE_KEY").expect("WALLET_PRIVATE_KEY must be set");
+    let leaderboard_contract_address =
+        env::var("LEADERBOARD_CONTRACT_ADDRESS").expect("LEADERBOARD_CONTRACT_ADDRESS must be set");
+    let network = match network.as_str() {
+        "mainnet" => Network::Mainnet,
+        "holesky" => Network::Holesky,
+        "holesky-stage" => Network::HoleskyStage,
+        "devnet" => Network::Devnet,
+        _ => panic!("Invalid NETWORK, possible values: mainnet|holeksy|holesky-stage|devnet"),
+    };
+
+    let aligned_client = AlignedClient::new(
+        chain_id.clone(),
+        eth_rpc_url.clone(),
+        network,
+        wallet_private_key.clone(),
+    );
+
+    info!("Config correct, reading proof...");
+
+    let proof = std::fs::read(PROOF_FILE_PATH).expect("proof to exist");
+    let image_id = std::fs::read(PROGRAM_ID_FILE_PATH).expect("image id file to exist");
+    let pub_input = std::fs::read(PUBLIC_INPUTS_FILE_PATH).expect("public inputs file to exist");
+
+    info!("Proof loaded, sending to verify on aligned...");
+    let aligned_verification_data = aligned_client
+        .send_proof_to_be_verified_on_aligned(proof, image_id, pub_input.clone())
+        .await;
+
+    info!("Proof verified on aligned, sending submission to contract...");
+    let tx_hash = send_solution_to_leaderboard(
+        aligned_verification_data,
+        pub_input,
+        eth_rpc_url,
+        wallet_private_key,
+        leaderboard_contract_address,
+    )
+    .await;
+    info!("Solution sent, tx hash: {:?}", hex::encode(tx_hash));
 }

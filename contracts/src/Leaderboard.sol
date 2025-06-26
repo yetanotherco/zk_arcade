@@ -9,6 +9,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
      * Storage
      */
     address public alignedServiceManager;
+    address public alignedBatcherPaymentService;
     mapping(address => uint256) public usersScore;
     mapping(address => uint256) public usersBeastLevelCompleted;
 
@@ -28,8 +29,12 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(address owner, address _alignedServiceManager) public initializer {
+    function initialize(address owner, address _alignedServiceManager, address _alignedBatcherPaymentService)
+        public
+        initializer
+    {
         alignedServiceManager = _alignedServiceManager;
+        alignedBatcherPaymentService = _alignedBatcherPaymentService;
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
     }
@@ -56,7 +61,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
                 batchMerkleRoot,
                 merkleProof,
                 verificationDataBatchIndex,
-                msg.sender
+                alignedBatcherPaymentService
             )
         );
 
@@ -77,9 +82,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
         usersBeastLevelCompleted[msg.sender] = levelCompleted;
 
-        for (uint256 i = 0; i < levelCompleted - currentLevelCompleted; i++) {
-            usersScore[msg.sender] += i;
-        }
+        usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
 
         emit NewSolutionSubmitted(msg.sender, levelCompleted);
     }

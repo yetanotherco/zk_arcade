@@ -15,10 +15,13 @@ contract LeaderboardDeployer is Script {
 
         address owner = vm.parseJsonAddress(configData, ".permissions.owner");
         address alignedServiceManagerAddress = vm.parseJsonAddress(configData, ".alignedServiceManager");
+        address alignedBatcherPaymentAddress = vm.parseJsonAddress(configData, ".alignedBatcherPaymentService");
 
         vm.startBroadcast();
         Leaderboard implementation = new Leaderboard();
-        bytes memory data = abi.encodeWithSignature("initialize(address,address)", owner, alignedServiceManagerAddress);
+        bytes memory data = abi.encodeWithSignature(
+            "initialize(address,address,address)", owner, alignedServiceManagerAddress, alignedBatcherPaymentAddress
+        );
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);
         vm.stopBroadcast();
 

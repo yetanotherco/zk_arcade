@@ -1,0 +1,7 @@
+{
+    "permissions": {
+        "owner": "0xc89fF235960ED47030d926aE1c00AB50ba93e361"
+    },
+    "alignedServiceManager": "0x9C5231FC88059C086Ea95712d105A2026048c39B",
+    "alignedBatcherPaymentService": "0x7577Ec4ccC1E6C529162ec8019A49C13F6DAd98b"
+}

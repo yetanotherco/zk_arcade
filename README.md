@@ -7,14 +7,14 @@ This version adds an experimental integration of zero-knowledge proving using th
 
 You can try the original version [here](dominik.wilkowski.dev/beast).
 
-## Run the game
+## Run the game and submit a proof
 
 ### Requirements
 
-1. [Rust](https://www.rust-lang.org/tools/install)
-2. [Risc0-Toolchain](https://dev.risczero.com/api/zkvm/install)
+-   [Rust](https://www.rust-lang.org/tools/install)
+-   [Risc0-Toolchain](https://dev.risczero.com/api/zkvm/install)
 
-3. Clone the repo:
+1. Clone the repo:
 
 ```shell
 git clone https://github.com/yetanotherco/zk-beast1984.git
@@ -24,5 +24,13 @@ cd zk-beast1984
 2. Compile the and run in the terminal:
 
 ```shell
-cargo run --release --bin beast
+make play_beast
+```
+
+3. Submit your proof:
+
+First fill the variables in `beast1984/cmd/.<NETWORK>.env` depending on the network (mainnet|holesky|holesky-stage|devnet).
+
+```shell
+make submit_beast_solution NETWORK=<NETWORK>
 ```

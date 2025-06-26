@@ -1,5 +1,7 @@
 .PHONY: play_beast submit_beast_solution deploy_contract
 
+SHELL := /bin/bash
+
 # devnet | holesky-stage | holesky | mainnet
 NETWORK=holesky-stage
 

@@ -4,7 +4,7 @@ use game_logic::{
     beasts::{Beast, BeastAction, CommonBeast, HatchedBeast, SuperBeast},
     board::Board,
     player::{Player, PlayerAction},
-    proving::{GameLogEntry, LevelLog, ProgramInput, ProgramOutput},
+    proving::{GameLogEntry, LevelLog, ProgramInput},
     Coord, Tile,
 };
 use risc0_zkvm::guest::env;
@@ -153,23 +153,21 @@ fn prove_level_completed(input: &LevelLog) -> bool {
 fn main() {
     let input = env::read::<ProgramInput>();
 
-    let mut score = 0;
-    let mut current_level_number = 0;
+    let mut current_level_number: u16 = 0;
     for level_completion in input.levels_log {
         current_level_number += 1;
         if current_level_number != level_completion.level.number() {
             panic!("Level completion must be in order")
         };
-        if prove_level_completed(&level_completion) {
-            score += level_completion.level.get_config().completion_score;
-        } else {
+        if !prove_level_completed(&level_completion) {
             panic!("Level {} proving failed", level_completion.level.number());
         }
     }
 
-    let output = ProgramOutput {
-        max_level: current_level_number,
-        score: score,
-    };
-    env::commit(&output);
+    // Committing in 32 bytes (u256) so its easier to decode in solidity
+    let mut number: [u8; 32] = [0; 32];
+    let bytes = current_level_number.to_be_bytes();
+    number[32 - bytes.len()..].copy_from_slice(&bytes);
+
+    env::commit_slice(&number);
 }

@@ -23,9 +23,3 @@ pub struct LevelLog {
 pub struct ProgramInput {
     pub levels_log: Vec<LevelLog>,
 }
-
-#[derive(Serialize, Deserialize)]
-pub struct ProgramOutput {
-    pub max_level: u16,
-    pub score: u16,
-}

@@ -22,6 +22,7 @@ sol!(
 const PROOF_FILE_PATH: &str = "./beast1984/proof.bin";
 const PUBLIC_INPUTS_FILE_PATH: &str = "./beast1984/public_inputs.bin";
 const PROGRAM_ID_FILE_PATH: &str = "./beast1984/proof_id.bin";
+const ENV_FILE: &str = "./beast1984/cmd/.env";
 
 async fn send_solution_to_leaderboard(
     aligned_verification_data: AlignedVerificationData,
@@ -51,7 +52,6 @@ async fn send_solution_to_leaderboard(
             .collect::<Vec<u8>>(),
     );
 
-    println!("Submitting solution");
     let res = leaderboard
         .submitBeastSolution(
             aligned_verification_data
@@ -88,6 +88,7 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     info!("Reading config...");
+    dotenv::from_path(ENV_FILE).ok().expect("To have .env file");
     let chain_id: u64 = env::var("CHAIN_ID")
         .ok()
         .map(|s| s.parse().expect("CHAIN_ID must be a valid u64"))
@@ -124,7 +125,10 @@ async fn main() {
         .send_proof_to_be_verified_on_aligned(proof, image_id, pub_input.clone())
         .await;
 
-    info!("Proof verified on aligned, sending submission to contract...");
+    info!(
+        "Proof verified on aligned with batch merkle root {:?}, sending submission to contract...",
+        hex::encode(aligned_verification_data.batch_merkle_root)
+    );
     let tx_hash = send_solution_to_leaderboard(
         aligned_verification_data,
         pub_input,

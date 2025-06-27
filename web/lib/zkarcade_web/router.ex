@@ -36,7 +36,7 @@ defmodule ZkArcadeWeb.Router do
   scope "/", ZkArcadeWeb do
     pipe_through :browser
 
-    live "/", PageLive, :home
+    get "/", PageController, :home
   end
 
   # To Enable LiveDashboard: (only enable behind auth)

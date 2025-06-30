@@ -8,10 +8,9 @@ defmodule ZkArcadeWeb.PageController do
 
   def connect_wallet(conn, %{"address" => address}) do
     conn
-      |> assign(:address, address)
-      |> put_session(:step, 0)
-      |> render(:home, layout: false)
-    render(conn, :home, layout: false)
+    |> assign(:address, address)
+    |> put_session(:step, 0)
+    |> render(:home, layout: false)
   end
 
 end

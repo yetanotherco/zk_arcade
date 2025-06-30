@@ -1,57 +1,23 @@
 <!DOCTYPE html>
 <html lang="en" class="[scrollbar-gutter:stable]">
-<head> 
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="csrf-token" content={get_csrf_token()} />
-  <.live_title default="ZK Games">
-    Zk Games!
-  </.live_title>
-  <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
-  <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
-  </script>
-  <script type="text/javascript">
-    window.$crisp=[];
-    window.CRISP_WEBSITE_ID="01c845e9-d8cd-4b06-ab7d-dd0e25baa513";
-    (function(){
-      d=document;
-      s=d.createElement("script");
-      s.src="https://client.crisp.chat/l.js";
-      s.async=1;
-      d.getElementsByTagName("head")[0].appendChild(s);
-    })();
-  </script>
-</head>
-
-<style>
-  .btn-connect-container {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1000;
-  }
-
-  .btn-connect {
-    background-color: rgb(72, 205, 76);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-  }
-
-  .btn-connect:hover {
-    background-color: #45a049;
-  }
-</style>
-
-<body class="bg-white font-mono antialiased">
-  <div class="btn-connect-container">
-    <button class="btn-connect" phx-click="toggle_wallet_form">
-      Conectar Wallet
-    </button>
-  </div>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title default="ALIGNED Claim">
+      <%= assigns[:page_title]%>
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+    <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="01c845e9-d8cd-4b06-ab7d-dd0e25baa513";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
+  </head>
+  <body class="bg-white font-mono antialiased">
+    <%= @inner_content %>
+    <%= if Application.get_env(:aligned_airdrop, :execution_env) == :prod do %>
+      <!-- 100% privacy-first analytics -->
+      <script async src="https://scripts.simpleanalyticscdn.com/latest.js">
+      </script>
+    <% end %>
+  </body>
 </html>

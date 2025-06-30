@@ -1,5 +1,55 @@
-<div class="min-h-screen w-full mx-auto flex flex-col items-center justify-center px-4 text-center">
-  <h1 class="text-2xl md:text-5xl font-semibold mb-2">
-    Zk Games!!
-  </h1>
+<div class="">
+  <%= if Map.has_key?(@conn.assigns, :wallet) && @conn.assigns.wallet do %>
+    <h1 class="text-2xl md:text-4xl font-semibold mb-2 pb-6">Claim your tokens!</h1>
+    <%!-- We show the wallet address retrived --%>
+    <h3 class="pb-4">1. Check your claiming info</h3>
+    <div class="border border-gray-300 p-4 mb-6 inline-block">
+      <div>
+        <div class="font-semibold mb-2">
+          Wallet address:
+        </div>
+        <div class="px-4 mb-6">
+          {@conn.assigns.wallet.address}
+        </div>
+        <div class="font-semibold mb-2">
+          Network:
+        </div>
+        <div class="px-4 mb-6">
+          <%= if Application.get_env(:aligned_airdrop, :network) == "anvil" do %>
+            Anvil (Local)
+          <% end %>
+          <%= if Application.get_env(:aligned_airdrop, :network) == "sepolia" do %>
+            Sepolia (Testnet)
+          <% end %>
+          <%= if Application.get_env(:aligned_airdrop, :network) == "mainnet" do %>
+            Ethereum Mainnet
+          <% end %>
+        </div>
+        <div class="font-semibold mb-2">
+          Tokens to claim:
+        </div>
+        <div class=" px-4 mb-2">
+          <mark class="bg-green-400 p-1">
+            {@conn.assigns.wallet.amount |> String.slice(0..-19//1)} $ALIGN
+          </mark>
+        </div>
+      </div>
+    </div>
+    <h3 class="pb-2">2. Check status and Claim</h3>
+    <x-app-send-claim
+      network={Application.get_env(:aligned_airdrop, :network)}
+      proxy_contract_address={Application.get_env(:aligned_airdrop, :proxy_contract_address)}
+      merkle_proof={@conn.assigns.wallet.merkle_proof}
+      amount={@conn.assigns.wallet.amount}
+    />
+  <% else %>
+    <%!-- We show the check claim page --%>
+    <h1 class="text-2xl md:text-4xl font-semibold mb-2 pb-6">
+      Check your claim
+    </h1>
+
+    <p>La red actual es: <%= System.get_env("ZK_NETWORK") || "no definida" %></p>
+
+    <x-app-check-claim network={"anvil"} />
+  <% end %>
 </div>

@@ -37,6 +37,7 @@ defmodule ZkArcadeWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    post "/", PageController, :connect_wallet
   end
 
   # To Enable LiveDashboard: (only enable behind auth)

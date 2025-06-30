@@ -9,8 +9,8 @@ module.exports = {
   content: [
     "./js/**/*.js",
     "./js/**/*.jsx",
-    "../lib/aligned_airdrop_web.ex",
-    "../lib/aligned_airdrop_web/**/*.*ex"
+    "../lib/zkarcade_web.ex",
+    "../lib/zkarcade_web/**/*.*ex"
   ],
   theme: {
     extend: {

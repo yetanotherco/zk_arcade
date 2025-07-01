@@ -12,15 +12,34 @@ import Config
 # If you use `mix release`, you need to explicitly enable the server
 # by passing the PHX_SERVER=true when you start it:
 #
-#     PHX_SERVER=true bin/zkarcade start
+#     PHX_SERVER=true bin/zk_arcade start
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
+config :zk_arcade, :execution_env, config_env()
+
 if System.get_env("PHX_SERVER") do
-  config :zkarcade, ZkArcadeWeb.Endpoint, server: true
+  config :zk_arcade, ZkArcadeWeb.Endpoint, server: true
 end
 
+config :zk_arcade, time_limit: System.get_env("CLAIM_TIME_LIMIT") || "2734912000"
+
 if config_env() == :prod do
+  database_url =
+    System.get_env("DATABASE_URL") ||
+      raise """
+      environment variable DATABASE_URL is missing.
+      For example: ecto://USER:PASS@HOST/DATABASE
+      """
+
+  maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+
+  config :zk_arcade, ZkArcade.Repo,
+    # ssl: true,
+    url: database_url,
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6
+
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want
@@ -33,13 +52,13 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "http://localhost:4000"
+  host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
   port_ssl = String.to_integer(System.get_env("PORT_SSL") || "443")
 
-  config :zkarcade, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :zk_arcade, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
-  config :zkarcade, ZkArcadeWeb.Endpoint,
+  config :zk_arcade, ZkArcadeWeb.Endpoint,
     url: [
       scheme: "https",
       port: port_ssl,
@@ -49,7 +68,7 @@ if config_env() == :prod do
       port: port_ssl,
       cipher_suite: :strong,
       keyfile: System.get_env("KEYFILE_PATH"),
-      certfile: System.get_env("CERTFILE_PATH"),
+      certfile: System.get_env("CERTFILE_PATH")
     ],
     http: [
       # Enable IPv6 and bind on all interfaces.
@@ -61,12 +80,27 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  config :zk_arcade,
+         :proxy_contract_address,
+         System.get_env("ZK_ARCADE_PROXY_CONTRACT_ADDRESS")
+
+  config :zk_arcade, :network, System.get_env("ZK_ARCADE_NETWORK")
+
+  newrelic_license_key = System.get_env("NEWRELIC_KEY")
+  newrelic_app_name = System.get_env("NEWRELIC_APP_NAME")
+
+  config :new_relic_agent,
+    app_name: newrelic_app_name,
+    license_key: newrelic_license_key,
+    httpc_request_options: [connect_timeout: 5000],
+    logs_in_context: :direct
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key
   # to your endpoint configuration:
   #
-  #     config :zkarcade, ZkArcadeWeb.Endpoint,
+  #     config :zk_arcade, ZkArcadeWeb.Endpoint,
   #       https: [
   #         ...,
   #         port: 443,
@@ -88,7 +122,7 @@ if config_env() == :prod do
   # We also recommend setting `force_ssl` in your config/prod.exs,
   # ensuring no data is ever sent via http, always redirecting to https:
   #
-  #     config :zkarcade, ZkArcadeWeb.Endpoint,
+  #     config :zk_arcade, ZkArcadeWeb.Endpoint,
   #       force_ssl: [hsts: true]
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.

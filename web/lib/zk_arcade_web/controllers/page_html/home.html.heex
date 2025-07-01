@@ -9,9 +9,16 @@
 <div style="display: flex;">
   <%= if Map.has_key?(@conn.assigns, :wallet) && @conn.assigns.wallet do %>
     <div style="margin-left:auto"> 
-      <a href="/terms-conditions" class="md:text-xl">
+      <p>
         Address: <%= inspect(@conn.assigns.wallet.address) %>
-      </a>
+
+      </p>
+      <p>
+        You have <%= inspect(@conn.assigns.wallet.points) %> points
+      </p>
+      <p>
+        Your balance in Aligned is <%= inspect(@conn.assigns.wallet.balance) %> ether
+      </p>
     </div>
   <% else %>
     <div style="margin-left:auto"> 

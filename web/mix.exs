@@ -3,7 +3,7 @@ defmodule ZkArcade.MixProject do
 
   def project do
     [
-      app: :zkarcade,
+      app: :zk_arcade,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule ZkArcade.MixProject do
   def application do
     [
       mod: {ZkArcade.Application, []},
-      extra_applications: [:logger, :runtime_tools, :cachex]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -32,12 +32,15 @@ defmodule ZkArcade.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.7.12"},
-      {:phoenix_html, "~> 4.0"},
+      {:phoenix, "~> 1.7.18"},
+      {:phoenix_ecto, "~> 4.5"},
+      {:ecto_sql, "~> 3.10"},
+      {:postgrex, ">= 0.0.0"},
+      {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.20.2"},
+      {:phoenix_live_view, "~> 1.0.0"},
       {:floki, ">= 0.30.0", only: :test},
-      # {:phoenix_live_dashboard, "~> 0.8.3"},
+      {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:heroicons,
@@ -47,23 +50,16 @@ defmodule ZkArcade.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:finch, "~> 0.18"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.20"},
-      {:httpoison, "~> 2.0"},
       {:jason, "~> 1.2"},
-      {:cbor, "~> 1.0.1"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.2"},
-      {:ethers, "~> 0.4.4"},
-      {:ethereumex, "~> 0.10"},
-      {:ecto_sql, "~> 3.0"},
-      {:postgrex, ">= 0.0.0"},
-      {:cachex, "~> 3.6"},
-      {:mutex, "~> 2.0"},
-      {:tails, "~> 0.1.5"},
-      {:cors_plug, "~> 3.0"},
+      {:bandit, "~> 1.5"},
+      {:rustler, "~> 0.35.1"},
+      {:nimble_csv, "~> 1.1"},
+      {:new_relic_agent, "~> 1.0"},
+      {:ex_keccak, "~> 0.7.5"},
+      {:ex_secp256k1, "~> 0.7"}
     ]
   end
 
@@ -75,12 +71,15 @@ defmodule ZkArcade.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "assets.setup", "assets.build"],
+      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      "ecto.setup": ["ecto.create", "ecto.migrate"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind zkarcade", "esbuild zkarcade"],
+      "assets.build": ["tailwind zk_arcade", "esbuild zk_arcade"],
       "assets.deploy": [
-        "tailwind zkarcade --minify",
-        "esbuild zkarcade --minify",
+        "tailwind zk_arcade --minify",
+        "esbuild zk_arcade --minify",
         "phx.digest"
       ]
     ]

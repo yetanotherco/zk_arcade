@@ -5,7 +5,7 @@ import { getDefaultConfig } from "connectkit";
 
 const common_config = {
     walletConnectProjectId: "b2fb11724ae6170bc3e2cf2d6e19ec5a",
-    appName: "Aligned Airdrop Claim",
+    appName: "Zk Arcade",
 }
 
 export const ConfigAnvil = createConfig(

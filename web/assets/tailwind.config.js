@@ -9,8 +9,8 @@ module.exports = {
   content: [
     "./js/**/*.js",
     "./js/**/*.jsx",
-    "../lib/zkarcade_web.ex",
-    "../lib/zkarcade_web/**/*.*ex"
+    "../lib/zk_arcade_web.ex",
+    "../lib/zk_arcade_web/**/*.*ex"
   ],
   theme: {
     extend: {

@@ -14,8 +14,6 @@ const queryClient = new QueryClient({
 });
 
 const configSelector = (config_name) => {
-  console.log("FormCheckClaim renderizado con config:", config_name);
-
   switch (config_name) {
     case "anvil":
       return ConfigAnvil;

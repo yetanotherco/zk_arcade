@@ -53,8 +53,8 @@
         {@conn.assigns.error} :(
       </div>
     <% else %>
-      <%!-- We show the check claim form --%>
-      <x-app-check-claim network={Application.get_env(:zk_arcade, :network)} />
+      <%!-- We show the agreement submit form --%>
+      <x-app-agreement-submit network={Application.get_env(:zk_arcade, :network)} />
     <% end %>
   <% end %>
 </div>

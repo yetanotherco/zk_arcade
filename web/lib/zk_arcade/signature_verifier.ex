@@ -5,7 +5,7 @@ defmodule ZkArcade.VerifySignature do
   def init(opts), do: opts
 
   def call(conn, address, sig_hex) do
-    message = "Aguante Rust!"
+    message = "I agree with the service policy"
     prefixed = prefix_message(message)
     hash = ExKeccak.hash_256(prefixed)
 

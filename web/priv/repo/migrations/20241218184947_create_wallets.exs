@@ -1,4 +1,4 @@
-defmodule AlignedAirdrop.Repo.Migrations.CreateWallets do
+defmodule ZkArcade.Repo.Migrations.CreateWallets do
   use Ecto.Migration
 
   def change do

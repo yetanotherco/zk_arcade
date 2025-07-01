@@ -7,9 +7,6 @@ defmodule ZkArcadeWeb.ClaimController do
   @step 2
 
   def home(conn, _params) do
-    # The home page is often custom made,
-    # so skip the default app layout.
-
     render(conn, :home, layout: false)
   end
 
@@ -20,16 +17,28 @@ defmodule ZkArcadeWeb.ClaimController do
       conn |> assign(:error, "Failure in signature authentication")
       render(conn, :home, layout: false)
     else
-      case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address)}) do
+      case ZkArcade.Accounts.fetch_wallet_by_address(String.downcase(address)) do
         {:ok, wallet} ->
-          Logger.info("Wallet creada: #{wallet.address}")
+          Logger.info("Ya existe una wallet para ese address")
+          conn |> assign(:wallet, wallet)
+          redirect(conn, to: ~p"/")
 
-        {:error, changeset} ->
-          Logger.error("Error al crear wallet: #{inspect(changeset.errors)}")
+        {:error, :not_found} ->
+          Logger.info("No se encontró una wallet para ese address, creando wallet...")
 
-          conn
-          |> assign(:error, "Hubo un problema al crear tu wallet")
-          |> render(:home, layout: false)
+          case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address)}) do
+            {:ok, wallet} ->
+              Logger.info("Wallet creada: #{wallet.address}")
+              conn |> assign(:wallet, wallet)
+
+              redirect(conn, to: ~p"/")
+            {:error, changeset} ->
+              Logger.error("Error al crear wallet: #{inspect(changeset.errors)}")
+
+              conn
+              |> assign(:error, "Hubo un problema al crear tu wallet")
+              |> render(:home, layout: false)
+          end
       end
 
       render(conn, :home, layout: false)

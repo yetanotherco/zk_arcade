@@ -14,13 +14,13 @@ defmodule ZkArcadeWeb.SignController do
     conn = VerifySignature.call(conn, address, sig)
 
     if conn.assigns[:error] do
-      conn |> assign(:error, "Failure in signature authentication")
+      conn = conn |> assign(:error, "Failure in signature authentication")
       render(conn, :home, layout: false)
     else
       case ZkArcade.Accounts.fetch_wallet_by_address(String.downcase(address)) do
         {:ok, wallet} ->
           Logger.info("Ya existe una wallet para ese address")
-          conn |> assign(:wallet, wallet)
+          conn = conn |> assign(:wallet, wallet)
           redirect(conn, to: ~p"/")
 
         {:error, :not_found} ->
@@ -29,7 +29,7 @@ defmodule ZkArcadeWeb.SignController do
           case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address)}) do
             {:ok, wallet} ->
               Logger.info("Wallet creada: #{wallet.address}")
-              conn |> assign(:wallet, wallet)
+              conn = conn |> assign(:wallet, wallet)
 
               redirect(conn, to: ~p"/")
             {:error, changeset} ->

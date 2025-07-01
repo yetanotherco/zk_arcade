@@ -11,8 +11,8 @@ html {
 }
 
 body {
-  padding: 1.5rem 0.5rem 1rem;
-  max-width: calc(min(90ch, round(down, 100%, 1ch)));
+  /* padding: 1.5rem 0.5rem 1rem;
+  max-width: calc(min(90ch, round(down, 100%, 1ch))); */
   margin: 0 auto;
   box-sizing: border-box;
 }

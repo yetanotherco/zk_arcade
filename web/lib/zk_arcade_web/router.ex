@@ -16,12 +16,8 @@ defmodule ZkArcadeWeb.Router do
     get "/", PageController, :home
   end
 
-  pipeline :check_claim_availability do
-    plug(ZkArcade.Plugs.CheckClaimAvailability)
-  end
-
   scope "/", ZkArcadeWeb do
-    pipe_through [:browser, :check_claim_availability]
+    pipe_through [:browser]
 
     get "/terms-conditions", PageController, :terms
 

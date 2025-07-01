@@ -3,9 +3,22 @@
     <h1 class="text-2xl md:text-3xl font-semibold">
       Aligned ZK Arcade
     </h1>
-
-    <a href="/terms-conditions" class="underline text-lg md:text-xl hover:text-blue-600 transition">
-      Connect Wallet
-    </a>
   </div>
 </header>
+
+<div style="display: flex;">
+  <pre><%= inspect(@conn) %></pre>
+  <%= if Map.has_key?(@conn.assigns, :wallet) && @conn.assigns.wallet do %>
+    <div style="margin-left:auto"> 
+      <a href="/terms-conditions" class="md:text-xl">
+        Address: <%= inspect(@conn.assigns.wallet.address) %>
+      </a>
+    </div>
+  <% else %>
+    <div style="margin-left:auto"> 
+      <a href="/terms-conditions" class="md:text-xl">
+        Connect Wallet
+      </a>
+    </div>
+  <% end %>
+</div>

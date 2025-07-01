@@ -20,8 +20,10 @@ defmodule ZkArcadeWeb.SignController do
       case ZkArcade.Accounts.fetch_wallet_by_address(String.downcase(address)) do
         {:ok, wallet} ->
           Logger.info("Ya existe una wallet para ese address")
-          conn = conn |> assign(:wallet, wallet)
-          redirect(conn, to: ~p"/")
+
+          conn
+          |> put_session(:wallet_address, wallet.address)
+          |> redirect(to: ~p"/")
 
         {:error, :not_found} ->
           Logger.info("No se encontró una wallet para ese address, creando wallet...")
@@ -29,9 +31,10 @@ defmodule ZkArcadeWeb.SignController do
           case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address)}) do
             {:ok, wallet} ->
               Logger.info("Wallet creada: #{wallet.address}")
-              conn = conn |> assign(:wallet, wallet)
 
-              redirect(conn, to: ~p"/")
+            conn
+            |> put_session(:wallet_address, wallet.address)
+            |> redirect(to: ~p"/")
             {:error, changeset} ->
               Logger.error("Error al crear wallet: #{inspect(changeset.errors)}")
 

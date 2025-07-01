@@ -6,8 +6,7 @@ defmodule ZkArcade.Accounts.Wallet do
   @foreign_key_type :binary_id
   schema "wallets" do
     field :address, :string
-    # field :amount, :string
-    # field :merkle_proof, :string
+    # TODO: Add the required fields to use in wallets
   end
 
   @doc false

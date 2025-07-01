@@ -9,7 +9,6 @@ defmodule ZkArcade.VerifySignature do
     prefixed = prefix_message(message)
     hash = ExKeccak.hash_256(prefixed)
 
-
     case recover_address(sig_hex, hash) do
       {:ok, recovered} ->
         if String.downcase(recovered) == String.downcase(address) do
@@ -49,13 +48,12 @@ defmodule ZkArcade.VerifySignature do
     end
   end
 
+  # Handle all the different v possible values
   defp normalize_v(27), do: 0
   defp normalize_v(28), do: 1
   defp normalize_v(0), do: 0
   defp normalize_v(1), do: 1
   defp normalize_v(_), do: :invalid_v
-
-
 
   defp decode_signature("0x" <> hex) do
     case Base.decode16(hex, case: :mixed) do

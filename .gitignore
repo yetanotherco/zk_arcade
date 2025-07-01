@@ -23,3 +23,4 @@ pkg
 /web/_build
 /web/assets/node_modules
 /web/deps
+/web/priv/static/assets/

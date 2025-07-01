@@ -38,9 +38,9 @@ defmodule ZkArcadeWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, formats: [:html, :json]
-
-      use Gettext, backend: ZkArcadeWeb.Gettext
+      use Phoenix.Controller,
+        formats: [:html, :json],
+        layouts: [html: ZkArcadeWeb.Layouts]
 
       import Plug.Conn
 
@@ -50,7 +50,8 @@ defmodule ZkArcadeWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView
+      use Phoenix.LiveView,
+        layout: {ZkArcadeWeb.Layouts, :app}
 
       unquote(html_helpers())
     end
@@ -79,17 +80,13 @@ defmodule ZkArcadeWeb do
 
   defp html_helpers do
     quote do
-      # Translation
-      use Gettext, backend: ZkArcadeWeb.Gettext
-
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components
       import ZkArcadeWeb.CoreComponents
 
-      # Common modules used in templates
+      # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
-      alias ZkArcadeWeb.Layouts
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())

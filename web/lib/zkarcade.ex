@@ -1,3 +1,0 @@
-defmodule ZkArcade do
-
-end

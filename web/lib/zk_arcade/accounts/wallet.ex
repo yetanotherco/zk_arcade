@@ -6,16 +6,16 @@ defmodule ZkArcade.Accounts.Wallet do
   @foreign_key_type :binary_id
   schema "wallets" do
     field :address, :string
-    field :amount, :string
-    field :merkle_proof, :string
+    # field :amount, :string
+    # field :merkle_proof, :string
   end
 
   @doc false
   def changeset(wallet, attrs) do
     wallet
-    |> cast(attrs, [:address, :amount, :merkle_proof])
+    |> cast(attrs, [:address])
     |> validate_address()
-    |> validate_required([:address, :amount, :merkle_proof])
+    |> validate_required([:address])
     |> unique_constraint(:address, name: :wallets_address_index)
   end
 

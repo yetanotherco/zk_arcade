@@ -22,8 +22,6 @@ if System.get_env("PHX_SERVER") do
   config :zk_arcade, ZkArcadeWeb.Endpoint, server: true
 end
 
-config :zk_arcade, time_limit: System.get_env("CLAIM_TIME_LIMIT") || "2734912000"
-
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

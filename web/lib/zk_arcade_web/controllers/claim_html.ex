@@ -1,10 +1,10 @@
-defmodule ZkArcadeWeb.ClaimHTML do
+defmodule ZkArcadeWeb.SignHTML do
   @moduledoc """
-  This module contains pages rendered by ClaimController.
+  This module contains pages rendered by SignController.
 
-  See the `claim_html` directory for all templates available.
+  See the `sign_html` directory for all templates available.
   """
   use ZkArcadeWeb, :html
 
-  embed_templates "claim_html/*"
+  embed_templates "sign_html/*"
 end

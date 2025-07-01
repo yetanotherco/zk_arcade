@@ -21,8 +21,8 @@ defmodule ZkArcadeWeb.Router do
 
     get "/terms-conditions", PageController, :terms
 
-    get "/claim", ClaimController, :home
-    post "/claim", ClaimController, :check_claimable
+    get "/sign", SignController, :home
+    post "/sign", SignController, :connect_wallet
   end
 
   # Other scopes may use custom stacks.

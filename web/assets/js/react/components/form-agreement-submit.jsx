@@ -31,7 +31,7 @@ const FormAgreementSubmit = () => {
       <div className="pb-6">
         <ConnectKitButton />
       </div>
-      <form ref={formRef} action="/claim" method="post">
+      <form ref={formRef} action="/sign" method="post">
         <input type="hidden" name="_csrf_token" value={csrfToken} />
         <input type="hidden" name="address" value={address || ""} />
         <input type="hidden" name="signature" value={signature} />

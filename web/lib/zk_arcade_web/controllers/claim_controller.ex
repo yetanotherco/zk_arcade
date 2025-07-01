@@ -1,4 +1,4 @@
-defmodule ZkArcadeWeb.ClaimController do
+defmodule ZkArcadeWeb.SignController do
   require Logger
   use ZkArcadeWeb, :controller
   alias ZkArcade.VerifySignature
@@ -10,7 +10,7 @@ defmodule ZkArcadeWeb.ClaimController do
     render(conn, :home, layout: false)
   end
 
-  def check_claimable(conn, %{"address" => address, "signature" => sig}) do
+  def connect_wallet(conn, %{"address" => address, "signature" => sig}) do
     conn = VerifySignature.call(conn, address, sig)
 
     if conn.assigns[:error] do

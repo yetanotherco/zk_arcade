@@ -16,9 +16,13 @@
       <p>
         You have <%= inspect(@conn.assigns.wallet.points) %> points
       </p>
-      <p>
-        Your balance in Aligned is <%= inspect(@conn.assigns.wallet.balance) %> ether
-      </p>
+
+      <x-app-get-user-balance 
+        network={Application.get_env(:zk_arcade, :network)}
+        payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+        user_address={String.downcase(@conn.assigns.wallet.address)} 
+      />
+
     </div>
   <% else %>
     <div style="margin-left:auto"> 

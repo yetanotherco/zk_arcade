@@ -23,6 +23,8 @@ defmodule ZkArcadeWeb.Router do
 
     get "/sign", SignController, :home
     post "/sign", SignController, :connect_wallet
+
+    get "/disconnect", PageController, :disconnect_wallet
   end
 
   # Other scopes may use custom stacks.

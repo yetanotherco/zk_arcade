@@ -18,6 +18,12 @@ defmodule ZkArcadeWeb.PageController do
     |> render(:home, layout: false)
   end
 
+  def disconnect_wallet(conn, _params) do
+    conn
+    |> delete_session(:wallet_address)
+    |> redirect(to: ~p"/")
+  end
+
   def terms(conn, _params) do
 
     render(conn |> put_session(:step, 1), :terms_and_conditions, layout: false)

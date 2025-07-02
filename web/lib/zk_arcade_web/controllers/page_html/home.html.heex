@@ -13,6 +13,9 @@
         Address: <%= inspect(@conn.assigns.wallet.address) %>
 
       </p>
+
+      <x-app-disconnect-user network={Application.get_env(:zk_arcade, :network)}/>
+
       <p>
         You have <%= inspect(@conn.assigns.wallet.points) %> points
       </p>

@@ -56,23 +56,35 @@ function SubmitProofToBatcher() {
 
   return (
     <div>
-      <h2>Subí tus archivos de prueba:</h2>
+      <h2>Upload the required files for the groth16 proof:</h2>
 
-      <label>Archivo .proof:</label>
-      <input type="file" onChange={(e) => handleFile(e, "proof")} />
+      <div style={{padding: "8px 16px"}}>
+        <label style={{marginRight:10}}>.proof file:</label>
+        <input type="file" onChange={(e) => handleFile(e, "proof")} />
+      </div>
 
-      <label>Archivo .vk:</label>
-      <input type="file" onChange={(e) => handleFile(e, "vk")} />
+      <div style={{padding: "8px 16px"}}>
+        <label style={{marginRight:10}}>.vk file:</label>
+        <input type="file" onChange={(e) => handleFile(e, "vk")} />
+      </div>
 
-      <label>Archivo .pub:</label>
-      <input type="file" onChange={(e) => handleFile(e, "pub")} />
+      <div style={{padding: "8px 16px"}}>
+        <label style={{marginRight:10}}>.pub file:</label>
+        <input type="file" onChange={(e) => handleFile(e, "pub")} />        
+      </div>
 
-      <button onClick={handleSubmit}>Enviar a Batcher</button>
+
+      <button
+        onClick={handleSubmit}
+        style={{ border: "2px solid black", padding: "8px 16px", cursor: "pointer", marginLeft:20, marginTop:10 }}
+      >
+        Send to batcher
+      </button>
 
       <p>
         {alignedData
           ? <pre>{JSON.stringify(alignedData, null, 2)}</pre>
-          : "Esperando datos..."}
+          : ""}
       </p>
     </div>
   );

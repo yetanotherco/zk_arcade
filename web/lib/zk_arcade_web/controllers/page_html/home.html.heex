@@ -1,0 +1,23 @@
+<header class="w-full bg-white">
+  <div class="flex justify-between items-center px-2 py-2">
+    <h1 class="text-2xl md:text-3xl font-semibold">
+      Aligned ZK Arcade
+    </h1>
+  </div>
+</header>
+
+<div style="display: flex;">
+  <%= if Map.has_key?(@conn.assigns, :wallet) && @conn.assigns.wallet do %>
+    <div style="margin-left:auto"> 
+      <a href="/terms-conditions" class="md:text-xl">
+        Address: <%= inspect(@conn.assigns.wallet.address) %>
+      </a>
+    </div>
+  <% else %>
+    <div style="margin-left:auto"> 
+      <a href="/terms-conditions" class="md:text-xl">
+        Connect Wallet
+      </a>
+    </div>
+  <% end %>
+</div>

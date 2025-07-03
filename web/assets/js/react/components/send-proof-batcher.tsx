@@ -94,7 +94,7 @@ const SubmitMultiple = async (
   verificationData: VerificationData[],
   signer: (data: VerificationData) => Promise<string>
 ): Promise<AlignedVerificationData[]> => {
-  const instance = "localhost:8080"; // This is the batcher web socket address
+  const instance = "ws://localhost:8080"; // This is the batcher web socket address
   const ws = await openWebSocket(instance);
 
   let sentVerificationData: VerificationData[] = [];

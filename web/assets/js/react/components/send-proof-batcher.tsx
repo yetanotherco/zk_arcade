@@ -211,8 +211,8 @@ const SubmitMultiple = async (
     },
     nonce: nonce.toString(16),
     max_fee: maxFeePerGas.toString(16),
-    chain_id: "0x4268",
-    payment_service_addr: "0x815aeCA64a974297942D2Bbf034ABEe22a38A003",
+    chain_id: "0x7A69",
+    payment_service_addr: "0x7969c5ed335650692bc04293b07f5bf2e7a673c0",
   };
       
   const sig = await handleSign(message);

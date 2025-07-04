@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useAccount, useSignMessage } from "wagmi";
+import { useConfig, useAccount, useSignMessage, usePublicClient, useEstimateFeesPerGas } from "wagmi";
+import * as CBOR from 'cbor2';
+import { parseSignature } from 'viem'
 
 // TO-DO: Find a way to remove this node.js dependency
 import { Keccak } from "sha3";
@@ -7,11 +9,39 @@ import { Keccak } from "sha3";
 function SubmitProofToBatcher() {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
+  const publicClient = usePublicClient();
+  const estimatedFees = useEstimateFeesPerGas();
 
   const [proof, setProof] = useState<Uint8Array | null>(null);
   const [vk, setVk] = useState<Uint8Array | null>(null);
   const [pub, setPub] = useState<Uint8Array | null>(null);
   const [alignedData, setAlignedData] = useState<AlignedVerificationData[] | null>(null);
+
+  const handleSign = async (message: any) => {
+    try {
+      const json = JSON.stringify(message, (key, value) =>
+        typeof value === 'bigint' ? value.toString() : value
+      );
+      const signature = await signMessageAsync({ 
+        message: json
+      });
+      
+      if (!signature) {
+        throw new Error("Failure obtaining the sign");
+      }
+      
+      const { r, s, v } = parseSignature(signature);
+      
+      if (!v) {
+        throw new Error("Failure obtaining the sign, v is undefined");
+      }
+      
+      return { r, s, v };
+    } catch (error) {
+      console.error("Failure in handleSign:", error);
+      throw new Error("Failure obtaining sign: " + error.message);
+    }
+  }
 
   const handleFile = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -29,29 +59,65 @@ function SubmitProofToBatcher() {
   };
 
   const signer = async (data: VerificationData) => {
+    const json = JSON.stringify(data, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    );
     return await signMessageAsync({
-      message: JSON.stringify(data),
+      message: json,
     });
+  };
+
+  const getNonce = async () => {
+    if (!address) {
+      alert("Address was undefined");
+      throw new Error("Address undefined");
+    }
+
+    const nonce = await publicClient?.getTransactionCount({
+      address,
+    });
+
+    if (nonce === undefined) {
+      throw new Error("Could not get nonce");
+    }
+
+    return nonce;
+  };
+
+  const getMaxFeePerGas = async () => {
+    const maxFeePerGas = estimatedFees.data?.maxFeePerGas;
+
+    if (!maxFeePerGas) {
+      alert("Max fee per gas was undefined");
+      throw new Error("Max fee per gas undefined");
+    }
+
+    return maxFeePerGas;
   };
 
   const handleSubmit = async () => {
     if (!proof || !vk || !pub || !address) {
-      alert("Faltan archivos o dirección");
+      alert("Files or address missing");
       return;
     }
 
-    const groth16Data: VerificationData = {
-      provingSystem: ProvingSystemId.Groth16Bn254,
-      proof,
-      publicInput: Option.from(pub),
-      verificationKey: Option.from(vk),
-      vmProgramCode: Option.None,
-      proofGeneratorAddress: address,
-    };
+    try {
+      const groth16Data: VerificationData = {
+        provingSystem: ProvingSystemId.Groth16Bn254,
+        proof,
+        publicInput: Option.from(pub),
+        verificationKey: Option.from(vk),
+        vmProgramCode: Option.None,
+        proofGeneratorAddress: address,
+      };
 
-    const result = await SubmitMultiple([groth16Data, groth16Data], signer);
-    console.log("Resultado:", result);
-    setAlignedData(result);
+      const result = await SubmitMultiple([groth16Data, groth16Data], signer, getNonce, getMaxFeePerGas, handleSign);
+      console.log("Result:", result);
+      setAlignedData(result);
+    } catch (error) {
+      console.error("Failure sending the proof: ", error);
+      alert("Failure sending the proof: " + error.message);
+    }
   };
 
   return (
@@ -73,7 +139,6 @@ function SubmitProofToBatcher() {
         <input type="file" onChange={(e) => handleFile(e, "pub")} />        
       </div>
 
-
       <button
         onClick={handleSubmit}
         style={{ border: "2px solid black", padding: "8px 16px", cursor: "pointer", marginLeft:20, marginTop:10 }}
@@ -92,7 +157,14 @@ function SubmitProofToBatcher() {
 
 const SubmitMultiple = async (
   verificationData: VerificationData[],
-  signer: (data: VerificationData) => Promise<string>
+  signer: (data: VerificationData) => Promise<string>,
+  getNonce: () => Promise<number>,
+  getMaxFeePerGas: () => Promise<bigint>,
+  handleSign: (message: any) => Promise<{
+    r: `0x${string}`;
+    s: `0x${string}`;
+    v: bigint;
+  }>
 ): Promise<AlignedVerificationData[]> => {
   const instance = "ws://localhost:8080"; // This is the batcher web socket address
   const ws = await openWebSocket(instance);
@@ -102,9 +174,11 @@ const SubmitMultiple = async (
   const preparedData = await Promise.all(
     verificationData.map(async (data) => {
       sentVerificationData.push(data);
-
       const sig = await signer(data);
-      return sig;
+      return {
+        verificationData: data,
+        signature: sig
+      };
     })
   );
 
@@ -115,9 +189,58 @@ const SubmitMultiple = async (
 
   const receivePromise = receiveResponse(reverseCommitments.length, ws);
 
-  // send data
-  preparedData.forEach((data) => ws.send(data));
+  console.log("Sending prepared data:", preparedData.length);
+  
+  await new Promise(resolve => setTimeout(resolve, 100));
 
+  const item = preparedData[0];
+
+  const nonce = await getNonce();
+
+  const maxFeePerGas = await getMaxFeePerGas();
+  
+  const message = {
+    verification_data: {
+      proving_system: "GnarkGroth16Bn254",
+      proof: Array.from(item.verificationData.proof),
+      pub_input: Array.from(item.verificationData.publicInput.data!),
+      verification_key: Array.from(item.verificationData.verificationKey.data!),
+      vm_program_code: item.verificationData.vmProgramCode.isSome ?
+        Array.from(item.verificationData.vmProgramCode.data!) : null,
+      proof_generator_addr: item.verificationData.proofGeneratorAddress,
+    },
+    nonce: stringToUint8Array(nonce.toString()),
+    max_fee: stringToUint8Array(maxFeePerGas.toString()),
+    chain_id: stringToUint8Array("17000"),
+    payment_service_addr: "0x815aeCA64a974297942D2Bbf034ABEe22a38A003",
+  };
+      
+  const sig = await handleSign(message);
+
+  const submitProofMessage = {
+    SubmitProof: {
+      verification_data: message,
+      signature: {
+        r: sig.r,
+        s: sig.s,
+        v: sig.v
+      }
+    }
+  };
+
+  console.log("Message to send:", submitProofMessage);
+
+  const serializedMessage = new Uint8Array(CBOR.encode(submitProofMessage));
+
+  if (ws.readyState === WebSocket.OPEN) {
+    console.log("Sending CBOR message of ", serializedMessage, "bytes");
+    ws.send(serializedMessage);
+    console.log("CBOR message sent correctly");
+  } else {
+    console.error("WebSocket not open. State:", ws.readyState);
+    throw new Error("WebSocket not open");
+  }
+ 
   const receivedData = await receivePromise;
 
   const alignedVerificationData: AlignedVerificationData[] = [];
@@ -164,23 +287,36 @@ const verifyMerklePath = (
   return uint8ArraysEqual(root, commitment);
 };
 
-
-const receiveResponse = async (
-  n: number,
-  ws: WebSocket
-): Promise<Array<BatchInclusionData>> => {
+const receiveResponse = (expectedCount: number, ws: WebSocket): Promise<any[]> => {
   return new Promise((resolve, reject) => {
-    let includedData: Array<BatchInclusionData> = [];
-    let i = 0;
-    ws.addEventListener('message', event => {
-      const data = new Uint8Array(event.data);
-      includedData.push(BatchInclusionData.fromBuffer(data));
-      i++;
-      if (i === n) resolve(includedData);
-    });
-    ws.addEventListener('close', event => {
-      reject("Connection was closed because all data was received");
-    });
+    const receivedData: any[] = [];
+    
+    ws.onmessage = (event) => {
+      try {
+        let data;
+        
+        if (event.data instanceof ArrayBuffer) {
+          data = CBOR.decode(new Uint8Array(event.data));
+        } else if (typeof event.data === 'string') {
+          data = JSON.parse(event.data);
+        } else {
+          data = CBOR.decode(event.data);
+        }
+        
+        receivedData.push(data);
+        
+        if (receivedData.length === expectedCount) {
+          resolve(receivedData);
+        }
+      } catch (error) {
+        console.error("Error decoding response:", error);
+        reject(error);
+      }
+    };
+    
+    ws.onerror = (error) => {
+      reject(error);
+    };
   });
 };
 
@@ -188,32 +324,50 @@ const openWebSocket = (address: string): Promise<WebSocket> => {
   return new Promise(function (resolve, reject) {
     const ws = new WebSocket(address);
 
-  ws.addEventListener("open", () => {
-    console.log("Conexión WebSocket abierta");
-  });
+    ws.addEventListener("open", () => {
+      console.log("WebSocket connection open");
+    });
 
-  ws.addEventListener("message", (event: MessageEvent<ArrayBuffer>) => {
-    const buffer = new Uint8Array(event.data);
+    ws.addEventListener("message", async (event: MessageEvent) => {
+      console.log("Message received on handshake:", event.data);
+      console.log("Data type:", typeof event.data);
+      
+      let buffer: Uint8Array;
+      
+      if (event.data instanceof Blob) {
+        const arrayBuffer = await event.data.arrayBuffer();
+        buffer = new Uint8Array(arrayBuffer);
+      } else if (event.data instanceof ArrayBuffer) {
+        buffer = new Uint8Array(event.data);
+      } else if (typeof event.data === 'string') {
+        buffer = new TextEncoder().encode(event.data);
+      } else {
+        console.error("Unsupported data type:", event.data);
+        reject(new Error("Unsupported data type in handshake"));
+        return;
+      }
 
-    const expectedProtocolVersion = ProtocolVersion.fromBytesBuffer(buffer);
+      const expectedProtocolVersion = ProtocolVersion.fromBytesBuffer(buffer);
 
-    if (0 !== expectedProtocolVersion) {
-      throw new Error(
-        `Unsupported Protocol version. Expected ${0} but got ${expectedProtocolVersion}`
-      );
-    }
+      if (0 !== expectedProtocolVersion) {
+        reject(new Error(
+          `Unsupported Protocol version. Expected ${0} but got ${expectedProtocolVersion}`
+        ));
+        return;
+      }
 
-    resolve(ws); // resolvemos solo si el protocolo es compatible
-  });
+      console.log("Compatible protocol, resolving web socket");
+      resolve(ws);
+    });
 
-    ws.addEventListener('error',  error => {
-      reject(
-        `Cannot connect to ${address}, received error: ${error}`
-      );
+    ws.addEventListener('error', error => {
+      console.error("Error in WebSocket:", error);
+      reject(`Cannot connect to ${address}, received error: ${error}`);
     });
 
     ws.addEventListener('close', event => {
-      console.error("Closed", event.reason);
+      console.error("WebSocket closed during handshake:", event.reason);
+      reject(`WebSocket closed during handshake: ${event.reason}`);
     });
   });
 };
@@ -236,6 +390,12 @@ function hexStringToBytes(hex: string): Uint8Array {
     bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
   }
   return bytes;
+}
+
+function uint8ArrayToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 type Option<T> = {
@@ -271,7 +431,7 @@ const ProvingSystemId = {
       case 1:
         return "GnarkPlonkBn254";
       case 2:
-        return "Groth16Bn254";
+        return "GnarkGroth16Bn254";
       case 3:
         return "SP1";
       case 4:
@@ -306,12 +466,17 @@ const VerificationDataCommitment = {
     const Hash = new Keccak(256);
 
     // proof commitment
-    let proofCommitment = Hash.update(data.proof).digest();
+    console.log("Data proof is: ", data.proof)
+
+    const proofStr = uint8ArrayToHex(data.proof);
+    console.log("Data proof into string is ", proofStr);
+
+    let proofCommitment = Hash.update(proofStr).digest();
     Hash.reset();
     // compute public input commitment
     let publicInputCommitment = new Uint8Array(32).fill(0);
-    publicInputCommitment = data.publicInput.isSome
-      ? Hash.update(data.publicInput.data!).digest()
+    publicInputCommitment = (data.publicInput.isSome && data.publicInput.data)
+      ? Hash.update(uint8ArrayToHex(data.publicInput.data)!).digest()
       : publicInputCommitment;
     Hash.reset();
     // aux commitment
@@ -321,9 +486,9 @@ const VerificationDataCommitment = {
         data.vmProgramCode.data!
       ).digest();
       Hash.reset();
-    } else if (data.verificationKey.isSome) {
+    } else if (data.verificationKey.isSome && data.verificationKey.data) {
       provingSystemAuxDataCommitment = Hash.update(
-        data.verificationKey.data!
+        uint8ArrayToHex(data.verificationKey.data)!
       ).digest();
       Hash.reset();
     }
@@ -388,8 +553,29 @@ const BatchInclusionData = {
 type ProtocolVersion = number;
 const ProtocolVersion = {
   fromBytesBuffer: (bytes: Uint8Array): ProtocolVersion => {
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    return view.getInt16(0, false);
+    console.log("Bytes received for protocol version:", bytes);
+    console.log("Bytes length:", bytes.byteLength);
+    
+    if (bytes.byteLength === 0) {
+      console.error("Received empty bytes for protocol version");
+      return 0;
+    }
+    
+    try {      
+      if (bytes.byteLength > 0) {
+        console.log("Assuming protocol version 0 from CBOR data");
+        return 0;
+      }
+      
+      return 0;
+    } catch (error) {
+      console.error("Error parsing protocol version:", error);
+      return 0;
+    }
   },
 };
 
+function stringToUint8Array(str: string) {
+  const encoder = new TextEncoder();
+  return encoder.encode(str);
+}

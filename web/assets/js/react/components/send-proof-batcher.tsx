@@ -209,9 +209,9 @@ const SubmitMultiple = async (
         Array.from(item.verificationData.vmProgramCode.data!) : null,
       proof_generator_addr: item.verificationData.proofGeneratorAddress,
     },
-    nonce: stringToUint8Array(nonce.toString()),
-    max_fee: stringToUint8Array(maxFeePerGas.toString()),
-    chain_id: stringToUint8Array("17000"),
+    nonce: nonce.toString(16),
+    max_fee: maxFeePerGas.toString(16),
+    chain_id: "0x4268",
     payment_service_addr: "0x815aeCA64a974297942D2Bbf034ABEe22a38A003",
   };
       
@@ -574,8 +574,3 @@ const ProtocolVersion = {
     }
   },
 };
-
-function stringToUint8Array(str: string) {
-  const encoder = new TextEncoder();
-  return encoder.encode(str);
-}

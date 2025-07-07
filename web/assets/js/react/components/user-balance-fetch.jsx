@@ -20,7 +20,7 @@ const UserBalanceFetch = ({ contract_address, user_address }) => {
     ],
     functionName: "user_balances",
     args: [user_address],
-    chainId: 17000,
+    chainId: 31337,
   });
 
   if (isLoading) return <div>Loading user balance...</div>

@@ -8,6 +8,10 @@
         {@conn.assigns.error} :(
       </div>
     <% else %>
-      <x-app-submit-proof-batcher network={Application.get_env(:zk_arcade, :network)}/>
+      <x-app-submit-proof-batcher 
+        network={Application.get_env(:zk_arcade, :network)}
+        payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+        user_address={String.downcase(@conn.assigns.wallet.address)} 
+      />
     <% end %>
 </div>

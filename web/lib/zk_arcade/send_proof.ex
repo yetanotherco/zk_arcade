@@ -88,8 +88,8 @@ defmodule ZkArcade.SendProof do
           },
           "nonce" => submit_proof_message["verificationData"]["nonce"],
           "max_fee" => submit_proof_message["verificationData"]["maxFee"],
-          "chain_id" => submit_proof_message["verificationData"]["chainId"],
-          "payment_service_addr" => submit_proof_message["verificationData"]["paymentServiceAddr"]
+          "chain_id" => submit_proof_message["verificationData"]["chain_id"],
+          "payment_service_addr" => submit_proof_message["verificationData"]["payment_service_addr"]
         },
         "signature" => %{
           "r" => submit_proof_message["signature"]["r"],

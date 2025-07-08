@@ -3,6 +3,7 @@ defmodule ZkArcadeWeb.ProofController do
   use ZkArcadeWeb, :controller
 
   alias ZkArcade.SendProof
+  alias ZkArcade.Proofs
 
   def home(conn, _params) do
     render(conn, :home, layout: false)
@@ -23,7 +24,24 @@ defmodule ZkArcadeWeb.ProofController do
       case SendProof.call(verification_data, signature, address) do
         :ok ->
           # Insert the entry to the database
-          conn
+          proof_params = %{
+            verification_data: verification_data,
+            wallet_address: address
+          }
+
+          case Proofs.create_proof(proof_params) do
+            {:ok, proof} ->
+              Logger.info("Proof saved successfully with ID: #{proof.id}")
+              conn
+              |> put_flash(:info, "Proof submitted and saved successfully!")
+              |> redirect(to: "/")
+
+            {:error, changeset} ->
+              Logger.error("Failed to save proof: #{inspect(changeset)}")
+              conn
+              |> put_flash(:error, "Proof submitted but failed to save to database")
+              |> redirect(to: "/")
+          end
 
         {:error, reason} ->
           Logger.error("SendProof failed: #{inspect(reason)}")

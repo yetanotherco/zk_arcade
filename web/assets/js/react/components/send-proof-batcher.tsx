@@ -4,6 +4,7 @@ import { NoncedVerificationdata, VerificationData } from "../types/aligned";
 import { useAligned } from "../hooks/useAligned";
 import { useBatcherPaymentService } from "../hooks/useBatcherPaymentService";
 import { Address, toHex } from "viem";
+import { useChainId } from "wagmi";
 
 type Args = {
 	batcherPaymentServiceAddress: Address;
@@ -15,6 +16,7 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 	const [vk, setVk] = useState<Uint8Array | null>(null);
 	const [pub, setPub] = useState<Uint8Array | null>(null);
 
+	const chainId = useChainId();
 	const { signVerificationData, estimateMaxFeeForBatchOfProofs } =
 		useAligned();
 	const {
@@ -68,7 +70,11 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 			);
 
 			const submitProofMsg = JSON.stringify({
-				verificationData: noncedVerificationData,
+				verificationData: {
+					...noncedVerificationData,
+					chain_id: toHex(chainId, { size: 32 }),
+					payment_service_addr: batcherPaymentServiceAddress,
+				},
 				signature: {
 					r,
 					s,

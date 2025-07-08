@@ -15,13 +15,13 @@ export const batcherPaymentServiceAbi = [
 	},
 ];
 
-export const eip712Domain = {
+export const eip712Domain = (chainId: number) => ({
 	name: "Aligned",
 	version: "1",
-	chainId: 31337,
+	chainId,
 	verifyingContract:
 		"0x7969c5eD335650692Bc04293B07F5BF2e7A673C0" as `0x${string}`,
-} as const;
+});
 
 export const eip712Types = {
 	NoncedVerificationData: [

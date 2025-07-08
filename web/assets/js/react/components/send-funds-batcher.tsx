@@ -7,7 +7,7 @@ type Props = {
 	contract_address: Address;
 };
 
-function SendFundsToContract({ contract_address }) {
+function SendFundsToContract({ contract_address }: Props) {
 	const [amount, setAmount] = useState("");
 	const [showForm, setShowForm] = useState(false);
 

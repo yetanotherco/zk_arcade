@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { useReadContract } from "wagmi";
+import { useChainId, useReadContract } from "wagmi";
 import { batcherPaymentServiceAbi } from "../constants/aligned";
 
 type Args = {
@@ -11,12 +11,14 @@ export const useBatcherPaymentService = ({
 	contractAddress,
 	userAddress,
 }: Args) => {
+	const chainId = useChainId();
+
 	const { ...balanceFetchData } = useReadContract({
 		address: contractAddress,
 		abi: batcherPaymentServiceAbi,
 		functionName: "user_balances",
 		args: [userAddress],
-		chainId: 31337,
+		chainId,
 	});
 
 	const { ...nonceFetchData } = useReadContract({
@@ -24,7 +26,7 @@ export const useBatcherPaymentService = ({
 		abi: batcherPaymentServiceAbi,
 		functionName: "user_nonces",
 		args: [userAddress],
-		chainId: 31337,
+		chainId,
 	});
 
 	return {

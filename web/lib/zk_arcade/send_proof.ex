@@ -2,7 +2,7 @@ defmodule ZkArcade.SendProof do
   require Logger
   require CBOR
 
-  def call(verification_data, signature, address) do
+  def call(submit_proof_message, address) do
     {:ok, conn_pid} = :gun.open({0, 0, 0, 0, 0, 0, 0, 1}, 8080)
     {:ok, _protocol} = :gun.await_up(conn_pid)
 
@@ -12,7 +12,9 @@ defmodule ZkArcade.SendProof do
       {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
         Logger.info("WebSocket upgrade successful!")
 
-        message = build_submit_proof_message(verification_data, signature, address)
+        message = build_submit_proof_message(submit_proof_message, address)
+        Logger.info("Built message is #{inspect(message)}")
+
         binary = CBOR.encode(message)
         Logger.debug("Message : #{binary}")
 
@@ -70,37 +72,47 @@ defmodule ZkArcade.SendProof do
     end
   end
 
-  defp build_submit_proof_message(verification_data, signature, _address) do
+  defp build_submit_proof_message(submit_proof_message, _address) do
+    verification_data = submit_proof_message["verificationData"]["verificationData"]
+
     %{
       "SubmitProof" => %{
         "verification_data" => %{
           "verification_data" => %{
-            "proving_system" => verification_data["verification_data"]["proving_system"],
-            "proof" => map_to_uint8_array(verification_data["verification_data"]["proof"]),
-            "pub_input" => map_to_uint8_array(verification_data["verification_data"]["pub_input"]),
-            "verification_key" => map_to_uint8_array(verification_data["verification_data"]["verification_key"]),
-            "vm_program_code" => verification_data["verification_data"]["vm_program_code"],
-            "proof_generator_addr" => verification_data["verification_data"]["proof_generator_addr"]
+            "proving_system" => verification_data["provingSystem"],
+            "proof" => map_to_uint8_array(verification_data["proof"]),
+            "pub_input" => map_to_uint8_array(verification_data["publicInput"]),
+            "verification_key" => map_to_uint8_array(verification_data["verificationKey"]),
+            "vm_program_code" => verification_data["vmProgramCode"],
+            "proof_generator_addr" => verification_data["proofGeneratorAddress"]
           },
-          "nonce" => verification_data["nonce"],
-          "max_fee" => verification_data["max_fee"],
-          "chain_id" => verification_data["chain_id"],
-          "payment_service_addr" => verification_data["payment_service_addr"]
+          "nonce" => submit_proof_message["verificationData"]["nonce"],
+          "max_fee" => submit_proof_message["verificationData"]["maxFee"],
+          "chain_id" => submit_proof_message["verificationData"]["chainId"],
+          "payment_service_addr" => submit_proof_message["verificationData"]["paymentServiceAddr"]
         },
         "signature" => %{
-          "r" => signature["r"],
-          "s" => signature["s"],
-          "v" => parse_bigint(signature["v"])
+          "r" => submit_proof_message["signature"]["r"],
+          "s" => submit_proof_message["signature"]["s"],
+          "v" => parse_bigint(submit_proof_message["signature"]["v"])
         }
       }
     }
   end
 
   defp map_to_uint8_array(index_map) when is_map(index_map) do
-    index_map
-    |> Enum.map(fn {k, v} -> {String.to_integer(k), v} end)
-    |> Enum.sort_by(fn {index, _} -> index end)
-    |> Enum.map(fn {_, value} -> value end)
+    indexed_values =
+      index_map
+      |> Enum.map(fn {k, v} -> {String.to_integer(k), v} end)
+      |> Enum.into(%{})
+
+
+    max_index = indexed_values |> Map.keys() |> Enum.max()
+
+    0..max_index
+    |> Enum.map(fn index ->
+      Map.get(indexed_values, index, 0)
+    end)
   end
 
   defp map_to_uint8_array(nil), do: nil

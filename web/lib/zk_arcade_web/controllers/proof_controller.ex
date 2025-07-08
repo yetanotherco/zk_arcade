@@ -22,19 +22,16 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   def submit(conn, %{
-        "verification_data" => verification_data_json,
-        "signature" => signature_json,
+        "submit_proof_message" => submit_proof_message_json,
         "address" => address,
       }) do
-    with {:ok, verification_data} <- Jason.decode(verification_data_json),
-         {:ok, signature} <- Jason.decode(signature_json) do
-      Logger.info("Received verification_data: #{inspect(verification_data)}")
-      Logger.info("Received signature: #{inspect(signature)}")
+    with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
+      Logger.info("Received submit_proof_message: #{inspect(submit_proof_message)}")
       Logger.info("Received address: #{inspect(address)}")
 
       # Web socket communication
-      case SendProof.call(verification_data, signature, address) do
-        :ok ->
+      case SendProof.call(submit_proof_message, address) do
+        {:ok, verification_data} ->
           # Insert the entry to the database
           proof_params = %{
             verification_data: verification_data,

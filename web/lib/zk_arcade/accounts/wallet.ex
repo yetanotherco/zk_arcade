@@ -12,7 +12,7 @@ defmodule ZkArcade.Accounts.Wallet do
 
     has_many :proofs, ZkArcade.Proofs.Proof, foreign_key: :wallet_address, references: :address
 
-    timestamps()
+    # timestamps()
   end
 
   @doc false

@@ -1,6 +1,6 @@
 import React from "react";
 import Web3EthProvider from "./components/web3-eth-provider";
-import SubmitProofToBatcher from "./components/send-proof-batcher";
+import SubmitProof from "./components/send-proof-batcher";
 import { Address } from "./types/blockchain";
 
 type Props = {
@@ -9,10 +9,10 @@ type Props = {
 	user_address: Address;
 };
 
-const AppSubmitProofToBatcher = (props: Props) => {
+const AppSubmitProof = (props: Props) => {
 	return (
 		<Web3EthProvider network={props.network}>
-			<SubmitProofToBatcher
+			<SubmitProof
 				batcherPaymentServiceAddress={props.payment_service_address}
 				userAddress={props.user_address}
 				{...props}
@@ -21,4 +21,4 @@ const AppSubmitProofToBatcher = (props: Props) => {
 	);
 };
 
-export default AppSubmitProofToBatcher;
+export default AppSubmitProof;

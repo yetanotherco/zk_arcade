@@ -9,6 +9,10 @@ defmodule ZkArcade.Accounts.Wallet do
     field :points, :integer, default: 0
     field :balance, :float, default: 0.0
     # TODO: Add the required fields to use in wallets
+
+    has_many :proofs, ZkArcade.Proofs.Proof, foreign_key: :wallet_address, references: :address
+
+    timestamps()
   end
 
   @doc false

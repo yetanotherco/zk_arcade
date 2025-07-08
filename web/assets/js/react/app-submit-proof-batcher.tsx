@@ -4,21 +4,21 @@ import SubmitProofToBatcher from "./components/send-proof-batcher";
 import { Address } from "./types/blockchain";
 
 type Props = {
-    network: string;
-    payment_service_address: Address;
-    user_address: Address;
+	network: string;
+	payment_service_address: Address;
+	user_address: Address;
 };
 
 const AppSubmitProofToBatcher = (props: Props) => {
-    return (
-        <Web3EthProvider network={props.network}>
-            <SubmitProofToBatcher
-                batcherPaymentServiceAddress={props.payment_service_address}
-                userAddress={props.user_address}
-                {...props}
-            />
-        </Web3EthProvider>
-    );
+	return (
+		<Web3EthProvider network={props.network}>
+			<SubmitProofToBatcher
+				batcherPaymentServiceAddress={props.payment_service_address}
+				userAddress={props.user_address}
+				{...props}
+			/>
+		</Web3EthProvider>
+	);
 };
 
 export default AppSubmitProofToBatcher;

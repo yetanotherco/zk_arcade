@@ -6,26 +6,26 @@ import AppSendFundsToBatcher from "./app-send-funds-batcher";
 import AppSubmitProofToBatcher from "./app-submit-proof-batcher";
 
 define(
-    { "x-app-agreement-submit": AppAgreementSubmit },
-    { attributes: ["network"] }
+	{ "x-app-agreement-submit": AppAgreementSubmit },
+	{ attributes: ["network"] }
 );
 
 define(
-    { "x-app-get-user-balance": AppGetUserBalance },
-    { attributes: ["network", "payment_service_address", "user_address"] }
+	{ "x-app-get-user-balance": AppGetUserBalance },
+	{ attributes: ["network", "payment_service_address", "user_address"] }
 );
 
 define(
-    { "x-app-disconnect-user": AppDisconnectUser },
-    { attributes: ["network"] }
+	{ "x-app-disconnect-user": AppDisconnectUser },
+	{ attributes: ["network"] }
 );
 
 define(
-    { "x-app-send-funds-batcher": AppSendFundsToBatcher },
-    { attributes: ["network", "payment_service_address"] }
+	{ "x-app-send-funds-batcher": AppSendFundsToBatcher },
+	{ attributes: ["network", "payment_service_address"] }
 );
 
 define(
-    { "x-app-submit-proof-batcher": AppSubmitProofToBatcher },
-    { attributes: ["network", "payment_service_address", "user_address"] }
+	{ "x-app-submit-proof-batcher": AppSubmitProofToBatcher },
+	{ attributes: ["network", "payment_service_address", "user_address"] }
 );

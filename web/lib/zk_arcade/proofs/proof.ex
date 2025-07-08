@@ -71,7 +71,8 @@ defmodule ZkArcade.Proofs do
 
   """
   def get_proofs_by_address(address) do
-    from(p in Proof, where: p.wallet_address == ^address)
+    downcased_addr = String.downcase(address)
+    from(p in Proof, where: p.wallet_address == ^downcased_addr)
     |> Repo.all()
   end
 
@@ -88,7 +89,7 @@ defmodule ZkArcade.Proofs do
 
   """
   def create_proof(attrs \\ %{}) do
-    with {:ok, wallet} <- ensure_wallet_exists(attrs["wallet_address"] || attrs[:wallet_address]) do
+    with {:ok, _wallet} <- get_or_create_wallet(attrs["wallet_address"] || attrs[:wallet_address]) do
       %Proof{}
       |> Proof.changeset(attrs)
       |> Repo.insert()
@@ -124,7 +125,7 @@ defmodule ZkArcade.Proofs do
     Proof.changeset(proof, attrs)
   end
 
-  defp ensure_wallet_exists(address) when is_binary(address) do
+  defp get_or_create_wallet(address) when is_binary(address) do
     case Accounts.fetch_wallet_by_address(address) do
       {:ok, wallet} ->
         {:ok, wallet}
@@ -136,5 +137,5 @@ defmodule ZkArcade.Proofs do
     end
   end
 
-  defp ensure_wallet_exists(_), do: {:error, :invalid_address}
+  defp get_or_create_wallet(_), do: {:error, :invalid_address}
 end

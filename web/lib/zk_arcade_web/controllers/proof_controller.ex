@@ -31,11 +31,12 @@ defmodule ZkArcadeWeb.ProofController do
 
       # Web socket communication
       case SendProof.call(submit_proof_message, address) do
-        {:ok, verification_data} ->
+        {:ok, {:batch_inclusion, batch_data}} ->
           # Insert the entry to the database
           proof_params = %{
-            verification_data: verification_data,
-            wallet_address: address
+            batch_data: batch_data,
+            wallet_address: address,
+            verification_data: submit_proof_message["verificationData"]
           }
 
           case Proofs.create_proof(proof_params) do

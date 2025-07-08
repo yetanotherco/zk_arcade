@@ -1,4 +1,3 @@
-# Esquema para los Proofs
 defmodule ZkArcade.Proofs.Proof do
   use Ecto.Schema
   import Ecto.Changeset
@@ -8,6 +7,7 @@ defmodule ZkArcade.Proofs.Proof do
   @foreign_key_type :binary_id
   schema "proofs" do
     field :verification_data, :map
+    field :batch_data, :map
     belongs_to :wallet, Wallet, foreign_key: :wallet_address, references: :address, type: :string
 
     timestamps()

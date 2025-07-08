@@ -5,54 +5,45 @@ defmodule ZkArcade.SendProof do
   def call(submit_proof_message, address) do
     {:ok, conn_pid} = :gun.open({0, 0, 0, 0, 0, 0, 0, 1}, 8080)
     {:ok, _protocol} = :gun.await_up(conn_pid)
-
     stream_ref = :gun.ws_upgrade(conn_pid, "/")
 
     receive do
       {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
         Logger.info("WebSocket upgrade successful!")
-
         message = build_submit_proof_message(submit_proof_message, address)
         Logger.info("Built message is #{inspect(message)}")
-
         binary = CBOR.encode(message)
-        Logger.debug("Message : #{binary}")
+        Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
 
         :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
-        :gun.ws_send(conn_pid, stream_ref, {:text, "This is the proof data"})
 
         handle_websocket_messages(conn_pid, stream_ref)
 
       {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
         Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
+        :gun.close(conn_pid)
         {:error, :upgrade_failed}
+    after
+      25_000 ->
+        Logger.error("Timeout during WebSocket upgrade")
+        :gun.close(conn_pid)
+        {:error, :upgrade_timeout}
     end
   end
 
   defp handle_websocket_messages(conn_pid, stream_ref) do
     receive do
       {:gun_ws, ^conn_pid, ^stream_ref, {:binary, msg}} ->
-        {:ok, decoded, _rest} = CBOR.decode(msg)
-        Logger.info("Received from server (binary): #{inspect(decoded)}")
+        case CBOR.decode(msg) do
+          {:ok, decoded, _rest} ->
+            Logger.info("Received from server (binary): #{inspect(decoded)}")
+            handle_server_message(decoded, conn_pid, stream_ref)
 
-        case decoded do
-          %{"ProtocolVersion" => _version} ->
-            Logger.info("Protocol version confirmed, waiting for a response to the Submit message")
-            handle_websocket_messages(conn_pid, stream_ref)
-
-          %{"InsufficientBalance" => address} ->
-            Logger.error("Insufficient balance for address #{address}")
+          {:error, reason} ->
+            Logger.error("Failed to decode CBOR message: #{inspect(reason)}")
+            Logger.error("Raw message: #{inspect(msg)}")
             :gun.close(conn_pid)
-            {:error, :insufficient_balance}
-
-          %{"Success" => _} ->
-            Logger.info("Proof submitted successfully")
-            :gun.close(conn_pid)
-            :ok
-
-          other ->
-            Logger.error("Mensaje not recognized: #{inspect(other)}")
-            {:error, :not_recognized}
+            {:error, :decode_error}
         end
 
       {:gun_ws, ^conn_pid, ^stream_ref, {:close, code, reason}} ->
@@ -64,11 +55,41 @@ defmodule ZkArcade.SendProof do
         Logger.info("Connection closed by the other side")
         {:error, :connection_down}
 
+      {:gun_error, ^conn_pid, ^stream_ref, reason} ->
+        Logger.error("WebSocket error: #{inspect(reason)}")
+        :gun.close(conn_pid)
+        {:error, :websocket_error}
+
     after
-      300_000 ->
-        Logger.warn("Timeout waiting for WebSocket response")
+      50_000 ->
+        Logger.error("Timeout waiting for WebSocket response")
         :gun.close(conn_pid)
         {:error, :timeout}
+    end
+  end
+
+  defp handle_server_message(decoded, conn_pid, stream_ref) do
+    case decoded do
+      %{"ProtocolVersion" => version} ->
+        Logger.info("Protocol version confirmed: #{version}, waiting for response to Submit message")
+        handle_websocket_messages(conn_pid, stream_ref)
+
+      %{"BatchInclusionData" => batch_data} ->
+        Logger.info("Proof submitted successfully - BatchInclusionData: #{inspect(batch_data)}")
+        :gun.close(conn_pid)
+        {:ok, {:batch_inclusion, batch_data}}
+
+      %{"InsufficientBalance" => address} ->
+        Logger.error("Insufficient balance for address #{address}")
+        :gun.close(conn_pid)
+        {:error, {:insufficient_balance, address}}
+
+      # There can be more error messages from the batcher, but they will enter on the other clause
+      other ->
+        Logger.error("Unrecognized message from batcher: #{inspect(other)}")
+        Logger.error("This might be a new message type or encoding issue")
+        :gun.close(conn_pid)
+        {:error, {:unrecognized_message, other}}
     end
   end
 
@@ -105,7 +126,6 @@ defmodule ZkArcade.SendProof do
       index_map
       |> Enum.map(fn {k, v} -> {String.to_integer(k), v} end)
       |> Enum.into(%{})
-
 
     max_index = indexed_values |> Map.keys() |> Enum.max()
 

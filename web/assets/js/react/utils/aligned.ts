@@ -31,7 +31,10 @@ export const computeVerificationDataCommitment = (
 		hasher.update(Buffer.from(provingSystemByte));
 		provingSystemAuxDataCommitment = hasher.digest();
 	}
-	const proofGeneratorAddress = verificationData.proofGeneratorAddress;
+
+	const proofGeneratorAddress = Buffer.from(
+		hexStringToBytes(verificationData.proofGeneratorAddress)
+	);
 
 	hasher.reset();
 	hasher.update(proofCommitment);
@@ -43,3 +46,13 @@ export const computeVerificationDataCommitment = (
 
 	return commitmentDigest;
 };
+
+function hexStringToBytes(hex: string): Uint8Array {
+	if (hex.startsWith("0x")) hex = hex.slice(2);
+	if (hex.length % 2 !== 0) throw new Error("Invalid hex string");
+	const bytes = new Uint8Array(hex.length / 2);
+	for (let i = 0; i < bytes.length; i++) {
+		bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+	}
+	return bytes;
+}

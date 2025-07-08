@@ -28,6 +28,7 @@
       <x-app-send-funds-batcher 
         network={Application.get_env(:zk_arcade, :network)}
         payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+        user_address={String.downcase(@conn.assigns.wallet.address)} 
       />
     </div>
   <% else %>
@@ -41,7 +42,7 @@
 
 <%= if Map.has_key?(@conn.assigns, :wallet) && @conn.assigns.wallet do %>
   <div class="flex justify-center align-center">
-    <a href="/submit-proof" style="border: 2px solid black; padding: 8px 16px;"> Submit Proofs! </a>
+    <.link navigate={~p"/submit-proof"} style="border: 2px solid black; padding: 8px 16px;"> Submit Proofs! </.link>
   </div>
 <% end %>
 

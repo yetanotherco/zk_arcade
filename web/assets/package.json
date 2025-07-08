@@ -7,10 +7,13 @@
         "react-dom": "^18.3.1",
         "remount": "^1.0.0",
         "viem": "^2.21.55",
-        "wagmi": "^2.14.3"
+        "wagmi": "^2.14.3",
+        "cbor2": "^2.0.1",
+        "sha3": "^2.1.4"
     },
     "devDependencies": {
         "@types/react": "^18.3.14",
-        "@types/react-dom": "^18.3.2"
+        "@types/react-dom": "^18.3.2",
+        "@types/node": "^24.0.10"
     }
 }

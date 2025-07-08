@@ -65,7 +65,7 @@ defmodule ZkArcade.SendProof do
         {:error, :connection_down}
 
     after
-      30_000 ->
+      300_000 ->
         Logger.warn("Timeout waiting for WebSocket response")
         :gun.close(conn_pid)
         {:error, :timeout}

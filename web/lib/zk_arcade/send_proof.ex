@@ -3,7 +3,8 @@ defmodule ZkArcade.SendProof do
   require CBOR
 
   def call(submit_proof_message, address) do
-    {:ok, conn_pid} = :gun.open({0, 0, 0, 0, 0, 0, 0, 1}, 8080)
+    # TODO: Handle both ipv4 and ipv6
+    {:ok, conn_pid} = :gun.open('localhost', 8080)
     {:ok, _protocol} = :gun.await_up(conn_pid)
     stream_ref = :gun.ws_upgrade(conn_pid, "/")
 

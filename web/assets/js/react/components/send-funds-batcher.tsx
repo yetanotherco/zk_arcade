@@ -97,7 +97,7 @@ function SendFundsToContract({ contract_address }: Props) {
 								id="amount"
 								type="number"
 								defaultValue={0.001}
-								step="0.001"
+								step="0.0001"
 								onChange={e => setAmount(e.target.value)}
 								style={{
 									padding: "8px",

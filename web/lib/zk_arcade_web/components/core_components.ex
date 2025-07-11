@@ -16,4 +16,42 @@ defmodule ZkArcadeWeb.CoreComponents do
   """
   use Phoenix.Component
 
+  defp classes(list) when is_list(list) do
+    list
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  def icon(%{name: "hero-" <> _} = assigns) do
+    ~H"""
+    <span class={classes([@name, @class])} />
+    """
+  end
+
+  def nav(assigns) do
+    ~H"""
+      <nav class="w-full flex justify-between items-center">
+        <div>
+          <h1 class="text-xl">
+            ZK Arcade
+          </h1>
+          <p class="tex-md text-accent-100">
+            Powered by ALIGNED
+          </p>
+        </div>
+
+        <div>
+          <%!-- TODO: react component here --%>
+          <div class="bg-contrast-100 p-1 rounded flex justify-between items-center" style="width: 200px">
+            <div>
+              <p class="text-xs">Connected:</p>
+              <p class="font-bold text-md">0x032...3211</p>
+            </div>
+            <.icon name="hero-chevron-down" class="size-3;5" />
+          </div>
+        </div>
+      </nav>
+    """
+  end
+
 end

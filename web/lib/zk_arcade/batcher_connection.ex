@@ -3,7 +3,7 @@ defmodule ZkArcade.BatcherConnection do
   require CBOR
 
   def send_submit_proof_message(submit_proof_message, address) do
-    {:ok, conn_pid} = :gun.open('localhost', 8080)
+    {:ok, conn_pid} = :gun.open(~c"localhost", 8080)
 
     conn_pid =
       case :gun.await_up(conn_pid) do

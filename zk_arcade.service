@@ -1,0 +1,16 @@
+[Unit]
+Description=ZkArcade
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/app/zk-arcade/
+EnvironmentFile=/home/app/config/.env.zk_arcade
+ExecStart=/home/app/zk-arcade/_build/prod/rel/zk-arcade/bin/zk-arcade start
+Restart=always
+RestartSec=1
+StartLimitBurst=100
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target

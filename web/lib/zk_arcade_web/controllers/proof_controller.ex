@@ -26,13 +26,26 @@ defmodule ZkArcadeWeb.ProofController do
         "address" => address,
       }) do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
-      Logger.info("Received submit_proof_message: #{inspect(submit_proof_message)}")
-      Logger.info("Received address: #{inspect(address)}")
+        Logger.info("Message decoding succesful, sending message on an async task.")
+        Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
+          submit_to_batcher(submit_proof_message, address)
+        end)
 
-      # Web socket communication
+        conn
+        |> put_flash(:info, "Proof is being submitted to batcher on an async task.")
+        |> redirect(to: "/")
+    else
+      error ->
+        Logger.error("Input validation failed: #{inspect(error)}")
+        conn
+        |> put_flash(:error, "Invalid input: #{inspect(error)}")
+        |> redirect(to: "/")
+    end
+  end
+
+  defp submit_to_batcher(submit_proof_message, address) do
       case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
         {:ok, {:batch_inclusion, batch_data}} ->
-          # Insert the entry to the database
           proof_params = %{
             batch_data: batch_data,
             wallet_address: address,
@@ -42,30 +55,13 @@ defmodule ZkArcadeWeb.ProofController do
           case Proofs.create_proof(proof_params) do
             {:ok, proof} ->
               Logger.info("Proof saved successfully with ID: #{proof.id}")
-              conn
-              |> put_flash(:info, "Proof submitted and saved successfully!")
-              |> redirect(to: "/")
 
             {:error, changeset} ->
               Logger.error("Failed to save proof: #{inspect(changeset)}")
-              conn
-              |> put_flash(:error, "Proof submitted but failed to save to database")
-              |> redirect(to: "/")
           end
 
         {:error, reason} ->
           Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-          conn
-          |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-          |> redirect(to: "/")
       end
-    else
-      error ->
-        Logger.error("Error decoding JSON: #{inspect(error)}")
-
-        conn
-        |> put_flash(:error, "Invalid data received")
-        |> redirect(to: "/")
-    end
   end
 end

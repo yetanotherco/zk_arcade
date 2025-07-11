@@ -1,4 +1,4 @@
-# ZK-arcade
+# ZK_Arcade
 
 Zk arcade repo
 
@@ -14,8 +14,8 @@ As admin user, run:
 
 ```
 cd /tmp
-git clone git@github.com:yetanotherco/zk-arcade.git
-cd zk-arcade
+git clone git@github.com:yetanotherco/zk_arcade.git
+cd zk_arcade
 make debian_deps DB_PASSWORD=<>
 make release
 make release_install
@@ -26,7 +26,7 @@ As app user, run:
 1. `cd` to the repo
 
   ```
-  cd zk-arcade
+  cd zk_arcade
   ```
 
 2. Generate a SECRET_KEY_BASE with:
@@ -54,8 +54,8 @@ As admin user, run:
 
 ```
 cd /tmp
-git clone git@github.com:yetanotherco/zk-arcade.git
-cd zk-arcade
+git clone git@github.com:yetanotherco/zk_arcade.git
+cd zk_arcade
 make release
 make release install
 ```

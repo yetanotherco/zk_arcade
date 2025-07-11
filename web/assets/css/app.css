@@ -28,8 +28,12 @@ ul {
 	padding: 0 1.2rem;
 }
 
-section {
+.section-spacer-lg {
 	margin-bottom: 150px;
+}
+
+.section-spacer-md {
+	margin-bottom: 70px;
 }
 
 #gradient-bg {

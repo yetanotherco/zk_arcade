@@ -31,14 +31,14 @@ defmodule ZkArcadeWeb.CoreComponents do
   def nav(assigns) do
     ~H"""
       <nav class="w-full flex justify-between items-center">
-        <div>
-          <h1 class="text-xl">
-            ZK Arcade
-          </h1>
-          <p class="tex-md text-accent-100">
-            Powered by ALIGNED
-          </p>
-        </div>
+          <.link href="/">
+            <h1 class="text-xl">
+              ZK Arcade
+            </h1>
+            <p class="tex-md text-accent-100">
+              Powered by ALIGNED
+            </p>
+          </.link>
 
         <div>
           <%!-- TODO: react component here --%>
@@ -69,17 +69,19 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def home_game_component(%{title: title, desc: desc, img: img} = assigns) do
+  def home_game_component(%{title: title, desc: desc, img: img, link: link} = assigns) do
     ~H"""
-    <div class="cursor-pointer group">
-      <img class="rounded mb-5 w-full" src={@img} width={280} height={180} />
-      <div>
-        <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
-          <%= @title %>
-        </h3>
-        <p class="text-md text-text-200"><%= @desc %></p>
+    <.link href={@link}>
+      <div class="cursor-pointer group">
+        <img class="rounded mb-5 w-full" src={@img} width={280} height={180} />
+        <div>
+          <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
+            <%= @title %>
+          </h3>
+          <p class="text-md text-text-200"><%= @desc %></p>
+        </div>
       </div>
-    </div>
+    </.link>
     """
   end
 

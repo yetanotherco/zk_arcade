@@ -22,7 +22,6 @@ defmodule ZkArcade.BatcherConnection do
       {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
         Logger.info("WebSocket upgrade successful!")
         message = build_submit_proof_message(submit_proof_message, address)
-        Logger.info("Built message is #{inspect(message)}")
         binary = CBOR.encode(message)
         Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
 
@@ -98,7 +97,6 @@ defmodule ZkArcade.BatcherConnection do
       # There can be more error messages from the batcher, but they will enter on the other clause
       other ->
         Logger.error("Unrecognized message from batcher: #{inspect(other)}")
-        Logger.error("This might be a new message type or encoding issue")
         :gun.close(conn_pid)
         {:error, {:unrecognized_message, other}}
     end

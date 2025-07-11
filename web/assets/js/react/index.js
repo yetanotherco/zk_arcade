@@ -4,6 +4,7 @@ import AppGetUserBalance from "./app-get-user-balance";
 import AppDisconnectUser from "./app-user-disconnect";
 import AppSendFundsToBatcher from "./app-send-funds-batcher";
 import AppSubmitProof from "./app-submit-proof-batcher";
+import AppListProofs from "./app-list-proofs";
 
 define(
 	{ "x-app-agreement-submit": AppAgreementSubmit },
@@ -28,4 +29,9 @@ define(
 define(
 	{ "x-app-submit-proof": AppSubmitProof },
 	{ attributes: ["network", "payment_service_address", "user_address"] }
+);
+
+define(
+	{ "x-app-list-proofs": AppListProofs },
+	{ attributes: ["network", "user_address", "proofs"] }
 );

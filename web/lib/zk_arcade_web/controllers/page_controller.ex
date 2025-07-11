@@ -13,7 +13,24 @@ defmodule ZkArcadeWeb.PageController do
         nil
       end
 
+    proofs =
+      case wallet do
+        wallet -> ZkArcade.Proofs.get_proofs_by_address(address)
+        _ -> nil
+      end
+
+    proofs_json = Enum.map(proofs, fn proof ->
+      %{
+        id: proof.id,
+        wallet_address: proof.wallet_address,
+        verification_data: proof.verification_data,
+        inserted_at: proof.inserted_at,
+        updated_at: proof.updated_at
+      }
+    end)
+
     conn
+    |> assign(:proofs, proofs_json)
     |> assign(:wallet, wallet)
     |> render(:home, layout: false)
   end

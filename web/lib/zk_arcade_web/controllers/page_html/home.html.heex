@@ -30,6 +30,12 @@
         payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
         user_address={String.downcase(@conn.assigns.wallet.address)} 
       />
+
+      <x-app-list-proofs
+        network={Application.get_env(:zk_arcade, :network)}
+        user_address={String.downcase(@conn.assigns.wallet.address)}
+        proofs={raw(Jason.encode!(@proofs))}
+      />
     </div>
   <% else %>
     <div style="margin-left:auto"> 

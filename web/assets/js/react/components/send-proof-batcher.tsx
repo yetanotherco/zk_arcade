@@ -87,9 +87,6 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 				},
 			});
 
-			// TODO sent to backend
-			console.log("MSG:", submitProofMsg);
-
 			setFormData({
 				submitProofMessage: submitProofMsg,
 				address: userAddress,

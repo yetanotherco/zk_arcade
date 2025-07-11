@@ -23,40 +23,46 @@ defmodule ZkArcadeWeb.ProofController do
 
   def submit(conn, %{
         "submit_proof_message" => submit_proof_message_json,
-        "address" => address,
       }) do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
-        Logger.info("Message decoding successful, sending message on an async task.")
-        task = Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-          submit_to_batcher(submit_proof_message, address)
-        end)
+      address = get_session(conn, :wallet_address)
+      if is_nil(address) do
+        conn
+        |> put_flash(:error, "Wallet address is undefined.")
+        |> redirect(to: "/")
+      end
 
-        # Wait a few seconds to catch immediate errors
-        case Task.yield(task, 10000) do
-          {:ok, {:ok, result}} ->
-            Logger.info("Task completed successfully: #{inspect(result)}")
-            conn
-            |> put_flash(:info, "Proof submitted successfully!")
-            |> redirect(to: "/")
+      Logger.info("Message decoding successful, sending message on an async task.")
+      task = Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
+        submit_to_batcher(submit_proof_message, address)
+      end)
 
-          {:ok, {:error, reason}} ->
-            Logger.error("Failed to send proof to batcher on async task: #{inspect(reason)}")
-            conn
-            |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-            |> redirect(to: "/")
+      # Wait a few seconds to catch immediate errors
+      case Task.yield(task, 10000) do
+        {:ok, {:ok, result}} ->
+          Logger.info("Task completed successfully: #{inspect(result)}")
+          conn
+          |> put_flash(:info, "Proof submitted successfully!")
+          |> redirect(to: "/")
 
-          nil ->
-            Logger.info("Task is taking longer than 5 seconds, continuing without waiting.")
-            conn
-            |> put_flash(:info, "Proof is being submitted to batcher.")
-            |> redirect(to: "/")
-        end
+        {:ok, {:error, reason}} ->
+          Logger.error("Failed to send proof to batcher on async task: #{inspect(reason)}")
+          conn
+          |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
+          |> redirect(to: "/")
+
+        nil ->
+          Logger.info("Task is taking longer than 5 seconds, continuing without waiting.")
+          conn
+          |> put_flash(:info, "Proof is being submitted to batcher.")
+          |> redirect(to: "/")
+      end
     else
       error ->
-        Logger.error("Input validation failed: #{inspect(error)}")
-        conn
-        |> put_flash(:error, "Invalid input: #{inspect(error)}")
-        |> redirect(to: "/")
+      Logger.error("Input validation failed: #{inspect(error)}")
+      conn
+      |> put_flash(:error, "Invalid input: #{inspect(error)}")
+      |> redirect(to: "/")
     end
   end
 

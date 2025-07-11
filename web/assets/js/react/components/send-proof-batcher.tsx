@@ -18,7 +18,6 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 
 	const [formData, setFormData] = useState<{
 		submitProofMessage: string;
-		address: `0x${string}`;
 	} | null>(null);
     
 	const chainId = useChainId();
@@ -91,7 +90,6 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 
 			setFormData({
 				submitProofMessage: submitProofMsg,
-				address: userAddress,
 			});
 
 			setTimeout(() => {
@@ -146,11 +144,6 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 						type="hidden"
 						name="submit_proof_message"
 						value={formData.submitProofMessage}
-					/>
-					<input
-						type="hidden"
-						name="address"
-						value={formData.address}
 					/>
 					<input
 						type="hidden"

@@ -1,21 +1,14 @@
-defmodule ZkArcadeWeb.SignController do
+defmodule ZkArcadeWeb.WalletController do
   require Logger
   use ZkArcadeWeb, :controller
   alias ZkArcade.VerifySignature
-
-  plug :check_step
-  @step 2
-
-  def home(conn, _params) do
-    render(conn, :home, layout: false)
-  end
 
   def connect_wallet(conn, %{"address" => address, "signature" => sig}) do
     conn = VerifySignature.call(conn, address, sig)
 
     if conn.assigns[:error] do
       conn = conn |> assign(:error, "Failure in signature authentication")
-      render(conn, :home, layout: false)
+      render(conn, :home)
     else
       case ZkArcade.Accounts.fetch_wallet_by_address(String.downcase(address)) do
         {:ok, wallet} ->
@@ -40,18 +33,15 @@ defmodule ZkArcadeWeb.SignController do
 
               conn
               |> assign(:error, "Hubo un problema al crear tu wallet")
-              |> render(:home, layout: false)
+              |> render(:home)
           end
       end
-
-      render(conn, :home, layout: false)
     end
   end
 
-  defp check_step(conn, _) do
-    case Plug.Conn.get_session(conn, :step) do
-      step when step in [1, 2]->  conn |> put_session(:step, @step)
-      _ -> conn |> halt() |> redirect(to: "/")
-    end
+  def disconnect_wallet(conn) do
+     conn
+    |> delete_session(:wallet_address)
+    |> redirect(to: ~p"/")
   end
 end

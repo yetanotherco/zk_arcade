@@ -15,7 +15,7 @@ defmodule ZkArcadeWeb.PageController do
 
     conn
     |> assign(:wallet, wallet)
-    |> render(:home, layout: false)
+    |> render(:home)
   end
 
   def disconnect_wallet(conn, _params) do
@@ -24,8 +24,9 @@ defmodule ZkArcadeWeb.PageController do
     |> redirect(to: ~p"/")
   end
 
-  def terms(conn, _params) do
-
-    render(conn |> put_session(:step, 1), :terms_and_conditions, layout: false)
+  def game(conn, %{"name" => game_name}) do
+     conn
+      |> assign(:game, game_name)
+      |> render(:game)
   end
 end

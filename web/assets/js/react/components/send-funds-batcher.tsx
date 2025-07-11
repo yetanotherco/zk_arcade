@@ -8,7 +8,7 @@ type Props = {
 };
 
 function SendFundsToContract({ contract_address }: Props) {
-	const [amount, setAmount] = useState("");
+	const [amount, setAmount] = useState("0.1");
 	const [showForm, setShowForm] = useState(false);
 
 	const contractAddress = contract_address;
@@ -96,10 +96,9 @@ function SendFundsToContract({ contract_address }: Props) {
 							<input
 								id="amount"
 								type="number"
-								value={amount}
+								defaultValue={0.1}
 								step="0.001"
 								onChange={e => setAmount(e.target.value)}
-								placeholder="0.1"
 								style={{
 									padding: "8px",
 									borderRadius: "4px",

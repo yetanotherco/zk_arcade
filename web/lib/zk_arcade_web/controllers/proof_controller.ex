@@ -26,14 +26,31 @@ defmodule ZkArcadeWeb.ProofController do
         "address" => address,
       }) do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
-        Logger.info("Message decoding succesful, sending message on an async task.")
-        Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
+        Logger.info("Message decoding successful, sending message on an async task.")
+        task = Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
           submit_to_batcher(submit_proof_message, address)
         end)
 
-        conn
-        |> put_flash(:info, "Proof is being submitted to batcher on an async task.")
-        |> redirect(to: "/")
+        # Wait a few seconds to catch immediate errors
+        case Task.yield(task, 10000) do
+          {:ok, {:ok, result}} ->
+            Logger.info("Task completed successfully: #{inspect(result)}")
+            conn
+            |> put_flash(:info, "Proof submitted successfully!")
+            |> redirect(to: "/")
+
+          {:ok, {:error, reason}} ->
+            Logger.error("Failed to send proof to batcher on async task: #{inspect(reason)}")
+            conn
+            |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
+            |> redirect(to: "/")
+
+          nil ->
+            Logger.info("Task is taking longer than 5 seconds, continuing without waiting.")
+            conn
+            |> put_flash(:info, "Proof is being submitted to batcher.")
+            |> redirect(to: "/")
+        end
     else
       error ->
         Logger.error("Input validation failed: #{inspect(error)}")
@@ -55,13 +72,16 @@ defmodule ZkArcadeWeb.ProofController do
           case Proofs.create_proof(proof_params) do
             {:ok, proof} ->
               Logger.info("Proof saved successfully with ID: #{proof.id}")
+              {:ok, proof}
 
             {:error, changeset} ->
               Logger.error("Failed to save proof: #{inspect(changeset)}")
+              {:error, changeset}
           end
 
         {:error, reason} ->
           Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
+          {:error, reason}
       end
   end
 end

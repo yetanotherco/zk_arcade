@@ -69,12 +69,6 @@ defmodule ZkArcade.BatcherConnection do
         Logger.error("WebSocket error: #{inspect(reason)}")
         :gun.close(conn_pid)
         {:error, :websocket_error}
-
-    after
-      50_000 ->
-        Logger.error("Timeout waiting for WebSocket response")
-        :gun.close(conn_pid)
-        {:error, :timeout}
     end
   end
 

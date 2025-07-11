@@ -2,7 +2,7 @@ defmodule ZkArcadeWeb.ProofController do
   require Logger
   use ZkArcadeWeb, :controller
 
-  alias ZkArcade.SendProof
+  alias ZkArcade.BatcherConnection
   alias ZkArcade.Proofs
 
   def home(conn, _params) do
@@ -30,7 +30,7 @@ defmodule ZkArcadeWeb.ProofController do
       Logger.info("Received address: #{inspect(address)}")
 
       # Web socket communication
-      case SendProof.call(submit_proof_message, address) do
+      case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
         {:ok, {:batch_inclusion, batch_data}} ->
           # Insert the entry to the database
           proof_params = %{
@@ -54,7 +54,7 @@ defmodule ZkArcadeWeb.ProofController do
           end
 
         {:error, reason} ->
-          Logger.error("SendProof failed: #{inspect(reason)}")
+          Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
           conn
           |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
           |> redirect(to: "/")

@@ -1,8 +1,8 @@
-defmodule ZkArcade.SendProof do
+defmodule ZkArcade.BatcherConnection do
   require Logger
   require CBOR
 
-  def call(submit_proof_message, address) do
+  def send_submit_proof_message(submit_proof_message, address) do
     {:ok, conn_pid} = :gun.open('localhost', 8080)
 
     conn_pid =

@@ -7,6 +7,7 @@
 
 html {
 	font-family: "Space Mono", monospace;
+	scroll-behavior: smooth;
 }
 
 body {
@@ -25,4 +26,56 @@ h2 {
 
 ul {
 	padding: 0 1.2rem;
+}
+
+section {
+	margin-bottom: 150px;
+}
+
+#gradient-bg {
+	background: radial-gradient(
+			66.17% 57.92% at 50% 48.52%,
+			rgba(6, 6, 6, 0) 0%,
+			#060606 100%
+		),
+		radial-gradient(
+			105.06% 110.34% at 48.01% 63.49%,
+			rgba(139, 252, 189, 0.2) 12.74%,
+			rgba(86, 237, 153, 0) 100%
+		),
+		radial-gradient(
+			73.48% 38.32% at 50.94% 52.83%,
+			rgba(255, 255, 255, 0.2) 12.74%,
+			rgba(255, 255, 255, 0) 100%
+		),
+		radial-gradient(
+			40.81% 33.22% at 47.55% 46.99%,
+			rgba(139, 252, 189, 0.2) 12.74%,
+			rgba(86, 237, 153, 0) 100%
+		);
+}
+
+.typing {
+	display: inline-block;
+	white-space: nowrap;
+	overflow: hidden;
+	border-right: 2px solid currentColor;
+	animation: typing 4s steps(40, end), blink 0.75s step-end infinite;
+}
+
+/* Typing effect */
+@keyframes typing {
+	from {
+		width: 0;
+	}
+	to {
+		width: 100%;
+	}
+}
+
+/* Blinking cursor effect */
+@keyframes blink {
+	50% {
+		border-color: transparent;
+	}
 }

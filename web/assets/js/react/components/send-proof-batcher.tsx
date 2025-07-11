@@ -31,6 +31,8 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 		userAddress,
 	});
 
+	const formRef = useRef<HTMLFormElement>(null);
+
 	const handleFile = async (
 		e: React.ChangeEvent<HTMLInputElement>,
 		type: "proof" | "vk" | "pub"
@@ -47,7 +49,7 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 	};
 
 	const handleSubmit = async () => {
-		const maxFee = await estimateMaxFeeForBatchOfProofs();
+		const maxFee = 600000000000000; //await estimateMaxFeeForBatchOfProofs();
 
 		if (!proof || !vk || !pub || nonce == undefined || !maxFee) {
 			alert("Files, address, nonce or maxFee missing or failed to fetch");
@@ -91,11 +93,20 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 				submitProofMessage: submitProofMsg,
 				address: userAddress,
 			});
+
+			setTimeout(() => {
+				formRef.current?.submit();
+			}, 0);
 		} catch (error) {
 			console.error("Failure sending the proof: ", error);
 			alert("Failure sending the proof: " + error.message);
 		}
 	};
+
+	const metaTag = document.head.querySelector("[name~=csrf-token][content]") as HTMLMetaElement | null;
+	if (!metaTag) {
+		throw new Error("CSRF token meta tag not found");
+	}
 
 	return (
 		<div>
@@ -130,47 +141,24 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 			</button>
 
 			{formData && (
-				<SubmitProofForm
-				submitProofMessage={formData.submitProofMessage}
-				address={formData.address}
-				/>
+				<form ref={formRef} method="POST" action="/submit-proof">
+					<input
+						type="hidden"
+						name="submit_proof_message"
+						value={formData.submitProofMessage}
+					/>
+					<input
+						type="hidden"
+						name="address"
+						value={formData.address}
+					/>
+					<input
+						type="hidden"
+						name="_csrf_token"
+						value={metaTag.content}
+					/>
+				</form>
 			)}
 		</div>
 	);
 };
-
-function SubmitProofForm({ submitProofMessage, address }: {
-	submitProofMessage: string;
-	address: `0x${string}`;
-}) {
-	const formRef = useRef<HTMLFormElement>(null);
-
-	const metaTag = document.head.querySelector("[name~=csrf-token][content]") as HTMLMetaElement | null;
-	if (!metaTag) {
-		throw new Error("CSRF token meta tag not found");
-	}
-
-	useEffect(() => {
-		formRef.current?.submit();
-	}, []);
-
-	return (
-		<form ref={formRef} method="POST" action="/submit-proof">
-			<input
-				type="hidden"
-				name="submit_proof_message"
-				value={submitProofMessage}
-			/>
-			<input
-				type="hidden"
-				name="address"
-				value={address}
-			/>
-			<input
-				type="hidden"
-				name="_csrf_token"
-				value={metaTag.content}
-			/>
-		</form>
-	);
-}

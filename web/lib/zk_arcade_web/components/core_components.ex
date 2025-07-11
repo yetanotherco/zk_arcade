@@ -83,4 +83,104 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
+
+  @doc ~S"""
+  Renders a table with custom styling.
+
+  ## Examples
+
+      <.table id="users" rows={@users}>
+        <:col :let={user} label="id"><%= user.id %></:col>
+        <:col :let={user} label="username"><%= user.username %></:col>
+      </.table>
+  """
+  attr(:id, :string, required: true)
+  attr(:class, :any, default: nil, doc: "css class attributes for the card background")
+  attr(:rows, :list, required: true)
+  attr(:row_id, :any, default: nil, doc: "the function for generating the row id")
+  attr(:row_item, :any,
+    default: &Function.identity/1,
+    doc: "the function for mapping each row before calling the :col and :action slots"
+  )
+  slot :col, required: true do
+    attr(:label, :string)
+    attr(:class, :string)
+  end
+
+  slot(:action, doc: "the slot for showing user actions in the last table column")
+  def table(assigns) do
+    ~H"""
+    <table class="table-fixed border-collapse w-full">
+      <thead>
+        <tr class="text-text-200 truncate">
+          <th :for={{col, _i} <- Enum.with_index(@col)} class="text-left font-normal pb-5">
+          <%= col[:label] %>
+          </th>
+        </tr>
+      </thead>
+      <tbody id={@id}>
+        <tr
+          :for={row <- @rows}
+          id={@row_id && @row_id.(row)}
+          class="gap-y-2 [&>td]:pb-4 animate-in fade-in-0 duration-700 truncate"
+        >
+          <td
+            :for={{col, _i} <- Enum.with_index(@col)}
+            class={classes(["p-0 pr-10"])}
+          >
+            <div class={
+              classes([
+                "group block normal-case  text-base min-w-28"
+              ])
+            }>
+              <%= render_slot(col, @row_item.(row)) %>
+            </div>
+          </td>
+          <td :if={@action != []} class="w-14 p-0">
+            <div class="whitespace-nowrap py-4 text-left text-sm">
+              <span :for={action <- @action} class="ml-4 leading-6 text-muted-foreground">
+                <%= render_slot(action, @row_item.(row)) %>
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    """
+  end
+
+  def footer(assigns) do
+    ~H"""
+    <div class="w-full border-t border-text-200/20 backdrop-blur-lg backdrop-saturate-200">
+      <div
+        class="w-full flex justify-center items-center flex-wrap p-5 py-10 gap-5 m-auto"
+        style="max-width: 1000px;"
+      >
+        <div class="hidden sm:inline-block flex-1">
+          <p class="text-md">
+            Powered By
+            <span class="text-accent-100 block mt-1">
+              Aligned Layer
+            </span>
+          </p>
+        </div>
+
+        <div class="h-full">
+          <div class="flex-1 flex flex-wrap gap-10 md:gap-32">
+            <%= for {title, links} <- @headers do %>
+              <div class="flex flex-col items-start gap-2">
+                <h3 class="text-text-100 font-bold text-lg"><%= title %></h3>
+                <%= for {value, link} <- links do %>
+                  <.link class="text-sm text-text-200 hover:underline" href={link}>
+                    <%= value %>
+                  </.link>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
 end

@@ -48,7 +48,7 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 	};
 
 	const handleSubmit = async () => {
-		const maxFee = 600000000000000; //await estimateMaxFeeForBatchOfProofs();
+		const maxFee = await estimateMaxFeeForBatchOfProofs();
 
 		if (!proof || !vk || !pub || nonce == undefined || !maxFee) {
 			alert("Files, address, nonce or maxFee missing or failed to fetch");

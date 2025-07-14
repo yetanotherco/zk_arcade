@@ -1,44 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import Web3EthProvider from "./providers/web3-eth-provider";
-import { Modal } from "./components/Modal";
-import { useModal } from "./hooks/useModal";
-import { Button } from "./components/Button";
+import React, { useEffect, useRef, useState } from "react";
+import { Modal } from "../../components/Modal";
+import { useModal } from "../../hooks/useModal";
+import { Button } from "../../components/Button";
 import { useAccount, useConnect, useConnectors, useSignMessage } from "wagmi";
 
-type Props = {
-	network: string;
-	payment_service_address: string;
-	user_address?: string;
-};
-
-export const AppUserWallet = ({
-	network,
-	payment_service_address,
-	user_address,
-}: Props) => {
-	return (
-		<Web3EthProvider network={network}>
-			<div
-				className="bg-contrast-100 p-1 rounded flex justify-between items-center"
-				style={{ width: 180 }}
-			>
-				{user_address ? (
-					<>
-						<div>
-							<p className="text-xs">Connected:</p>
-							<p className="font-bold text-md">0x032...3211</p>
-						</div>
-						<span className="hero-chevron-down size-3.5" />
-					</>
-				) : (
-					<ConnectWallet />
-				)}
-			</div>
-		</Web3EthProvider>
-	);
-};
-
-const ConnectWallet = () => {
+export const ConnectWalletWithAgreement = () => {
 	const { open, setOpen, toggleOpen } = useModal();
 
 	const formRef = useRef<HTMLFormElement>(null);

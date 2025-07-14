@@ -32,6 +32,7 @@ module.exports = {
 				},
 				contrast: {
 					100: "rgb(54 54 55 / <alpha-value>)",
+					200: "rgb(66 77 71 / <alpha-value>)",
 				},
 				disabled: "rgb(179 179 179 / <alpha-value>)",
 			},

@@ -1,7 +1,7 @@
 import { define } from "remount";
-import { AppUserWallet } from "./app-user-wallet";
+import Wallet from "./modules/Wallet";
 
 define(
-	{ "x-app-user-wallet": AppUserWallet },
+	{ "x-app-user-wallet": Wallet },
 	{ attributes: ["network", "payment_service_address", "user_address"] }
 );

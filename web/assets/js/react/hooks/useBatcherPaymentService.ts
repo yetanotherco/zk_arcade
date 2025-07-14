@@ -1,6 +1,12 @@
-import { Address } from "viem";
-import { useChainId, useReadContract } from "wagmi";
+import { Address, parseEther } from "viem";
+import {
+	useChainId,
+	useReadContract,
+	useSendTransaction,
+	useWaitForTransactionReceipt,
+} from "wagmi";
 import { batcherPaymentServiceAbi } from "../constants/aligned";
+import { useCallback, useEffect } from "react";
 
 type Args = {
 	contractAddress: Address;
@@ -12,6 +18,15 @@ export const useBatcherPaymentService = ({
 	userAddress,
 }: Args) => {
 	const chainId = useChainId();
+
+	const {
+		data: hash,
+		sendTransaction,
+		...sendFundsData
+	} = useSendTransaction();
+	const { isLoading, isSuccess } = useWaitForTransactionReceipt({
+		hash,
+	});
 
 	const { ...balanceFetchData } = useReadContract({
 		address: contractAddress,
@@ -29,6 +44,18 @@ export const useBatcherPaymentService = ({
 		chainId,
 	});
 
+	const sendFunds = useCallback(
+		(amountToDepositInEther: string) => {
+			const value = parseEther(amountToDepositInEther);
+			sendTransaction({ to: contractAddress, value });
+		},
+		[sendTransaction]
+	);
+
+	useEffect(() => {
+		balanceFetchData.refetch();
+	}, [isSuccess]);
+
 	return {
 		balance: {
 			...balanceFetchData,
@@ -37,6 +64,12 @@ export const useBatcherPaymentService = ({
 		nonce: {
 			...nonceFetchData,
 			data: nonceFetchData.data as bigint | undefined,
+		},
+		sendFunds: {
+			send: sendFunds,
+			...sendFundsData,
+			isLoading,
+			isSuccess,
 		},
 	};
 };

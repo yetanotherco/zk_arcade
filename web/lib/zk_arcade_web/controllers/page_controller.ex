@@ -25,6 +25,7 @@ defmodule ZkArcadeWeb.PageController do
         id: proof.id,
         wallet_address: proof.wallet_address,
         verification_data: proof.verification_data,
+        batch_data: proof.batch_data,
         inserted_at: NaiveDateTime.to_iso8601(proof.inserted_at),
         updated_at: NaiveDateTime.to_iso8601(proof.updated_at)
       }

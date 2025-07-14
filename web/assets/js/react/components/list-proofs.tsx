@@ -6,6 +6,17 @@ interface MapToBeVector {
   [key: string]: number;
 }
 
+interface BatchInclusionProof {
+  merkle_path: number[][];
+}
+
+interface BatchData {
+  batch_inclusion_proof: BatchInclusionProof;
+  batch_merkle_root: number[];
+  index_in_batch: number;
+  user_nonce: string;
+}
+
 interface VerificationData {
   proof: MapToBeVector;
   proofGeneratorAddress: string;
@@ -44,6 +55,7 @@ interface Proof {
   wallet_address: string;
   verification_data: ProofVerificationData;
   updated_at: string;
+  batch_data: BatchData;
 }
 
 interface ProcessedProof {
@@ -52,6 +64,18 @@ interface ProcessedProof {
   wallet_address: string;
   verification_data: ProcessedProofVerificationData;
   updated_at: string;
+  batch_data: ProcessedBatchData;
+}
+
+interface ProcessedBatchInclusionProof {
+  merkle_path: Uint8Array[];
+}
+
+interface ProcessedBatchData {
+  batch_inclusion_proof: ProcessedBatchInclusionProof;
+  batch_merkle_root: Uint8Array;
+  index_in_batch: number;
+  user_nonce: string;
 }
 
 type Props = {
@@ -73,8 +97,23 @@ const ListProofs = ({ user_address, proofs }: Props) => {
     return array;
   };
 
-  const processProof = (rawProof: Proof): ProcessedProof => {
+  const arrayToUint8Array = (arr: number[]): Uint8Array => {
+    return new Uint8Array(arr);
+  };
+
+  const processBatchData = (batchData: BatchData): ProcessedBatchData => {
     return {
+      batch_inclusion_proof: {
+        merkle_path: batchData.batch_inclusion_proof.merkle_path.map(path => arrayToUint8Array(path))
+      },
+      batch_merkle_root: arrayToUint8Array(batchData.batch_merkle_root),
+      index_in_batch: batchData.index_in_batch,
+      user_nonce: batchData.user_nonce
+    };
+  };
+
+  const processProof = (rawProof: Proof): ProcessedProof => {
+    const processed: ProcessedProof = {
       ...rawProof,
       verification_data: {
         ...rawProof.verification_data,
@@ -84,8 +123,11 @@ const ListProofs = ({ user_address, proofs }: Props) => {
           publicInput: objectToUint8Array(rawProof.verification_data.verificationData.publicInput),
           verificationKey: objectToUint8Array(rawProof.verification_data.verificationData.verificationKey)
         }
-      }
+      },
+      batch_data: processBatchData(rawProof.batch_data)
     };
+
+    return processed;
   };
 
   useEffect(() => {
@@ -153,6 +195,22 @@ const ListProofs = ({ user_address, proofs }: Props) => {
 
               <p> Verification Key: {uint8ArrayToHex(proof.verification_data.verificationData.verificationKey)} </p>
 
+              <div style={{ marginTop: '12px' }}>
+                <p><strong>Batch Data:</strong></p>
+                <div>
+                  <p> Merkle Root: {uint8ArrayToHex(proof.batch_data.batch_merkle_root)} </p>
+                  <p> Index in Batch: {proof.batch_data.index_in_batch} </p>
+                  <p> User Nonce: {proof.batch_data.user_nonce} </p>
+                  <p> Merkle Path ({proof.batch_data.batch_inclusion_proof.merkle_path.length} nodes): </p>
+                  <div style={{ marginLeft: '10px', maxHeight: '100px', overflowY: 'auto' }}>
+                    {proof.batch_data.batch_inclusion_proof.merkle_path.map((path, index) => (
+                      <p key={index} style={{ fontSize: '0.7em', margin: '2px 0', fontFamily: 'monospace' }}>
+                        [{index}]: {uint8ArrayToHex(path)}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>

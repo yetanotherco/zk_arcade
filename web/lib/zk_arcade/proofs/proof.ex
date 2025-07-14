@@ -17,7 +17,7 @@ defmodule ZkArcade.Proofs.Proof do
   @doc false
   def changeset(proof, attrs) do
     proof
-    |> cast(attrs, [:verification_data, :wallet_address])
+    |> cast(attrs, [:verification_data, :wallet_address, :batch_data])
     |> validate_required([:verification_data, :wallet_address])
     |> foreign_key_constraint(:wallet_address)
   end

@@ -12,6 +12,7 @@ defmodule ZkArcade.Application do
       ZkArcade.Repo,
       {DNSCluster, query: Application.get_env(:zk_arcade, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ZkArcade.PubSub},
+      {Task.Supervisor, name: ZkArcade.TaskSupervisor},
       # Start a worker by calling: ZkArcade.Worker.start_link(arg)
       # {ZkArcade.Worker, arg},
       # Start to serve requests, typically the last entry

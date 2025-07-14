@@ -5,6 +5,7 @@ config :zk_arcade, ZkArcade.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
+  port: 5433,
   database: "zk_arcade_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -19,7 +20,7 @@ config :zk_arcade, ZkArcade.Repo,
 config :zk_arcade, ZkArcadeWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: {127, 0, 0, 1}, port: 4005],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
@@ -84,3 +85,6 @@ config :phoenix_live_view,
 config :zk_arcade, :payment_service_address, "0x7969c5ed335650692bc04293b07f5bf2e7a673c0"
 
 config :zk_arcade, :network, "anvil"
+
+config :zk_arcade, :host, "localhost"
+config :zk_arcade, :port, 8080

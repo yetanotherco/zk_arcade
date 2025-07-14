@@ -111,9 +111,9 @@ defmodule ZkArcade.BatcherConnection do
         "verification_data" => %{
           "verification_data" => %{
             "proving_system" => verification_data["provingSystem"],
-            "proof" => map_to_uint8_array(verification_data["proof"]),
-            "pub_input" => map_to_uint8_array(verification_data["publicInput"]),
-            "verification_key" => map_to_uint8_array(verification_data["verificationKey"]),
+            "proof" => verification_data["proof"],
+            "pub_input" => verification_data["publicInput"],
+            "verification_key" => verification_data["verificationKey"],
             "vm_program_code" => verification_data["vmProgramCode"],
             "proof_generator_addr" => verification_data["proofGeneratorAddress"]
           },

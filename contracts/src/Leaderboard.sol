@@ -19,6 +19,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error CallToAlignedContractFailed();
     error ProofNotVerifiedOnAligned();
     error UserHasAlreadyCompletedThisLevel(uint256 level);
+    error UserAddressMismatch(address expected, address actual);
 
     /**
      * Events
@@ -50,6 +51,15 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes memory merkleProof,
         uint256 verificationDataBatchIndex
     ) public {
+        (uint256 levelCompleted, address userAddress) = abi.decode(publicInputs, (uint256, address));
+
+        if (userAddress != msg.sender) {
+            revert UserAddressMismatch({
+                expected: userAddress,
+                actual: msg.sender
+            });
+        }
+
         bytes32 pubInputCommitment = keccak256(abi.encodePacked(publicInputs));
         (bool callWasSuccessful, bytes memory proofIsIncluded) = alignedServiceManager.staticcall(
             abi.encodeWithSignature(
@@ -75,7 +85,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert ProofNotVerifiedOnAligned();
         }
 
-        uint256 levelCompleted = abi.decode(publicInputs, (uint256));
         uint256 currentLevelCompleted = usersBeastLevelCompleted[msg.sender];
         if (levelCompleted <= currentLevelCompleted) {
             revert UserHasAlreadyCompletedThisLevel(currentLevelCompleted);

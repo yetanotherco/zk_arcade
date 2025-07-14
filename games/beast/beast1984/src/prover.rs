@@ -12,11 +12,11 @@ pub enum ProvingError {
     SavingProof(String),
 }
 
-pub fn prove(levels_log: Vec<LevelLog>) -> Result<Receipt, ProvingError> {
+pub fn prove(levels_log: Vec<LevelLog>, address: String) -> Result<Receipt, ProvingError> {
     let mut env_builder = ExecutorEnv::builder();
 
     // write input data
-    let input = ProgramInput { levels_log };
+    let input = ProgramInput { levels_log, address };
     env_builder
         .write(&input)
         .map_err(|e| ProvingError::WriteInput(e.to_string()))?;

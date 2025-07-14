@@ -170,4 +170,5 @@ fn main() {
     number[32 - bytes.len()..].copy_from_slice(&bytes);
 
     env::commit_slice(&number);
+    env::commit(&input.address);
 }

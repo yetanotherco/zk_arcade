@@ -33,8 +33,8 @@
 
       <x-app-list-proofs
         network={Application.get_env(:zk_arcade, :network)}
-        user_address={String.downcase(@conn.assigns.wallet.address)}
-        proofs={raw(Jason.encode!(@proofs))}
+        user_address={@wallet && String.downcase(@wallet.address) || ""}
+        proofs={@proofs_json}
       />
     </div>
   <% else %>

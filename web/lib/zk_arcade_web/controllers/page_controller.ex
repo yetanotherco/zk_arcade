@@ -14,9 +14,10 @@ defmodule ZkArcadeWeb.PageController do
       end
 
     proofs =
-      case wallet do
-        wallet -> ZkArcade.Proofs.get_proofs_by_address(address)
-        _ -> nil
+      if wallet do
+        ZkArcade.Proofs.get_proofs_by_address(wallet.address)
+      else
+        []
       end
 
     proofs_json = Enum.map(proofs, fn proof ->
@@ -24,13 +25,13 @@ defmodule ZkArcadeWeb.PageController do
         id: proof.id,
         wallet_address: proof.wallet_address,
         verification_data: proof.verification_data,
-        inserted_at: proof.inserted_at,
-        updated_at: proof.updated_at
+        inserted_at: NaiveDateTime.to_iso8601(proof.inserted_at),
+        updated_at: NaiveDateTime.to_iso8601(proof.updated_at)
       }
     end)
 
     conn
-    |> assign(:proofs, proofs_json)
+    |> assign(:proofs_json, Jason.encode!(proofs_json))
     |> assign(:wallet, wallet)
     |> render(:home, layout: false)
   end

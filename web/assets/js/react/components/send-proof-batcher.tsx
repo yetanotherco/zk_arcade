@@ -75,9 +75,21 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 				noncedVerificationData
 			);
 
+			// we need to manually build the json here, because the uint8array is taken as an object
+			const noncedVerificationDataMappedToArray = {
+				...noncedVerificationData,
+				verificationData: {
+					...noncedVerificationData.verificationData,
+					proof: Array.from(verificationData.proof),
+					publicInput: verificationData.publicInput ? Array.from(verificationData.publicInput): undefined,
+					verificationKey:  verificationData.verificationKey ? Array.from(verificationData.verificationKey): undefined,
+					vmProgramCode:  verificationData.vmProgramCode ? Array.from(verificationData.vmProgramCode): undefined				
+				}
+			};
+
 			const submitProofMsg = JSON.stringify({
 				verificationData: {
-					...noncedVerificationData,
+					...noncedVerificationDataMappedToArray,
 					chain_id: toHex(chainId, { size: 32 }),
 					payment_service_addr: batcherPaymentServiceAddress,
 				},

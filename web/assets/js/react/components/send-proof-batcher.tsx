@@ -94,7 +94,7 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 
 			setTimeout(() => {
 				formRef.current?.submit();
-			}, 0);
+			}, 100);
 		} catch (error) {
 			console.error("Failure sending the proof: ", error);
 			alert("Failure sending the proof: " + error.message);

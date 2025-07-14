@@ -18,12 +18,13 @@ defmodule ZkArcadeWeb.Router do
     post "/wallet/sign", WalletController, :connect_wallet
     get "/wallet/disconnect", WalletController, :disconnect_wallet
 
+    post "/submit-proof", ProofController, :submit
+
     end
 
   scope "/api", ZkArcadeWeb do
     pipe_through :api
   end
-
 
   # Enable LiveDashboard in development
   if Application.compile_env(:zk_arcade, :dev_routes) do

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import { NoncedVerificationdata, VerificationData } from "../types/aligned";
 import { useAligned } from "../hooks/useAligned";
@@ -16,6 +16,10 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 	const [vk, setVk] = useState<Uint8Array | null>(null);
 	const [pub, setPub] = useState<Uint8Array | null>(null);
 
+	const [formData, setFormData] = useState<{
+		submitProofMessage: string;
+	} | null>(null);
+    
 	const chainId = useChainId();
 	const { signVerificationData, estimateMaxFeeForBatchOfProofs } =
 		useAligned();
@@ -25,6 +29,8 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 		contractAddress: batcherPaymentServiceAddress,
 		userAddress,
 	});
+
+	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleFile = async (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -82,13 +88,23 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 				},
 			});
 
-			// TODO sent to backend
-			console.log("MSG:", submitProofMsg);
+			setFormData({
+				submitProofMessage: submitProofMsg,
+			});
+
+			setTimeout(() => {
+				formRef.current?.submit();
+			}, 100);
 		} catch (error) {
 			console.error("Failure sending the proof: ", error);
 			alert("Failure sending the proof: " + error.message);
 		}
 	};
+
+	const metaTag = document.head.querySelector("[name~=csrf-token][content]") as HTMLMetaElement | null;
+	if (!metaTag) {
+		throw new Error("CSRF token meta tag not found");
+	}
 
 	return (
 		<div>
@@ -121,6 +137,21 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 			>
 				Send to server
 			</button>
+
+			{formData && (
+				<form ref={formRef} method="POST" action="/submit-proof">
+					<input
+						type="hidden"
+						name="submit_proof_message"
+						value={formData.submitProofMessage}
+					/>
+					<input
+						type="hidden"
+						name="_csrf_token"
+						value={metaTag.content}
+					/>
+				</form>
+			)}
 		</div>
 	);
 };

@@ -12,24 +12,24 @@ defmodule ZkArcadeWeb.WalletController do
     else
       case ZkArcade.Accounts.fetch_wallet_by_address(String.downcase(address)) do
         {:ok, wallet} ->
-          Logger.info("Ya existe una wallet para ese address")
+          Logger.info("There is already a wallet for the received address")
 
           conn
           |> put_session(:wallet_address, wallet.address)
           |> redirect(to: ~p"/")
 
         {:error, :not_found} ->
-          Logger.info("No se encontró una wallet para ese address, creando wallet...")
+          Logger.info("Could not find a wallet for the received address, creating wallet...")
 
           case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address)}) do
             {:ok, wallet} ->
-              Logger.info("Wallet creada: #{wallet.address}")
+              Logger.info("Created wallet for address #{wallet.address}")
 
             conn
             |> put_session(:wallet_address, wallet.address)
             |> redirect(to: ~p"/")
             {:error, changeset} ->
-              Logger.error("Error al crear wallet: #{inspect(changeset.errors)}")
+              Logger.error("Error creating wallet: #{inspect(changeset.errors)}")
 
               conn
               |> assign(:error, "Hubo un problema al crear tu wallet")

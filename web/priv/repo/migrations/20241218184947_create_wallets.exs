@@ -5,8 +5,8 @@ defmodule ZkArcade.Repo.Migrations.CreateWallets do
     create table(:wallets, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :address, :string
-      add :amount, :string
-      add :merkle_proof, :text
+      add :points, :integer, default: 0, null: false
+      add :balance, :float, default: 0.0, null: false
     end
 
     create unique_index(:wallets, :address, name: :wallets_address_index)

@@ -5,6 +5,7 @@ import { Button, Modal } from "../../components";
 import { useModal, useBatcherPaymentService } from "../../hooks";
 import { FormInput } from "../../components/";
 import { useEthPrice } from "../../hooks/useEthPrice";
+import { useToast } from "../../state/toast";
 
 type Props = {
 	payment_service_address: Address;
@@ -22,11 +23,56 @@ export const BalanceScoreInAligned = ({
 		userAddress: user_address,
 	});
 	const [balanceValue, setBalanceValue] = useState("");
+	const { addToast } = useToast();
+
 	useEffect(() => {
-		if (sendFunds.isLoading) {
+		if (sendFunds.receipt.isLoading) {
 			window.setTimeout(() => setOpen(false), 250);
+			addToast({
+				title: "Transaction sent",
+				desc: "Transaction was sent successfully, waiting for receipt...",
+				type: "success",
+			});
 		}
-	}, [sendFunds.isLoading]);
+	}, [sendFunds.receipt.isLoading]);
+
+	useEffect(() => {
+		if (sendFunds.receipt.isSuccess && sendFunds.receipt.data) {
+			addToast({
+				title: "Balance deposit confirmed",
+				desc: "The transaction was included, your balance has been updated",
+				type: "success",
+			});
+		}
+	}, [sendFunds.receipt.isSuccess, sendFunds.receipt.data]);
+
+	useEffect(() => {
+		if (sendFunds.transaction.isError) {
+			const errorMessage =
+				sendFunds.transaction.error?.message ||
+				"Something went wrong with the transaction.";
+
+			addToast({
+				title: "Transaction failed",
+				desc: errorMessage,
+				type: "error",
+			});
+		}
+	}, [sendFunds.transaction.isError, sendFunds.transaction.error]);
+
+	useEffect(() => {
+		if (sendFunds.receipt.isError) {
+			const errorMessage =
+				sendFunds.receipt.error?.message ||
+				"Something went wrong with the transaction.";
+
+			addToast({
+				title: "Transaction failed",
+				desc: errorMessage,
+				type: "error",
+			});
+		}
+	}, [sendFunds.receipt.isError, sendFunds.receipt.error]);
 
 	return (
 		<>
@@ -46,9 +92,12 @@ export const BalanceScoreInAligned = ({
 				</div>
 				<div>
 					<h3 className="text-md font-bold mb-1">Score:</h3>
+					{/* TODO: query score from Leaderboard contract */}
 					<p>100</p>
 				</div>
 			</div>
+
+			{/* Deposit on aligned modal */}
 			<Modal open={open} setOpen={setOpen}>
 				<div
 					className="bg-contrast-100 p-10 rounded flex flex-col items-center gap-8"
@@ -76,15 +125,19 @@ export const BalanceScoreInAligned = ({
 						</p>
 					</div>
 					<div>
-						<Button variant="text" onClick={toggleOpen}>
+						<Button
+							variant="text"
+							className="mr-10"
+							onClick={toggleOpen}
+						>
 							Cancel
 						</Button>
 						<Button
 							variant="accent-fill"
-							onClick={() => {
-								sendFunds.send(balanceValue);
+							onClick={async () => {
+								await sendFunds.send(balanceValue);
 							}}
-							isLoading={sendFunds.isLoading}
+							isLoading={sendFunds.receipt.isLoading}
 							disabled={Number(balanceValue) == 0}
 						>
 							Confirm

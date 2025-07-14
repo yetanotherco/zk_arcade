@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 type ButtonVariant = "accent-fill" | "text-accent" | "text" | "disabled";
 
 const buttonVariantStyles: { [key in ButtonVariant]: string } = {
-	"accent-fill": "bg-accent-100",
-	disabled: "bg-disabled",
-	text: "px-0 py-0",
-	"text-accent": "px-0 py-0 text-accent-100 hover:underline",
+	"accent-fill": "px-10 py-2 bg-accent-100",
+	disabled: "px-10 py-2 bg-disabled",
+	text: "hover:underline",
+	"text-accent": "text-accent-100 hover:underline",
 };
 
 type Props = React.ComponentProps<"button"> & {
@@ -35,7 +35,7 @@ export const Button = ({
 
 	return (
 		<button
-			className={`rounded px-10 py-2 font-bold text-md ${buttonVariantStyles[currentVariant]} ${className}`}
+			className={`rounded font-bold text-md ${buttonVariantStyles[currentVariant]} ${className}`}
 			{...props}
 			disabled={disabled || isLoading}
 		>

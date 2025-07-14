@@ -9,7 +9,8 @@
 		"viem": "^2.21.55",
 		"wagmi": "^2.14.3",
 		"cbor2": "^2.0.1",
-		"sha3": "^2.1.4"
+		"sha3": "^2.1.4",
+		"@react-spring/web": "10.0.1"
 	},
 	"devDependencies": {
 		"@types/react": "^18.3.14",

@@ -21,10 +21,11 @@ export const useBatcherPaymentService = ({
 
 	const {
 		data: hash,
-		sendTransaction,
-		...sendFundsData
+		sendTransactionAsync,
+		...transactionData
 	} = useSendTransaction();
-	const { isLoading, isSuccess } = useWaitForTransactionReceipt({
+
+	const receiptData = useWaitForTransactionReceipt({
 		hash,
 	});
 
@@ -45,16 +46,19 @@ export const useBatcherPaymentService = ({
 	});
 
 	const sendFunds = useCallback(
-		(amountToDepositInEther: string) => {
+		async (amountToDepositInEther: string) => {
 			const value = parseEther(amountToDepositInEther);
-			sendTransaction({ to: contractAddress, value });
+			await sendTransactionAsync({
+				to: contractAddress,
+				value,
+			});
 		},
-		[sendTransaction]
+		[sendTransactionAsync]
 	);
 
 	useEffect(() => {
 		balanceFetchData.refetch();
-	}, [isSuccess]);
+	}, [receiptData.isSuccess]);
 
 	return {
 		balance: {
@@ -67,9 +71,8 @@ export const useBatcherPaymentService = ({
 		},
 		sendFunds: {
 			send: sendFunds,
-			...sendFundsData,
-			isLoading,
-			isSuccess,
+			transaction: transactionData,
+			receipt: receiptData,
 		},
 	};
 };

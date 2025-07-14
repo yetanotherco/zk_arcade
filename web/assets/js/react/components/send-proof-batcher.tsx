@@ -48,7 +48,7 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 	};
 
 	const handleSubmit = async () => {
-		const maxFee = 600000000000000; //await estimateMaxFeeForBatchOfProofs();
+		const maxFee = await estimateMaxFeeForBatchOfProofs();
 
 		if (!proof || !vk || !pub || nonce == undefined || !maxFee) {
 			alert("Files, address, nonce or maxFee missing or failed to fetch");
@@ -94,7 +94,7 @@ export default ({ batcherPaymentServiceAddress, userAddress }: Args) => {
 
 			setTimeout(() => {
 				formRef.current?.submit();
-			}, 0);
+			}, 100);
 		} catch (error) {
 			console.error("Failure sending the proof: ", error);
 			alert("Failure sending the proof: " + error.message);

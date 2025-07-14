@@ -3,7 +3,9 @@ defmodule ZkArcade.BatcherConnection do
   require CBOR
 
   def send_submit_proof_message(submit_proof_message, address) do
-    {:ok, conn_pid} = :gun.open(~c"localhost", 8080)
+    host = String.to_charlist(Application.get_env(:zk_arcade, :host))
+    port = Application.get_env(:zk_arcade, :port)
+    {:ok, conn_pid} = :gun.open(host, port)
 
     conn_pid =
       case :gun.await_up(conn_pid) do
@@ -37,7 +39,7 @@ defmodule ZkArcade.BatcherConnection do
       25_000 ->
         Logger.error("Timeout during WebSocket upgrade")
         :gun.close(conn_pid)
-        {:error, :upgrade_timeout}
+        {:error, "Failed to upgrade socket connection due to timeout"}
     end
   end
 
@@ -69,12 +71,6 @@ defmodule ZkArcade.BatcherConnection do
         Logger.error("WebSocket error: #{inspect(reason)}")
         :gun.close(conn_pid)
         {:error, :websocket_error}
-
-    after
-      50_000 ->
-        Logger.error("Timeout waiting for WebSocket response")
-        :gun.close(conn_pid)
-        {:error, :timeout}
     end
   end
 
@@ -93,6 +89,11 @@ defmodule ZkArcade.BatcherConnection do
         Logger.error("Insufficient balance for address #{address}")
         :gun.close(conn_pid)
         {:error, {:insufficient_balance, address}}
+
+      %{"InvalidProof" => reason} ->
+        Logger.error("There was a problem with the submited proof: #{reason}")
+        :gun.close(conn_pid)
+        {:error, "Invalid proof - #{reason}"}
 
       # There can be more error messages from the batcher, but they will enter on the other clause
       other ->

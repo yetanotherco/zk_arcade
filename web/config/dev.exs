@@ -85,3 +85,6 @@ config :phoenix_live_view,
 config :zk_arcade, :payment_service_address, "0x7969c5ed335650692bc04293b07f5bf2e7a673c0"
 
 config :zk_arcade, :network, "anvil"
+
+config :zk_arcade, :host, "localhost"
+config :zk_arcade, :port, 8080

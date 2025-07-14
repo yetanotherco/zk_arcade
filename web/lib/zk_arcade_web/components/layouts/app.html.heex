@@ -3,7 +3,11 @@
 
   <div class="mx-auto flex flex-col" style="max-width: 1000px">
     <div class="absolute w-full mt-10" style="max-width: 1000px">
-      <.nav />
+      <.nav 
+        network={Application.get_env(:zk_arcade, :network)}
+        payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+        wallet={@conn.assigns.wallet} 
+       />
     </div>
 
     <div class="w-full flex-1 flex flex-col" style="margin-top: 50px">

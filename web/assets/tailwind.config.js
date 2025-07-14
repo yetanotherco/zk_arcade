@@ -9,6 +9,7 @@ module.exports = {
 	content: [
 		"./js/**/*.js",
 		"./js/**/*.jsx",
+		"./js/**/*.tsx",
 		"../lib/zk_arcade_web.ex",
 		"../lib/zk_arcade_web/**/*.*ex",
 	],
@@ -20,6 +21,7 @@ module.exports = {
 				current: "currentColor",
 				transparent: "transparent",
 				background: "rgb(5 6 5 / <alpha-value>)",
+				"modal-overlay": "rgba(0, 0, 0, 0.5)",
 				accent: {
 					100: "rgb(64 254 146 / <alpha-value>)",
 					200: "rgb(102 255 168 / <alpha-value>)",
@@ -31,6 +33,7 @@ module.exports = {
 				contrast: {
 					100: "rgb(54 54 55 / <alpha-value>)",
 				},
+				disabled: "rgb(179 179 179 / <alpha-value>)",
 			},
 			fontSize: {
 				xs: ["0.75rem", "1.375rem"], // 12px to rem, 22px to rem

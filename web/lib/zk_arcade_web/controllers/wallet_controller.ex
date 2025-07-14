@@ -39,7 +39,7 @@ defmodule ZkArcadeWeb.WalletController do
     end
   end
 
-  def disconnect_wallet(conn) do
+  def disconnect_wallet(conn, _params) do
      conn
     |> delete_session(:wallet_address)
     |> redirect(to: ~p"/")

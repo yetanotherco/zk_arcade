@@ -41,14 +41,11 @@ defmodule ZkArcadeWeb.CoreComponents do
           </.link>
 
         <div>
-          <%!-- TODO: react component here --%>
-          <div class="bg-contrast-100 p-1 rounded flex justify-between items-center" style="width: 180px">
-            <div>
-              <p class="text-xs">Connected:</p>
-              <p class="font-bold text-md">0x032...3211</p>
-            </div>
-            <.icon name="hero-chevron-down" class="size-3.5" />
-          </div>
+          <x-app-user-wallet
+            network={@network}
+            payment_service_address={@payment_service_address}
+            user_address={@wallet}
+          />
         </div>
       </nav>
     """

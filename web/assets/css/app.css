@@ -28,6 +28,20 @@ ul {
 	padding: 0 1.2rem;
 }
 
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+tbody tr td {
+	padding-block: 5px;
+}
+
+/* Add spacing effect between thead and tbody using a border or pseudo row */
+thead {
+	border-bottom: 5px solid transparent; /* simulates a margin */
+}
+
 .section-spacer-lg {
 	margin-bottom: 150px;
 }

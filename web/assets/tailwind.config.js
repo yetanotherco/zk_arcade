@@ -23,6 +23,8 @@ module.exports = {
 				background: "rgb(5 6 5 / <alpha-value>)",
 				"modal-overlay": "rgba(0, 0, 0, 0.5)",
 				red: "rgb(253 77 77 / <alpha-value>)",
+				yellow: "rgb(241 254 64 / <alpha-value>)",
+				blue: "rgb(64 165 254 / <alpha-value>)",
 				accent: {
 					100: "rgb(64 254 146 / <alpha-value>)",
 					200: "rgb(102 255 168 / <alpha-value>)",

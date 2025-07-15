@@ -81,7 +81,14 @@ export const BalanceScoreInAligned = ({
 					<h3 className="text-md font-bold mb-1">
 						Balance on Aligned:
 					</h3>
-					<p>{formatEther(balance.data || BigInt(0))} ETH</p>
+					<p>
+						{Number(
+							formatEther(balance.data || BigInt(0))
+						).toLocaleString(undefined, {
+							maximumFractionDigits: 5,
+						})}{" "}
+						ETH
+					</p>
 					<Button
 						variant="text-accent"
 						className="mt-2"

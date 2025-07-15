@@ -2,22 +2,21 @@ import React from "react";
 import { useBatcherPaymentService } from "../../hooks/";
 import { BalanceScoreInAligned } from "./BalanceScoreInAligned";
 import { Address } from "../../types/blockchain";
+import { ProofSubmissions } from "./ProofSubmissions";
+import { ProofSubmission } from "../../types/aligned";
 
 type Props = {
 	network: string;
 	payment_service_address: Address;
 	user_address: Address;
+	proofs: ProofSubmission[];
 };
 
 export const WalletInfo = ({
 	payment_service_address,
 	user_address,
+	proofs,
 }: Props) => {
-	const { balance, sendFunds } = useBatcherPaymentService({
-		contractAddress: payment_service_address,
-		userAddress: user_address,
-	});
-
 	return (
 		<div className="relative group">
 			<div className="flex flex-row items-center gap-3">
@@ -33,22 +32,14 @@ export const WalletInfo = ({
 			</div>
 			<div className="pt-2">
 				<div
-					className="flex flex-col gap-8 px-10 py-8 absolute left-0  bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10"
-					style={{ width: 400, maxHeight: 300 }}
+					className="flex flex-col gap-8 p-8 absolute left-0  bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10"
+					style={{ width: 400, maxHeight: 400 }}
 				>
 					<BalanceScoreInAligned
 						payment_service_address={payment_service_address}
 						user_address={user_address}
 					/>
-
-					<div>
-						<h3 className="text-md font-bold mb-1">
-							Your Proof Submissions:
-						</h3>
-						<p className="text-sm">
-							You don't have any submission for now...
-						</p>
-					</div>
+					<ProofSubmissions proofs={proofs} />
 				</div>
 			</div>
 		</div>

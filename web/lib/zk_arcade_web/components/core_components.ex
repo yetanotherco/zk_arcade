@@ -45,6 +45,7 @@ defmodule ZkArcadeWeb.CoreComponents do
             network={@network}
             payment_service_address={@payment_service_address}
             user_address={@wallet}
+            proofs={@submitted_proofs}
           />
         </div>
       </nav>

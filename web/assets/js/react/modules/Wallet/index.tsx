@@ -10,9 +10,15 @@ type Props = {
 	network: string;
 	payment_service_address: Address;
 	user_address?: Address;
+	proofs: string;
 };
 
-export default ({ network, payment_service_address, user_address }: Props) => {
+export default ({
+	network,
+	payment_service_address,
+	user_address,
+	proofs,
+}: Props) => {
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
@@ -22,6 +28,7 @@ export default ({ network, payment_service_address, user_address }: Props) => {
 						network={network}
 						payment_service_address={payment_service_address}
 						user_address={user_address}
+						proofs={JSON.parse(proofs)}
 					/>
 				) : (
 					<ConnectWalletWithAgreement />

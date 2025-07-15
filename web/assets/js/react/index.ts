@@ -4,7 +4,14 @@ import SubmitProof from "./modules/SubmitProof/";
 
 define(
 	{ "x-app-user-wallet": Wallet },
-	{ attributes: ["network", "payment_service_address", "user_address"] }
+	{
+		attributes: [
+			"network",
+			"payment_service_address",
+			"user_address",
+			"proofs",
+		],
+	}
 );
 
 define(

@@ -1,5 +1,14 @@
 import { Address, Hex } from "viem";
 
+export type ProofSubmission = {
+	id: string;
+	game: string;
+	status: "verified" | "pending" | "submitted-to-leaderboard";
+	insertedAt: string;
+	batchData?: BatchInclusionData;
+	verificationData: NoncedVerificationdata;
+};
+
 export type SubmitProof = {
 	verificationData: NoncedVerificationdata;
 	signature: {
@@ -52,13 +61,13 @@ export type VerificationDataCommitment = {
 };
 
 export type InclusionProof = {
-	merkle_path: Array<Uint8Array>;
+	merkle_path: Uint8Array;
 };
 
 export type BatchInclusionData = {
-	batchMerkleRoot: Uint8Array;
-	batchInclusionProof: InclusionProof;
-	indexInBatch: number;
+	batch_merkle_root: Uint8Array;
+	batch_inclusion_proof: InclusionProof;
+	index_in_batch: number;
 };
 
 export type AlignedVerificationData = {

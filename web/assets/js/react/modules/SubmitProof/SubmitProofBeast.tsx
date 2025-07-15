@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, FormInput, Modal } from "../../components";
 import { useAligned, useBatcherPaymentService, useModal } from "../../hooks";
 import { Address } from "../../types/blockchain";
-import { toHex } from "viem";
+import { formatEther, toHex } from "viem";
 import {
 	NoncedVerificationdata,
 	SubmitProof,
@@ -26,6 +26,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 	const [publicInputs, setPublicInputs] = useState<Uint8Array>();
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
+	const [maxFee, setMaxFee] = useState(BigInt(0));
 
 	const { addToast } = useToast();
 
@@ -60,6 +61,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 			isLoading: nonceIsLoading,
 			isSuccess: nonceIsSuccess,
 		},
+		balance,
 	} = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
@@ -144,6 +146,15 @@ export default ({ payment_service_address, user_address }: Props) => {
 		chainId,
 	]);
 
+	useEffect(() => {
+		const fn = async () => {
+			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
+			if (!maxFee) return;
+			setMaxFee(maxFee);
+		};
+		fn();
+	}, [estimateMaxFeeForBatchOfProofs]);
+
 	return (
 		<>
 			<div className="w-full flex justify-center items-center cursor-pointer">
@@ -196,6 +207,26 @@ export default ({ payment_service_address, user_address }: Props) => {
 							/>
 						</div>
 
+						<p
+							className={`text-sm ${
+								(balance.data || 0) < maxFee
+									? "text-red"
+									: "text-text-100"
+							}`}
+						>
+							{(balance.data || 0) > maxFee
+								? "This will cost you"
+								: "You need at least"}{" "}
+							~
+							{Number(formatEther(maxFee)).toLocaleString(
+								undefined,
+								{
+									maximumFractionDigits: 10,
+								}
+							)}{" "}
+							ETH in your aligned balance
+						</p>
+
 						<div>
 							<Button
 								variant="text"
@@ -206,7 +237,12 @@ export default ({ payment_service_address, user_address }: Props) => {
 							</Button>
 							<Button
 								variant="accent-fill"
-								disabled={!proof || !proofId || !publicInputs}
+								disabled={
+									!proof ||
+									!proofId ||
+									!publicInputs ||
+									(balance.data || 0) < maxFee
+								}
 								isLoading={submissionIsLoading}
 								onClick={handleSubmission}
 							>

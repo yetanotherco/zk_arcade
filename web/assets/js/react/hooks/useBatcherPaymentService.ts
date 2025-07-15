@@ -37,6 +37,7 @@ export const useBatcherPaymentService = ({
 		chainId,
 	});
 
+	// TODO: get nonce from batcher
 	const { ...nonceFetchData } = useReadContract({
 		address: contractAddress,
 		abi: batcherPaymentServiceAbi,

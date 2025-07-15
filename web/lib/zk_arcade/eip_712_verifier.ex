@@ -3,8 +3,6 @@ defmodule ZkArcade.EIP712Verifier do
   alias ExSecp256k1
 
   def verify_signature(signature, address, verification_data_hash, nonce, max_fee, chain_id) do
-    Logger.info("Verification data hash is #{inspect(verification_data_hash)}")
-
     with {:ok, domain_separator} <- build_domain_separator(chain_id),
          {:ok, struct_hash} <- build_struct_hash(verification_data_hash, nonce, max_fee),
          {:ok, typed_data_hash} <- build_typed_data_hash(domain_separator, struct_hash),

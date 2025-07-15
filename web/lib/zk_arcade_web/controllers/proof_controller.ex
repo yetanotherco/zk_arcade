@@ -62,6 +62,7 @@ defmodule ZkArcadeWeb.ProofController do
 
         {:ok, {:error, reason}} ->
           Logger.error("Failed to send proof to batcher on async task: #{inspect(reason)}")
+          Proofs.update_proof_status(pending_proof.id, "failed", nil)
           conn
           |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
           |> redirect(to: "/")
@@ -88,6 +89,7 @@ defmodule ZkArcadeWeb.ProofController do
 
       {:error, reason} ->
         Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
+        Proofs.update_proof_status(proof_id, "failed", nil)
         {:error, reason}
     end
   end

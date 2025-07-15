@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-interface ProcessedVerificationData {
+interface InnerVerificationData {
   proof: Uint8Array;
   proofGeneratorAddress: string;
   provingSystem: string;
@@ -8,29 +8,29 @@ interface ProcessedVerificationData {
   verificationKey: Uint8Array;
 }
 
-interface ProcessedProofVerificationData {
+interface VerificationData {
   chain_id: string;
   maxFee: string;
   nonce: string;
   payment_service_addr: string;
-  verificationData: ProcessedVerificationData;
+  verificationData: InnerVerificationData;
 }
 
-interface ProcessedProof {
+interface Proof {
   id: string;
   inserted_at: string;
   wallet_address: string;
-  verification_data: ProcessedProofVerificationData;
+  verification_data: VerificationData;
   updated_at: string;
-  batch_data: ProcessedBatchData;
+  batch_data: BatchData;
 }
 
-interface ProcessedBatchInclusionProof {
+interface BatchInclusionProof {
   merkle_path: Uint8Array[];
 }
 
-interface ProcessedBatchData {
-  batch_inclusion_proof: ProcessedBatchInclusionProof;
+interface BatchData {
+  batch_inclusion_proof: BatchInclusionProof;
   batch_merkle_root: Uint8Array;
   index_in_batch: number;
   user_nonce: string;
@@ -42,7 +42,7 @@ type Props = {
 };
 
 const ListProofs = ({ user_address, proofs }: Props) => {
-  const [parsedProofs, setParsedProofs] = useState<ProcessedProof[]>([]);
+  const [parsedProofs, setParsedProofs] = useState<Proof[]>([]);
 
 
   useEffect(() => {
@@ -87,29 +87,16 @@ const ListProofs = ({ user_address, proofs }: Props) => {
 
               <p>Wallet Address: {proof.wallet_address} </p>              
 
-              <p>Chain ID: {proof.verification_data.chain_id} </p>
+              <p>Public Input: {proof.verification_data.verificationData.publicInput.slice(0, 8)}... </p>
 
-              <p>Proving System: {proof.verification_data.verificationData.provingSystem} </p>
+              <p>Proof Data: {proof.verification_data.verificationData.proof.slice(0, 8)}... </p>
 
-              <p>Generator Address: {proof.verification_data.verificationData.proofGeneratorAddress} </p>
-
-              <p>Max Fee: {proof.verification_data.maxFee} </p>
-
-              <p>Nonce: {proof.verification_data.nonce} </p>
-
-              <p>Payment Service: {proof.verification_data.payment_service_addr} </p>
-
-              <p>Public Input: {proof.verification_data.verificationData.publicInput} </p>
-
-              <p>Proof Data: {proof.verification_data.verificationData.proof} </p>
-
-              <p> Verification Key: {proof.verification_data.verificationData.verificationKey} </p>
+              <p> Verification Key: {proof.verification_data.verificationData.verificationKey.slice(0, 8)}... </p>
 
               <div style={{ marginTop: '12px' }}>
                 <p><strong>Batch Data:</strong></p>
                 <div>
-                  <p> Merkle Root: {proof.batch_data.batch_merkle_root} </p>
-                  <p> Index in Batch: {proof.batch_data.index_in_batch} </p>
+                  <p> Merkle Root: {proof.batch_data.batch_merkle_root.slice(0, 8)}... </p>
                   <p> User Nonce: {proof.batch_data.user_nonce} </p>
                   <p> Merkle Path ({proof.batch_data.batch_inclusion_proof.merkle_path.length} nodes): </p>
                   <div style={{ marginLeft: '10px', maxHeight: '100px', overflowY: 'auto' }}>

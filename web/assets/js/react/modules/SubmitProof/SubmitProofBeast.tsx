@@ -207,25 +207,36 @@ export default ({ payment_service_address, user_address }: Props) => {
 							/>
 						</div>
 
-						<p
-							className={`text-sm ${
-								(balance.data || 0) < maxFee
-									? "text-red"
-									: "text-text-100"
-							}`}
-						>
-							{(balance.data || 0) > maxFee
-								? "This will cost you"
-								: "You need at least"}{" "}
-							~
-							{Number(formatEther(maxFee)).toLocaleString(
-								undefined,
-								{
+						<div>
+							<p className="text-sm mb-2">
+								Current aligned balance:{" "}
+								{Number(
+									formatEther(balance.data || BigInt(0))
+								).toLocaleString(undefined, {
 									maximumFractionDigits: 10,
-								}
-							)}{" "}
-							ETH in your aligned balance
-						</p>
+								})}{" "}
+								ETH
+							</p>
+							<p
+								className={`text-sm ${
+									(balance.data || 0) < maxFee
+										? "text-red"
+										: "text-text-100"
+								}`}
+							>
+								{(balance.data || 0) > maxFee
+									? "This will cost you"
+									: "You need at least"}{" "}
+								~
+								{Number(formatEther(maxFee)).toLocaleString(
+									undefined,
+									{
+										maximumFractionDigits: 10,
+									}
+								)}{" "}
+								ETH in your aligned balance
+							</p>
+						</div>
 
 						<div>
 							<Button

@@ -36,16 +36,19 @@ defmodule ZkArcadeWeb.ProofController do
 
       # Note: The proof creation is done here because we need the proof id to modify the proof state later,
       # which is passed to the task below
-      {:ok, pending_proof} = case Proofs.create_pending_proof(submit_proof_message, address) do
-        {:ok, pending_proof} ->
-          Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
-        {:error, changeset} ->
-          Logger.error("Failed to create proof: #{inspect(changeset)}")
-          conn
-          |> put_flash(:error, "Failed to create proof")
-          |> redirect(to: "/")
-          |> halt()
-      end
+      pending_proof =
+        case Proofs.create_pending_proof(submit_proof_message, address) do
+          {:ok, pending_proof} ->
+            Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
+            pending_proof
+
+          {:error, changeset} ->
+            Logger.error("Failed to create proof: #{inspect(changeset)}")
+            conn
+            |> put_flash(:error, "Failed to create proof")
+            |> redirect(to: "/")
+            |> halt()
+        end
 
       Logger.info("Message decoding successful, sending message on an async task.")
       task = Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->

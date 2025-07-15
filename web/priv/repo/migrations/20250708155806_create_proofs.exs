@@ -6,6 +6,7 @@ defmodule ZkArcade.Repo.Migrations.CreateProofs do
       add :id, :binary_id, primary_key: true
       add :verification_data, :map, null: false
       add :batch_data, :map
+      add :status, :string, null: false, default: "pending"
       add :wallet_address, references(:wallets, column: :address, type: :string), null: false
 
       timestamps()

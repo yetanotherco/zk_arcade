@@ -16,6 +16,8 @@ defmodule ZkArcadeWeb.ProofController do
         |> redirect(to: "/")
       end
 
+      # TO-DO: Verify the address obtained from the signature is the same as the one received from the session.
+
       Logger.info("Message decoding successful, sending message on an async task.")
       task = Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
         submit_to_batcher(submit_proof_message, address)

@@ -34,9 +34,22 @@ defmodule ZkArcadeWeb.ProofController do
 
       # TO-DO: Verify the address obtained from the signature is the same as the one received from the session.
 
+      # Note: The proof creation is done here because we need the proof id to modify the proof state later,
+      # which is passed to the task below
+      {:ok, pending_proof} = case create_pending_proof(submit_proof_message, address) do
+        {:ok, pending_proof} ->
+          Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
+        {:error, changeset} ->
+          Logger.error("Failed to create proof: #{inspect(changeset)}")
+          conn
+          |> put_flash(:error, "Failed to create proof")
+          |> redirect(to: "/")
+          |> halt()
+      end
+
       Logger.info("Message decoding successful, sending message on an async task.")
       task = Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-        submit_to_batcher(submit_proof_message, address)
+        submit_to_batcher(submit_proof_message, address, pending_proof.id)
       end)
 
       # Wait a few seconds to catch immediate errors
@@ -68,28 +81,14 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp submit_to_batcher(submit_proof_message, address) do
-      case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
-        {:ok, {:batch_inclusion, batch_data}} ->
-          proof_params = %{
-            batch_data: batch_data,
-            wallet_address: address,
-            verification_data: submit_proof_message["verificationData"]
-          }
+  defp submit_to_batcher(submit_proof_message, address, proof_id) do
+    case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
+      {:ok, {:batch_inclusion, batch_data}} ->
+        Proofs.update_proof_status(proof_id, "verified", batch_data)
 
-          case Proofs.create_proof(proof_params) do
-            {:ok, proof} ->
-              Logger.info("Proof saved successfully with ID: #{proof.id}")
-              {:ok, proof}
-
-            {:error, changeset} ->
-              Logger.error("Failed to save proof: #{inspect(changeset)}")
-              {:error, changeset}
-          end
-
-        {:error, reason} ->
-          Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-          {:error, reason}
-      end
+      {:error, reason} ->
+        Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
+        {:error, reason}
+    end
   end
 end

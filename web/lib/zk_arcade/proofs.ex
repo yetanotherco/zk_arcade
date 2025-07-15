@@ -8,6 +8,7 @@ defmodule ZkArcade.Proofs do
   alias ZkArcade.Proofs.Proof
   alias ZkArcade.Accounts
 
+  require Logger
   @doc """
   Returns the list of proofs.
 
@@ -52,7 +53,7 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
-  defp create_pending_proof(submit_proof_message, address) do
+  def create_pending_proof(submit_proof_message, address) do
     proof_params = %{
       wallet_address: address,
       verification_data: submit_proof_message["verificationData"],
@@ -60,7 +61,7 @@ defmodule ZkArcade.Proofs do
       batch_data: nil
     }
 
-    Proofs.create_proof(proof_params)
+    create_proof(proof_params)
   end
 
   @doc """

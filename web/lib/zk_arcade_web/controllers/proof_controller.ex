@@ -36,7 +36,7 @@ defmodule ZkArcadeWeb.ProofController do
 
       # Note: The proof creation is done here because we need the proof id to modify the proof state later,
       # which is passed to the task below
-      {:ok, pending_proof} = case create_pending_proof(submit_proof_message, address) do
+      {:ok, pending_proof} = case Proofs.create_pending_proof(submit_proof_message, address) do
         {:ok, pending_proof} ->
           Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
         {:error, changeset} ->

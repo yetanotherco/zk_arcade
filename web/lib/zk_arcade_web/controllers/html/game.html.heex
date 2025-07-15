@@ -17,12 +17,11 @@
         <p class="text-md text-text-200"><%= raw(String.replace(@game.how_to_play, "\n", "<br>")) %></p>
     </section>
 
-    <div class="w-full flex justify-center items-center cursor-pointer">
-        <div class="bg-accent-100 p-5 rounded w-full text-center hover:bg-accent-200 transition" style="max-width: 400px">
-            <%!-- Do this from react --%>
-            <p class="text-lg font-bold">Submit solution proof</p>
-        </div>
-    </div>
+    <x-app-submit-proof 
+        network={Application.get_env(:zk_arcade, :network)}
+        payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+        user_address={@wallet}
+    />
 
     <div class="section-spacer-md"></div>
 </div>

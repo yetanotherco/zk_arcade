@@ -26,27 +26,23 @@ defmodule ZkArcadeWeb.ProofController do
         {:ok, {:ok, result}} ->
           Logger.info("Task completed successfully: #{inspect(result)}")
           conn
-          |> put_flash(:info, "Proof submitted successfully!")
-          |> redirect(to: "/")
+          |> redirect(to: "/game/beast?message=proof-sent")
 
         {:ok, {:error, reason}} ->
           Logger.error("Failed to send proof to batcher on async task: #{inspect(reason)}")
           conn
-          |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-          |> redirect(to: "/")
+          |> redirect(to: "/game/beast?message=proof-failed")
 
         nil ->
           Logger.info("Task is taking longer than 5 seconds, continuing without waiting.")
           conn
-          |> put_flash(:info, "Proof is being submitted to batcher.")
-          |> redirect(to: "/")
+          |> redirect(to: "/game/beast?message=proof-sent")
       end
     else
       error ->
       Logger.error("Input validation failed: #{inspect(error)}")
       conn
-      |> put_flash(:error, "Invalid input: #{inspect(error)}")
-      |> redirect(to: "/")
+      |> redirect(to: "/game/beast?message=proof-failed")
     end
   end
 

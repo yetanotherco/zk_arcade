@@ -1,14 +1,20 @@
-import { Signature } from "viem";
+import { Address, Hex } from "viem";
 
 export type SubmitProof = {
 	verificationData: NoncedVerificationdata;
-	signature: Signature;
+	signature: {
+		r: Hex;
+		s: Hex;
+		v: number;
+	};
 };
 
 export type NoncedVerificationdata = {
 	verificationData: VerificationData;
 	nonce: `0x${string}`;
 	maxFee: `0x${string}`;
+	chain_id: `0x${string}`;
+	payment_service_addr: Address;
 };
 
 export type VerificationData = {
@@ -19,10 +25,10 @@ export type VerificationData = {
 		| "SP1"
 		| "Risc0"
 		| "CircomGroth16Bn256";
-	proof: Uint8Array;
-	publicInput?: Uint8Array;
-	verificationKey?: Uint8Array;
-	vmProgramCode?: Uint8Array;
+	proof: number[];
+	publicInput?: number[];
+	verificationKey?: number[];
+	vmProgramCode?: number[];
 	proofGeneratorAddress: string;
 };
 

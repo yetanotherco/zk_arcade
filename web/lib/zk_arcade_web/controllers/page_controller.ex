@@ -2,8 +2,8 @@ defmodule ZkArcadeWeb.PageController do
   require Logger
   use ZkArcadeWeb, :controller
 
-  def home(conn, _params) do
-    wallet =
+  defp get_wallet_from_session(conn) do
+     wallet =
       if address = get_session(conn, :wallet_address) do
         case ZkArcade.Accounts.fetch_wallet_by_address(address) do
           {:ok, wallet} -> wallet.address
@@ -13,13 +13,22 @@ defmodule ZkArcadeWeb.PageController do
         nil
       end
 
+      wallet
+  end
+
+  def home(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+
     conn
     |> assign(:wallet, wallet)
     |> render(:home)
   end
 
   def game(conn, %{"name" => _game_name}) do
+     wallet = get_wallet_from_session(conn)
+
      conn
+      |> assign(:wallet, wallet)
       |> assign(:game, %{
         image: "/images/beast1984.webp",
         name: "Beast 1984",

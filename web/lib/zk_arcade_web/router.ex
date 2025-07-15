@@ -18,7 +18,7 @@ defmodule ZkArcadeWeb.Router do
     post "/wallet/sign", WalletController, :connect_wallet
     get "/wallet/disconnect", WalletController, :disconnect_wallet
 
-    post "/submit-proof", ProofController, :submit
+    post "/proof/", ProofController, :submit
 
     end
 

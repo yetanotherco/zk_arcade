@@ -1,6 +1,6 @@
 import React from "react";
 import { ProofSubmission } from "../../types/aligned";
-import { bytesToHex, toHex } from "viem";
+import { bytesToHex } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { Button } from "../../components";
 
@@ -33,6 +33,15 @@ const Proof = ({ proof }: { proof: ProofSubmission }) => {
 		-4
 	)}`;
 
+	const handleSubmitProof = () => {};
+
+	const btnText: { [key in ProofSubmission["status"]]: string } = {
+		verified: "Submit solution",
+		"submitted-to-leaderboard": "Already submitted to leaderboard",
+		pending:
+			"You need to wait until its verified before submitting the solution",
+	};
+
 	return (
 		<>
 			<tr>
@@ -49,6 +58,19 @@ const Proof = ({ proof }: { proof: ProofSubmission }) => {
 					</a>
 				</td>
 				<td>{proofHashShorten}</td>
+			</tr>
+
+			<tr>
+				<td colSpan={100}>
+					<Button
+						variant="text"
+						className="text-sm w-full"
+						disabled={proof.status !== "verified"}
+						onClick={handleSubmitProof}
+					>
+						{btnText[proof.status]}
+					</Button>
+				</td>
 			</tr>
 		</>
 	);
@@ -72,21 +94,7 @@ export const ProofSubmissions = ({ proofs = [] }: Props) => {
 							</thead>
 							<tbody className="text-text-100 text-sm">
 								{proofs.map(proof => (
-									<>
-										<Proof key={proof.id} proof={proof} />
-										{proof.status == "verified" && (
-											<tr>
-												<td colSpan={100}>
-													<Button
-														variant="text-accent"
-														className="text-sm w-full"
-													>
-														Submit solution
-													</Button>
-												</td>
-											</tr>
-										)}
-									</>
+									<Proof key={proof.id} proof={proof} />
 								))}
 							</tbody>
 						</table>

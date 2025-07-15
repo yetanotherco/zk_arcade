@@ -25,12 +25,10 @@ interface Proof {
   batch_data: BatchData;
 }
 
-interface BatchInclusionProof {
-  merkle_path: Uint8Array[];
-}
-
 interface BatchData {
-  batch_inclusion_proof: BatchInclusionProof;
+  batch_inclusion_proof: {
+    merkle_path: Uint8Array[];
+  };
   batch_merkle_root: Uint8Array;
   index_in_batch: number;
   user_nonce: string;
@@ -53,13 +51,6 @@ const ListProofs = ({ user_address, proofs }: Props) => {
       console.error("Failed to parse proofs JSON", e);
     }
   }, [proofs]);
-
-
-  const uint8ArrayToHex = (array: Uint8Array): string => {
-    return Array.from(array)
-      .map(byte => byte.toString(16).padStart(2, '0'))
-      .join('');
-  };
 
   return (
     <div>
@@ -102,7 +93,7 @@ const ListProofs = ({ user_address, proofs }: Props) => {
                   <div style={{ marginLeft: '10px', maxHeight: '100px', overflowY: 'auto' }}>
                     {proof.batch_data.batch_inclusion_proof.merkle_path.map((path, index) => (
                       <p key={index} style={{ fontSize: '0.7em', margin: '2px 0', fontFamily: 'monospace' }}>
-                        [{index}]: {uint8ArrayToHex(path)}
+                        [{index}]: {path}
                       </p>
                     ))}
                   </div>

@@ -25,6 +25,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 	const [proofId, setProofId] = useState<Uint8Array>();
 	const [publicInputs, setPublicInputs] = useState<Uint8Array>();
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
+	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 
 	const { addToast } = useToast();
 
@@ -96,11 +97,11 @@ export default ({ payment_service_address, user_address }: Props) => {
 		}
 
 		const verificationData: VerificationData = {
-			provingSystem: "GnarkGroth16Bn254",
+			provingSystem: "Risc0",
 			proof: Array.from(proof),
 			publicInput: Array.from(publicInputs),
-			vmProgramCode: undefined,
-			verificationKey: Array.from(proofId),
+			vmProgramCode: Array.from(proofId),
+			verificationKey: undefined,
 			proofGeneratorAddress: user_address,
 		};
 
@@ -124,7 +125,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 		};
 
 		setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
+		setSubmissionIsLoading(true);
 		window.setTimeout(() => {
 			formRef.current?.submit();
 		}, 100);
@@ -206,6 +207,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 							<Button
 								variant="accent-fill"
 								disabled={!proof || !proofId || !publicInputs}
+								isLoading={submissionIsLoading}
 								onClick={handleSubmission}
 							>
 								Confirm

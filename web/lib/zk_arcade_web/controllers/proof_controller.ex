@@ -4,6 +4,7 @@ defmodule ZkArcadeWeb.ProofController do
 
   alias ZkArcade.BatcherConnection
   alias ZkArcade.Proofs
+  alias ZkArcade.EIP712Verifier
 
   def home(conn, _params) do
     wallet =
@@ -27,12 +28,24 @@ defmodule ZkArcadeWeb.ProofController do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
       address = get_session(conn, :wallet_address)
       if is_nil(address) do
+        Logger.error("Address is not defined in session!")
         conn
         |> put_flash(:error, "Wallet address is undefined.")
         |> redirect(to: "/")
       end
 
-      # TO-DO: Verify the address obtained from the signature is the same as the one received from the session.
+      case EIP712Verifier.verify_aligned_signature(
+        submit_proof_message,
+        address,
+        submit_proof_message["verificationData"]["chain_id"]
+      ) do
+        {:ok, true} -> Logger.info("Signature was verified successfully!")
+        {:error, reason} ->
+          Logger.error("Failed to verify the received signature: #{inspect(reason)}")
+          conn
+          |> put_flash(:error, "Failed to verify the received signature: #{inspect(reason)}")
+          |> redirect(to: "/")
+      end
 
       Logger.info("Message decoding successful, sending message on an async task.")
       task = Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->

@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import { bytesToHex, encodeAbiParameters } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { Button } from "../../components";
-import { useWriteContract } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import { leaderboardAbi } from "../../constants/aligned";
+import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
+import { useToast } from "../../state/toast";
 
 const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
 	verified: "text-accent-100",
@@ -27,8 +29,12 @@ const Proof = ({
 	proof: ProofSubmission;
 	leaderboard_address: Address;
 }) => {
-	const { writeContractAsync, isPending, data, isSuccess, error, isError } =
-		useWriteContract();
+	const { address } = useAccount();
+	const { addToast } = useToast();
+	const { submitSolution, score } = useLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: address || "0x0",
+	});
 
 	const merkleRoot = bytesToHex(
 		proof.batchData?.batch_merkle_root || Uint8Array.from([])
@@ -50,44 +56,55 @@ const Proof = ({
 
 	const handleSubmitProof = async () => {
 		if (!proof.batchData) {
+			alert("Batch data not available for this proof");
 			return;
 		}
 
-		const hexPath: string[] =
-			proof.batchData.batch_inclusion_proof.merkle_path.map(
-				p => `${Buffer.from(p).toString("hex")}`
-			);
-		const encodedMerkleProof = `0x${hexPath.join("")}`;
-
-		const args = [
-			bytesToHex(commitment.proofCommitment, { size: 32 }),
-			bytesToHex(
-				Uint8Array.from(
-					proof.verificationData.verificationData.publicInput || []
-				),
-				{ size: 32 }
-			),
-			bytesToHex(commitment.provingSystemAuxDataCommitment, {
-				size: 32,
-			}),
-			proof.verificationData.verificationData.proofGeneratorAddress,
-			merkleRoot,
-			encodedMerkleProof,
-			proof.batchData?.index_in_batch,
-		];
-
-		console.log("ARGS", args);
-
-		// todo: here we would call base on proof.game
-		await writeContractAsync({
-			address: leaderboard_address,
-			functionName: "submitBeastSolution",
-			abi: leaderboardAbi,
-			args,
-		});
+		await submitSolution.submitBeastSolution(
+			proof.verificationData.verificationData,
+			proof.batchData
+		);
 	};
 
-	console.log("CONTRACT eRROR", error, data);
+	useEffect(() => {
+		if (submitSolution.receipt.isError) {
+			addToast({
+				title: "Receipt error",
+				desc: "Failed to retrieve receipt from the transaction.",
+				type: "error",
+			});
+		}
+
+		if (submitSolution.receipt.isSuccess) {
+			addToast({
+				title: "Receipt received",
+				desc: "Your solution receipt has been received, your score has been updated.",
+				type: "success",
+			});
+			score.refetch();
+		}
+
+		if (submitSolution.tx.isSuccess) {
+			addToast({
+				title: "Solution verified",
+				desc: "Your proof was submitted and verified successfully, waiting for receipt....",
+				type: "success",
+			});
+		}
+
+		if (submitSolution.tx.isError) {
+			addToast({
+				title: "Solution failed",
+				desc: "The transaction was sent but the verification failed.",
+				type: "error",
+			});
+		}
+	}, [
+		submitSolution.receipt.isLoading,
+		submitSolution.receipt.isError,
+		submitSolution.tx.isSuccess,
+		submitSolution.tx.isError,
+	]);
 
 	return (
 		<>
@@ -115,7 +132,10 @@ const Proof = ({
 						disabled={proof.status !== "verified"}
 						onClick={handleSubmitProof}
 					>
-						{btnText[proof.status]}
+						{submitSolution.tx.isPending ||
+						submitSolution.receipt.isLoading
+							? "Sending..."
+							: btnText[proof.status]}
 					</Button>
 				</td>
 			</tr>

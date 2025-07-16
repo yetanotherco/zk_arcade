@@ -8,6 +8,7 @@ defmodule ZkArcade.Proofs do
   alias ZkArcade.Proofs.Proof
   alias ZkArcade.Accounts
 
+  require Logger
   @doc """
   Returns the list of proofs.
 
@@ -52,6 +53,17 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
+  def create_pending_proof(submit_proof_message, address) do
+    proof_params = %{
+      wallet_address: address,
+      verification_data: submit_proof_message["verificationData"],
+      status: "pending",
+      batch_data: nil
+    }
+
+    create_proof(proof_params)
+  end
+
   @doc """
   Creates a proof and ensures the wallet exists.
 
@@ -86,6 +98,38 @@ defmodule ZkArcade.Proofs do
   """
   def delete_proof(%Proof{} = proof) do
     Repo.delete(proof)
+  end
+
+  def update_proof_status_submitted(proof_id, batch_data) do
+    proof = get_proof!(proof_id)
+
+    changeset = change_proof(proof, %{status: "submitted", batch_data: batch_data})
+
+    case Repo.update(changeset) do
+      {:ok, updated_proof} ->
+        Logger.info("Updated proof #{proof_id} status to submitted")
+        {:ok, updated_proof}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+        {:error, changeset}
+    end
+  end
+
+  def update_proof_status_claimed(proof_id) do
+    proof = get_proof!(proof_id)
+
+    changeset = change_proof(proof, %{status: "claimed"})
+
+    case Repo.update(changeset) do
+      {:ok, updated_proof} ->
+        Logger.info("Updated proof #{proof_id} status to claimed")
+        {:ok, updated_proof}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+        {:error, changeset}
+    end
   end
 
   @doc """

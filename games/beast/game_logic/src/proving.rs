@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum GameLogEntry {
-    CommonBeastMoved { idx: usize, new_pos: Coord },
-    SuperBeastMoved { idx: usize, new_pos: Coord },
+    CommonBeastMoved { old_pos: Coord, new_pos: Coord },
+    SuperBeastMoved { old_pos: Coord, new_pos: Coord },
     HatchedBeastMoved { idx: usize, new_pos: Coord },
     PlayerMoved { dir: Dir },
 }
@@ -22,4 +22,5 @@ pub struct LevelLog {
 #[derive(Serialize, Deserialize)]
 pub struct ProgramInput {
     pub levels_log: Vec<LevelLog>,
+    pub address: Vec<u8>,
 }

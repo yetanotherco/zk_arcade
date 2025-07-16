@@ -108,9 +108,9 @@ fn prove_level_completed(input: &LevelLog) -> bool {
                     PlayerAction::None => {}
                 }
             }
-            GameLogEntry::CommonBeastMoved { idx, new_pos } => {
+            GameLogEntry::CommonBeastMoved { old_pos, new_pos } => {
                 let beast_action = common_beasts
-                    .get_mut(*idx)
+                    .iter_mut().find(|beast| beast.position == *old_pos)
                     .unwrap()
                     .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
@@ -120,9 +120,9 @@ fn prove_level_completed(input: &LevelLog) -> bool {
                     player.respawn(&mut board);
                 }
             }
-            GameLogEntry::SuperBeastMoved { idx, new_pos } => {
+            GameLogEntry::SuperBeastMoved { old_pos, new_pos } => {
                 let beast_action = super_beasts
-                    .get_mut(*idx)
+                    .iter_mut().find(|beast| beast.position == *old_pos)
                     .unwrap()
                     .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();

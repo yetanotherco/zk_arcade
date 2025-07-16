@@ -34,25 +34,9 @@ defmodule ZkArcadeWeb.ProofController do
 
       # TO-DO: Verify the address obtained from the signature is the same as the one received from the session.
 
-      # Note: The proof creation is done here because we need the proof id to modify the proof state later,
-      # which is passed to the task below
-      pending_proof =
-        case Proofs.create_pending_proof(submit_proof_message, address) do
-          {:ok, pending_proof} ->
-            Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
-            pending_proof
-
-          {:error, changeset} ->
-            Logger.error("Failed to create proof: #{inspect(changeset)}")
-            conn
-            |> put_flash(:error, "Failed to create proof")
-            |> redirect(to: "/")
-            |> halt()
-        end
-
       Logger.info("Message decoding successful, sending message on an async task.")
       task = Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-        submit_to_batcher(submit_proof_message, address, pending_proof.id)
+        submit_to_batcher(submit_proof_message, address)
       end)
 
       # Wait a few seconds to catch immediate errors
@@ -65,7 +49,6 @@ defmodule ZkArcadeWeb.ProofController do
 
         {:ok, {:error, reason}} ->
           Logger.error("Failed to send proof to batcher on async task: #{inspect(reason)}")
-          Proofs.update_proof_status(pending_proof.id, "failed", nil)
           conn
           |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
           |> redirect(to: "/")
@@ -85,15 +68,22 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp submit_to_batcher(submit_proof_message, address, proof_id) do
-    case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
-      {:ok, {:batch_inclusion, batch_data}} ->
-        Proofs.update_proof_status(proof_id, "verified", batch_data)
+  defp submit_to_batcher(submit_proof_message, address) do
+    with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address) do
+      Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
+      case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
+        {:ok, {:batch_inclusion, batch_data}} ->
+          Proofs.update_proof_status(pending_proof.id, "verified", batch_data)
 
-      {:error, reason} ->
-        Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-        Proofs.update_proof_status(proof_id, "failed", nil)
-        {:error, reason}
+        {:error, reason} ->
+          Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
+          Proofs.update_proof_status(pending_proof.id, "failed", nil)
+          {:error, reason}
+      end
+    else
+      {:error, changeset} when is_map(changeset) ->
+        Logger.error("Failed to create proof: #{inspect(changeset)}")
+        {:error, changeset}
     end
   end
 end

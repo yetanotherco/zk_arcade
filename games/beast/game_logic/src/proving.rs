@@ -22,5 +22,5 @@ pub struct LevelLog {
 #[derive(Serialize, Deserialize)]
 pub struct ProgramInput {
     pub levels_log: Vec<LevelLog>,
-    pub address: String,
+    pub address: Vec<u8>,
 }

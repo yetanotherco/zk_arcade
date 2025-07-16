@@ -15,4 +15,4 @@ submit_beast_solution:
 
 __CONTRACTS__:
 deploy_contract:
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh
+	@cd ../../ && . contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh

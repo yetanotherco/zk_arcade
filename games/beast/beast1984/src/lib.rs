@@ -13,5 +13,6 @@ pub mod help;
 pub mod prover;
 pub mod start;
 pub mod stty;
+mod ethereum;
 
 pub use start::*;

@@ -6,6 +6,7 @@
       <.nav 
         network={Application.get_env(:zk_arcade, :network)}
         payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+        leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
         wallet={@conn.assigns.wallet} 
         submitted_proofs={@conn.assigns.submitted_proofs}
        />

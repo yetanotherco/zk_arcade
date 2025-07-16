@@ -9,6 +9,7 @@ import { ToastContainer } from "../../components/Toast";
 type Props = {
 	network: string;
 	payment_service_address: Address;
+	leaderboard_address: Address;
 	user_address?: Address;
 	proofs: string;
 };
@@ -16,6 +17,7 @@ type Props = {
 export default ({
 	network,
 	payment_service_address,
+	leaderboard_address,
 	user_address,
 	proofs,
 }: Props) => {
@@ -26,6 +28,7 @@ export default ({
 				{user_address ? (
 					<WalletInfo
 						network={network}
+						leaderboard_address={leaderboard_address}
 						payment_service_address={payment_service_address}
 						user_address={user_address}
 						proofs={JSON.parse(proofs)}

@@ -1,19 +1,34 @@
 import React from "react";
 import { ProofSubmission } from "../../types/aligned";
-import { bytesToHex } from "viem";
+import { Address } from "../../types/blockchain";
+import { bytesToHex, encodeAbiParameters } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { Button } from "../../components";
+import { useWriteContract } from "wagmi";
+import { leaderboardAbi } from "../../constants/aligned";
 
-type Props = {
-	proofs: ProofSubmission[];
+const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
+	verified: "text-accent-100",
+	"submitted-to-leaderboard": "text-blue",
+	pending: "text-yellow",
 };
 
-const Proof = ({ proof }: { proof: ProofSubmission }) => {
-	const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
-		verified: "text-accent-100",
-		"submitted-to-leaderboard": "text-blue",
-		pending: "text-yellow",
-	};
+const btnText: { [key in ProofSubmission["status"]]: string } = {
+	verified: "Submit solution",
+	"submitted-to-leaderboard": "Already submitted to leaderboard",
+	pending:
+		"You need to wait until its verified before submitting the solution",
+};
+
+const Proof = ({
+	proof,
+	leaderboard_address,
+}: {
+	proof: ProofSubmission;
+	leaderboard_address: Address;
+}) => {
+	const { writeContractAsync, isPending, data, isSuccess, error, isError } =
+		useWriteContract();
 
 	const merkleRoot = bytesToHex(
 		proof.batchData?.batch_merkle_root || Uint8Array.from([])
@@ -23,24 +38,56 @@ const Proof = ({ proof }: { proof: ProofSubmission }) => {
 		-4
 	)}`;
 
-	const proofHash = bytesToHex(
-		computeVerificationDataCommitment(
-			proof.verificationData.verificationData
-		)
+	const commitment = computeVerificationDataCommitment(
+		proof.verificationData.verificationData
 	);
+
+	const proofHash = bytesToHex(commitment.commitmentDigest);
 
 	const proofHashShorten = `${proofHash.slice(0, 2)}...${proofHash.slice(
 		-4
 	)}`;
 
-	const handleSubmitProof = () => {};
+	const handleSubmitProof = async () => {
+		if (!proof.batchData) {
+			return;
+		}
 
-	const btnText: { [key in ProofSubmission["status"]]: string } = {
-		verified: "Submit solution",
-		"submitted-to-leaderboard": "Already submitted to leaderboard",
-		pending:
-			"You need to wait until its verified before submitting the solution",
+		const hexPath: string[] =
+			proof.batchData.batch_inclusion_proof.merkle_path.map(
+				p => `${Buffer.from(p).toString("hex")}`
+			);
+		const encodedMerkleProof = `0x${hexPath.join("")}`;
+
+		const args = [
+			bytesToHex(commitment.proofCommitment, { size: 32 }),
+			bytesToHex(
+				Uint8Array.from(
+					proof.verificationData.verificationData.publicInput || []
+				),
+				{ size: 32 }
+			),
+			bytesToHex(commitment.provingSystemAuxDataCommitment, {
+				size: 32,
+			}),
+			proof.verificationData.verificationData.proofGeneratorAddress,
+			merkleRoot,
+			encodedMerkleProof,
+			proof.batchData?.index_in_batch,
+		];
+
+		console.log("ARGS", args);
+
+		// todo: here we would call base on proof.game
+		await writeContractAsync({
+			address: leaderboard_address,
+			functionName: "submitBeastSolution",
+			abi: leaderboardAbi,
+			args,
+		});
 	};
+
+	console.log("CONTRACT eRROR", error, data);
 
 	return (
 		<>
@@ -76,7 +123,15 @@ const Proof = ({ proof }: { proof: ProofSubmission }) => {
 	);
 };
 
-export const ProofSubmissions = ({ proofs = [] }: Props) => {
+type Props = {
+	proofs: ProofSubmission[];
+	leaderboard_address: Address;
+};
+
+export const ProofSubmissions = ({
+	proofs = [],
+	leaderboard_address,
+}: Props) => {
 	return (
 		<div>
 			<h3 className="text-md font-bold mb-2">Your Proof Submissions:</h3>
@@ -94,7 +149,13 @@ export const ProofSubmissions = ({ proofs = [] }: Props) => {
 							</thead>
 							<tbody className="text-text-100 text-sm">
 								{proofs.map(proof => (
-									<Proof key={proof.id} proof={proof} />
+									<Proof
+										key={proof.id}
+										proof={proof}
+										leaderboard_address={
+											leaderboard_address
+										}
+									/>
 								))}
 							</tbody>
 						</table>

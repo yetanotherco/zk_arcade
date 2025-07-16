@@ -8,6 +8,7 @@ define(
 		attributes: [
 			"network",
 			"payment_service_address",
+			"leaderboard_address",
 			"user_address",
 			"proofs",
 		],

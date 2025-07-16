@@ -44,7 +44,12 @@ export const computeVerificationDataCommitment = (
 	const commitmentDigest = hasher.digest();
 	hasher.reset();
 
-	return commitmentDigest;
+	return {
+		commitmentDigest,
+		proofCommitment,
+		pubInputCommitment,
+		provingSystemAuxDataCommitment,
+	};
 };
 
 function hexStringToBytes(hex: string): Uint8Array {

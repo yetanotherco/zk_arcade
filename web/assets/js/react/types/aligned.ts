@@ -61,7 +61,7 @@ export type VerificationDataCommitment = {
 };
 
 export type InclusionProof = {
-	merkle_path: Uint8Array;
+	merkle_path: Uint8Array[];
 };
 
 export type BatchInclusionData = {

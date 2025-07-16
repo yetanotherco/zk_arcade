@@ -1,5 +1,4 @@
 import React from "react";
-import { useBatcherPaymentService } from "../../hooks/";
 import { BalanceScoreInAligned } from "./BalanceScoreInAligned";
 import { Address } from "../../types/blockchain";
 import { ProofSubmissions } from "./ProofSubmissions";
@@ -8,12 +7,14 @@ import { ProofSubmission } from "../../types/aligned";
 type Props = {
 	network: string;
 	payment_service_address: Address;
+	leaderboard_address: Address;
 	user_address: Address;
 	proofs: ProofSubmission[];
 };
 
 export const WalletInfo = ({
 	payment_service_address,
+	leaderboard_address,
 	user_address,
 	proofs,
 }: Props) => {
@@ -39,7 +40,10 @@ export const WalletInfo = ({
 						payment_service_address={payment_service_address}
 						user_address={user_address}
 					/>
-					<ProofSubmissions proofs={proofs} />
+					<ProofSubmissions
+						proofs={proofs}
+						leaderboard_address={leaderboard_address}
+					/>
 				</div>
 			</div>
 		</div>

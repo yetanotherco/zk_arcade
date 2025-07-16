@@ -16,34 +16,39 @@ defmodule ZkArcadeWeb.PageController do
       wallet
   end
 
-  def home(conn, _params) do
-    wallet = get_wallet_from_session(conn)
+  defp get_proofs(nil), do: []
 
-    proofs = ZkArcade.Proofs.get_proofs_by_address(wallet);
+  defp get_proofs(address) do
+    proofs = ZkArcade.Proofs.get_proofs_by_address(address)
 
-    proofs_json = Enum.map(proofs, fn proof ->
+    Enum.map(proofs, fn proof ->
       %{
         id: proof.id,
         status: "verified",
         game: "Beast",
         insertedAt: NaiveDateTime.to_iso8601(proof.inserted_at),
         batchData: proof.batch_data,
-        verificationData: proof.verification_data,
+        verificationData: proof.verification_data
       }
     end)
+  end
+
+  def home(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    proofs = get_proofs(wallet)
 
     conn
-    |> assign(:submitted_proofs, Jason.encode!(proofs_json))
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:wallet, wallet)
     |> render(:home)
   end
 
   def game(conn, %{"name" => _game_name}) do
      wallet = get_wallet_from_session(conn)
-     proofs = ZkArcade.Proofs.get_proofs_by_address(wallet);
+      proofs = get_proofs(wallet)
 
      conn
-      |> assign(:submitted_proofs, proofs)
+      |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
       |> assign(:game, %{
         image: "/images/beast1984.webp",

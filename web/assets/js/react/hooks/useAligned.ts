@@ -24,7 +24,7 @@ export const useAligned = () => {
 		async (noncedVerificationData: NoncedVerificationdata) => {
 			const verificationDataHash = computeVerificationDataCommitment(
 				noncedVerificationData.verificationData
-			);
+			).commitmentDigest;
 
 			const message = {
 				verification_data_hash: toHex(verificationDataHash),

@@ -41,7 +41,7 @@ play_beast:
 
 submit_beast_solution:
 	@cp games/beast/beast1984/cmd/.$(NETWORK).env games/beast/beast1984/cmd/.env
-	@cargo run --manifest-path ./games/beast/beast1984/Cargo.toml --release --bin submit_solution
+	@cd games/beast && cargo run --manifest-path ./beast1984/Cargo.toml --release --bin submit_solution
 
 
 

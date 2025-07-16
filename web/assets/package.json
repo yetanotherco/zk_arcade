@@ -1,21 +1,21 @@
 {
 	"dependencies": {
+		"@react-spring/web": "10.0.1",
 		"@sentry/react": "^8.47.0",
 		"@tanstack/react-query": "^5.62.8",
+		"cbor2": "^2.0.1",
 		"connectkit": "^1.8.2",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
 		"remount": "^1.0.0",
-		"viem": "^2.21.55",
-		"wagmi": "^2.14.3",
-		"cbor2": "^2.0.1",
 		"sha3": "^2.1.4",
-		"@react-spring/web": "10.0.1"
+		"viem": "^2.21.55",
+		"wagmi": "^2.14.3"
 	},
 	"devDependencies": {
+		"@types/node": "^24.0.14",
 		"@types/react": "^18.3.14",
-		"@types/react-dom": "^18.3.2",
-		"@types/node": "^24.0.10"
+		"@types/react-dom": "^18.3.2"
 	},
 	"prettier": {
 		"useTabs": true,

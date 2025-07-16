@@ -131,22 +131,6 @@ defmodule ZkArcade.BatcherConnection do
     }
   end
 
-  defp map_to_uint8_array(index_map) when is_map(index_map) do
-    indexed_values =
-      index_map
-      |> Enum.map(fn {k, v} -> {String.to_integer(k), v} end)
-      |> Enum.into(%{})
-
-    max_index = indexed_values |> Map.keys() |> Enum.max()
-
-    0..max_index
-    |> Enum.map(fn index ->
-      Map.get(indexed_values, index, 0)
-    end)
-  end
-
-  defp map_to_uint8_array(nil), do: nil
-
   defp parse_bigint(v) when is_binary(v) do
     String.to_integer(v)
   end

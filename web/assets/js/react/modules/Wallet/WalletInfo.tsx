@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { BalanceScoreInAligned } from "./BalanceScoreInAligned";
 import { Address } from "../../types/blockchain";
 import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
+import { useToast } from "../../state/toast";
 
 type Props = {
 	network: string;
@@ -19,6 +20,21 @@ export const WalletInfo = ({
 	user_address,
 	proofs,
 }: Props) => {
+	const { addToast } = useToast();
+
+	useEffect(() => {
+		addToast({
+			title: "Transaction sent",
+			desc: "Your transaction was sent and verified, waiting for receipt...",
+			type: "success",
+		});
+		addToast({
+			title: "Transaction sent",
+			desc: "Your transaction was sent and verified, waiting for receipt...",
+			type: "success",
+		});
+	}, []);
+
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleDisconnect = () => {

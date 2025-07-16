@@ -38,14 +38,14 @@ export const Toast: React.FC<Props> = ({ id, title, desc, type }) => {
 			onMouseLeave={togglePaused}
 			onClick={() => setHide(true)}
 			className={clsx(
-				"relative flex min-w-[300px] cursor-pointer items-center gap-10 rounded px-8 py-4",
+				"relative flex cursor-pointer mr-4 mb-4 items-center gap-10 rounded px-8 py-4",
 				{
 					"border bg-accent-100/20 border-accent-100":
 						type === "success",
 					"border bg-red/20 border-red": type === "error",
 				}
 			)}
-			style={{ ...springs }}
+			style={{ maxWidth: 500, ...springs }}
 		>
 			<div>
 				<p

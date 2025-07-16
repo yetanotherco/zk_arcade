@@ -67,6 +67,24 @@ const Proof = ({
 	};
 
 	useEffect(() => {
+		if (submitSolution.tx.isSuccess) {
+			addToast({
+				title: "Solution verified",
+				desc: "Your proof was submitted and verified successfully, waiting for receipt....",
+				type: "success",
+			});
+		}
+
+		if (submitSolution.tx.isError) {
+			addToast({
+				title: "Solution failed",
+				desc: "The transaction was sent but the verification failed.",
+				type: "error",
+			});
+		}
+	}, [submitSolution.tx.isSuccess, submitSolution.tx.isError]);
+
+	useEffect(() => {
 		if (submitSolution.receipt.isError) {
 			addToast({
 				title: "Receipt error",
@@ -83,28 +101,7 @@ const Proof = ({
 			});
 			score.refetch();
 		}
-
-		if (submitSolution.tx.isSuccess) {
-			addToast({
-				title: "Solution verified",
-				desc: "Your proof was submitted and verified successfully, waiting for receipt....",
-				type: "success",
-			});
-		}
-
-		if (submitSolution.tx.isError) {
-			addToast({
-				title: "Solution failed",
-				desc: "The transaction was sent but the verification failed.",
-				type: "error",
-			});
-		}
-	}, [
-		submitSolution.receipt.isLoading,
-		submitSolution.receipt.isError,
-		submitSolution.tx.isSuccess,
-		submitSolution.tx.isError,
-	]);
+	}, [submitSolution.receipt.isLoading, submitSolution.receipt.isError]);
 
 	return (
 		<>

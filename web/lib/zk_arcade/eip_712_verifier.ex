@@ -2,6 +2,9 @@ defmodule ZkArcade.EIP712Verifier do
   require Logger
   alias ExSecp256k1
 
+  @verifyingContractAddress "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0"
+  @domainType "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+
   def verify_signature(signature, address, verification_data_hash, nonce, max_fee, chain_id) do
     with {:ok, domain_separator} <- build_domain_separator(chain_id),
          {:ok, struct_hash} <- build_struct_hash(verification_data_hash, nonce, max_fee),
@@ -18,8 +21,8 @@ defmodule ZkArcade.EIP712Verifier do
   end
 
   def build_domain_separator(chain_id) do
-    with {:ok, contract_address_bytes} <- decode_hex("0x7969c5eD335650692Bc04293B07F5BF2e7A673C0") do
-      domain_type_hash = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
+    with {:ok, contract_address_bytes} <- decode_hex(@verifyingContractAddress) do
+      domain_type_hash = keccak256(@domainType)
 
       name_hash = keccak256("Aligned")
       version_hash = keccak256("1")

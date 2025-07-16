@@ -59,7 +59,9 @@ defmodule ZkArcade.MixProject do
       {:nimble_csv, "~> 1.1"},
       {:new_relic_agent, "~> 1.0"},
       {:ex_keccak, "~> 0.7.5"},
-      {:ex_secp256k1, "~> 0.7"}
+      {:ex_secp256k1, "~> 0.7"},
+      {:gun, "~> 2.0"},
+      {:cbor, "~> 1.0"}
     ]
   end
 

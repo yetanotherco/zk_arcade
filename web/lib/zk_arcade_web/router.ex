@@ -27,6 +27,7 @@ defmodule ZkArcadeWeb.Router do
     get "/disconnect", PageController, :disconnect_wallet
 
     get "/submit-proof", ProofController, :home
+    post "/submit-proof", ProofController, :submit
   end
 
   # Other scopes may use custom stacks.

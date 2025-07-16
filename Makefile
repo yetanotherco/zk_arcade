@@ -27,8 +27,8 @@ web_run: web_deps web_db
 
 web_remove_db_container:
 	@cd web && \
-		docker stop zkarcade-postgres-container || true  && \
-		docker rm zkarcade-postgres-container || true
+		docker stop zk_arcade_db || true  && \
+		docker rm zk_arcade_db || true
 
 web_clean_db: web_remove_db_container
 	@cd web && \

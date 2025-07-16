@@ -391,11 +391,12 @@ impl Game {
                 if matches!(self.beat, Beat::Five) {
                     // beast movements
                     for idx in 0..self.common_beasts.len() {
+                        let old_pos = self.common_beasts[idx].position;
                         let action =
                             self.common_beasts[idx].advance(&mut self.board, self.player.position);
 
                         self.push_to_log(GameLogEntry::CommonBeastMoved {
-                            idx,
+                            old_pos,
                             new_pos: self.common_beasts[idx].position,
                         });
 
@@ -406,10 +407,12 @@ impl Game {
                         }
                     }
                     for idx in 0..self.super_beasts.len() {
+                        let old_pos = self.super_beasts[idx].position;
                         let action =
                             self.super_beasts[idx].advance(&mut self.board, self.player.position);
+
                         self.push_to_log(GameLogEntry::SuperBeastMoved {
-                            idx,
+                            old_pos,
                             new_pos: self.super_beasts[idx].position,
                         });
 

@@ -100,14 +100,30 @@ defmodule ZkArcade.Proofs do
     Repo.delete(proof)
   end
 
-  def update_proof_status(proof_id, status, batch_data \\ nil) do
+  def update_proof_status_verified(proof_id, batch_data) do
     proof = get_proof!(proof_id)
 
-    changeset = change_proof(proof, %{status: status, batch_data: batch_data})
+    changeset = change_proof(proof, %{status: "verified", batch_data: batch_data})
 
     case Repo.update(changeset) do
       {:ok, updated_proof} ->
-        Logger.info("Updated proof #{proof_id} status to #{status}")
+        Logger.info("Updated proof #{proof_id} status to verified")
+        {:ok, updated_proof}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+        {:error, changeset}
+    end
+  end
+
+  def update_proof_status_submitted(proof_id) do
+    proof = get_proof!(proof_id)
+
+    changeset = change_proof(proof, %{status: "submitted"})
+
+    case Repo.update(changeset) do
+      {:ok, updated_proof} ->
+        Logger.info("Updated proof #{proof_id} status to submitted")
         {:ok, updated_proof}
 
       {:error, changeset} ->

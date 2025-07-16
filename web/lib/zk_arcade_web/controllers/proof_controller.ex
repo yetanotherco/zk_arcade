@@ -54,7 +54,7 @@ defmodule ZkArcadeWeb.ProofController do
           |> redirect(to: "/")
 
         nil ->
-          Logger.info("Task is taking longer than 5 seconds, continuing without waiting.")
+          Logger.info("Task is taking longer than 10 seconds, continuing without waiting.")
           conn
           |> put_flash(:info, "Proof is being submitted to batcher.")
           |> redirect(to: "/")
@@ -73,11 +73,26 @@ defmodule ZkArcadeWeb.ProofController do
       Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
       case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
         {:ok, {:batch_inclusion, batch_data}} ->
-          Proofs.update_proof_status(pending_proof.id, "verified", batch_data)
+          case Proofs.update_proof_status(pending_proof.id, "verified", batch_data) do
+            {:ok, updated_proof} ->
+              Logger.info("Proof #{pending_proof.id} verified and updated successfully")
+              {:ok, updated_proof}
+            {:error, reason} ->
+              Logger.error("Failed to update proof status: #{inspect(reason)}")
+              {:error, reason}
+          end
 
         {:error, reason} ->
           Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-          Proofs.update_proof_status(pending_proof.id, "failed", nil)
+          case Proofs.get_proof!(pending_proof.id) do
+            proof_to_delete ->
+              case Proofs.delete_proof(proof_to_delete) do
+                {:ok, _deleted_proof} ->
+                  Logger.info("Proof #{pending_proof.id} deleted successfully")
+                {:error, changeset} ->
+                  Logger.error("Failed to delete proof #{pending_proof.id} from database: #{inspect(changeset)}")
+              end
+          end
           {:error, reason}
       end
     else

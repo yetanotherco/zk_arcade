@@ -168,6 +168,9 @@ fn main() {
     let mut number: [u8; 32] = [0; 32];
     let bytes = current_level_number.to_be_bytes();
     number[32 - bytes.len()..].copy_from_slice(&bytes);
+    let mut address: [u8; 32] = [0; 32];
+    address[12.. 32].copy_from_slice(&input.address);
 
     env::commit_slice(&number);
+    env::commit_slice(&address);
 }

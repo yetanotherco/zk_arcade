@@ -73,7 +73,7 @@ defmodule ZkArcadeWeb.ProofController do
       Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
       case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
         {:ok, {:batch_inclusion, batch_data}} ->
-          case Proofs.update_proof_status_verified(pending_proof.id, batch_data) do
+          case Proofs.update_proof_status_submitted(pending_proof.id, batch_data) do
             {:ok, updated_proof} ->
               Logger.info("Proof #{pending_proof.id} verified and updated successfully")
               {:ok, updated_proof}

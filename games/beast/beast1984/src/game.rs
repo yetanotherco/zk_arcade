@@ -1,10 +1,6 @@
 //! this module contains the main struct that orchestrates the game
 
-use crate::{
-    help::Help,
-    prover::{prove, save_proof},
-    stty::{RawMode, install_raw_mode_signal_handler},
-};
+use crate::{ethereum, help::Help, prover::{prove, save_proof}, stty::{RawMode, install_raw_mode_signal_handler}};
 use game_logic::{
     ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
     BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
@@ -106,11 +102,15 @@ pub struct Game {
     beat: Beat,
     input_listener: mpsc::Receiver<u8>,
     _raw_mode: RawMode,
+    address: String,
 }
 
 impl Game {
     /// create a new instance of the beast game
     pub fn new() -> Self {
+
+        let address = ethereum::read_address();
+
         let board_terrain_info = Board::generate_terrain(Level::One);
 
         install_raw_mode_signal_handler();
@@ -155,6 +155,7 @@ impl Game {
             has_won: false,
             input_listener: receiver,
             _raw_mode,
+            address,
         }
     }
 
@@ -599,8 +600,9 @@ impl Game {
             levels_log
         };
 
+        let address = self.address.clone();
         let handle = std::thread::spawn(move || {
-            let res = prove(levels_completion_log);
+            let res = prove(levels_completion_log, address);
             if let Ok(receipt) = res {
                 save_proof(receipt).expect("To be able to write proof");
             } else {

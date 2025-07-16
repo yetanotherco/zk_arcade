@@ -100,14 +100,14 @@ defmodule ZkArcade.Proofs do
     Repo.delete(proof)
   end
 
-  def update_proof_status_verified(proof_id, batch_data) do
+  def update_proof_status_submitted(proof_id, batch_data) do
     proof = get_proof!(proof_id)
 
-    changeset = change_proof(proof, %{status: "verified", batch_data: batch_data})
+    changeset = change_proof(proof, %{status: "submitted", batch_data: batch_data})
 
     case Repo.update(changeset) do
       {:ok, updated_proof} ->
-        Logger.info("Updated proof #{proof_id} status to verified")
+        Logger.info("Updated proof #{proof_id} status to submitted")
         {:ok, updated_proof}
 
       {:error, changeset} ->
@@ -116,14 +116,14 @@ defmodule ZkArcade.Proofs do
     end
   end
 
-  def update_proof_status_submitted(proof_id) do
+  def update_proof_status_claimed(proof_id) do
     proof = get_proof!(proof_id)
 
-    changeset = change_proof(proof, %{status: "submitted"})
+    changeset = change_proof(proof, %{status: "claimed"})
 
     case Repo.update(changeset) do
       {:ok, updated_proof} ->
-        Logger.info("Updated proof #{proof_id} status to submitted")
+        Logger.info("Updated proof #{proof_id} status to claimed")
         {:ok, updated_proof}
 
       {:error, changeset} ->

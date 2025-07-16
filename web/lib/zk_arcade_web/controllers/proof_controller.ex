@@ -84,14 +84,12 @@ defmodule ZkArcadeWeb.ProofController do
 
         {:error, reason} ->
           Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-          case Proofs.get_proof!(pending_proof.id) do
-            proof_to_delete ->
-              case Proofs.delete_proof(proof_to_delete) do
-                {:ok, _deleted_proof} ->
-                  Logger.info("Proof #{pending_proof.id} deleted successfully")
-                {:error, changeset} ->
-                  Logger.error("Failed to delete proof #{pending_proof.id} from database: #{inspect(changeset)}")
-              end
+          proof_to_delete = Proofs.get_proof!(pending_proof.id)
+          case Proofs.delete_proof(proof_to_delete) do
+            {:ok, _deleted_proof} ->
+              Logger.info("Proof #{pending_proof.id} deleted successfully")
+            {:error, changeset} ->
+              Logger.error("Failed to delete proof #{pending_proof.id} from database: #{inspect(changeset)}")
           end
           {:error, reason}
       end

@@ -161,16 +161,18 @@ export default ({ payment_service_address, user_address }: Props) => {
 				<Button variant="accent-fill" onClick={toggleOpen}>
 					Submit solution proof
 				</Button>
-				<Modal open={open} setOpen={setOpen}>
-					<div
-						className="rounded bg-contrast-100 p-10 flex flex-col items-center gap-10"
-						style={{ minWidth: 500 }}
-					>
-						<h3 className="text-md font-bold mb-2">
+				<Modal maxWidth={600} open={open} setOpen={setOpen}>
+					<div className="rounded w-full bg-contrast-100 p-10 flex flex-col items-center gap-10">
+						<h3 className="text-md font-bold">
 							Submit Beast solution proof
 						</h3>
 
-						<form ref={formRef} action="/proof/" method="post">
+						<form
+							ref={formRef}
+							action="/proof/"
+							method="post"
+							className="hidden"
+						>
 							<input
 								type="hidden"
 								name="submit_proof_message"

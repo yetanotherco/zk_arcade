@@ -115,11 +115,8 @@ export const BalanceScoreInAligned = ({
 			</div>
 
 			{/* Deposit on aligned modal */}
-			<Modal open={open} setOpen={setOpen}>
-				<div
-					className="bg-contrast-100 p-10 rounded flex flex-col items-center gap-8"
-					style={{ minWidth: 500 }}
-				>
+			<Modal maxWidth={500} open={open} setOpen={setOpen}>
+				<div className="bg-contrast-100 w-full p-10 rounded flex flex-col items-center gap-8">
 					<h3 className="text-md font-bold mb-2">
 						Deposit into Aligned Batcher
 					</h3>

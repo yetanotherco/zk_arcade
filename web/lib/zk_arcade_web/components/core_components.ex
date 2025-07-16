@@ -71,7 +71,7 @@ defmodule ZkArcadeWeb.CoreComponents do
   def home_game_component(%{title: title, desc: desc, img: img, link: link} = assigns) do
     ~H"""
     <.link href={@link}>
-      <div class="cursor-pointer group">
+      <div class="cursor-pointer group w-full sm:max-w-280">
         <img class="rounded mb-5 w-full" src={@img} width={280} height={180} />
         <div>
           <h3 class="text-xl font-normal group-hover:underline underline-offset-4">

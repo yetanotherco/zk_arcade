@@ -54,11 +54,8 @@ export const ConnectWalletWithAgreement = () => {
 			<div className="cursor-pointer" onClick={toggleOpen}>
 				Connect Wallet
 			</div>
-			<Modal open={open} setOpen={setOpen}>
-				<div
-					className="bg-contrast-100 p-10 rounded flex flex-col items-center gap-8"
-					style={{ maxWidth: 800 }}
-				>
+			<Modal maxWidth={800} open={open} setOpen={setOpen}>
+				<div className="bg-contrast-100 w-full p-10 rounded flex flex-col items-center gap-8">
 					<form ref={formRef} action="/wallet/sign" method="post">
 						<input
 							type="hidden"
@@ -125,12 +122,12 @@ export const ConnectWalletWithAgreement = () => {
 						</p>
 					</div>
 
-					<div className="flex flex-col gap-2">
-						<Button variant="accent-fill" onClick={handleAgreement}>
-							Agree
-						</Button>
+					<div className="flex  gap-10">
 						<Button variant="text" onClick={toggleOpen}>
 							Cancel
+						</Button>
+						<Button variant="accent-fill" onClick={handleAgreement}>
+							Agree
 						</Button>
 					</div>
 				</div>

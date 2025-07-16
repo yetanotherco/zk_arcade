@@ -6,6 +6,7 @@ import { useIsMounted } from "connectkit";
 
 type Props = {
 	open: boolean;
+	maxWidth: number;
 	setOpen: (prev: boolean) => void;
 	onOpen?: () => void;
 	onClose?: () => void;
@@ -24,6 +25,7 @@ export const Modal = ({
 	onClose,
 	showCloseButton = true,
 	children,
+	maxWidth,
 }: Props) => {
 	const mounted = useIsMounted();
 
@@ -50,9 +52,9 @@ export const Modal = ({
 
 	if (!open) return null;
 	return createPortal(
-		<div className="max-mobile:p-6 bg-modal-overlay fixed inset-0 z-20 h-full w-full p-10">
+		<div className="max-sm:p-6 bg-modal-overlay fixed inset-0 z-20 h-full w-full p-10">
 			<div className="flex h-full w-full items-center justify-center">
-				<div ref={ref} className="content">
+				<div ref={ref} className="content w-full" style={{ maxWidth }}>
 					<div className="relative">
 						{showCloseButton && (
 							<div className="absolute right-5 top-5 z-30 cursor-pointer">

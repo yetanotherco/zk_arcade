@@ -75,6 +75,9 @@ module.exports = {
 				9: "36px",
 				10: "40px",
 			},
+			maxWidth: {
+				280: "280px",
+			},
 		},
 	},
 	plugins: [

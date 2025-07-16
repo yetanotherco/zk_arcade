@@ -38,6 +38,7 @@ export const WalletInfo = ({
 				>
 					<BalanceScoreInAligned
 						payment_service_address={payment_service_address}
+						leaderboard_address={leaderboard_address}
 						user_address={user_address}
 					/>
 					<ProofSubmissions

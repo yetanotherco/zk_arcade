@@ -6,14 +6,17 @@ import { useModal, useBatcherPaymentService } from "../../hooks";
 import { FormInput } from "../../components/";
 import { useEthPrice } from "../../hooks/useEthPrice";
 import { useToast } from "../../state/toast";
+import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
 
 type Props = {
 	payment_service_address: Address;
+	leaderboard_address: Address;
 	user_address: Address;
 };
 
 export const BalanceScoreInAligned = ({
 	payment_service_address,
+	leaderboard_address,
 	user_address,
 }: Props) => {
 	const { open, setOpen, toggleOpen } = useModal();
@@ -21,6 +24,10 @@ export const BalanceScoreInAligned = ({
 	const { balance, sendFunds } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
+	});
+	const { score } = useLeaderboardContract({
+		userAddress: user_address,
+		contractAddress: leaderboard_address,
 	});
 	const [balanceValue, setBalanceValue] = useState("");
 	const { addToast } = useToast();
@@ -99,8 +106,11 @@ export const BalanceScoreInAligned = ({
 				</div>
 				<div>
 					<h3 className="text-md font-bold mb-1">Score:</h3>
-					{/* TODO: query score from Leaderboard contract */}
-					<p>100</p>
+					<p>
+						{score.isLoading || score.isError
+							? "..."
+							: Number(score.data)}
+					</p>
 				</div>
 			</div>
 

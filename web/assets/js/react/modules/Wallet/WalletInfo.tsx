@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { BalanceScoreInAligned } from "./BalanceScoreInAligned";
 import { Address } from "../../types/blockchain";
 import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
+import { Button } from "../../components";
 
 type Props = {
 	network: string;
@@ -18,6 +19,12 @@ export const WalletInfo = ({
 	user_address,
 	proofs,
 }: Props) => {
+	const formRef = useRef<HTMLFormElement>(null);
+
+	const handleDisconnect = () => {
+		formRef.current?.submit();
+	};
+
 	return (
 		<div className="relative group">
 			<div className="flex flex-row items-center gap-3">
@@ -45,6 +52,20 @@ export const WalletInfo = ({
 						proofs={proofs}
 						leaderboard_address={leaderboard_address}
 					/>
+					<div>
+						<form
+							ref={formRef}
+							action="/wallet/disconnect"
+							className="hidden"
+						></form>
+						<Button
+							variant="text"
+							className="text-red text-sm"
+							onClick={handleDisconnect}
+						>
+							Disconnect
+						</Button>
+					</div>
 				</div>
 			</div>
 		</div>

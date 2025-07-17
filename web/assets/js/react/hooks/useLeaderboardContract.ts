@@ -51,10 +51,7 @@ export const useLeaderboardContract = ({
 
 			const args = [
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
-				bytesToHex(
-					Uint8Array.from(verificationData.publicInput || []),
-					{ size: 32 }
-				),
+				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
 				bytesToHex(commitment.provingSystemAuxDataCommitment, {
 					size: 32,
 				}),

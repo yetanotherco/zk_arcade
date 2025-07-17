@@ -151,20 +151,27 @@ const Proof = ({
 							? "Sending..."
 							: btnText[proof.status]}
 					</Button>
+					{proof.status == "submitted" && (
+						<form
+							className="hidden"
+							ref={formRef}
+							action="/proof/status/submitted"
+							method="POST"
+						>
+							<input
+								type="hidden"
+								name="_csrf_token"
+								value={csrfToken}
+							/>
+							<input
+								type="hidden"
+								name="proof_id"
+								value={proof.id}
+							/>
+						</form>
+					)}
 				</td>
 			</tr>
-
-			{proof.status == "submitted" && (
-				<form
-					className="hidden"
-					ref={formRef}
-					action="/proof/status/submitted"
-					method="POST"
-				>
-					<input type="hidden" name="_csrf_token" value={csrfToken} />
-					<input type="hidden" name="proof_id" value={proof.id} />
-				</form>
-			)}
 		</>
 	);
 };
@@ -194,7 +201,7 @@ export const ProofSubmissions = ({
 								</tr>
 							</thead>
 							<tbody className="text-text-100 text-sm">
-								{proofs.map(proof => (
+								{proofs.reverse().map(proof => (
 									<Proof
 										key={proof.id}
 										proof={proof}

@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 
-type ButtonVariant = "accent-fill" | "text-accent" | "text" | "disabled";
+type ButtonVariant =
+	| "accent-fill"
+	| "text-accent"
+	| "text"
+	| "disabled"
+	| "disabled-text";
 
 const buttonVariantStyles: { [key in ButtonVariant]: string } = {
 	"accent-fill": "px-10 py-2 bg-accent-100",
 	disabled: "px-10 py-2 bg-disabled",
+	"disabled-text": "font-normal",
 	text: "hover:underline",
 	"text-accent": "text-accent-100 hover:underline",
 };
@@ -27,7 +33,9 @@ export const Button = ({
 
 	useEffect(() => {
 		if (isLoading || disabled) {
-			setCurrentVariant("disabled");
+			if (variant == "text-accent" || variant == "text")
+				setCurrentVariant("disabled-text");
+			else setCurrentVariant("disabled");
 		} else {
 			setCurrentVariant(variant);
 		}

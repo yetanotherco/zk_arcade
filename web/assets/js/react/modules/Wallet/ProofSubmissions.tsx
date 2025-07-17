@@ -1,25 +1,34 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
-import { bytesToHex, encodeAbiParameters } from "viem";
+import { bytesToHex } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { Button } from "../../components";
-import { useAccount, useWriteContract } from "wagmi";
-import { leaderboardAbi } from "../../constants/aligned";
+import { useAccount } from "wagmi";
 import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
 import { useToast } from "../../state/toast";
+import { useCSRFToken } from "../../hooks/useCSRFToken";
 
 const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
 	verified: "text-accent-100",
-	"submitted-to-leaderboard": "text-blue",
 	pending: "text-yellow",
+	claimed: "text-blue",
+	failed: "text-red",
 };
 
 const btnText: { [key in ProofSubmission["status"]]: string } = {
 	verified: "Submit solution",
-	"submitted-to-leaderboard": "Already submitted to leaderboard",
+	claimed: "Already submitted to leaderboard",
 	pending:
 		"You need to wait until its verified before submitting the solution",
+	failed: "The proof failed to be verified, you have to re-send it",
+};
+
+const statusText: { [key in ProofSubmission["status"]]: string } = {
+	claimed: "Submitted",
+	verified: "Verified",
+	pending: "Pending",
+	failed: "Failed",
 };
 
 const Proof = ({
@@ -29,6 +38,8 @@ const Proof = ({
 	proof: ProofSubmission;
 	leaderboard_address: Address;
 }) => {
+	const { csrfToken } = useCSRFToken();
+	const formRef = useRef<HTMLFormElement>(null);
 	const { address } = useAccount();
 	const { addToast } = useToast();
 	const { submitSolution, score } = useLeaderboardContract({
@@ -108,15 +119,19 @@ const Proof = ({
 			<tr>
 				<td>{proof.game}</td>
 				<td className={colorBasedOnStatus[proof.status]}>
-					{proof.status}
+					{statusText[proof.status]}
 				</td>
 				<td>
-					<a
-						href={`https://explorer.alignedlayer.com/batches/${merkleRoot}`}
-						className="underline"
-					>
-						{merkleRootHash}
-					</a>
+					{proof.batchData?.batch_merkle_root ? (
+						<a
+							href={`https://explorer.alignedlayer.com/batches/${merkleRoot}`}
+							className="underline"
+						>
+							{merkleRootHash}
+						</a>
+					) : (
+						<>...</>
+					)}
 				</td>
 				<td>{proofHashShorten}</td>
 			</tr>
@@ -124,8 +139,10 @@ const Proof = ({
 			<tr>
 				<td colSpan={100}>
 					<Button
-						variant="text"
-						className="text-sm w-full"
+						variant="text-accent"
+						className={`text-sm w-full ${
+							proof.status !== "verified" ? "text-text-200" : ""
+						}`}
 						disabled={proof.status !== "verified"}
 						onClick={handleSubmitProof}
 					>
@@ -136,6 +153,18 @@ const Proof = ({
 					</Button>
 				</td>
 			</tr>
+
+			{proof.status == "verified" && (
+				<form
+					className="hidden"
+					ref={formRef}
+					action="/proof/status/submitted"
+					method="POST"
+				>
+					<input type="hidden" name="_csrf_token" value={csrfToken} />
+					<input type="hidden" name="proof_id" value={proof.id} />
+				</form>
+			)}
 		</>
 	);
 };
@@ -152,7 +181,7 @@ export const ProofSubmissions = ({
 	return (
 		<div>
 			<h3 className="text-md font-bold mb-2">Your Proof Submissions:</h3>
-			<div className="overflow-scroll" style={{ maxHeight: 200 }}>
+			<div className="overflow-scroll" style={{ maxHeight: 150 }}>
 				{proofs.length > 0 ? (
 					<div>
 						<table className="w-full text-left">

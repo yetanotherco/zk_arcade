@@ -5,6 +5,18 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.BatcherConnection
   alias ZkArcade.Proofs
 
+  def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id}) do
+    address = get_session(conn, :wallet_address)
+      if is_nil(address) do
+        conn
+        |> redirect(to: "/")
+      end
+
+    Proofs.update_proof_status_claimed(address, proof_id)
+    conn
+      |> redirect(to: "/")
+  end
+
   def submit(conn, %{
         "submit_proof_message" => submit_proof_message_json,
       }) do

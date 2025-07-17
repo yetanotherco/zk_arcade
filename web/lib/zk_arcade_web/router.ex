@@ -19,8 +19,8 @@ defmodule ZkArcadeWeb.Router do
     get "/wallet/disconnect", WalletController, :disconnect_wallet
 
     post "/proof/", ProofController, :submit
-
-    end
+    post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
+  end
 
   scope "/api", ZkArcadeWeb do
     pipe_through :api

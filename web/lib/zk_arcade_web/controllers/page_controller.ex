@@ -24,7 +24,7 @@ defmodule ZkArcadeWeb.PageController do
     Enum.map(proofs, fn proof ->
       %{
         id: proof.id,
-        status: "verified",
+        status: proof.status,
         game: "Beast",
         insertedAt: NaiveDateTime.to_iso8601(proof.inserted_at),
         batchData: proof.batch_data,

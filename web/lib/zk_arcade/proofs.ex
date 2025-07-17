@@ -116,19 +116,25 @@ defmodule ZkArcade.Proofs do
     end
   end
 
-  def update_proof_status_claimed(proof_id) do
+  def update_proof_status_claimed(address, proof_id) do
     proof = get_proof!(proof_id)
+    downcased_addr = String.downcase(address)
 
-    changeset = change_proof(proof, %{status: "claimed"})
+    if proof.wallet_address != downcased_addr do
+      Logger.error("Failed to update proof #{proof_id} does not belong to address #{address}")
+      {:error, %{}}
+    else
+      changeset = change_proof(proof, %{status: "claimed"})
 
-    case Repo.update(changeset) do
-      {:ok, updated_proof} ->
-        Logger.info("Updated proof #{proof_id} status to claimed")
-        {:ok, updated_proof}
+      case Repo.update(changeset) do
+        {:ok, updated_proof} ->
+          Logger.info("Updated proof #{proof_id} status to claimed")
+          {:ok, updated_proof}
 
-      {:error, changeset} ->
-        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
-        {:error, changeset}
+        {:error, changeset} ->
+          Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+          {:error, changeset}
+      end
     end
   end
 

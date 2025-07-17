@@ -131,6 +131,14 @@ defmodule ZkArcade.BatcherConnection do
     }
   end
 
+  defp close_connection(conn_pid, stream_ref) do
+    :gun.ws_send(conn_pid, stream_ref, {:close, 1000, ""})
+    receive do
+      {:gun_ws, ^conn_pid, ^stream_ref, {:close, _code, _reason}} ->
+        :gun.close(conn_pid)
+    end
+  end
+
   defp parse_bigint(v) when is_binary(v) do
     String.to_integer(v)
   end

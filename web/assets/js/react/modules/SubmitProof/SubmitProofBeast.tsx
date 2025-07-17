@@ -11,6 +11,47 @@ import {
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useChainId } from "wagmi";
 import { useToast } from "../../state/toast";
+import { encode as cborEncode, decode as cborDecode } from 'cbor-web';
+
+async function getNonce(host: string, port: number, address: string): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const ws = new WebSocket(`ws://${host}:${port}`);
+		ws.binaryType = 'arraybuffer';
+
+		ws.onopen = () => {
+			console.log("WebSocket connection established");
+		};
+
+		ws.onmessage = (event) => {
+			try {
+				const cbor_data = event.data;
+				const data = cborDecode(new Uint8Array(cbor_data));
+
+				if (data?.ProtocolVersion) {
+					console.log(`Protocol version received: ${data.ProtocolVersion}`);
+					const message = { GetNonceForAddress: address };
+					const encoded = cborEncode(message).buffer;
+					ws.send(encoded);
+					console.log(`Sent GetNonceForAddress for address: ${address}`);
+				} else if (data?.Nonce) {
+					ws.close();
+					resolve(data.Nonce);
+				} else if (data?.EthRpcError || data?.InvalidRequest) {
+					ws.close();
+					reject(data);
+				}
+			} catch (e) {
+				ws.close();
+				reject(e);
+			}
+		};
+
+		ws.onerror = () => {
+			ws.close();
+			reject(new Error("WebSocket connection error"));
+		};
+	});
+}
 
 type Props = {
 	payment_service_address: Address;
@@ -113,6 +154,14 @@ export default ({ payment_service_address, user_address }: Props) => {
 			verificationKey: undefined,
 			proofGeneratorAddress: user_address,
 		};
+
+		console.log("Nonce defined in eth is ", nonce);
+		try {
+			const nonce = await getNonce('localhost', 8080, user_address);
+			console.log("The one defined in batcher is ", nonce);
+		} catch (err) {
+			console.error("Error obtaining nonce from batcher:", err);
+		}
 
 		const noncedVerificationdata: NoncedVerificationdata = {
 			maxFee: toHex(maxFee, { size: 32 }),

@@ -132,6 +132,7 @@ defmodule ZkArcade.BatcherConnection do
   end
 
   defp close_connection(conn_pid, stream_ref) do
+    Logger.info("Closing the connection with the batcher...")
     :gun.ws_send(conn_pid, stream_ref, {:close, 1000, ""})
     receive do
       {:gun_ws, ^conn_pid, ^stream_ref, {:close, _code, _reason}} ->

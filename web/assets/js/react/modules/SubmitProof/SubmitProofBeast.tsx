@@ -49,6 +49,13 @@ export default ({ payment_service_address, user_address }: Props) => {
 				type: "success",
 			});
 		}
+
+		// Remove the message param from the URL without reloading the page
+		// this prevents showing the message again when the user refreshes the page
+		if (message) {
+			const newUrl = window.location.pathname;
+			window.history.replaceState({}, "", newUrl);
+		}
 	}, []);
 
 	const chainId = useChainId();

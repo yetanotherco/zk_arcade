@@ -39,7 +39,7 @@ defmodule ZkArcadeWeb.SignController do
               Logger.error("Error creating wallet: #{inspect(changeset.errors)}")
 
               conn
-              |> assign(:error, "Hubo un problema al crear tu wallet")
+              |> assign(:error, "There was a problem creating wallet: #{inspect(changeset.errors)}")
               |> render(:home, layout: false)
           end
       end

@@ -54,7 +54,7 @@ defmodule ZkArcade.BatcherConnection do
           {:error, reason} ->
             Logger.error("Failed to decode CBOR message: #{inspect(reason)}")
             Logger.error("Raw message: #{inspect(msg)}")
-            :gun.close(conn_pid)
+            close_connection(conn_pid, stream_ref)
             {:error, :decode_error}
         end
 
@@ -82,7 +82,7 @@ defmodule ZkArcade.BatcherConnection do
 
       %{"BatchInclusionData" => batch_data} ->
         Logger.info("Proof submitted successfully - BatchInclusionData: #{inspect(batch_data)}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:ok, {:batch_inclusion, batch_data}}
 
       %{"InsufficientBalance" => address} ->

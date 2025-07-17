@@ -3,7 +3,7 @@ import { Address, Hex } from "viem";
 export type ProofSubmission = {
 	id: string;
 	game: string;
-	status: "verified" | "pending" | "failed" | "claimed";
+	status: "submitted" | "pending" | "failed" | "claimed";
 	insertedAt: string;
 	batchData?: BatchInclusionData;
 	verificationData: NoncedVerificationdata;

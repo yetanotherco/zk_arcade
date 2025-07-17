@@ -10,14 +10,14 @@ import { useToast } from "../../state/toast";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 
 const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
-	verified: "text-accent-100",
+	submitted: "text-accent-100",
 	pending: "text-yellow",
 	claimed: "text-blue",
 	failed: "text-red",
 };
 
 const btnText: { [key in ProofSubmission["status"]]: string } = {
-	verified: "Submit solution",
+	submitted: "Submit solution",
 	claimed: "Already submitted to leaderboard",
 	pending:
 		"You need to wait until its verified before submitting the solution",
@@ -25,8 +25,8 @@ const btnText: { [key in ProofSubmission["status"]]: string } = {
 };
 
 const statusText: { [key in ProofSubmission["status"]]: string } = {
-	claimed: "Submitted",
-	verified: "Verified",
+	claimed: "Claimed",
+	submitted: "Ready",
 	pending: "Pending",
 	failed: "Failed",
 };
@@ -141,9 +141,9 @@ const Proof = ({
 					<Button
 						variant="text-accent"
 						className={`text-sm w-full ${
-							proof.status !== "verified" ? "text-text-200" : ""
+							proof.status !== "submitted" ? "text-text-200" : ""
 						}`}
-						disabled={proof.status !== "verified"}
+						disabled={proof.status !== "submitted"}
 						onClick={handleSubmitProof}
 					>
 						{submitSolution.tx.isPending ||
@@ -154,7 +154,7 @@ const Proof = ({
 				</td>
 			</tr>
 
-			{proof.status == "verified" && (
+			{proof.status == "submitted" && (
 				<form
 					className="hidden"
 					ref={formRef}

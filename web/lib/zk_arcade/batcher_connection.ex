@@ -33,7 +33,7 @@ defmodule ZkArcade.BatcherConnection do
 
       {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
         Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:error, :upgrade_failed}
     after
       25_000 ->
@@ -87,18 +87,18 @@ defmodule ZkArcade.BatcherConnection do
 
       %{"InsufficientBalance" => address} ->
         Logger.error("Insufficient balance for address #{address}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:error, {:insufficient_balance, address}}
 
       %{"InvalidProof" => reason} ->
         Logger.error("There was a problem with the submited proof: #{reason}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:error, "Invalid proof - #{reason}"}
 
       # There can be more error messages from the batcher, but they will enter on the other clause
       other ->
         Logger.error("Unrecognized message from batcher: #{inspect(other)}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:error, {:unrecognized_message, other}}
     end
   end

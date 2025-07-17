@@ -84,6 +84,9 @@ const Proof = ({
 				desc: "Your proof was submitted and verified successfully, waiting for receipt....",
 				type: "success",
 			});
+			window.setTimeout(() => {
+				formRef.current?.submit();
+			}, 500);
 		}
 
 		if (submitSolution.tx.isError) {

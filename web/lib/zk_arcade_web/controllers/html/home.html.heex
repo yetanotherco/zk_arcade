@@ -29,22 +29,13 @@
 
    <section id="leaderboard" class="section-spacer-lg">
     <.section_header header="LeaderBoard" />
-    <.table id="leaderboard" rows={[
-      %{position: 1, address: "0x8E...638", score: 100},
-      %{position: 2, address: "0xAB...123", score: 95},
-      %{position: 3, address: "0xCD...456", score: 92},
-      %{position: 4, address: "0xEF...789", score: 88},
-      %{position: 5, address: "0x01...ABC", score: 85},
-      %{position: 6, address: "0x23...DEF", score: 82},
-      %{position: 7, address: "0x45...012", score: 79},
-      %{position: 8, address: "0x67...345", score: 75},
-      %{position: 9, address: "0x89...678", score: 72},
-      %{position: 10, address: "0xAA...999", score: 70}
-    ]}>
+    <.table id="leaderboard" rows={@leaderboard}>
         <:col :let={user} label="Position"><%= user.position %></:col>
-        <:col :let={user} label="Address"><%= user.address %></:col>
+        <:col :let={user} label="Address">
+          <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
+        </:col>
         <:col :let={user} label="Score"><%= user.score%></:col>
-      </.table>
+    </.table>
   </section>
 
 </div>

@@ -103,7 +103,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
 
-	let {
+	const {
 		balance,
 	} = useBatcherPaymentService({
 		contractAddress: payment_service_address,

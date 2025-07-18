@@ -1,8 +1,8 @@
-defmodule ZkArcadeWeb.PageHTML do
+defmodule ZkArcadeWeb.WalletHTML do
   @moduledoc """
   This module contains pages rendered by PageController.
 
-  See the `html` directory for all templates available.
+  See the `page_html` directory for all templates available.
   """
   use ZkArcadeWeb, :html
 

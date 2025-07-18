@@ -6,20 +6,16 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.Proofs
   alias ZkArcade.EIP712Verifier
 
-  def home(conn, _params) do
-    wallet =
-      if address = get_session(conn, :wallet_address) do
-        case ZkArcade.Accounts.fetch_wallet_by_address(address) do
-          {:ok, wallet} -> wallet
-          _ -> nil
-        end
-      else
-        nil
+  def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id}) do
+    address = get_session(conn, :wallet_address)
+      if is_nil(address) do
+        conn
+        |> redirect(to: "/")
       end
 
+    Proofs.update_proof_status_claimed(address, proof_id)
     conn
-    |> assign(:wallet, wallet)
-    |> render(:home, layout: false)
+      |> redirect(to: "/")
   end
 
   def submit(conn, %{
@@ -53,21 +49,21 @@ defmodule ZkArcadeWeb.ProofController do
 
               conn
               |> put_flash(:info, "Proof submitted successfully!")
-              |> redirect(to: "/")
+              |> redirect(to: "/game/beast?message=proof-sent")
 
             {:ok, {:error, reason}} ->
               Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
 
               conn
               |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-              |> redirect(to: "/")
+              |> redirect(to: "/game/beast?message=proof-failed")
 
             nil ->
               Logger.info("Task is taking longer than 10 seconds, proceeding.")
 
               conn
               |> put_flash(:info, "Proof is being submitted to batcher.")
-              |> redirect(to: "/")
+              |> redirect(to: "/game/beast?message=proof-sent")
           end
         else
           {:error, reason} ->
@@ -75,8 +71,7 @@ defmodule ZkArcadeWeb.ProofController do
 
             conn
             |> put_flash(:error, "Failed to verify the received signature: #{inspect(reason)}")
-            |> redirect(to: "/")
-            |> halt()
+            |> redirect(to: "/game/beast?message=proof-failed")
         end
       end
     else
@@ -84,7 +79,7 @@ defmodule ZkArcadeWeb.ProofController do
         Logger.error("Input validation failed: #{inspect(error)}")
         conn
         |> put_flash(:error, "Invalid input: #{inspect(error)}")
-        |> redirect(to: "/")
+        |> redirect(to: "/game/beast?message=proof-failed")
         |> halt()
     end
   end

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { parseSignature, toHex } from "viem";
-import { useChainId, usePublicClient, useSignTypedData } from "wagmi";
+import { usePublicClient, useSignTypedData } from "wagmi";
 import { NoncedVerificationdata } from "../types/aligned";
 import { computeVerificationDataCommitment } from "../utils/aligned";
 import {
@@ -11,7 +11,6 @@ import {
 
 export const useAligned = () => {
 	const client = usePublicClient();
-	const chainId = useChainId();
 	const {
 		signTypedDataAsync,
 		signTypedData,
@@ -25,7 +24,7 @@ export const useAligned = () => {
 		async (noncedVerificationData: NoncedVerificationdata) => {
 			const verificationDataHash = computeVerificationDataCommitment(
 				noncedVerificationData.verificationData
-			);
+			).commitmentDigest;
 
 			const message = {
 				verification_data_hash: toHex(verificationDataHash),
@@ -34,7 +33,7 @@ export const useAligned = () => {
 			};
 
 			const signature = await signTypedDataAsync({
-				domain: eip712Domain(chainId),
+				domain: eip712Domain(Number(noncedVerificationData.chain_id)),
 				types: eip712Types,
 				primaryType: "NoncedVerificationData",
 				message,

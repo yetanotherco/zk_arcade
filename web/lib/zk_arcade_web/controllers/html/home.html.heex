@@ -1,0 +1,51 @@
+<div class="w-full">
+
+  <div class="flex flex-row h-screen items-center justify-between">
+    <div class="flex flex-row justify-between items-end">
+      <div style="width: 70%">
+        <h1 class="typing md:text-5xl text-2xl font-normal mb-4">Play. Prove. <span class="text-accent-100">Verify</span>. Compete</h1>
+        <p class="text-text-200">
+          The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on <span class="text-accent-100">ALIGNED</span>. Climb the leaderboard, earn your rank.
+        </p>
+      </div>
+      <a href="#play-games">
+        <div class="hidden md:block cursor-pointer inline-flex items-center space-x-2 group">
+          <span>Play Games</span>
+          <.icon name="hero-arrow-long-right" class="size-7 transition-transform duration-200 group-hover:translate-x-1" />
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <section id="play-games" class="section-spacer-lg">
+    <.section_header header="Play Games" />
+    <div class="flex w-full flex-wrap lg:justify-between gap-10">
+      <.home_game_component disabled="false" link="/game/beast"  title="Beast 1984" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/beast1984.webp"} />
+      <.home_game_component disabled="true" link="/game/sudoku" title="Sudoku (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/sudoku.png"} />
+      <.home_game_component disabled="true" link="/game/parity" title="Parity (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/parity.jpeg"} />
+    </div>
+  </section>
+
+
+   <section id="leaderboard" class="section-spacer-lg">
+    <.section_header header="LeaderBoard" />
+    <.table id="leaderboard" rows={[
+      %{position: 1, address: "0x8E...638", score: 100},
+      %{position: 2, address: "0xAB...123", score: 95},
+      %{position: 3, address: "0xCD...456", score: 92},
+      %{position: 4, address: "0xEF...789", score: 88},
+      %{position: 5, address: "0x01...ABC", score: 85},
+      %{position: 6, address: "0x23...DEF", score: 82},
+      %{position: 7, address: "0x45...012", score: 79},
+      %{position: 8, address: "0x67...345", score: 75},
+      %{position: 9, address: "0x89...678", score: 72},
+      %{position: 10, address: "0xAA...999", score: 70}
+    ]}>
+        <:col :let={user} label="Position"><%= user.position %></:col>
+        <:col :let={user} label="Address"><%= user.address %></:col>
+        <:col :let={user} label="Score"><%= user.score%></:col>
+      </.table>
+  </section>
+
+</div>
+

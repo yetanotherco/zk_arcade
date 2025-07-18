@@ -29,7 +29,19 @@ defmodule ZkArcade.BatcherConnection do
 
         :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
 
-        handle_websocket_messages(conn_pid, stream_ref)
+        case handle_websocket_messages(conn_pid, stream_ref) do
+          {:ok, {:batch_inclusion, batch_data}} ->
+            {:ok, {:batch_inclusion, batch_data}}
+          {:error, :connection_down} ->
+            Logger.info("Retrying to send message")
+            case retry_send(submit_proof_message, address) do
+              {:ok, {:batch_inclusion, batch_data}} ->
+                {:ok, {:batch_inclusion, batch_data}}
+              {:error, :connection_down} ->
+                Logger.info("Failed while retrying to send message")
+                {:error, "Failed to send message on retry"}
+            end
+          end
 
       {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
         Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
@@ -145,4 +157,96 @@ defmodule ZkArcade.BatcherConnection do
   end
 
   defp parse_bigint(v) when is_integer(v), do: v
+
+  # Here we are using an exponential backoff, so we are waiting (0, 5, 15, 35, 75, 155)
+  defp retry_send(submit_proof_message, address) do
+    backoffs = [0, 5_000, 15_000, 35_000, 75_000, 155_000]
+
+    Enum.reduce_while(backoffs, {:error, :not_attempted}, fn backoff_ms, _last_result ->
+      Logger.info("Retrying in #{backoff_ms} ms...")
+      if backoff_ms > 0 do
+        Process.sleep(backoff_ms)
+      end
+
+      case try_connection(submit_proof_message, address) do
+        {:ok, result} ->
+          {:halt, {:ok, result}}
+
+        {:error, :connection_down} = error ->
+          {:cont, error}
+
+        {:error, :timeout} = error ->
+          {:cont, error}
+
+        other ->
+          {:halt, other}
+      end
+    end)
+  end
+
+  defp try_connection(submit_proof_message, address) do
+    case open_and_upgrade_connection() do
+      {:ok, conn_pid, stream_ref} ->
+        receive do
+          {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
+            Logger.info("WebSocket upgrade successful!")
+            message = build_submit_proof_message(submit_proof_message, address)
+            binary = CBOR.encode(message)
+            Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
+
+            :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
+            handle_websocket_messages(conn_pid, stream_ref)
+
+          {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
+            Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
+            close_connection(conn_pid, stream_ref)
+            {:error, :upgrade_failed}
+        after
+          25_000 ->
+            Logger.error("Timeout during WebSocket upgrade")
+            :gun.close(conn_pid)
+            {:error, :timeout}
+        end
+
+      {:error, reason} ->
+        Logger.error("Failed to connect to batcher #{inspect(reason)}")
+        {:error, :connection_down}
+    end
+  end
+
+  defp open_and_upgrade_connection() do
+    host = String.to_charlist(Application.get_env(:zk_arcade, :host))
+    port = Application.get_env(:zk_arcade, :port)
+
+    with {:ok, conn_pid} <- :gun.open(host, port),
+        {:ok, _protocol} <- :gun.await_up(conn_pid) do
+      upgrade_connection(conn_pid)
+    else
+      {:error, :timeout} ->
+        try_localhost_upgrade()
+
+      {:error, reason} ->
+        Logger.error("Failed to open connection to #{inspect(host)}:#{port} - #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  defp try_localhost_upgrade() do
+    localhost = {0, 0, 0, 0, 0, 0, 0, 1}
+    port = 8080
+
+    with {:ok, conn_pid} <- :gun.open(localhost, port),
+        {:ok, _protocol} <- :gun.await_up(conn_pid) do
+      upgrade_connection(conn_pid)
+    else
+      {:error, reason} ->
+        Logger.error("Failed to open connection on localhost:8080 - #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  defp upgrade_connection(conn_pid) do
+    stream_ref = :gun.ws_upgrade(conn_pid, "/")
+    {:ok, conn_pid, stream_ref}
+  end
 end

@@ -7,9 +7,12 @@ export const useOnClickOutside = <T extends HTMLElement>(
 
 	const onClick = (e: MouseEvent) => {
 		if (!ref.current) return;
-		e.preventDefault();
-		//@ts-expect-error i think this is an incorrect type from react
-		if (!ref.current?.contains(e.target)) cb(e);
+
+		//@ts-expect-error
+		if (!ref.current?.contains(e.target)) {
+			e.preventDefault();
+			cb(e);
+		}
 	};
 
 	const setRef = useCallback((node: T) => {

@@ -68,19 +68,31 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def home_game_component(%{title: title, desc: desc, img: img, link: link} = assigns) do
+  def home_game_component(%{title: title, desc: desc, img: img, link: link, disabled: disabled} = assigns) do
     ~H"""
-    <.link href={@link}>
-      <div class="cursor-pointer group w-full sm:max-w-280">
-        <img class="rounded mb-5 w-full" src={@img} width={280} height={180} />
-        <div>
-          <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
-            <%= @title %>
-          </h3>
-          <p class="text-md text-text-200"><%= @desc %></p>
-        </div>
+    <%= if @disabled == "true" do %>
+      <div class="w-full sm:max-w-280">
+        <.game_content title={@title} desc={@desc} img={@img} />
       </div>
-    </.link>
+    <% else %>
+      <.link href={@link}>
+        <div class="cursor-pointer group w-full sm:max-w-280">
+          <.game_content title={@title} desc={@desc} img={@img} />
+        </div>
+      </.link>
+    <% end %>
+    """
+  end
+
+  defp game_content(assigns) do
+    ~H"""
+    <img class="rounded mb-5 w-full" src={@img} width={280} height={180} />
+    <div>
+      <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
+        <%= @title %>
+      </h3>
+      <p class="text-md text-text-200"><%= @desc %></p>
+    </div>
     """
   end
 

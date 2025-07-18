@@ -127,6 +127,8 @@ export const BalanceScoreInAligned = ({
 							type="number"
 							value={balanceValue}
 							onChange={e => setBalanceValue(e.target.value)}
+							min="0"
+							step="0.0001"
 						/>
 						<p className="mt-1">
 							~

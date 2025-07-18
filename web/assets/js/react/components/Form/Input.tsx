@@ -5,14 +5,14 @@ type Props = React.ComponentProps<"input"> & {
 };
 
 export const FormInput = forwardRef<HTMLInputElement, Props>(
-	({ label, ...props }, ref) => {
+	({ label, type = "text", ...props }, ref) => {
 		return (
 			<div className="w-full">
 				<p className="mb-2 text-sm">{label}</p>
 				<input
-					type="text"
-					className="w-full bg-contrast-200 rounded border-none text-white"
+					type={type}
 					ref={ref}
+					className="w-full bg-contrast-200 rounded border-none text-white"
 					{...props}
 				/>
 			</div>

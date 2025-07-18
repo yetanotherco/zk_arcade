@@ -27,6 +27,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const [maxFee, setMaxFee] = useState(BigInt(0));
+	const [currentNonce, setCurrentNonce] = useState<`0x${string}` | null>(null);
 
 	const { addToast } = useToast();
 
@@ -34,6 +35,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 		alert("User address is nil")
 		return
 	}
+	const { nonce, loading: nonceLoading, error: nonceError } = useBatcherNonce("localhost", 8080, user_address);
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
@@ -88,8 +90,6 @@ export default ({ payment_service_address, user_address }: Props) => {
 			else if (type === "pub") setPublicInputs(data);
 		};
 
-	const fetchNonce = useBatcherNonce('localhost', 8080, user_address);
-
 	const handleSubmission = useCallback(async () => {
 		if (!proof || !proofId || !publicInputs || !user_address) {
 			alert("You need to provide proof, proofid, public inputs");
@@ -102,11 +102,8 @@ export default ({ payment_service_address, user_address }: Props) => {
 			return;
 		}
 
-		let nonce: `0x${string}`;
-		try {
-			nonce = await fetchNonce();
-		} catch (err) {
-			alert("Could not get nonce: " + (err as Error).message);
+		if (!currentNonce) {
+			alert("Nonce is still loading or failed");
 			return;
 		}
 
@@ -121,7 +118,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 
 		const noncedVerificationdata: NoncedVerificationdata = {
 			maxFee: toHex(maxFee, { size: 32 }),
-			nonce,
+			nonce: currentNonce,
 			chain_id: toHex(chainId, { size: 32 }),
 			payment_service_addr: payment_service_address,
 			verificationData,
@@ -153,7 +150,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 		user_address,
 		payment_service_address,
 		chainId,
-		fetchNonce,
+		currentNonce,
 	]);
 
 	useEffect(() => {
@@ -164,6 +161,15 @@ export default ({ payment_service_address, user_address }: Props) => {
 		};
 		fn();
 	}, [estimateMaxFeeForBatchOfProofs]);
+
+	useEffect(() => {
+		if (!nonceLoading && nonce) {
+			setCurrentNonce(nonce);
+		}
+		if (!nonceLoading && nonceError) {
+			alert("Could not fetch nonce: " + nonceError.message);
+		}
+	}, [nonce, nonceLoading, nonceError]);
 
 	return (
 		<>

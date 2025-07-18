@@ -1,10 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { encode as cborEncode, decode as cborDecode } from 'cbor-web';
 
 export function useBatcherNonce(host: string, port: number, address: string) {
-	return useCallback(() => {
-		return new Promise<`0x${string}`>((resolve, reject) => {
-			const ws = new WebSocket(`ws://${host}:${port}`);
+	const [nonce, setNonce] = useState<`0x${string}` | null>(null);
+	const [error, setError] = useState<Error | null>(null);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		let ws: WebSocket | null = null;
+
+		const fetchNonce = () => {
+			ws = new WebSocket(`ws://${host}:${port}`);
 			ws.binaryType = 'arraybuffer';
 
 			ws.onopen = () => {
@@ -19,24 +25,36 @@ export function useBatcherNonce(host: string, port: number, address: string) {
 					if (data?.ProtocolVersion) {
 						const message = { GetNonceForAddress: address };
 						const encoded = cborEncode(message).buffer;
-						ws.send(encoded);
+						ws?.send(encoded);
 					} else if (data?.Nonce) {
-						ws.close();
-						resolve(data.Nonce);
+						ws?.close();
+						setNonce(data.Nonce);
+						setLoading(false);
 					} else if (data?.EthRpcError || data?.InvalidRequest) {
-						ws.close();
-						reject(new Error(JSON.stringify(data)));
+						ws?.close();
+						setError(new Error(JSON.stringify(data)));
+						setLoading(false);
 					}
 				} catch (e) {
-					ws.close();
-					reject(e);
+					ws?.close();
+					setError(e as Error);
+					setLoading(false);
 				}
 			};
 
 			ws.onerror = () => {
-				ws.close();
-				reject(new Error("WebSocket connection error"));
+				ws?.close();
+				setError(new Error("WebSocket connection error"));
+				setLoading(false);
 			};
-		});
+		};
+
+		fetchNonce();
+
+		return () => {
+			ws?.close();
+		};
 	}, [host, port, address]);
+
+	return { nonce, loading, error };
 }

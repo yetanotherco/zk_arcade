@@ -104,11 +104,6 @@ export default ({ payment_service_address, user_address }: Props) => {
 		useAligned();
 
 	let {
-		nonce: {
-			data: nonce,
-			isLoading: nonceIsLoading,
-			isSuccess: nonceIsSuccess,
-		},
 		balance,
 	} = useBatcherPaymentService({
 		contractAddress: payment_service_address,
@@ -135,11 +130,6 @@ export default ({ payment_service_address, user_address }: Props) => {
 			return;
 		}
 
-		if (nonce == undefined || nonceIsLoading || !nonceIsSuccess) {
-			alert("Could not get nonce");
-			return;
-		}
-
 		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
 		if (!maxFee) {
 			alert("Could not estimate max fee");
@@ -155,17 +145,19 @@ export default ({ payment_service_address, user_address }: Props) => {
 			proofGeneratorAddress: user_address,
 		};
 
-		console.log("Nonce defined in eth is ", nonce);
-		try {
-			nonce = hexToBigInt(await getNonce('localhost', 8080, user_address));
-			console.log("The one defined in batcher is ", nonce);
-		} catch (err) {
-			console.error("Error obtaining nonce from batcher:", err);
+		const nonce = await getNonce('localhost', 8080, user_address)
+			.catch((err) => {
+				alert("Could not get nonce: " + err.message);
+			});
+
+		if (nonce == undefined) {
+			console.log("Failed to get nonce")
+			return;
 		}
 
 		const noncedVerificationdata: NoncedVerificationdata = {
 			maxFee: toHex(maxFee, { size: 32 }),
-			nonce: toHex(nonce, { size: 32 }),
+			nonce: nonce,
 			chain_id: toHex(chainId, { size: 32 }),
 			payment_service_addr: payment_service_address,
 			verificationData,
@@ -190,9 +182,6 @@ export default ({ payment_service_address, user_address }: Props) => {
 	}, [
 		setSubmitProofMessage,
 		signVerificationData,
-		nonce,
-		nonceIsLoading,
-		nonceIsSuccess,
 		estimateMaxFeeForBatchOfProofs,
 		proof,
 		proofId,

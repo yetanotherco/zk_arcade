@@ -11,7 +11,6 @@ import {
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useChainId } from "wagmi";
 import { useToast } from "../../state/toast";
-import { encode as cborEncode, decode as cborDecode } from 'cbor-web';
 
 type Props = {
 	payment_service_address: Address;

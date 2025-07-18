@@ -3,9 +3,9 @@ defmodule ZkArcade.BatcherConnection do
   require CBOR
 
   def send_submit_proof_message(submit_proof_message, address) do
-    host = String.to_charlist(Application.get_env(:zk_arcade, :host))
-    port = Application.get_env(:zk_arcade, :port)
-    {:ok, conn_pid} = :gun.open(host, port)
+    batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
+    batcher_port = Application.get_env(:zk_arcade, :batcher_port)
+    {:ok, conn_pid} = :gun.open(batcher_host, batcher_port)
 
     conn_pid =
       case :gun.await_up(conn_pid) do

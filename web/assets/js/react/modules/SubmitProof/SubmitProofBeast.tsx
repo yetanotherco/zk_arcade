@@ -15,11 +15,11 @@ import { useToast } from "../../state/toast";
 type Props = {
 	payment_service_address: Address;
 	user_address?: Address;
-	host: string;
-	port: number;
+	batcher_host: string;
+	batcher_port: number;
 };
 
-export default ({ payment_service_address, user_address, host, port }: Props) => {
+export default ({ payment_service_address, user_address, batcher_host, batcher_port }: Props) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
@@ -29,7 +29,7 @@ export default ({ payment_service_address, user_address, host, port }: Props) =>
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const [maxFee, setMaxFee] = useState(BigInt(0));
-	const { nonce, isLoading: nonceLoading, error: nonceError } = useBatcherNonce(host, port, user_address);
+	const { nonce, isLoading: nonceLoading, error: nonceError } = useBatcherNonce(batcher_host, batcher_port, user_address);
 
 	const { addToast } = useToast();
 

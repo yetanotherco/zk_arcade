@@ -33,7 +33,7 @@ defmodule ZkArcade.BatcherConnection do
 
       {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
         Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:error, :upgrade_failed}
     after
       25_000 ->
@@ -54,7 +54,7 @@ defmodule ZkArcade.BatcherConnection do
           {:error, reason} ->
             Logger.error("Failed to decode CBOR message: #{inspect(reason)}")
             Logger.error("Raw message: #{inspect(msg)}")
-            :gun.close(conn_pid)
+            close_connection(conn_pid, stream_ref)
             {:error, :decode_error}
         end
 
@@ -82,23 +82,23 @@ defmodule ZkArcade.BatcherConnection do
 
       %{"BatchInclusionData" => batch_data} ->
         Logger.info("Proof submitted successfully - BatchInclusionData: #{inspect(batch_data)}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:ok, {:batch_inclusion, batch_data}}
 
       %{"InsufficientBalance" => address} ->
         Logger.error("Insufficient balance for address #{address}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:error, {:insufficient_balance, address}}
 
       %{"InvalidProof" => reason} ->
         Logger.error("There was a problem with the submited proof: #{reason}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:error, "Invalid proof - #{reason}"}
 
       # There can be more error messages from the batcher, but they will enter on the other clause
       other ->
         Logger.error("Unrecognized message from batcher: #{inspect(other)}")
-        :gun.close(conn_pid)
+        close_connection(conn_pid, stream_ref)
         {:error, {:unrecognized_message, other}}
     end
   end
@@ -129,6 +129,15 @@ defmodule ZkArcade.BatcherConnection do
         }
       }
     }
+  end
+
+  defp close_connection(conn_pid, stream_ref) do
+    Logger.info("Closing the connection with the batcher...")
+    :gun.ws_send(conn_pid, stream_ref, {:close, 1000, ""})
+    receive do
+      {:gun_ws, ^conn_pid, ^stream_ref, {:close, _code, _reason}} ->
+        :gun.close(conn_pid)
+    end
   end
 
   defp parse_bigint(v) when is_binary(v) do

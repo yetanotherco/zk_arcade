@@ -66,7 +66,7 @@ defmodule ZkArcade.VerifySignature do
 
   defp reject(conn) do
     conn
-      |> assign(:error, "Fallo en la autenticación")
+      |> assign(:error, "Failure in authentication")
       |> put_session(:step, 0)
   end
 

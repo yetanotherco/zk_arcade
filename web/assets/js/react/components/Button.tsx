@@ -8,7 +8,7 @@ type ButtonVariant =
 	| "disabled-text";
 
 const buttonVariantStyles: { [key in ButtonVariant]: string } = {
-	"accent-fill": "px-10 py-2 bg-accent-100",
+	"accent-fill": "px-10 text-black py-2 bg-accent-100",
 	disabled: "px-10 py-2 bg-disabled",
 	"disabled-text": "font-normal",
 	text: "hover:underline",

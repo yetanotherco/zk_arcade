@@ -27,15 +27,10 @@ export default ({ payment_service_address, user_address }: Props) => {
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const [maxFee, setMaxFee] = useState(BigInt(0));
-	const [currentNonce, setCurrentNonce] = useState<`0x${string}` | null>(null);
+	const { nonce, loading: nonceLoading, error: nonceError } = useBatcherNonce("localhost", 8080, user_address);
 
 	const { addToast } = useToast();
 
-	if (!user_address){
-		alert("User address is nil")
-		return
-	}
-	const { nonce, loading: nonceLoading, error: nonceError } = useBatcherNonce("localhost", 8080, user_address);
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
@@ -102,7 +97,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 			return;
 		}
 
-		if (!currentNonce) {
+		if (!nonce) {
 			alert("Nonce is still loading or failed");
 			return;
 		}
@@ -118,7 +113,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 
 		const noncedVerificationdata: NoncedVerificationdata = {
 			maxFee: toHex(maxFee, { size: 32 }),
-			nonce: currentNonce,
+			nonce: nonce,
 			chain_id: toHex(chainId, { size: 32 }),
 			payment_service_addr: payment_service_address,
 			verificationData,
@@ -150,7 +145,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 		user_address,
 		payment_service_address,
 		chainId,
-		currentNonce,
+		nonce,
 	]);
 
 	useEffect(() => {
@@ -161,15 +156,6 @@ export default ({ payment_service_address, user_address }: Props) => {
 		};
 		fn();
 	}, [estimateMaxFeeForBatchOfProofs]);
-
-	useEffect(() => {
-		if (!nonceLoading && nonce) {
-			setCurrentNonce(nonce);
-		}
-		if (!nonceLoading && nonceError) {
-			alert("Could not fetch nonce: " + nonceError.message);
-		}
-	}, [nonce, nonceLoading, nonceError]);
 
 	return (
 		<>
@@ -270,7 +256,9 @@ export default ({ payment_service_address, user_address }: Props) => {
 									!proof ||
 									!proofId ||
 									!publicInputs ||
-									(balance.data || 0) < maxFee
+									(balance.data || 0) < maxFee ||
+									nonceLoading ||
+									!nonce
 								}
 								isLoading={submissionIsLoading}
 								onClick={handleSubmission}

@@ -20,6 +20,8 @@ defmodule ZkArcadeWeb.Router do
 
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
+
+    get "/history", HistoryController, :history
   end
 
   scope "/api", ZkArcadeWeb do

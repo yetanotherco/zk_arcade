@@ -17,7 +17,6 @@ export function useBatcherNonce(host: string, port: number, address: string) {
 					const data = cborDecode(new Uint8Array(cbor_data));
 
 					if (data?.ProtocolVersion) {
-						console.log(`Protocol version received: ${data.ProtocolVersion}`);
 						const message = { GetNonceForAddress: address };
 						const encoded = cborEncode(message).buffer;
 						ws.send(encoded);

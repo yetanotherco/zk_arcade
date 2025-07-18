@@ -211,6 +211,8 @@ impl Game {
                     self.handle_win_state();
                 }
                 GameState::Quit => {
+                    println!("Proof saved to ./games/beast/beast1984/. ");
+                    println!("Submit it to https://zkarcade.com and earn points!");
                     println!("Bye...");
                     break;
                 }
@@ -620,7 +622,7 @@ impl Game {
         }
 
         let msg = if let Ok(_) = res {
-            "Execution proven and stored!"
+            "Proof saved to ./games/beast/beast1984/. Submit it to https://zkarcade.com and earn points!"
         } else {
             "Could not prove program, try again..."
         };

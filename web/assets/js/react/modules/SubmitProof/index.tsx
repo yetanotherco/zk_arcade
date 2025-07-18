@@ -9,9 +9,11 @@ type Props = {
 	network: string;
 	payment_service_address: Address;
 	user_address?: Address;
+	host: string;
+	port: number;
 };
 
-export default ({ network, payment_service_address, user_address }: Props) => {
+export default ({ network, payment_service_address, user_address, host, port }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
@@ -19,6 +21,8 @@ export default ({ network, payment_service_address, user_address }: Props) => {
 				<SubmitProofBeast
 					payment_service_address={payment_service_address}
 					user_address={user_address}
+					host={host}
+					port={port}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

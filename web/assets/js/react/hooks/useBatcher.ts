@@ -5,7 +5,7 @@ import { hexToBigInt } from "viem";
 export function useBatcherNonce(host: string, port: number, address?: string) {
 	const [nonce, setNonce] = useState<bigint | null>(null);
 	const [error, setError] = useState<Error | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		let ws: WebSocket | null = null;

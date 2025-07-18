@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, FormInput, Modal } from "../../components";
 import { useAligned, useBatcherPaymentService, useModal } from "../../hooks";
 import { Address } from "../../types/blockchain";
-import { formatEther, toHex } from "viem";
+import { formatEther, hexToBigInt, toHex } from "viem";
 import {
 	NoncedVerificationdata,
 	SubmitProof,
@@ -13,7 +13,7 @@ import { useChainId } from "wagmi";
 import { useToast } from "../../state/toast";
 import { encode as cborEncode, decode as cborDecode } from 'cbor-web';
 
-async function getNonce(host: string, port: number, address: string): Promise<string> {
+async function getNonce(host: string, port: number, address: string): Promise<`0x${string}`> {
 	return new Promise((resolve, reject) => {
 		const ws = new WebSocket(`ws://${host}:${port}`);
 		ws.binaryType = 'arraybuffer';
@@ -103,7 +103,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
 
-	const {
+	let {
 		nonce: {
 			data: nonce,
 			isLoading: nonceIsLoading,
@@ -157,7 +157,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 
 		console.log("Nonce defined in eth is ", nonce);
 		try {
-			const nonce = await getNonce('localhost', 8080, user_address);
+			nonce = hexToBigInt(await getNonce('localhost', 8080, user_address));
 			console.log("The one defined in batcher is ", nonce);
 		} catch (err) {
 			console.error("Error obtaining nonce from batcher:", err);

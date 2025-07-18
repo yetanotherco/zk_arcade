@@ -111,9 +111,16 @@ defmodule ZkArcade.EIP712Verifier do
         int_value = :binary.decode_unsigned(bytes, :big)
         encode_uint256(int_value)
       {:error, _} ->
-        case Integer.parse(value) do
-          {int_value, ""} -> encode_uint256(int_value)
-          _ -> raise "Invalid uint256 value: #{value}"
+        case String.starts_with?(value, "0x") do
+          true ->
+            {int_value, ""} = Integer.parse(String.trim_leading(value, "0x"), 16)
+            encode_uint256(int_value)
+
+          false ->
+            case Integer.parse(value) do
+              {int_value, ""} -> encode_uint256(int_value)
+              _ -> raise "Invalid uint256 value: #{value}"
+            end
         end
     end
   end

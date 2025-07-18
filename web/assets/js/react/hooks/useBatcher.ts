@@ -21,7 +21,6 @@ export function useBatcherNonce(host: string, port: number, address: string) {
 						const message = { GetNonceForAddress: address };
 						const encoded = cborEncode(message).buffer;
 						ws.send(encoded);
-						console.log(`Sent GetNonceForAddress for address: ${address}`);
 					} else if (data?.Nonce) {
 						ws.close();
 						resolve(data.Nonce);

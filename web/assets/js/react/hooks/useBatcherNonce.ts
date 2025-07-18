@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
-import { encode as cborEncode, decode as cborDecode } from 'cbor-web';
+import { encode as cborEncode, decode as cborDecode } from 'cbor2';
 import { hexToBigInt } from "viem";
+
+type GetNonceFromBatcherResponse = {
+	ProtocolVersion: string,
+	Nonce: `0x${string}`;
+	EthRpcError: string;
+	InvalidRequest: string;
+}
 
 export function useBatcherNonce(host: string, port: number, address?: string) {
 	const [nonce, setNonce] = useState<bigint | null>(null);
@@ -25,7 +32,7 @@ export function useBatcherNonce(host: string, port: number, address?: string) {
 			ws.onmessage = (event) => {
 				try {
 					const cbor_data = event.data;
-					const data = cborDecode(new Uint8Array(cbor_data));
+					const data = cborDecode<GetNonceFromBatcherResponse>(new Uint8Array(cbor_data));
 
 					if (data?.ProtocolVersion) {
 						const message = { GetNonceForAddress: address };

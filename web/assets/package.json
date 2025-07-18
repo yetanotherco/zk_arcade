@@ -4,7 +4,6 @@
 		"@sentry/react": "^8.47.0",
 		"@tanstack/react-query": "^5.62.8",
 		"cbor2": "^2.0.1",
-    	"cbor-web": "^10.0.9",
 		"connectkit": "^1.8.2",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",

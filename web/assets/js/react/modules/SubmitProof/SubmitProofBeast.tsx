@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, FormInput, Modal } from "../../components";
-import { useAligned, useBatcherPaymentService, useModal } from "../../hooks";
+import { useAligned, useBatcherPaymentService, useModal, useBatcherNonce } from "../../hooks";
 import { Address } from "../../types/blockchain";
-import { formatEther, hexToBigInt, toHex } from "viem";
+import { formatEther, toHex } from "viem";
 import {
 	NoncedVerificationdata,
 	SubmitProof,
@@ -12,46 +12,6 @@ import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useChainId } from "wagmi";
 import { useToast } from "../../state/toast";
 import { encode as cborEncode, decode as cborDecode } from 'cbor-web';
-
-async function getNonce(host: string, port: number, address: string): Promise<`0x${string}`> {
-	return new Promise((resolve, reject) => {
-		const ws = new WebSocket(`ws://${host}:${port}`);
-		ws.binaryType = 'arraybuffer';
-
-		ws.onopen = () => {
-			console.log("WebSocket connection established");
-		};
-
-		ws.onmessage = (event) => {
-			try {
-				const cbor_data = event.data;
-				const data = cborDecode(new Uint8Array(cbor_data));
-
-				if (data?.ProtocolVersion) {
-					console.log(`Protocol version received: ${data.ProtocolVersion}`);
-					const message = { GetNonceForAddress: address };
-					const encoded = cborEncode(message).buffer;
-					ws.send(encoded);
-					console.log(`Sent GetNonceForAddress for address: ${address}`);
-				} else if (data?.Nonce) {
-					ws.close();
-					resolve(data.Nonce);
-				} else if (data?.EthRpcError || data?.InvalidRequest) {
-					ws.close();
-					reject(data);
-				}
-			} catch (e) {
-				ws.close();
-				reject(e);
-			}
-		};
-
-		ws.onerror = () => {
-			ws.close();
-			reject(new Error("WebSocket connection error"));
-		};
-	});
-}
 
 type Props = {
 	payment_service_address: Address;
@@ -70,6 +30,11 @@ export default ({ payment_service_address, user_address }: Props) => {
 	const [maxFee, setMaxFee] = useState(BigInt(0));
 
 	const { addToast } = useToast();
+
+	if (!user_address){
+		alert("User address is nil")
+		return
+	}
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
@@ -124,6 +89,8 @@ export default ({ payment_service_address, user_address }: Props) => {
 			else if (type === "pub") setPublicInputs(data);
 		};
 
+	const fetchNonce = useBatcherNonce('localhost', 8080, user_address);
+
 	const handleSubmission = useCallback(async () => {
 		if (!proof || !proofId || !publicInputs || !user_address) {
 			alert("You need to provide proof, proofid, public inputs");
@@ -136,6 +103,14 @@ export default ({ payment_service_address, user_address }: Props) => {
 			return;
 		}
 
+		let nonce: `0x${string}`;
+		try {
+			nonce = await fetchNonce();
+		} catch (err) {
+			alert("Could not get nonce: " + (err as Error).message);
+			return;
+		}
+
 		const verificationData: VerificationData = {
 			provingSystem: "Risc0",
 			proof: Array.from(proof),
@@ -145,19 +120,9 @@ export default ({ payment_service_address, user_address }: Props) => {
 			proofGeneratorAddress: user_address,
 		};
 
-		const nonce = await getNonce('localhost', 8080, user_address)
-			.catch((err) => {
-				alert("Could not get nonce: " + err.message);
-			});
-
-		if (nonce == undefined) {
-			console.log("Failed to get nonce")
-			return;
-		}
-
 		const noncedVerificationdata: NoncedVerificationdata = {
 			maxFee: toHex(maxFee, { size: 32 }),
-			nonce: nonce,
+			nonce,
 			chain_id: toHex(chainId, { size: 32 }),
 			payment_service_addr: payment_service_address,
 			verificationData,
@@ -189,6 +154,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 		user_address,
 		payment_service_address,
 		chainId,
+		fetchNonce,
 	]);
 
 	useEffect(() => {

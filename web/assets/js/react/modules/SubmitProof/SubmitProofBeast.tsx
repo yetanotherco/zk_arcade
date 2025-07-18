@@ -115,7 +115,7 @@ export default ({ payment_service_address, user_address, host, port }: Props) =>
 
 		const noncedVerificationdata: NoncedVerificationdata = {
 			maxFee: toHex(maxFee, { size: 32 }),
-			nonce: nonce,
+			nonce: toHex(nonce, { size: 32 }),
 			chain_id: toHex(chainId, { size: 32 }),
 			payment_service_addr: payment_service_address,
 			verificationData,

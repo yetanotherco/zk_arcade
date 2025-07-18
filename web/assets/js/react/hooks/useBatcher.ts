@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { encode as cborEncode, decode as cborDecode } from 'cbor-web';
+import { hexToBigInt } from "viem";
 
 export function useBatcherNonce(host: string, port: number, address?: string) {
-	const [nonce, setNonce] = useState<`0x${string}` | null>(null);
+	const [nonce, setNonce] = useState<bigint | null>(null);
 	const [error, setError] = useState<Error | null>(null);
 	const [loading, setLoading] = useState(true);
 
@@ -29,7 +30,7 @@ export function useBatcherNonce(host: string, port: number, address?: string) {
 							ws?.send(encoded);
 						} else if (data?.Nonce) {
 							ws?.close();
-							setNonce(data.Nonce);
+							setNonce(hexToBigInt(data.Nonce));
 							setLoading(false);
 						} else if (data?.EthRpcError || data?.InvalidRequest) {
 							ws?.close();

@@ -99,7 +99,7 @@ export default ({ payment_service_address, user_address, host, port }: Props) =>
 			return;
 		}
 
-		if (!nonce) {
+		if (nonce == null) {
 			alert("Nonce is still loading or failed");
 			return;
 		}
@@ -260,7 +260,7 @@ export default ({ payment_service_address, user_address, host, port }: Props) =>
 									!publicInputs ||
 									(balance.data || 0) < maxFee ||
 									nonceLoading ||
-									!nonce
+									nonce == null
 								}
 								isLoading={submissionIsLoading}
 								onClick={handleSubmission}

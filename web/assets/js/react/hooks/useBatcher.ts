@@ -34,23 +34,23 @@ export function useBatcherNonce(host: string, port: number, address?: string) {
 					} else if (data?.Nonce) {
 						ws?.close();
 						setNonce(hexToBigInt(data.Nonce));
-						setLoading(false);
+						setIsLoading(false);
 					} else if (data?.EthRpcError || data?.InvalidRequest) {
 						ws?.close();
 						setError(new Error(JSON.stringify(data)));
-						setLoading(false);
+						setIsLoading(false);
 					}
 				} catch (e) {
 					ws?.close();
 					setError(e as Error);
-					setLoading(false);
+					setIsLoading(false);
 				}
 			};
 
 			ws.onerror = () => {
 				ws?.close();
 				setError(new Error("WebSocket connection error"));
-				setLoading(false);
+				setIsLoading(false);
 			};
 		};
 
@@ -61,5 +61,5 @@ export function useBatcherNonce(host: string, port: number, address?: string) {
 		};
 	}, [host, port, address]);
 
-	return { nonce, loading, error };
+	return { nonce, isLoading, error };
 }

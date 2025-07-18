@@ -28,7 +28,7 @@ defmodule ZkArcadeWeb.SignController do
         {:error, :not_found} ->
           Logger.info("Could not find a wallet for the received address, creating wallet...")
 
-          case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address)}) do
+          case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address), agreement_signature: sig}) do
             {:ok, wallet} ->
               Logger.info("Created wallet for address #{wallet.address}")
 
@@ -39,7 +39,7 @@ defmodule ZkArcadeWeb.SignController do
               Logger.error("Error creating wallet: #{inspect(changeset.errors)}")
 
               conn
-              |> assign(:error, "Hubo un problema al crear tu wallet")
+              |> assign(:error, "There was a problem creating wallet: #{inspect(changeset.errors)}")
               |> render(:home, layout: false)
           end
       end

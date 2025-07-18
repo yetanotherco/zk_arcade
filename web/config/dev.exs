@@ -88,5 +88,5 @@ config :zk_arcade, :leaderboard_address, "<COMPLETE_ADDRESS_FROM_OUTPUT>"
 
 config :zk_arcade, :network, "anvil"
 
-config :zk_arcade, :host, "localhost"
-config :zk_arcade, :port, 8080
+config :zk_arcade, :batcher_host, "localhost"
+config :zk_arcade, :batcher_port, 8080

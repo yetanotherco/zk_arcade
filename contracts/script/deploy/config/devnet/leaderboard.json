@@ -1,7 +1,14 @@
 {
-    "permissions": {
-        "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-    },
-    "alignedServiceManager": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
-    "alignedBatcherPaymentService": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0"
+	"permissions": {
+		"owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	},
+	"alignedServiceManager": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+	"alignedBatcherPaymentService": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
+	"levels": [
+		{
+			"endsAtBlock": "0x000000000000000000000000000000000000000000000000000000174876e800",
+			"gameConfig": "0xfa0a0300fa0c0500c8140c00b41e0a01aa1e0a03a01e0a07a0320501a0640c08",
+			"startsAtBlock": "0x0000000000000000000000000000000000000000000000000000000000000000"
+		}
+	]
 }

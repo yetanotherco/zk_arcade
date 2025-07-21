@@ -14,12 +14,12 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     // == Beast storages ==
     struct BeastGame {
-        uint256 startsAtBlock;
         uint256 endsAtBlock;
         uint256 gameConfig;
+        uint256 startsAtBlock;
     }
 
-    BeastGame[] beastGames;
+    BeastGame[] public beastGames;
     /// See `getBeastKey` to see the key implementation
     mapping(bytes32 => uint256) public usersBeastLevelCompleted;
 

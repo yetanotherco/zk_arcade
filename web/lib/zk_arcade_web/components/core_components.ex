@@ -98,12 +98,12 @@ defmodule ZkArcadeWeb.CoreComponents do
 
   def home_statistics_component(%{label: label, value: value} = assigns) do
     ~H"""
-        <div class="border border-gray-800 rounded-lg p-6 shadow-inner">
-          <p class="text-gray-400 text-xs uppercase tracking-widest"><%= label %></p>
-          <p class="text-5xl font-semibold text-green-300 mt-2">
-            <%= value %>
-          </p>
-        </div>
+      <div class="border-r border-gray-800 p-6">
+        <p class="text-gray-400 text-xs uppercase tracking-widest"><%= label %></p>
+        <p class="text-5xl font-semibold text-green-300 mt-2">
+          <%= value %>
+        </p>
+      </div>
     """
   end
 

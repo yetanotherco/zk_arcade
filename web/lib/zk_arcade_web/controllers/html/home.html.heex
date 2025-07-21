@@ -19,9 +19,12 @@
       </a>
     </div>
 
-    <div class="grid grid-cols-2 rounded-lg overflow-hidden border border-gray-800 text-mint-300 font-sans">
-        <.home_statistics_component label="Total Players" value={ZkArcade.Accounts.list_wallets() |> length()} />
-        <.home_statistics_component label="Total Proofs" value={ZkArcade.Proofs.list_proofs() |> length()} />
+    <div>
+      <h2 class="md:text-3xl text-xl font-normal mt-8">Statistics</h2>
+      <div class="grid grid-cols-2 rounded-lg overflow-hidden border border-gray-800 text-mint-300 font-sans mt-2">
+          <.home_statistics_component label="Total Players" value={ZkArcade.Accounts.list_wallets() |> length()} />
+          <.home_statistics_component label="Total Proofs" value={ZkArcade.Proofs.list_proofs() |> length()} />
+      </div>
     </div>
   </div>
 

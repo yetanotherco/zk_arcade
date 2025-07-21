@@ -161,8 +161,11 @@ defmodule ZkArcade.BatcherConnection do
     segment8 = c * 256 + d
     {0, 0, 0, 0, 0, 0xFFFF, segment7, segment8}
   end
-  defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
-    {:ok, tuple} = :inet.parse_address(String.to_charlist(ipv4))
+  defp ipv4_to_ipv6(ipv4) when is_list(ipv4) do
+    {:ok, tuple} = :inet.parse_address(ipv4)
     ipv4_to_ipv6(tuple)
+  end
+  defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
+    ipv4_to_ipv6(String.to_charlist(ipv4))
   end
 end

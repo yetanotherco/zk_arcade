@@ -211,7 +211,7 @@ defmodule ZkArcade.BatcherConnection do
       upgrade_connection(conn_pid)
     else
       {:error, :timeout} ->
-        try_localhost_upgrade()
+        try_ipv6_connection()
 
       {:error, reason} ->
         Logger.error("Failed to open connection to #{inspect(batcher_host)}:#{batcher_port} - #{inspect(reason)}")
@@ -222,13 +222,14 @@ defmodule ZkArcade.BatcherConnection do
   # Tries to open a connection to the batcher using ipv6 localhost address.
   # This is a fallback in case the initial ipv4 connection fails, and depends on the
   # ip protocol supported by the batcher.
-  # TODO: Handle more cases than localhost, probably using a method to convert an ipv4
-  # address to an ipv6 address.
-  defp try_localhost_upgrade() do
-    localhost = {0, 0, 0, 0, 0, 0, 0, 1}
-    port = 8080
+  defp try_ipv6_connection() do
+    batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
+    batcher_port = Application.get_env(:zk_arcade, :batcher_port)
 
-    with {:ok, conn_pid} <- :gun.open(localhost, port),
+    {:ok, parsed_ipv6_addr} = :inet.parse_address(String.to_charlist(batcher_host))
+    localhost_ipv6 = ipv4_to_ipv6(parsed_ipv6_addr)
+
+    with {:ok, conn_pid} <- :gun.open(localhost_ipv6, batcher_port),
         {:ok, _protocol} <- :gun.await_up(conn_pid) do
       upgrade_connection(conn_pid)
     else
@@ -240,12 +241,12 @@ defmodule ZkArcade.BatcherConnection do
 
   # Converts an IPv4 address to an IPv6 address by padding the first 6 segments with zeros
   # and placing the IPv4 address in the last two segments.
-  defp ipv4_to_ipv6(ipv4) when is_tuple(ipv4) do
-    {a, b, c, d} = ipv4
-    {0, 0, 0, 0, 0, 0, a, b * 256 + c * 16 + d}
+  # Note: the returned address is an IPv4 mapped IPv6 address.
+  defp ipv4_to_ipv6({a, b, c, d}) do
+    {0, 0, 0, 0, 0, 0xFFFF, (a * 16_777_216) + (b * 65_536) + (c * 256) + d}
   end
   defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
-    {a, b, c, d} = :inet.parse_ipv4(ipv4)
+    {:ok, {a, b, c, d}} = :inet.parse_address(String.to_charlist(ipv4))
     ipv4_to_ipv6({a, b, c, d})
   end
 
@@ -263,7 +264,7 @@ defmodule ZkArcade.BatcherConnection do
     :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
 
     case handle_websocket_messages(conn_pid, stream_ref) do
-      {:ok, {:batch_inclusion, batch_data}} = ok ->
+      {:ok, {:batch_inclusion, _}} = ok ->
         ok
 
       {:error, :connection_down} = err ->

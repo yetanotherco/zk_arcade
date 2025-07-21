@@ -75,7 +75,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes memory merkleProof,
         uint256 verificationDataBatchIndex
     ) public {
-        (uint256 gameConfig, uint256 levelCompleted, address userAddress) =
+        (uint256 levelCompleted, uint256 gameConfig, address userAddress) =
             abi.decode(publicInputs, (uint256, uint256, address));
 
         if (userAddress != msg.sender) {

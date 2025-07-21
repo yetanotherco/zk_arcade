@@ -3,7 +3,7 @@
 use game_logic::{
     beasts::{Beast, BeastAction, CommonBeast, HatchedBeast, SuperBeast},
     board::Board,
-    common::levels::Level,
+    common::{game::GameMatch, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog, ProgramInput},
     Coord, Tile,
@@ -12,7 +12,7 @@ use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
-fn prove_level_completed(input: &LevelLog) -> bool {
+fn prove_level_completed(game: GameMatch, input: &LevelLog) -> bool {
     let mut board = Board::new_from_matrix(&input.board);
 
     /*
@@ -22,7 +22,7 @@ fn prove_level_completed(input: &LevelLog) -> bool {
      * 2. Verify they match with the config
      * 3. Verify the distance between the player and the enemies match
      */
-    let level_config = input.level.get_config();
+    let level_config = game.get_config(input.level);
     let mut player: Option<Player> = None;
     let mut common_beasts: Vec<CommonBeast> = vec![];
     let mut super_beasts: Vec<SuperBeast> = vec![];
@@ -153,13 +153,13 @@ fn prove_level_completed(input: &LevelLog) -> bool {
     common_beasts.len() + super_beasts.len() + hatched_beasts.len() == 0 && player.lives > 0
 }
 
-fn encode_game_config() -> [u8; 32] {
+fn encode_game_config(game: GameMatch) -> [u8; 32] {
     let mut levels: [[u8; 4]; 8] = [[0u8; 4]; 8];
 
     let mut level = Level::One;
     let mut i = 0;
     loop {
-        let config = level.get_config();
+        let config = game.get_config(level);
         levels[i][0] = config.blocks;
         levels[i][1] = config.static_blocks;
         levels[i][2] = config.common_beasts;
@@ -186,6 +186,7 @@ fn encode_game_config() -> [u8; 32] {
 
 fn main() {
     let input = env::read::<ProgramInput>();
+    let game_match = GameMatch::new(input.block_number);
 
     let mut current_level_number: u16 = 0;
     for level_completion in input.levels_log {
@@ -193,7 +194,7 @@ fn main() {
         if current_level_number != level_completion.level.number() {
             panic!("Level completion must be in order")
         };
-        if !prove_level_completed(&level_completion) {
+        if !prove_level_completed(game_match.clone(), &level_completion) {
             panic!("Level {} proving failed", level_completion.level.number());
         }
     }
@@ -203,7 +204,7 @@ fn main() {
     let bytes = current_level_number.to_be_bytes();
     number[32 - bytes.len()..].copy_from_slice(&bytes);
 
-    let game = encode_game_config();
+    let game = encode_game_config(game_match);
 
     let mut address: [u8; 32] = [0; 32];
     address[12..32].copy_from_slice(&input.address);

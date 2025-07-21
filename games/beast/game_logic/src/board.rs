@@ -6,7 +6,7 @@ use std::fmt::Write;
 
 use crate::{
     beasts::{Beast, CommonBeast, Egg, HatchedBeast, SuperBeast},
-    common::levels::Level,
+    common::levels::LevelConfig,
     player::Player,
     Coord, Tile, ANSI_LEFT_BORDER, ANSI_RESET_BG, ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH,
     PLAYER_START,
@@ -85,10 +85,8 @@ impl Board {
     }
 
     /// generate the terrain of the board according to the level config we pass in
-    pub fn generate_terrain(level: Level) -> BoardTerrainInfo {
+    pub fn generate_terrain(level_config: LevelConfig) -> BoardTerrainInfo {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
-
-        let level_config = level.get_config();
 
         let mut common_beasts = Vec::with_capacity(level_config.common_beasts as usize);
         let mut super_beasts = Vec::with_capacity(level_config.super_beasts as usize);

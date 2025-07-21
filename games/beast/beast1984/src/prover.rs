@@ -13,7 +13,11 @@ pub enum ProvingError {
     SavingProof(String),
 }
 
-pub fn prove(levels_log: Vec<LevelLog>, address: String) -> Result<Receipt, ProvingError> {
+pub fn prove(
+    levels_log: Vec<LevelLog>,
+    block_number: u64,
+    address: String,
+) -> Result<Receipt, ProvingError> {
     let mut env_builder = ExecutorEnv::builder();
 
     let address_bytes =
@@ -22,6 +26,7 @@ pub fn prove(levels_log: Vec<LevelLog>, address: String) -> Result<Receipt, Prov
     let input = ProgramInput {
         levels_log,
         address: address_bytes,
+        block_number,
     };
     env_builder
         .write(&input)

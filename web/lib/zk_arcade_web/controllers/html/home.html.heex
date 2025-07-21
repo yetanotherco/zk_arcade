@@ -1,11 +1,14 @@
 <div class="w-full">
 
-  <div class="flex flex-row h-screen items-center justify-between">
+  <div class="flex flex-col h-screen justify-center space-y-12">
     <div class="flex flex-row justify-between items-end">
       <div style="width: 70%">
-        <h1 class="typing md:text-5xl text-2xl font-normal mb-4">Play. Prove. <span class="text-accent-100">Verify</span>. Compete</h1>
+        <h1 class="typing md:text-5xl text-2xl font-normal mb-4">
+          Play. Prove. <span class="text-accent-100">Verify</span>. Compete
+        </h1>
         <p class="text-text-200">
-          The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on <span class="text-accent-100">ALIGNED</span>. Climb the leaderboard, earn your rank.
+          The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on 
+          <span class="text-accent-100">ALIGNED</span>. Climb the leaderboard, earn your rank.
         </p>
       </div>
       <a href="#play-games">
@@ -15,18 +18,15 @@
         </div>
       </a>
     </div>
-  </div>
 
-<section class="content-visibility-auto relative z-10 bg-backdrop pt-4" id="zk-arcade-stats" data-theme="dark">
-  <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-semibold mb-2">Statistics</h2>
-
-    <div class="bg-black p-8 text-mint-300 font-sans grid grid-cols-1 md:grid-cols-2 gap-8">
-      <.home_statistics_component label="Total Players" value={ZkArcade.Accounts.list_wallets() |> length()} />
-      <.home_statistics_component label="Total Proofs" value={ZkArcade.Proofs.list_proofs() |> length()} />
+    <div>
+      <h2 class="md:text-3xl text-xl font-normal mt-8">Statistics</h2>
+      <div class="p-8 text-mint-300 font-sans grid grid-cols-1 md:grid-cols-2 gap-8">
+        <.home_statistics_component label="Total Players" value={ZkArcade.Accounts.list_wallets() |> length()} />
+        <.home_statistics_component label="Total Proofs" value={ZkArcade.Proofs.list_proofs() |> length()} />
+      </div>
     </div>
   </div>
-</section>
 
   <section id="play-games" class="section-spacer-lg">
     <.section_header header="Play Games" />

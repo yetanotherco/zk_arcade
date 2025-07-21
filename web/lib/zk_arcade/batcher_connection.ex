@@ -3,55 +3,33 @@ defmodule ZkArcade.BatcherConnection do
   require CBOR
 
   def send_submit_proof_message(submit_proof_message, address) do
-    host = String.to_charlist(Application.get_env(:zk_arcade, :host))
-    port = Application.get_env(:zk_arcade, :port)
-    {:ok, conn_pid} = :gun.open(host, port)
-
-    conn_pid =
-      case :gun.await_up(conn_pid) do
-        {:ok, _protocol} ->
-          conn_pid
-
-        {:error, :timeout} ->
-          {:ok, new_conn_pid} = :gun.open({0, 0, 0, 0, 0, 0, 0, 1}, 8080)
-          {:ok, _protocol} = :gun.await_up(new_conn_pid)
-          new_conn_pid
-      end
-
-    stream_ref = :gun.ws_upgrade(conn_pid, "/")
-
-    receive do
-      {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
-        Logger.info("WebSocket upgrade successful!")
-        message = build_submit_proof_message(submit_proof_message, address)
-        binary = CBOR.encode(message)
-        Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
-
-        :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
-
-        case handle_websocket_messages(conn_pid, stream_ref) do
-          {:ok, {:batch_inclusion, batch_data}} ->
-            {:ok, {:batch_inclusion, batch_data}}
-          {:error, :connection_down} ->
-            Logger.info("Retrying to send message")
-            case retry_send(submit_proof_message, address) do
-              {:ok, {:batch_inclusion, batch_data}} ->
-                {:ok, {:batch_inclusion, batch_data}}
+    case open_and_upgrade_connection() do
+      {:ok, conn_pid, stream_ref} ->
+        receive do
+          {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
+            Logger.info("WebSocket upgrade successful!")
+            case send_message_and_handle_response(conn_pid, stream_ref, submit_proof_message, address) do
+              {:ok, _} = ok -> ok
               {:error, :connection_down} ->
-                Logger.info("Failed while retrying to send message")
-                {:error, "Failed to send message on retry"}
+                Logger.info("Retrying to send message after connection down")
+                retry_send(submit_proof_message, address)
+              other -> other
             end
-          end
 
-      {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
-        Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
-        close_connection(conn_pid, stream_ref)
-        {:error, :upgrade_failed}
-    after
-      25_000 ->
-        Logger.error("Timeout during WebSocket upgrade")
-        :gun.close(conn_pid)
-        {:error, "Failed to upgrade socket connection due to timeout"}
+          {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
+            Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
+            close_connection(conn_pid, stream_ref)
+            {:error, :upgrade_failed}
+        after
+          25_000 ->
+            Logger.error("Timeout during WebSocket upgrade")
+            :gun.close(conn_pid)
+            {:error, "Failed to upgrade socket connection due to timeout"}
+        end
+
+      {:error, reason} ->
+        Logger.error("Failed to connect to batcher: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 
@@ -195,12 +173,7 @@ defmodule ZkArcade.BatcherConnection do
         receive do
           {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
             Logger.info("WebSocket upgrade successful!")
-            message = build_submit_proof_message(submit_proof_message, address)
-            binary = CBOR.encode(message)
-            Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
-
-            :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
-            handle_websocket_messages(conn_pid, stream_ref)
+            send_message_and_handle_response(conn_pid, stream_ref, submit_proof_message, address)
 
           {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
             Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
@@ -254,4 +227,26 @@ defmodule ZkArcade.BatcherConnection do
     stream_ref = :gun.ws_upgrade(conn_pid, "/")
     {:ok, conn_pid, stream_ref}
   end
+
+  # Sends the message to the batcher and handles the batcher response
+  defp send_message_and_handle_response(conn_pid, stream_ref, submit_proof_message, address) do
+    message = build_submit_proof_message(submit_proof_message, address)
+    binary = CBOR.encode(message)
+    Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
+
+    :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
+
+    case handle_websocket_messages(conn_pid, stream_ref) do
+      {:ok, {:batch_inclusion, batch_data}} = ok ->
+        ok
+
+      {:error, :connection_down} = err ->
+        Logger.info("Connection down while sending message")
+        err
+
+      other ->
+        other
+    end
+  end
+
 end

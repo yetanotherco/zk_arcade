@@ -23,19 +23,8 @@
 
     <div class="bg-black p-8 text-mint-300 font-sans">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="border border-gray-800 rounded-lg p-6 shadow-inner">
-          <p class="text-gray-400 text-xs uppercase tracking-widest">Total Players</p>
-          <p class="text-5xl font-semibold text-green-300 mt-2">
-            <%= ZkArcade.Accounts.list_wallets() |> length() %>
-          </p>
-        </div>
-
-        <div class="border border-gray-800 rounded-lg p-6 shadow-inner">
-          <p class="text-gray-400 text-xs uppercase tracking-widest">Total Proofs</p>
-          <p class="text-5xl font-semibold text-green-300 mt-2">
-            <%= ZkArcade.Proofs.list_proofs() |> length() %>
-          </p>
-        </div>
+        <.home_statistics_component label="Total Players" value={ZkArcade.Accounts.list_wallets() |> length()} />
+        <.home_statistics_component label="Total Proofs" value={ZkArcade.Proofs.list_proofs() |> length()} />
       </div>
     </div>
   </div>

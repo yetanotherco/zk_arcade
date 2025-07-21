@@ -141,7 +141,10 @@ defmodule ZkArcade.BatcherConnection do
 
   defp parse_bigint(v) when is_integer(v), do: v
 
-  # Here we are using an exponential backoff, so we are waiting (0, 5, 15, 35, 75, 155)
+  # Retries sending the message to the batcher with exponential backoff after a failure in
+  # the connection on the first attempt. Since we are using an exponential backoff,
+  # we are waiting (0, 5, 15, 35, 75, 155) seconds before each retry.
+  # If the connection is down, it will retry until it succeeds or exhausts the retries
   defp retry_send(submit_proof_message, address) do
     backoffs = [0, 5_000, 15_000, 35_000, 75_000, 155_000]
 
@@ -155,9 +158,11 @@ defmodule ZkArcade.BatcherConnection do
         {:ok, result} ->
           {:halt, {:ok, result}}
 
+        # This covers the case where the connection went down during the send attempt
         {:error, :connection_down} = error ->
           {:cont, error}
 
+        # This covers the case where the connection timed out during the send attempt
         {:error, :timeout} = error ->
           {:cont, error}
 
@@ -167,6 +172,7 @@ defmodule ZkArcade.BatcherConnection do
     end)
   end
 
+  # Attempts to open a connection to the batcher and upgrade it to web socket.
   defp try_connection(submit_proof_message, address) do
     case open_and_upgrade_connection() do
       {:ok, conn_pid, stream_ref} ->
@@ -192,6 +198,9 @@ defmodule ZkArcade.BatcherConnection do
     end
   end
 
+  # Opens a connection to the batcher and upgrades it to web socket connection.
+  # First tries to connect to the batcher using the configured host and port via ipv4.
+  # If the connection fails, it tries to connect using ipv6 as a fallback
   defp open_and_upgrade_connection() do
     Logger.info("Host is #{inspect(Application.get_env(:zk_arcade, :batcher_host))}")
     batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
@@ -229,6 +238,8 @@ defmodule ZkArcade.BatcherConnection do
     end
   end
 
+  # Converts an IPv4 address to an IPv6 address by padding the first 6 segments with zeros
+  # and placing the IPv4 address in the last two segments.
   defp ipv4_to_ipv6(ipv4) when is_tuple(ipv4) do
     {a, b, c, d} = ipv4
     {0, 0, 0, 0, 0, 0, a, b * 256 + c * 16 + d}

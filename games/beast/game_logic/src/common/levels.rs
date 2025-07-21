@@ -23,10 +23,6 @@ pub enum Level {
     Seven,
     /// level 8
     Eight,
-    /// level 9
-    Nine,
-    /// level 10
-    Ten,
 }
 
 impl Level {
@@ -41,8 +37,6 @@ impl Level {
             Self::Six => LEVEL_SIX,
             Self::Seven => LEVEL_SEVEN,
             Self::Eight => LEVEL_EIGHT,
-            Self::Nine => LEVEL_NINE,
-            Self::Ten => LEVEL_TEN,
         }
     }
 
@@ -56,9 +50,7 @@ impl Level {
             Self::Five => Some(Self::Six),
             Self::Six => Some(Self::Seven),
             Self::Seven => Some(Self::Eight),
-            Self::Eight => Some(Self::Nine),
-            Self::Nine => Some(Self::Ten),
-            Self::Ten => None,
+            Self::Eight => None,
         }
     }
 
@@ -72,8 +64,6 @@ impl Level {
             Self::Six => 6,
             Self::Seven => 7,
             Self::Eight => 8,
-            Self::Nine => 9,
-            Self::Ten => 10,
         }
     }
 }
@@ -89,8 +79,6 @@ impl fmt::Display for Level {
             Level::Six => write!(f, "6"),
             Level::Seven => write!(f, "7"),
             Level::Eight => write!(f, "8"),
-            Level::Nine => write!(f, "9"),
-            Level::Ten => write!(f, "10"),
         }
     }
 }
@@ -99,19 +87,19 @@ impl fmt::Display for Level {
 #[derive(Debug, Clone)]
 pub struct LevelConfig {
     /// how many blocks are placed on the board
-    pub blocks: usize,
+    pub blocks: u8,
     /// how many static blocks are placed on the board
-    pub static_blocks: usize,
+    pub static_blocks: u8,
     /// how many common beasts are placed on the board
-    pub common_beasts: usize,
+    pub common_beasts: u8,
     /// how many super beasts are placed on the board
-    pub super_beasts: usize,
+    pub super_beasts: u8,
     /// how many eggs are placed on the board
-    pub eggs: usize,
+    pub eggs: u8,
     /// how long it takes for an egg to hatch
     pub egg_hatching_time: Duration,
     /// how far away from each other the beasts start
-    pub beast_starting_distance: usize,
+    pub beast_starting_distance: u8,
     /// how long the level lasts
     pub time: Duration,
     /// how many points are awarded for completing the level
@@ -120,7 +108,7 @@ pub struct LevelConfig {
 
 /// level config for level 1
 pub const LEVEL_ONE: LevelConfig = LevelConfig {
-    blocks: 300,
+    blocks: 255,
     static_blocks: 10,
     common_beasts: 3,
     super_beasts: 0,
@@ -202,7 +190,7 @@ pub const LEVEL_SEVEN: LevelConfig = LevelConfig {
     static_blocks: 50,
     common_beasts: 5,
     super_beasts: 1,
-    eggs: 1,
+    eggs: 0,
     egg_hatching_time: Duration::from_millis(20000),
     beast_starting_distance: 27,
     time: Duration::from_secs(300),
@@ -213,39 +201,13 @@ pub const LEVEL_SEVEN: LevelConfig = LevelConfig {
 pub const LEVEL_EIGHT: LevelConfig = LevelConfig {
     blocks: 160,
     static_blocks: 100,
-    common_beasts: 10,
-    super_beasts: 5,
-    eggs: 3,
+    common_beasts: 12,
+    super_beasts: 8,
+    eggs: 0,
     egg_hatching_time: Duration::from_millis(20000),
     beast_starting_distance: 27,
     time: Duration::from_secs(330),
     completion_score: 25,
-};
-
-/// level config for level 9
-pub const LEVEL_NINE: LevelConfig = LevelConfig {
-    blocks: 150,
-    static_blocks: 150,
-    common_beasts: 10,
-    super_beasts: 5,
-    eggs: 5,
-    egg_hatching_time: Duration::from_millis(17000),
-    beast_starting_distance: 27,
-    time: Duration::from_secs(330),
-    completion_score: 30,
-};
-
-/// level config for level 10
-pub const LEVEL_TEN: LevelConfig = LevelConfig {
-    blocks: 180,
-    static_blocks: 150,
-    common_beasts: 10,
-    super_beasts: 10,
-    eggs: 8,
-    egg_hatching_time: Duration::from_millis(10000),
-    beast_starting_distance: 27,
-    time: Duration::from_secs(360),
-    completion_score: 100,
 };
 
 #[cfg(test)]
@@ -281,16 +243,6 @@ mod tests {
             Level::Eight.to_string(),
             "8",
             "This level should render to 8"
-        );
-        assert_eq!(
-            Level::Nine.to_string(),
-            "9",
-            "This level should render to 9"
-        );
-        assert_eq!(
-            Level::Ten.to_string(),
-            "10",
-            "This level should render to 10"
         );
     }
 
@@ -331,20 +283,6 @@ mod tests {
             Some(Level::Eight),
             "This level should progress to 8"
         );
-        assert_eq!(
-            Level::Eight.next(),
-            Some(Level::Nine),
-            "This level should progress to 9"
-        );
-        assert_eq!(
-            Level::Nine.next(),
-            Some(Level::Ten),
-            "This level should progress to 10"
-        );
-        assert_eq!(
-            Level::Ten.next(),
-            None,
-            "This level should be the last level"
-        );
+        assert_eq!(Level::Eight.next(), None, "This level should progress to 9");
     }
 }

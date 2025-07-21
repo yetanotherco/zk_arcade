@@ -209,6 +209,11 @@ defmodule ZkArcade.BatcherConnection do
     end
   end
 
+  # Tries to open a connection to the batcher using ipv6 localhost address.
+  # This is a fallback in case the initial ipv4 connection fails, and depends on the
+  # ip protocol supported by the batcher.
+  # TODO: Handle more cases than localhost, probably using a method to convert an ipv4
+  # address to an ipv6 address.
   defp try_localhost_upgrade() do
     localhost = {0, 0, 0, 0, 0, 0, 0, 1}
     port = 8080

@@ -193,10 +193,11 @@ defmodule ZkArcade.BatcherConnection do
   end
 
   defp open_and_upgrade_connection() do
-    host = String.to_charlist(Application.get_env(:zk_arcade, :host))
-    port = Application.get_env(:zk_arcade, :port)
+    Logger.info("Host is #{inspect(Application.get_env(:zk_arcade, :batcher_host))}")
+    batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
+    batcher_port = Application.get_env(:zk_arcade, :batcher_port)
 
-    with {:ok, conn_pid} <- :gun.open(host, port),
+    with {:ok, conn_pid} <- :gun.open(batcher_host, batcher_port),
         {:ok, _protocol} <- :gun.await_up(conn_pid) do
       upgrade_connection(conn_pid)
     else
@@ -204,7 +205,7 @@ defmodule ZkArcade.BatcherConnection do
         try_localhost_upgrade()
 
       {:error, reason} ->
-        Logger.error("Failed to open connection to #{inspect(host)}:#{port} - #{inspect(reason)}")
+        Logger.error("Failed to open connection to #{inspect(batcher_host)}:#{batcher_port} - #{inspect(reason)}")
         {:error, reason}
     end
   end

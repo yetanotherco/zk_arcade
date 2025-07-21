@@ -13,7 +13,9 @@ defmodule ZkArcade.BatcherConnection do
           conn_pid
 
         {:error, :timeout} ->
-          {:ok, new_conn_pid} = :gun.open({0, 0, 0, 0, 0, 0, 0, 1}, 8080)
+          Logger.info("Connection timed out, trying to connect with IPv6.")
+          ipv6_address = ipv4_to_ipv6(batcher_host)
+          {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
           {:ok, _protocol} = :gun.await_up(new_conn_pid)
           new_conn_pid
       end
@@ -103,6 +105,9 @@ defmodule ZkArcade.BatcherConnection do
     end
   end
 
+  # Builds the message that will be sent to the batcher
+  # It is built this way to match the struct expected by the batcher after
+  # the CBOR encoding/decoding process
   defp build_submit_proof_message(submit_proof_message, _address) do
     verification_data = submit_proof_message["verificationData"]["verificationData"]
 
@@ -131,6 +136,8 @@ defmodule ZkArcade.BatcherConnection do
     }
   end
 
+  # Closes the connection with the batcher notifying it with a close message and waits
+  # for the confirmation of the close message before closing the connection
   defp close_connection(conn_pid, stream_ref) do
     Logger.info("Closing the connection with the batcher...")
     :gun.ws_send(conn_pid, stream_ref, {:close, 1000, ""})
@@ -145,4 +152,20 @@ defmodule ZkArcade.BatcherConnection do
   end
 
   defp parse_bigint(v) when is_integer(v), do: v
+
+  # Converts an IPv4 address to an IPv6 address by padding the first 6 segments with zeros
+  # and placing the IPv4 address in the last two segments.
+  # Note: the returned address is an IPv4 mapped IPv6 address.
+  defp ipv4_to_ipv6({a, b, c, d}) do
+    segment7 = a * 256 + b
+    segment8 = c * 256 + d
+    {0, 0, 0, 0, 0, 0xFFFF, segment7, segment8}
+  end
+  defp ipv4_to_ipv6(ipv4) when is_list(ipv4) do
+    {:ok, tuple} = :inet.parse_address(ipv4)
+    ipv4_to_ipv6(tuple)
+  end
+  defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
+    ipv4_to_ipv6(String.to_charlist(ipv4))
+  end
 end

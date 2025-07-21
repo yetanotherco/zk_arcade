@@ -34,12 +34,14 @@ defmodule ZkArcadeWeb.PageController do
   end
 
   def home(conn, _params) do
+    leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet)
 
     conn
     |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:wallet, wallet)
+    |> assign(:leaderboard, leaderboard)
     |> render(:home)
   end
 

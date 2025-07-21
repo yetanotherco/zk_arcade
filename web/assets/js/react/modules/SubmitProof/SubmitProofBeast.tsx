@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, FormInput, Modal } from "../../components";
-import { useAligned, useBatcherPaymentService, useModal } from "../../hooks";
+import { useAligned, useBatcherPaymentService, useModal, useBatcherNonce } from "../../hooks";
 import { Address } from "../../types/blockchain";
 import { formatEther, toHex } from "viem";
 import {
@@ -15,9 +15,11 @@ import { useToast } from "../../state/toast";
 type Props = {
 	payment_service_address: Address;
 	user_address?: Address;
+	batcher_host: string;
+	batcher_port: number;
 };
 
-export default ({ payment_service_address, user_address }: Props) => {
+export default ({ payment_service_address, user_address, batcher_host, batcher_port }: Props) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
@@ -27,8 +29,10 @@ export default ({ payment_service_address, user_address }: Props) => {
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const [maxFee, setMaxFee] = useState(BigInt(0));
+	const { nonce, isLoading: nonceLoading, error: nonceError } = useBatcherNonce(batcher_host, batcher_port, user_address);
 
 	const { addToast } = useToast();
+
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
@@ -63,11 +67,6 @@ export default ({ payment_service_address, user_address }: Props) => {
 		useAligned();
 
 	const {
-		nonce: {
-			data: nonce,
-			isLoading: nonceIsLoading,
-			isSuccess: nonceIsSuccess,
-		},
 		balance,
 	} = useBatcherPaymentService({
 		contractAddress: payment_service_address,
@@ -94,14 +93,14 @@ export default ({ payment_service_address, user_address }: Props) => {
 			return;
 		}
 
-		if (nonce == undefined || nonceIsLoading || !nonceIsSuccess) {
-			alert("Could not get nonce");
-			return;
-		}
-
 		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
 		if (!maxFee) {
 			alert("Could not estimate max fee");
+			return;
+		}
+
+		if (nonce == null) {
+			alert("Nonce is still loading or failed");
 			return;
 		}
 
@@ -141,9 +140,6 @@ export default ({ payment_service_address, user_address }: Props) => {
 	}, [
 		setSubmitProofMessage,
 		signVerificationData,
-		nonce,
-		nonceIsLoading,
-		nonceIsSuccess,
 		estimateMaxFeeForBatchOfProofs,
 		proof,
 		proofId,
@@ -151,6 +147,7 @@ export default ({ payment_service_address, user_address }: Props) => {
 		user_address,
 		payment_service_address,
 		chainId,
+		nonce,
 	]);
 
 	useEffect(() => {
@@ -261,7 +258,9 @@ export default ({ payment_service_address, user_address }: Props) => {
 									!proof ||
 									!proofId ||
 									!publicInputs ||
-									(balance.data || 0) < maxFee
+									(balance.data || 0) < maxFee ||
+									nonceLoading ||
+									nonce == null
 								}
 								isLoading={submissionIsLoading}
 								onClick={handleSubmission}

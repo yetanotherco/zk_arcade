@@ -228,6 +228,11 @@ defmodule ZkArcade.BatcherConnection do
     end
   end
 
+  defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
+    {a, b, c, d} = :inet.parse_ipv4(ipv4)
+    ipv4_to_ipv6({a, b, c, d})
+  end
+
   defp upgrade_connection(conn_pid) do
     stream_ref = :gun.ws_upgrade(conn_pid, "/")
     {:ok, conn_pid, stream_ref}

@@ -115,6 +115,9 @@ defmodule ZkArcade.BatcherConnection do
     end
   end
 
+  # Builds the message that will be sent to the batcher
+  # It is built this way to match the struct expected by the batcher after
+  # the CBOR encoding/decoding process
   defp build_submit_proof_message(submit_proof_message, _address) do
     verification_data = submit_proof_message["verificationData"]["verificationData"]
 
@@ -143,6 +146,8 @@ defmodule ZkArcade.BatcherConnection do
     }
   end
 
+  # Closes the connection with the batcher notifying it with a close message and waits
+  # for the confirmation of the close message before closing the connection
   defp close_connection(conn_pid, stream_ref) do
     Logger.info("Closing the connection with the batcher...")
     :gun.ws_send(conn_pid, stream_ref, {:close, 1000, ""})

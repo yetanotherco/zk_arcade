@@ -228,6 +228,10 @@ defmodule ZkArcade.BatcherConnection do
     end
   end
 
+  defp ipv4_to_ipv6(ipv4) when is_tuple(ipv4) do
+    {a, b, c, d} = ipv4
+    {0, 0, 0, 0, 0, 0, a, b * 256 + c * 16 + d}
+  end
   defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
     {a, b, c, d} = :inet.parse_ipv4(ipv4)
     ipv4_to_ipv6({a, b, c, d})

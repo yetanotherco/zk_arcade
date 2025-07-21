@@ -20,9 +20,9 @@
   <section id="play-games" class="section-spacer-lg">
     <.section_header header="Play Games" />
     <div class="flex w-full flex-wrap lg:justify-between gap-10">
-      <.home_game_component disabled="false" link="/game/beast"  title="Beast 1984" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/beast1984.webp"} />
-      <.home_game_component disabled="true" link="/game/sudoku" title="Sudoku (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/sudoku.png"} />
-      <.home_game_component disabled="true" link="/game/parity" title="Parity (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/parity.jpeg"} />
+      <.home_game_component tags={[:cli, :risc0]} disabled="false"link="/game/beast"  title="Beast 1984" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/beast1984.webp"} />
+      <.home_game_component tags={[:browser, :circom]} disabled="true" link="/game/sudoku" title="Sudoku (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/sudoku.png"} />
+      <.home_game_component tags={[:browser, :circom]} disabled="true" link="/game/parity" title="Parity (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/parity.jpeg"} />
     </div>
   </section>
 

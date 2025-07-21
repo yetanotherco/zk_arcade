@@ -21,11 +21,9 @@
   <div class="container mx-auto px-4">
     <h2 class="text-3xl font-semibold mb-2">Statistics</h2>
 
-    <div class="bg-black p-8 text-mint-300 font-sans">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <.home_statistics_component label="Total Players" value={ZkArcade.Accounts.list_wallets() |> length()} />
-        <.home_statistics_component label="Total Proofs" value={ZkArcade.Proofs.list_proofs() |> length()} />
-      </div>
+    <div class="bg-black p-8 text-mint-300 font-sans grid grid-cols-1 md:grid-cols-2 gap-8">
+      <.home_statistics_component label="Total Players" value={ZkArcade.Accounts.list_wallets() |> length()} />
+      <.home_statistics_component label="Total Proofs" value={ZkArcade.Proofs.list_proofs() |> length()} />
     </div>
   </div>
 </section>

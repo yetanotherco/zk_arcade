@@ -224,6 +224,9 @@ defmodule ZkArcade.BatcherConnection do
   # ip protocol supported by the batcher.
   defp try_ipv6_connection() do
     batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
+    if batcher_host == ~c"localhost" do
+      batcher_host = ~c"127.0.0.1"
+    end
     batcher_port = Application.get_env(:zk_arcade, :batcher_port)
 
     {:ok, parsed_ipv6_addr} = :inet.parse_address(String.to_charlist(batcher_host))

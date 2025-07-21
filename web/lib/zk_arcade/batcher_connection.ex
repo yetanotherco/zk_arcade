@@ -15,7 +15,7 @@ defmodule ZkArcade.BatcherConnection do
         {:error, :timeout} ->
           Logger.info("Connection timed out, trying to connect with IPv6.")
           ipv6_address = ipv4_to_ipv6(batcher_host)
-          {:ok, new_conn_pid} = :gun.open(ipv6_address, 8080)
+          {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
           {:ok, _protocol} = :gun.await_up(new_conn_pid)
           new_conn_pid
       end

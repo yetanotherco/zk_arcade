@@ -223,21 +223,31 @@ defmodule ZkArcade.BatcherConnection do
   # This is a fallback in case the initial ipv4 connection fails, and depends on the
   # ip protocol supported by the batcher.
   defp try_ipv6_connection() do
-    batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
-    if batcher_host == ~c"localhost" do
-      batcher_host = ~c"127.0.0.1"
-    end
+    configured_host = Application.get_env(:zk_arcade, :batcher_host)
     batcher_port = Application.get_env(:zk_arcade, :batcher_port)
 
-    {:ok, parsed_ipv6_addr} = :inet.parse_address(String.to_charlist(batcher_host))
-    localhost_ipv6 = ipv4_to_ipv6(parsed_ipv6_addr)
+    host_charlist =
+      case configured_host do
+        binary when is_binary(binary) -> String.to_charlist(binary)
+        charlist when is_list(charlist) -> charlist
+      end
 
-    with {:ok, conn_pid} <- :gun.open(localhost_ipv6, batcher_port),
+    host_to_resolve =
+      if host_charlist == ~c"localhost" do
+        ~c"127.0.0.1"
+      else
+        host_charlist
+      end
+
+    {:ok, parsed_ipv4} = :inet.parse_address(host_to_resolve)
+    ipv6_address = ipv4_to_ipv6(parsed_ipv4)
+
+    with {:ok, conn_pid} <- :gun.open(ipv6_address, batcher_port),
         {:ok, _protocol} <- :gun.await_up(conn_pid) do
       upgrade_connection(conn_pid)
     else
       {:error, reason} ->
-        Logger.error("Failed to open connection on localhost:8080 - #{inspect(reason)}")
+        Logger.error("Failed to open connection on #{host_to_resolve}:#{batcher_port} - #{inspect(reason)}")
         {:error, reason}
     end
   end
@@ -246,11 +256,13 @@ defmodule ZkArcade.BatcherConnection do
   # and placing the IPv4 address in the last two segments.
   # Note: the returned address is an IPv4 mapped IPv6 address.
   defp ipv4_to_ipv6({a, b, c, d}) do
-    {0, 0, 0, 0, 0, 0xFFFF, (a * 16_777_216) + (b * 65_536) + (c * 256) + d}
+    segment7 = a * 256 + b
+    segment8 = c * 256 + d
+    {0, 0, 0, 0, 0, 0xFFFF, segment7, segment8}
   end
   defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
-    {:ok, {a, b, c, d}} = :inet.parse_address(String.to_charlist(ipv4))
-    ipv4_to_ipv6({a, b, c, d})
+    {:ok, tuple} = :inet.parse_address(String.to_charlist(ipv4))
+    ipv4_to_ipv6(tuple)
   end
 
   defp upgrade_connection(conn_pid) do

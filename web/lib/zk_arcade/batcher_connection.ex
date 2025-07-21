@@ -151,13 +151,14 @@ defmodule ZkArcade.BatcherConnection do
 
   defp parse_bigint(v) when is_integer(v), do: v
 
-  defp ipv4_to_ipv6(ipv4) when is_tuple(ipv4) do
-    {a, b, c, d} = ipv4
-    {0, 0, 0, 0, 0, 0, a, b * 256 + c * 16 + d}
+  # Converts an IPv4 address to an IPv6 address by padding the first 6 segments with zeros
+  # and placing the IPv4 address in the last two segments.
+  # Note: the returned address is an IPv4 mapped IPv6 address.
+  defp ipv4_to_ipv6({a, b, c, d}) do
+    {0, 0, 0, 0, 0, 0xFFFF, (a * 16_777_216) + (b * 65_536) + (c * 256) + d}
   end
   defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
-    {a, b, c, d} = :inet.parse_ipv4(ipv4)
+    {:ok, {a, b, c, d}} = :inet.parse_address(String.to_charlist(ipv4))
     ipv4_to_ipv6({a, b, c, d})
   end
-
 end

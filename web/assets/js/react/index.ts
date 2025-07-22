@@ -23,5 +23,5 @@ define(
 
 define(
 	{ "x-app-aligned-savings": AlignedSavings },
-	{ attributes: ["proofs", "proofType", "ethPrice", "gasCostGwei", "proofsPerBatch"] }
+	{ attributes: ["proofs", "proofType", "proofsPerBatch"] }
 );

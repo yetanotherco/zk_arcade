@@ -1,15 +1,24 @@
 import React from "react";
 import { calcAlignedSavings } from "../../utils/aligned";
+import { useEthPrice } from "../../hooks/";
 
 type Props = {
 	proofs: number;
 	proofType: string;
-	ethPrice: number;
-	gasCostGwei: number;
 	proofsPerBatch?: number;
 };
 
-export default ({ proofs, proofType, ethPrice, gasCostGwei, proofsPerBatch }: Props) => {
+export default ({ proofs, proofType, proofsPerBatch }: Props) => {
+
+    const ethPrice = useEthPrice().price;
+
+    // TODO: Implement a hook to fetch gas cost in Gwei using wagmi API
+    const gasCostGwei = useGasCost();
+
+    if (!ethPrice || !gasCostGwei) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <>
             <div className="">

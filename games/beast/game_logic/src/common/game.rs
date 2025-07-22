@@ -1,51 +1,79 @@
-use crate::common::levels::{
-    one::{self},
-    Level, LevelConfig,
-};
+use std::{fs::File, io::BufReader, time::Duration};
 
-// TODO: define more games
-#[derive(Clone, Debug)]
-pub enum GameMatch {
-    One { from_block: u64, to_block: u64 },
+use serde::{Deserialize, Serialize};
+
+use crate::common::levels::{Level, LevelConfig, LevelJson};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GameJson {
+    pub levels: Vec<LevelJson>,
+    pub game_config: String,
+    pub from_block: u64,
+    pub to_block: u64,
 }
 
-const GAMES: [GameMatch; 1] = [GameMatch::One {
-    from_block: 0,
-    to_block: 10000000,
-}];
+#[derive(Clone, Debug)]
+pub struct GameLevels {
+    levels: Vec<LevelConfig>,
+}
 
-impl GameMatch {
-    pub fn new(block_number: u64) -> GameMatch {
-        for game in GAMES {
-            match game {
-                Self::One {
-                    from_block,
-                    to_block,
-                } if (from_block <= block_number && block_number < to_block) => {
-                    return Self::One {
-                        from_block,
-                        to_block,
-                    }
-                }
-                _ => continue,
+impl GameLevels {
+    pub fn new(block_number: u64) -> GameLevels {
+        let file = File::open("generated_levels.json").expect("Cannot open generated_levels.json");
+        let reader = BufReader::new(file);
+        let games: Vec<GameJson> = serde_json::from_reader(reader).expect("Invalid JSON format");
+
+        for game in games.into_iter() {
+            if game.from_block <= block_number && block_number < game.to_block {
+                let levels = game
+                    .levels
+                    .iter()
+                    .map(|lvl| LevelConfig {
+                        blocks: lvl.blocks.try_into().expect("blocks out of range"),
+                        static_blocks: lvl
+                            .static_blocks
+                            .try_into()
+                            .expect("static_blocks out of range"),
+                        common_beasts: lvl
+                            .common_beasts
+                            .try_into()
+                            .expect("common_beasts out of range"),
+                        super_beasts: lvl
+                            .super_beasts
+                            .try_into()
+                            .expect("super_beasts out of range"),
+                        eggs: lvl.eggs.try_into().expect("eggs out of range"),
+                        egg_hatching_time: Duration::from_millis(lvl.egg_hatching_time),
+                        beast_starting_distance: lvl
+                            .beast_starting_distance
+                            .try_into()
+                            .expect("beast_starting_distance out of range"),
+                        time: Duration::from_secs(lvl.time),
+                        completion_score: lvl
+                            .completion_score
+                            .try_into()
+                            .expect("completion_score out of range"),
+                    })
+                    .collect();
+
+                return GameLevels { levels };
             }
         }
+
         panic!("No game found to play yet");
     }
 
     /// return the level config for a specific level
     pub fn get_config(&self, level: Level) -> LevelConfig {
-        match self {
-            Self::One { .. } => match level {
-                Level::One => one::LEVEL_ONE,
-                Level::Two => one::LEVEL_TWO,
-                Level::Three => one::LEVEL_THREE,
-                Level::Four => one::LEVEL_FOUR,
-                Level::Five => one::LEVEL_FIVE,
-                Level::Six => one::LEVEL_SIX,
-                Level::Seven => one::LEVEL_SEVEN,
-                Level::Eight => one::LEVEL_EIGHT,
-            },
+        match level {
+            Level::One => self.levels[0].clone(),
+            Level::Two => self.levels[1].clone(),
+            Level::Three => self.levels[2].clone(),
+            Level::Four => self.levels[3].clone(),
+            Level::Five => self.levels[4].clone(),
+            Level::Six => self.levels[5].clone(),
+            Level::Seven => self.levels[6].clone(),
+            Level::Eight => self.levels[7].clone(),
         }
     }
 }

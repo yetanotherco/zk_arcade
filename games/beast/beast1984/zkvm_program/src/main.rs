@@ -3,7 +3,7 @@
 use game_logic::{
     beasts::{Beast, BeastAction, CommonBeast, HatchedBeast, SuperBeast},
     board::Board,
-    common::{game::GameMatch, levels::Level},
+    common::{game::GameLevels, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog, ProgramInput},
     Coord, Tile,
@@ -12,7 +12,7 @@ use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
-fn prove_level_completed(game: GameMatch, input: &LevelLog) -> bool {
+fn prove_level_completed(game: GameLevels, input: &LevelLog) -> bool {
     let mut board = Board::new_from_matrix(&input.board);
 
     /*
@@ -153,7 +153,7 @@ fn prove_level_completed(game: GameMatch, input: &LevelLog) -> bool {
     common_beasts.len() + super_beasts.len() + hatched_beasts.len() == 0 && player.lives > 0
 }
 
-fn encode_game_config(game: GameMatch) -> [u8; 32] {
+fn encode_game_config(game: GameLevels) -> [u8; 32] {
     let mut levels: [[u8; 4]; 8] = [[0u8; 4]; 8];
 
     let mut level = Level::One;
@@ -186,7 +186,7 @@ fn encode_game_config(game: GameMatch) -> [u8; 32] {
 
 fn main() {
     let input = env::read::<ProgramInput>();
-    let game_match = GameMatch::new(input.block_number);
+    let game_match = GameLevels::new(input.block_number);
 
     let mut current_level_number: u16 = 0;
     for level_completion in input.levels_log {

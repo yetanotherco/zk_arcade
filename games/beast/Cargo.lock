@@ -2842,8 +2842,10 @@ dependencies = [
 name = "game_logic"
 version = "0.1.0"
 dependencies = [
+ "hex",
  "rand 0.9.1",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

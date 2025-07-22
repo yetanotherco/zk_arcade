@@ -1,5 +1,3 @@
-pub mod one;
-
 use std::{fmt, time::Duration};
 
 use serde::{Deserialize, Serialize};
@@ -88,5 +86,18 @@ pub struct LevelConfig {
     /// how long the level lasts
     pub time: Duration,
     /// how many points are awarded for completing the level
+    pub completion_score: u16,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct LevelJson {
+    pub blocks: u8,
+    pub static_blocks: u8,
+    pub common_beasts: u8,
+    pub super_beasts: u8,
+    pub eggs: u8,
+    pub egg_hatching_time: u64,
+    pub beast_starting_distance: u8,
+    pub time: u64,
     pub completion_score: u16,
 }

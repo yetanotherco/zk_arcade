@@ -4,16 +4,16 @@ use crate::{
     ethereum,
     help::Help,
     prover::{prove, save_proof},
-    stty::{install_raw_mode_signal_handler, RawMode},
+    stty::{RawMode, install_raw_mode_signal_handler},
 };
 use game_logic::{
+    ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
+    BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
     board::Board,
-    common::{game::GameMatch, levels::Level},
+    common::{game::GameLevels, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog},
-    Dir, Tile, ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT,
-    ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH, LOGO,
 };
 use std::{
     io::{self, Read},
@@ -88,7 +88,7 @@ pub struct Game {
     pub board: Board,
     /// the current level we're in
     pub level: Level,
-    pub game_match: GameMatch,
+    pub game_match: GameLevels,
     /// when we started the level
     pub level_start: Instant,
     /// all of our common beasts instances
@@ -118,7 +118,7 @@ impl Game {
         let address = ethereum::read_address();
         // TODO: get block number from eth rpc
         let block_number = 0;
-        let game_match = GameMatch::new(block_number);
+        let game_match = GameLevels::new(block_number);
         let board_terrain_info = Board::generate_terrain(game_match.get_config(Level::One));
 
         install_raw_mode_signal_handler();

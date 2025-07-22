@@ -21,8 +21,8 @@ defmodule ZkArcade.Proofs.Proof do
   @doc false
   def changeset(proof, attrs) do
     proof
-    |> cast(attrs, [:verification_data, :wallet_address, :batch_data, :status, :game])
-    |> validate_required([:verification_data, :wallet_address, :status, :game])
+    |> cast(attrs, [:verification_data, :wallet_address, :batch_data, :status, :game, :proving_system])
+    |> validate_required([:verification_data, :wallet_address, :status, :game, :proving_system])
     |> validate_inclusion(:status, ["pending", "submitted", "failed", "claimed"])
     |> validate_inclusion(:game, ["Beast", "Sudoku", "Parity"])
     |> validate_inclusion(:proving_system, ["risc0", "groth16", "stark", "plonk", "sp1"])

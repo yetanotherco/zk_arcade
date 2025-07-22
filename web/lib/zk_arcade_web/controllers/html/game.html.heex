@@ -1,34 +1,42 @@
 <div class="w-full" style="margin-top: 100px">
-    <div class="section-spacer-md">
-        <img src={@game.image} class="rounded" style="width: 600px; height: 300px" /> 
-        <div class="mt-8">
-            <h2 class="text-3xl text-text-100 font-normal mb-1"><%= @game.name %></h2>
-            <p class="text-md text-text-200"><%= @game.desc %></p>
+    <div class="section-width">
+        <div class="section-spacer-md section-">
+            <img src={@game.image} class="rounded" style="width: 600px; height: 300px" /> 
+            <div class="mt-8">
+                <h2 class="text-3xl text-text-100 font-normal mb-1"><%= @game.name %></h2>
+                <p class="text-md text-text-200"><%= @game.desc %></p>
+            </div>
+            <div class="flex mt-2 gap-2">
+                <%= for variant <- @game.tags do %>
+                    <.tag variant={variant} />
+                <% end %>
+            </div>
         </div>
-        <div class="flex mt-2 gap-2">
-            <%= for variant <- @game.tags do %>
-                <.tag variant={variant} />
-            <% end %>
-      </div>
     </div>
     
-    <section class="section-spacer-md">
-        <.section_header header="Description" />
-        <p class="text-md text-text-200"><%= @game.full_desc %></p>
-    </section>
+    <div class="section-width section-width">
+        <section class="section-spacer-md">
+            <.section_header header="Description" />
+            <p class="text-md text-text-200"><%= @game.full_desc %></p>
+        </section>
+    </div>
 
-    <section class="section-spacer-md">
-        <.section_header header="How to play" />
-        <p class="text-md text-text-200"><%= raw(String.replace(@game.how_to_play, "\n", "<br>")) %></p>
-    </section>
+    <div class="section-width section-width">
+        <section class="section-spacer-md">
+            <.section_header header="How to play" />
+            <p class="text-md text-text-200"><%= raw(String.replace(@game.how_to_play, "\n", "<br>")) %></p>
+        </section>
+    </div>
 
-    <x-app-submit-proof 
-        network={Application.get_env(:zk_arcade, :network)}
-        payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
-        user_address={@wallet}
-        batcher_host={Application.get_env(:zk_arcade, :batcher_host)}
-        batcher_port={Application.get_env(:zk_arcade, :batcher_port)}
-    />
+   <div class="section-width justify-center">
+        <x-app-submit-proof 
+            network={Application.get_env(:zk_arcade, :network)}
+            payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+            user_address={@wallet}
+            batcher_host={Application.get_env(:zk_arcade, :batcher_host)}
+            batcher_port={Application.get_env(:zk_arcade, :batcher_port)}
+        />
+    </div>
 
     <div class="section-spacer-md"></div>
 </div>

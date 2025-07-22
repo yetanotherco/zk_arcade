@@ -15,6 +15,19 @@ body {
 	box-sizing: border-box;
 }
 
+.select-invert::selection,
+.select-invert *::selection {
+	background-color: rgb(0, 0, 0);
+	color: rgb(24 255 127);
+}
+
+::selection,
+.select-normal::selection,
+.select-normal *::selection {
+	background-color: rgb(24 255 127);
+	color: #000000;
+}
+
 a {
 	word-break: keep-all;
 }
@@ -43,11 +56,86 @@ thead {
 }
 
 .section-spacer-lg {
-	margin-bottom: 150px;
+	margin-bottom: 130px;
 }
 
 .section-spacer-md {
 	margin-bottom: 70px;
+}
+
+.section-width {
+	display: flex;
+	flex-direction: row;
+	position: relative;
+	margin: 0 auto;
+	max-width: 1000px;
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+	.section-width {
+		padding-left: 1.5rem;
+		padding-right: 1.5rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.section-width {
+		padding-left: 2rem;
+		padding-right: 2rem;
+	}
+}
+
+.marquee-wrapper {
+	overflow: hidden;
+	height: 300px;
+}
+
+.marquee-column {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem; /* gap-6 */
+}
+
+.marquee-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+/* Scroll up animation */
+.scroll-up {
+	animation: scroll-up 30s linear infinite;
+}
+
+/* Scroll down animation */
+.scroll-down {
+	animation: scroll-down 30s linear infinite;
+}
+
+/* Pause on hover */
+.marquee-container:hover .scroll-up,
+.marquee-container:hover .scroll-down {
+	animation-play-state: paused;
+}
+
+@keyframes scroll-up {
+	0% {
+		transform: translateY(0);
+	}
+	100% {
+		transform: translateY(-50%);
+	}
+}
+
+@keyframes scroll-down {
+	0% {
+		transform: translateY(-50%);
+	}
+	100% {
+		transform: translateY(0);
+	}
 }
 
 #gradient-bg {

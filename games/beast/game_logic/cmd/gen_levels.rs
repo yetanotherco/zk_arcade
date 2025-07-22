@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 
 const BLOCK_TIME_SECONDS: u64 = 12;
 
-// These are your hand-tuned base levels 1 to 8
 fn base_template() -> Vec<LevelJson> {
     vec![
         LevelJson {

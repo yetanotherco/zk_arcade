@@ -116,8 +116,9 @@ impl Game {
     /// create a new instance of the beast game
     pub fn new() -> Self {
         let address = ethereum::read_address();
-        // TODO: get block number from eth rpc
-        let block_number = 0;
+        let block_number =
+            ethereum::get_current_block_number().expect("Could not get block number from rpc");
+        println!("Loading game for block number {}...", block_number);
         let game_match = GameLevels::new(block_number);
         let board_terrain_info = Board::generate_terrain(game_match.get_config(Level::One));
 

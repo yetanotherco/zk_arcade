@@ -10,7 +10,7 @@ defmodule ZkArcade.Proofs.Proof do
     field :batch_data, :map
     # Status can be "pending", "verified", submitted or "failed"
     field :status, :string, default: "pending"
-    field :game, :string, default: "beast"
+    field :game, :string, default: "Beast"
 
     belongs_to :wallet, Wallet, foreign_key: :wallet_address, references: :address, type: :string
 

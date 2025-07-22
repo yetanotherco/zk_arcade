@@ -11,7 +11,7 @@ rand = { version = "0.9.1", optional = true }
 hex = "0.4.3"
 
 [features]
-default = ["dep:rand", "devnet"]
+default = ["dep:rand"]
 zkvm = []
 devnet = []
 stage = []

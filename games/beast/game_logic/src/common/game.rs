@@ -17,17 +17,23 @@ pub struct GameLevels {
     levels: Vec<LevelConfig>,
 }
 
-#[cfg(feature = "devnet")]
-const GAME_FILE: &str = "levels/devnet.json";
+const GAME_FILE: &str = game_file();
 
-#[cfg(feature = "stage")]
-const GAME_FILE: &str = "levels/stage.json";
+const fn game_file() -> &'static str {
+    #[cfg(feature = "devnet")]
+    return "levels/devnet.json";
 
-#[cfg(feature = "holesky")]
-const GAME_FILE: &str = "levels/holesky.json";
+    #[cfg(feature = "stage")]
+    return "levels/stage.json";
 
-#[cfg(feature = "mainnet")]
-const GAME_FILE: &str = "levels/mainnet.json";
+    #[cfg(feature = "holesky")]
+    return "levels/holesky.json";
+
+    #[cfg(feature = "mainnet")]
+    return "levels/mainnet.json";
+
+    ""
+}
 
 impl GameLevels {
     pub fn new(block_number: u64) -> GameLevels {

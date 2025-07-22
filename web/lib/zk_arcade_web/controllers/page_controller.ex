@@ -25,7 +25,7 @@ defmodule ZkArcadeWeb.PageController do
       %{
         id: proof.id,
         status: proof.status,
-        game: "Beast",
+        game: proof.game,
         insertedAt: NaiveDateTime.to_iso8601(proof.inserted_at),
         batchData: proof.batch_data,
         verificationData: proof.verification_data

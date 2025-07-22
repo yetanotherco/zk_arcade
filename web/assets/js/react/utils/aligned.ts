@@ -67,7 +67,7 @@ export const calcAlignedSavings = (
   proofType: string,
   ethPrice: number,
   gasCostGwei: number,
-  proofsPerBatch: number = 20,
+  proofsPerBatch: number,
 ): {
   alignedCost: number;
   baseCost: number;
@@ -82,10 +82,6 @@ export const calcAlignedSavings = (
 	sp1: 275000,
 	risc0: 308000,
   };
-
-  if (!proofsPerBatch) {
-	proofsPerBatch = 20;
-  }
 
   const alignedGasPerBatch = 350000 + 1800 * proofsPerBatch;
   const gweiPrice = ethPrice * 1e-9;

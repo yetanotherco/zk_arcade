@@ -37,7 +37,7 @@ web_clean_db: web_remove_db_container
 
 __GAME__:
 play_beast:
-	cd games/beast/beast1984 && cargo run --release --bin beast
+	@cd games/beast/ && cargo run --release --bin beast
 
 submit_beast_solution:
 	@cp games/beast/beast1984/cmd/.$(NETWORK).env games/beast/beast1984/cmd/.env

@@ -17,9 +17,21 @@ pub struct GameLevels {
     levels: Vec<LevelConfig>,
 }
 
+#[cfg(feature = "devnet")]
+const GAME_FILE: &str = "levels/devnet.json";
+
+#[cfg(feature = "stage")]
+const GAME_FILE: &str = "levels/stage.json";
+
+#[cfg(feature = "holesky")]
+const GAME_FILE: &str = "levels/holesky.json";
+
+#[cfg(feature = "mainnet")]
+const GAME_FILE: &str = "levels/mainnet.json";
+
 impl GameLevels {
     pub fn new(block_number: u64) -> GameLevels {
-        let file = File::open("generated_levels.json").expect("Cannot open generated_levels.json");
+        let file = File::open(GAME_FILE).expect("Cannot open game levels file");
         let reader = BufReader::new(file);
         let games: Vec<GameJson> = serde_json::from_reader(reader).expect("Invalid JSON format");
 

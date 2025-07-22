@@ -13,7 +13,7 @@ export default ({ proofs, proof_type, proofsPerBatch }: Props) => {
     const ethPrice = useEthPrice().price;
 
     // TODO: Implement a hook to fetch gas cost in Gwei using wagmi API
-    const gasCostGwei = useGasCost();
+    const gasCostGwei = 12;
 
     if (!ethPrice || !gasCostGwei) {
         return <div>Loading...</div>;

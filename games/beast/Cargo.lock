@@ -2843,6 +2843,7 @@ name = "game_logic"
 version = "0.1.0"
 dependencies = [
  "hex",
+ "primitive-types",
  "rand 0.9.1",
  "serde",
  "serde_json",

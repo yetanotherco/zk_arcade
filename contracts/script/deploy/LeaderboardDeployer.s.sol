@@ -18,7 +18,7 @@ contract LeaderboardDeployer is Script {
         address alignedBatcherPaymentAddress = vm.parseJsonAddress(configData, ".alignedBatcherPaymentService");
 
         Leaderboard.BeastGame[] memory beastGames =
-            abi.decode(vm.parseJson(configData, ".levels"), (Leaderboard.BeastGame[]));
+            abi.decode(vm.parseJson(configData, ".games"), (Leaderboard.BeastGame[]));
 
         vm.startBroadcast();
         Leaderboard implementation = new Leaderboard();

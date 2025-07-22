@@ -1,6 +1,7 @@
 use std::{fs::File, io::Write};
 
 use game_logic::common::{game::GameJson, levels::LevelJson};
+use primitive_types::U256;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
@@ -173,14 +174,14 @@ fn generate_game_levels(levels_per_game: usize, rng: &mut impl Rng) -> Vec<Level
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct LeaderboardLevel {
-    endsAtBlock: u64,
+    endsAtBlock: String,
     gameConfig: String,
-    startsAtBlock: u64,
+    startsAtBlock: String,
 }
 
 #[derive(Serialize, Deserialize)]
 struct LeaderboardConfig {
-    levels: Vec<LeaderboardLevel>,
+    games: Vec<LeaderboardLevel>,
 }
 
 fn main() {
@@ -229,12 +230,20 @@ fn main() {
     let mut leaderboard_file = File::create(format!("levels/leaderboard_{}.json", network))
         .expect("Unable to create file");
     let leaderboard_config = LeaderboardConfig {
-        levels: games
+        games: games
             .iter()
-            .map(|game| LeaderboardLevel {
-                startsAtBlock: game.from_block,
-                endsAtBlock: game.to_block,
-                gameConfig: game.game_config.clone(),
+            .map(|game| {
+                let mut start_buf = [0u8; 32];
+                let mut end_buf = [0u8; 32];
+
+                U256::from(game.from_block).to_big_endian(&mut start_buf);
+                U256::from(game.to_block).to_big_endian(&mut end_buf);
+
+                LeaderboardLevel {
+                    startsAtBlock: format!("0x{}", hex::encode(start_buf)),
+                    endsAtBlock: format!("0x{}", hex::encode(end_buf)),
+                    gameConfig: format!("0x{}", game.game_config.clone()),
+                }
             })
             .collect(),
     };

@@ -83,6 +83,10 @@ export const calcAlignedSavings = (
 	risc0: 308000,
   };
 
+  if (!proofsPerBatch) {
+	proofsPerBatch = 20;
+  }
+
   const alignedGasPerBatch = 350000 + 1800 * proofsPerBatch;
   const gweiPrice = ethPrice * 1e-9;
 

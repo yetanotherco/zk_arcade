@@ -59,4 +59,18 @@ defmodule ZkArcadeWeb.PageController do
       })
       |> render(:game)
   end
+
+  def history(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    proofs = get_proofs(wallet)
+
+    # print proofs
+    Logger.info("Proofs for wallet #{wallet}: #{inspect(proofs)}")
+
+    conn
+    |> assign(:wallet, wallet)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
+    |> render(:history)
+  end
 end

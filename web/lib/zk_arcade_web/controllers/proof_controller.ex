@@ -41,7 +41,7 @@ defmodule ZkArcadeWeb.ProofController do
 
           task =
             Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-              submit_to_batcher(submit_proof_message, address, game)
+              submit_to_batcher(submit_proof_message, address, game, submit_proof_message["verificationData"]["verificationData"]["provingSystem"])
             end)
 
           case Task.yield(task, 10_000) do
@@ -85,8 +85,8 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp submit_to_batcher(submit_proof_message, address, game) do
-    with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address, game) do
+  defp submit_to_batcher(submit_proof_message, address, game, proving_system) do
+    with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address, game, String.downcase(proving_system)) do
       Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
       case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
         {:ok, {:batch_inclusion, batch_data}} ->

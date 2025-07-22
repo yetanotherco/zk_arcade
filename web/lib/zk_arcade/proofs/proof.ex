@@ -11,6 +11,7 @@ defmodule ZkArcade.Proofs.Proof do
     # Status can be "pending", "verified", submitted or "failed"
     field :status, :string, default: "pending"
     field :game, :string, default: "Beast"
+    field :proving_system, :string, default: "risc0"
 
     belongs_to :wallet, Wallet, foreign_key: :wallet_address, references: :address, type: :string
 
@@ -24,6 +25,7 @@ defmodule ZkArcade.Proofs.Proof do
     |> validate_required([:verification_data, :wallet_address, :status, :game])
     |> validate_inclusion(:status, ["pending", "submitted", "failed", "claimed"])
     |> validate_inclusion(:game, ["Beast", "Sudoku", "Parity"])
+    |> validate_inclusion(:proving_system, ["risc0", "groth16", "stark", "plonk", "sp1"])
     |> foreign_key_constraint(:wallet_address)
   end
 end

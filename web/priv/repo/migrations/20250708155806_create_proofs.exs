@@ -9,6 +9,7 @@ defmodule ZkArcade.Repo.Migrations.CreateProofs do
       add :status, :string, null: false, default: "pending"
       add :wallet_address, references(:wallets, column: :address, type: :string), null: false
       add :game, :string, null: false, default: "beast"
+      add :proving_system, :string, null: false, default: "risc0"
 
       timestamps()
     end

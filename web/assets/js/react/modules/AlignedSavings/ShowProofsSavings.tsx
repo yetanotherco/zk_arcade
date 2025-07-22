@@ -5,17 +5,14 @@ import { useEthPrice } from "../../hooks/";
 type Props = {
 	proofs: number;
 	proof_type: string;
+    gas_cost_gwei: number;
 	proofsPerBatch?: number;
 };
 
-export default ({ proofs, proof_type, proofsPerBatch }: Props) => {
-
+export default ({ proofs, proof_type, gas_cost_gwei, proofsPerBatch }: Props) => {
     const ethPrice = useEthPrice().price;
 
-    // TODO: Implement a hook to fetch gas cost in Gwei using wagmi API
-    const gasCostGwei = 12;
-
-    if (!ethPrice || !gasCostGwei) {
+    if (!ethPrice) {
         return <div>Loading...</div>;
     }
 
@@ -23,7 +20,7 @@ export default ({ proofs, proof_type, proofsPerBatch }: Props) => {
         proofsPerBatch = 20;
     }
 
-    const alignedSavings = calcAlignedSavings(proofs, proof_type, ethPrice, gasCostGwei, proofsPerBatch);
+    const alignedSavings = calcAlignedSavings(proofs, proof_type, ethPrice, gas_cost_gwei, proofsPerBatch);
 
     return (
         <>

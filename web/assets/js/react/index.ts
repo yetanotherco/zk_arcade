@@ -23,5 +23,5 @@ define(
 
 define(
 	{ "x-app-aligned-savings": AlignedSavings },
-	{ attributes: ["proofs", "proof_type", "proofsPerBatch"] }
+	{ attributes: ["proofs", "proof_type", "gas_cost_gwei", "proofsPerBatch"] }
 );

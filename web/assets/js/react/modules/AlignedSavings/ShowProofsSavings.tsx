@@ -27,7 +27,7 @@ export default ({ proofs, proof_type, gas_cost_gwei, proofsPerBatch }: Props) =>
             <div className="">
                 <h2 className="text-2xl font-bold mb-4">Aligned Savings</h2>
                 <p>
-                    The savings of proving with Aligned instead of verifying the proofs in ethereum are the following:
+                    The savings of verifying the proofs with Aligned instead of verifying the proofs in ethereum.
 
                     With {proofs} total {proof_type} proofs, the estimated savings are:
                 </p>

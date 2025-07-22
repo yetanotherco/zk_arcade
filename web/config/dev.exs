@@ -90,5 +90,5 @@ config :ethereumex,
 
 config :zk_arcade, :network, "anvil"
 
-config :zk_arcade, :batcher_host, "127.0.0.1"
+config :zk_arcade, :batcher_host, "localhost"
 config :zk_arcade, :batcher_port, 8080

@@ -223,24 +223,14 @@ defmodule ZkArcade.BatcherConnection do
   # This is a fallback in case the initial ipv4 connection fails, and depends on the
   # ip protocol supported by the batcher.
   defp try_ipv6_connection() do
-    configured_host = Application.get_env(:zk_arcade, :batcher_host)
+    Logger.info("Connection timed out, trying to connect with IPv6.")
+
+    batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
     batcher_port = Application.get_env(:zk_arcade, :batcher_port)
 
-    host_charlist =
-      case configured_host do
-        binary when is_binary(binary) -> String.to_charlist(binary)
-        charlist when is_list(charlist) -> charlist
-      end
-
-    host_to_resolve =
-      if host_charlist == ~c"localhost" do
-        ~c"127.0.0.1"
-      else
-        host_charlist
-      end
-
-    {:ok, parsed_ipv4} = :inet.parse_address(host_to_resolve)
-    ipv6_address = ipv4_to_ipv6(parsed_ipv4)
+    ipv6_address = ipv4_to_ipv6(batcher_host)
+    {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
+    {:ok, _protocol} = :gun.await_up(new_conn_pid)
 
     with {:ok, conn_pid} <- :gun.open(ipv6_address, batcher_port),
         {:ok, _protocol} <- :gun.await_up(conn_pid) do

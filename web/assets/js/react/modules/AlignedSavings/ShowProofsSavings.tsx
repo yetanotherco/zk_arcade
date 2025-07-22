@@ -35,13 +35,13 @@ export default ({ proofs, proof_type, proofsPerBatch }: Props) => {
                     With {proofs} total {proof_type} proofs, the estimated savings are:
                 </p>
                 <p className="text-xl font-semibold mt-4">
-                    Base Cost: {alignedSavings.baseCost.toPrecision(6)} USD
+                    Base Cost: {alignedSavings.baseCost.toPrecision(5)} USD
                 </p>
                 <p className="text-xl font-semibold mt-4">
-                    Aligned Cost: {alignedSavings.alignedCost.toPrecision(5)} USD
+                    Aligned Cost: {alignedSavings.alignedCost.toPrecision(4)} USD
                 </p>
                 <p className="text-xl font-semibold mt-4">
-                    Savings: {alignedSavings.savings.toPrecision(6)} USD
+                    Savings: {alignedSavings.savings.toPrecision(5)} USD
                 </p>
                 <p className="text-sm text-gray-500">
                     Note: These calculations are based on current gas prices and an estimated gas cost and may vary.

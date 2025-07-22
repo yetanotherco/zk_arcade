@@ -20,11 +20,18 @@
     </div>
 
     <div>
-      <h2 class="md:text-3xl text-xl font-normal mt-8">Statistics</h2>
+      <h2 class="md:text-3xl text-xl font-normal mt-10">Statistics</h2>
       <div class="grid grid-cols-2 rounded-lg overflow-hidden border border-gray-800 text-mint-300 font-sans mt-2">
           <.home_statistics_component label="Total Players" value={ZkArcade.Accounts.list_wallets() |> length()} />
           <.home_statistics_component label="Total Proofs" value={ZkArcade.Proofs.list_proofs() |> length()} />
       </div>
+    </div>
+    <div class="mt-4">
+      <x-app-aligned-savings
+        proofs={length(ZkArcade.Proofs.list_proofs())}
+        proof_type={"risc0"}
+        gas_cost_gwei={12}
+      />
     </div>
   </div>
 

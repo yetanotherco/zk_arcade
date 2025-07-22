@@ -228,7 +228,7 @@ defmodule ZkArcade.BatcherConnection do
     batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
     batcher_port = Application.get_env(:zk_arcade, :batcher_port)
 
-    ipv6_address = ipv4_to_ipv6(batcher_host)
+    {:ok, ipv6_address} = :inet.getaddr(batcher_host, :inet6)
     {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
     {:ok, _protocol} = :gun.await_up(new_conn_pid)
 
@@ -240,19 +240,6 @@ defmodule ZkArcade.BatcherConnection do
         Logger.error("Failed to open connection on #{host_to_resolve}:#{batcher_port} - #{inspect(reason)}")
         {:error, reason}
     end
-  end
-
-  # Converts an IPv4 address to an IPv6 address by padding the first 6 segments with zeros
-  # and placing the IPv4 address in the last two segments.
-  # Note: the returned address is an IPv4 mapped IPv6 address.
-  defp ipv4_to_ipv6({a, b, c, d}) do
-    segment7 = a * 256 + b
-    segment8 = c * 256 + d
-    {0, 0, 0, 0, 0, 0xFFFF, segment7, segment8}
-  end
-  defp ipv4_to_ipv6(ipv4) when is_binary(ipv4) do
-    {:ok, tuple} = :inet.parse_address(String.to_charlist(ipv4))
-    ipv4_to_ipv6(tuple)
   end
 
   defp upgrade_connection(conn_pid) do

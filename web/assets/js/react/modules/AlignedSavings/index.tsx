@@ -3,16 +3,16 @@ import ShowProofSavings from "./ShowProofsSavings";
 
 type Props = {
 	proofs: number;
-	proofType: string;
+	proof_type: string;
 	proofsPerBatch?: number;
 };
 
-export default ({ proofs, proofType, proofsPerBatch }: Props) => {
+export default ({ proofs, proof_type, proofsPerBatch }: Props) => {
 	return (
 		<>
 			<ShowProofSavings
 				proofs={proofs}
-				proofType={proofType}
+				proof_type={proof_type}
 				proofsPerBatch={proofsPerBatch}
 			/>
 		</>

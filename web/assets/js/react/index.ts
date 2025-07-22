@@ -23,5 +23,5 @@ define(
 
 define(
 	{ "x-app-aligned-savings": AlignedSavings },
-	{ attributes: ["proofs", "proofType", "proofsPerBatch"] }
+	{ attributes: ["proofs", "proof_type", "proofsPerBatch"] }
 );

@@ -23,7 +23,7 @@ defmodule ZkArcade.Proofs.Proof do
     |> cast(attrs, [:verification_data, :wallet_address, :batch_data, :status, :game])
     |> validate_required([:verification_data, :wallet_address, :status, :game])
     |> validate_inclusion(:status, ["pending", "submitted", "failed", "claimed"])
-    |> validate_inclusion(:game, ["beast", "sudoku", "parity"])
+    |> validate_inclusion(:game, ["Beast", "Sudoku", "Parity"])
     |> foreign_key_constraint(:wallet_address)
   end
 end

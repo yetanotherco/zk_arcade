@@ -15,13 +15,13 @@ defmodule ZkArcadeWeb.Router do
 
     get "/", PageController, :home
     get "/game/:name", PageController, :game
+    get "/history", PageController, :history
     post "/wallet/sign", WalletController, :connect_wallet
     get "/wallet/disconnect", WalletController, :disconnect_wallet
 
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
 
-    get "/history", PageController, :history
   end
 
   scope "/api", ZkArcadeWeb do

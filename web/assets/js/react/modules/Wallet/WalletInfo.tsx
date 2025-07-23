@@ -40,7 +40,7 @@ export const WalletInfo = ({
 			</div>
 			<div className="pt-2">
 				<div
-					className="flex flex-col gap-8 p-8 absolute right-0  bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10"
+					className="flex flex-col gap-8 p-8 absolute right-0 shadow-2xl bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10"
 					style={{ width: 400, maxHeight: 400 }}
 				>
 					<BalanceScoreInAligned

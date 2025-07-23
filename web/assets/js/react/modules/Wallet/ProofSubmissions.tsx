@@ -189,7 +189,18 @@ export const ProofSubmissions = ({
 }: Props) => {
 	return (
 		<div>
-			<h3 className="text-md font-bold mb-2">Your Proof Submissions:</h3>
+			<div className="flex justify-between mb-6">
+				<h3 className="text-md font-bold">Your Proof Submissions:</h3>
+				<div className="cursor-pointer group/proof-submission">
+					<a
+						href="/history"
+						className="text-text-100 mr-2 text-sm group-hover/proof-submission:underline"
+					>
+						See all
+					</a>
+					<span className="hero-arrow-long-right size-5 transition group-hover/proof-submission:translate-x-0.5" />
+				</div>
+			</div>
 			<div className="overflow-scroll" style={{ maxHeight: 150 }}>
 				{proofs.length > 0 ? (
 					<div>

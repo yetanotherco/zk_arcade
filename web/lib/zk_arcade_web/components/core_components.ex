@@ -41,14 +41,6 @@ defmodule ZkArcadeWeb.CoreComponents do
           </.link>
 
         <div>
-          <.link href="/history">
-            <h1 class="text-l">
-              History
-            </h1>
-          </.link>
-        </div>
-
-        <div>
           <x-app-user-wallet
             network={@network}
             payment_service_address={@payment_service_address}

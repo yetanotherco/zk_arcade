@@ -36,30 +36,29 @@
           <div class="marquee-wrapper">
             <div class="marquee-column scroll-up">
               <div class="marquee-content">
-                <.home_statistic label="Proof verified" value="500M" desc="Last 30 days" />
-                <.home_statistic label="Total Players" value="500M" desc="Last 30 days" />
-                <.home_statistic label="Cost saved" value="500M USD" desc="Last 30 days" />
+                <.home_statistic label="Proof verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
               </div>
               <div class="marquee-content">
-                <.home_statistic label="Proof verified" value="500M" desc="Last 30 days" />
-                <.home_statistic label="Total Players" value="500M" desc="Last 30 days" />
-                <.home_statistic label="Cost saved" value="500M USD" desc="Last 30 days" />
+                <.home_statistic label="Proof verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
               </div>
             </div>
           </div>
 
-          <!-- Right column (scroll down) -->
           <div class="marquee-wrapper">
             <div class="marquee-column scroll-down">
                <div class="marquee-content">
-                <.home_statistic label="Proof verified" value="500M" desc="Last 30 days" />
-                <.home_statistic label="Total Players" value="500M" desc="Last 30 days" />
-                <.home_statistic label="Cost saved" value="500M USD" desc="Last 30 days" />
+                <.home_statistic label="Proof verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
               </div>
               <div class="marquee-content">
-                <.home_statistic label="Proof verified" value="500M" desc="Last 30 days" />
-                <.home_statistic label="Total Players" value="500M" desc="Last 30 days" />
-                <.home_statistic label="Cost saved" value="500M USD" desc="Last 30 days" />
+                <.home_statistic label="Proof verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
               </div>
             </div>
           </div>

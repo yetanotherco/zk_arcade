@@ -37,19 +37,30 @@ defmodule ZkArcadeWeb.PageController do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet)
+    proofs_verified = ZkArcade.Proofs.list_proofs() |> length()
+    total_players = ZkArcade.Accounts.list_wallets() |> length()
+    # TODO: since all our proofs are from risc0, we can just fetch all the proofs
+    # In the future, we'd have to sum the savings of all the proofs for each proving system
+    {:ok, eth_price} = ZkArcade.EthPrice.get_eth_price_usd()
+    cost_saved = ZkArcade.Utils.calc_aligned_savings(proofs_verified, "risc0", eth_price, 20)
+    campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
+    days = ZkArcade.Utils.date_diff_days(campaign_started_at_unix_timestamp)
+    desc = "Last #{days} days"
+
 
     conn
-    |> assign(:submitted_proofs, Jason.encode!(proofs))
-    |> assign(:wallet, wallet)
-    |> assign(:leaderboard, leaderboard)
-    |> render(:home)
+      |> assign(:submitted_proofs, Jason.encode!(proofs))
+      |> assign(:wallet, wallet)
+      |> assign(:leaderboard, leaderboard)
+      |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
+      |> render(:home)
   end
 
   def game(conn, %{"name" => _game_name}) do
-     wallet = get_wallet_from_session(conn)
-      proofs = get_proofs(wallet)
+    wallet = get_wallet_from_session(conn)
+    proofs = get_proofs(wallet)
 
-     conn
+    conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
       |> assign(:game, %{

@@ -42,7 +42,7 @@ defmodule ZkArcadeWeb.ProofController do
             Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
               with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address) do
                 Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
-                submit_to_batcher(submit_proof_message, address)
+                submit_to_batcher(submit_proof_message, address, pending_proof.id)
               else
                 {:error, changeset} when is_map(changeset) ->
                   Logger.error("Failed to create proof: #{inspect(changeset)}")
@@ -91,12 +91,12 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp submit_to_batcher(submit_proof_message, address) do
+  defp submit_to_batcher(submit_proof_message, address, pending_proof_id) do
     case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
       {:ok, {:batch_inclusion, batch_data}} ->
-        case Proofs.update_proof_status_submitted(pending_proof.id, batch_data) do
+        case Proofs.update_proof_status_submitted(pending_proof_id, batch_data) do
           {:ok, updated_proof} ->
-            Logger.info("Proof #{pending_proof.id} verified and updated successfully")
+            Logger.info("Proof #{pending_proof_id} verified and updated successfully")
             {:ok, updated_proof}
           {:error, reason} ->
             Logger.error("Failed to update proof status: #{inspect(reason)}")
@@ -105,13 +105,13 @@ defmodule ZkArcadeWeb.ProofController do
 
       {:error, reason} ->
         Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-        case Proofs.update_proof_status_failed(pending_proof.id) do
+        case Proofs.update_proof_status_failed(pending_proof_id) do
           {:ok, updated_proof} ->
-            Logger.info("Proof #{pending_proof.id} status updated to failed")
+            Logger.info("Proof #{pending_proof_id} status updated to failed")
             {:error, reason}
 
           {:error, changeset} ->
-            Logger.error("Failed to update proof #{pending_proof.id} status: #{inspect(changeset)}")
+            Logger.error("Failed to update proof #{pending_proof_id} status: #{inspect(changeset)}")
             {:error, reason}
         end
     end
@@ -145,7 +145,7 @@ defmodule ZkArcadeWeb.ProofController do
                 submit_proof_message["verificationData"]["chain_id"]
               ) do
               Logger.info("Message decoded and signature verified. Retrying proof submission.")
-                case submit_to_batcher(submit_proof_message, address) do
+                case submit_to_batcher(submit_proof_message, address, proof.id) do
                   {:ok, updated_proof} ->
                     Logger.info("Proof #{proof_id} retried successfully")
                     conn

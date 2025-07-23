@@ -9,6 +9,7 @@ defmodule ZkArcade.Application do
   def start(_type, _args) do
     children = [
       ZkArcadeWeb.Telemetry,
+      {Cachex, name: :eth_price_cache},
       ZkArcade.Repo,
       {DNSCluster, query: Application.get_env(:zk_arcade, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ZkArcade.PubSub},

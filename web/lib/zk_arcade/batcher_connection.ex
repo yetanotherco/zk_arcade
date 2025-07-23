@@ -138,32 +138,6 @@ defmodule ZkArcade.BatcherConnection do
 
   defp parse_bigint(v) when is_integer(v), do: v
 
-  # Attempts to open a connection to the batcher and upgrade it to web socket.
-  defp try_connection(submit_proof_message, address) do
-    case open_and_upgrade_connection() do
-      {:ok, conn_pid, stream_ref} ->
-        receive do
-          {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
-            Logger.info("WebSocket upgrade successful!")
-            send_message_and_handle_response(conn_pid, stream_ref, submit_proof_message, address)
-
-          {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
-            Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
-            close_connection(conn_pid, stream_ref)
-            {:error, :upgrade_failed}
-        after
-          25_000 ->
-            Logger.error("Timeout during WebSocket upgrade")
-            :gun.close(conn_pid)
-            {:error, :timeout}
-        end
-
-      {:error, reason} ->
-        Logger.error("Failed to connect to batcher #{inspect(reason)}")
-        {:error, :connection_down}
-    end
-  end
-
   # Opens a connection to the batcher and upgrades it to web socket connection.
   # First tries to connect to the batcher using the configured host and port via ipv4.
   # If the connection fails, it tries to connect using ipv6 as a fallback

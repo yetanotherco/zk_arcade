@@ -68,16 +68,16 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def home_game_component(%{title: title, desc: desc, img: img, link: link, disabled: disabled} = assigns) do
+  def home_game_component(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
       <div class="w-full sm:max-w-280">
-        <.game_content title={@title} desc={@desc} img={@img} />
+        <.game_content tags={@tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
       <.link href={@link}>
         <div class="cursor-pointer group w-full sm:max-w-280">
-          <.game_content title={@title} desc={@desc} img={@img} />
+          <.game_content tags={@tags} title={@title} desc={@desc} img={@img} />
         </div>
       </.link>
     <% end %>
@@ -86,13 +86,46 @@ defmodule ZkArcadeWeb.CoreComponents do
 
   defp game_content(assigns) do
     ~H"""
-    <img class="rounded mb-5 w-full" src={@img} width={280} height={180} />
+    <img class="rounded mb-1 w-full" src={@img} width={280} height={180} />
     <div>
-      <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
-        <%= @title %>
-      </h3>
+        <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
+          <%= @title %>
+        </h3>
+      <div class="flex mb-2 gap-2">
+        <%= for variant <- @tags do %>
+          <.tag variant={variant} />
+        <% end %>
+      </div>
       <p class="text-md text-text-200"><%= @desc %></p>
     </div>
+    """
+  end
+
+  def home_statistic(%{label: label, value: value, desc: desc} = assigns) do
+    ~H"""
+      <div class="bg-contrast-300 p-2 rounded" style="width: 205px">
+        <p class="text-text-100 text-sm mb-2"><%= @label %></p>
+        <h1 class="font-normal text-accent-100 text-4xl mb-1"><%= @value %></h1>
+        <div class="flex w-full justify-end">
+          <p class="text-text-100 bg-contrast-100 text-sm rounded" style="padding: 0 5px"><%= @desc %></p>
+        </div>
+      </div>
+    """
+  end
+
+  def tag(assigns) do
+    ~H"""
+    <%= case @variant do %>
+      <% :risc0 -> %>
+        <p class="mt-2 text-xs text-text-100 bg-risc0/20 border border-risc0 rounded w-fit px-3 font-bold">Risc0</p>
+      <% :cli -> %>
+        <p class="mt-2 text-xs text-text-100 bg-orange/20 border border-orange rounded w-fit px-3 font-bold">CLI</p>
+      <% :browser -> %>
+        <p class="mt-2 text-xs text-text-100 bg-blue/20 border border-blue rounded w-fit px-3 font-bold">Browser</p>
+      <% :circom -> %>
+        <p class="mt-2 text-xs text-text-100 bg-circom/20 border border-circom rounded w-fit px-3 font-bold">Circom</p>
+      <% _ -> %>
+    <% end %>
     """
   end
 

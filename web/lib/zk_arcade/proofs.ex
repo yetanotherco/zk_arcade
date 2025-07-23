@@ -53,12 +53,14 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
-  def create_pending_proof(submit_proof_message, address) do
+  def create_pending_proof(submit_proof_message, address, game, proving_system) do
     proof_params = %{
       wallet_address: address,
       verification_data: submit_proof_message["verificationData"],
       status: "pending",
-      batch_data: nil
+      batch_data: nil,
+      game: game,
+      proving_system: proving_system
     }
 
     create_proof(proof_params)

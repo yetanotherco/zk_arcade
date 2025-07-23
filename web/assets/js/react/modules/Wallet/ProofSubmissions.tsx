@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from "react";
-import { ProofSubmission } from "../../types/aligned";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ProofSubmission, SubmitProof } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
-import { bytesToHex } from "viem";
+import { bytesToHex, toHex } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { Button } from "../../components";
 import { useAccount } from "wagmi";
-import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
+import { useLeaderboardContract, useAligned } from "../../hooks";
 import { useToast } from "../../state/toast";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 
@@ -39,13 +39,15 @@ const Proof = ({
 	leaderboard_address: Address;
 }) => {
 	const { csrfToken } = useCSRFToken();
-	const formRef = useRef<HTMLFormElement>(null);
+	const formRefSubmitted = useRef<HTMLFormElement>(null);
+	const formRefRetry = useRef<HTMLFormElement>(null);
 	const { address } = useAccount();
 	const { addToast } = useToast();
 	const { submitSolution, score } = useLeaderboardContract({
 		contractAddress: leaderboard_address,
 		userAddress: address || "0x0",
 	});
+	const [submitProofMessage, setSubmitProofMessage] = useState("");
 
 	const merkleRoot = bytesToHex(
 		proof.batchData?.batch_merkle_root || Uint8Array.from([])
@@ -76,6 +78,45 @@ const Proof = ({
 			proof.batchData
 		);
 	};
+
+	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
+		useAligned();
+
+
+	// TODO: Change the 'pending' status to 'failed' after proving the workflow works
+	const handleRetrySubmitProof = useCallback(async () => {
+		if (proof.status !== "pending") {
+			alert("You can only retry submitting a proof that is in 'pending' status");
+			return;
+		}
+
+		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
+		if (!maxFee) {
+			alert("Could not estimate max fee");
+			return;
+		}
+
+		proof.verificationData.maxFee = toHex(maxFee, { size: 32 });
+
+		const { r, s, v } = await signVerificationData(proof.verificationData);
+
+		const submitProofMessage: SubmitProof = {
+			verificationData: proof.verificationData,
+			signature: {
+				r,
+				s,
+				v: Number(v),
+			},
+		};
+
+		setSubmitProofMessage(JSON.stringify(submitProofMessage));
+
+		console.log("Submit proof message:", submitProofMessage);
+
+		window.setTimeout(() => {
+			formRefRetry.current?.submit();
+		}, 100);
+	}, [proof, estimateMaxFeeForBatchOfProofs, signVerificationData]);
 
 	useEffect(() => {
 		if (submitSolution.tx.isSuccess) {
@@ -111,7 +152,7 @@ const Proof = ({
 				type: "success",
 			});
 			window.setTimeout(() => {
-				formRef.current?.submit();
+				formRefSubmitted.current?.submit();
 			}, 1000);
 		}
 	}, [submitSolution.receipt.isLoading, submitSolution.receipt.isError]);
@@ -136,6 +177,41 @@ const Proof = ({
 					)}
 				</td>
 				<td>{proofHashShorten}</td>
+				<td>
+					{proof.status === "pending" && (
+						<>
+							<Button
+								variant="text-accent"
+								className="text-sm"
+								onClick={handleRetrySubmitProof}
+							>
+								Retry
+							</Button>
+							<form
+								ref={formRefRetry}
+								action="/proof/status/retry"
+								method="post"
+								className="hidden"
+							>
+								<input
+									type="hidden"
+									name="submit_proof_message"
+									value={submitProofMessage}
+								/>
+								<input
+									type="hidden"
+									name="_csrf_token"
+									value={csrfToken}
+								/>
+								<input
+									type="hidden"
+									name="proof_id"
+									value={proof.id}
+								/>
+							</form>
+						</>
+					)}
+				</td>
 			</tr>
 
 			<tr>
@@ -156,7 +232,7 @@ const Proof = ({
 					{proof.status == "submitted" && (
 						<form
 							className="hidden"
-							ref={formRef}
+							ref={formRefSubmitted}
 							action="/proof/status/submitted"
 							method="POST"
 						>

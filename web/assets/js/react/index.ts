@@ -18,7 +18,7 @@ define(
 
 define(
 	{ "x-app-submit-proof": SubmitProof },
-	{ attributes: ["network", "payment_service_address", "user_address"] }
+	{ attributes: ["network", "payment_service_address", "user_address", "batcher_host", "batcher_port"] }
 );
 
 define(

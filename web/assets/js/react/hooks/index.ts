@@ -4,3 +4,5 @@ export * from "./useIsMounted";
 export * from "./useModal";
 export * from "./useOnClickOutside";
 export * from "./useOnClickOutside";
+export * from "./useBatcherNonce";
+export * from "./useEthPrice";

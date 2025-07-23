@@ -23,8 +23,11 @@ module.exports = {
 				background: "rgb(5 6 5 / <alpha-value>)",
 				"modal-overlay": "rgba(0, 0, 0, 0.5)",
 				black: "rgb(0 0 0 / <alpha-value>)",
+				orange: "rgb(255 160 24 / <alpha-value>)",
 				red: "rgb(253 77 77 / <alpha-value>)",
 				yellow: "rgb(241 254 64 / <alpha-value>)",
+				risc0: "rgb(254 254 157 / <alpha-value>)",
+				circom: "rgb(148 148 148 / <alpha-value>)",
 				blue: "rgb(64 165 254 / <alpha-value>)",
 				accent: {
 					100: "rgb(24 255 127 / <alpha-value>)",
@@ -37,6 +40,7 @@ module.exports = {
 				contrast: {
 					100: "rgb(54 54 55 / <alpha-value>)",
 					200: "rgb(66 77 71 / <alpha-value>)",
+					300: "rgb(48 48 48 / <alpha-value>)",
 				},
 				disabled: "rgb(179 179 179 / <alpha-value>)",
 			},

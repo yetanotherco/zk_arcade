@@ -11,8 +11,8 @@ const buttonVariantStyles: { [key in ButtonVariant]: string } = {
 	"accent-fill": "px-10 text-black py-2 bg-accent-100",
 	disabled: "px-10 py-2 bg-disabled",
 	"disabled-text": "font-normal",
-	text: "hover:underline",
-	"text-accent": "text-accent-100 hover:underline",
+	text: "font-bold hover:underline",
+	"text-accent": "font-bold text-accent-100 hover:underline",
 };
 
 type Props = React.ComponentProps<"button"> & {
@@ -43,7 +43,7 @@ export const Button = ({
 
 	return (
 		<button
-			className={`rounded font-bold text-md ${buttonVariantStyles[currentVariant]} ${className}`}
+			className={`rounded text-md ${buttonVariantStyles[currentVariant]} ${className}`}
 			{...props}
 			disabled={disabled || isLoading}
 		>

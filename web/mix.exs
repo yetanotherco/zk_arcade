@@ -61,7 +61,10 @@ defmodule ZkArcade.MixProject do
       {:ex_keccak, "~> 0.7.5"},
       {:ex_secp256k1, "~> 0.7"},
       {:gun, "~> 2.0"},
-      {:cbor, "~> 1.0"}
+      {:cbor, "~> 1.0"},
+      {:ethers, "~> 0.4.4"},
+      {:cachex, "~> 4.0"},
+      {:httpoison, "~> 2.0"}
     ]
   end
 

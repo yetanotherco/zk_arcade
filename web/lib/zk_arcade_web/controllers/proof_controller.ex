@@ -40,7 +40,13 @@ defmodule ZkArcadeWeb.ProofController do
 
           task =
             Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-              submit_to_batcher(submit_proof_message, address)
+              with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address) do
+                submit_to_batcher(submit_proof_message, address)
+              else
+                {:error, changeset} when is_map(changeset) ->
+                  Logger.error("Failed to create proof: #{inspect(changeset)}")
+                  {:error, changeset}
+              end
             end)
 
           case Task.yield(task, 10_000) do
@@ -85,35 +91,29 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   defp submit_to_batcher(submit_proof_message, address) do
-    with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address) do
-      Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
-      case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
-        {:ok, {:batch_inclusion, batch_data}} ->
-          case Proofs.update_proof_status_submitted(pending_proof.id, batch_data) do
-            {:ok, updated_proof} ->
-              Logger.info("Proof #{pending_proof.id} verified and updated successfully")
-              {:ok, updated_proof}
-            {:error, reason} ->
-              Logger.error("Failed to update proof status: #{inspect(reason)}")
-              {:error, reason}
-          end
+    Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
+    case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
+      {:ok, {:batch_inclusion, batch_data}} ->
+        case Proofs.update_proof_status_submitted(pending_proof.id, batch_data) do
+          {:ok, updated_proof} ->
+            Logger.info("Proof #{pending_proof.id} verified and updated successfully")
+            {:ok, updated_proof}
+          {:error, reason} ->
+            Logger.error("Failed to update proof status: #{inspect(reason)}")
+            {:error, reason}
+        end
 
-        {:error, reason} ->
-          Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-          case Proofs.update_proof_status_failed(pending_proof.id) do
-            {:ok, updated_proof} ->
-              Logger.info("Proof #{pending_proof.id} status updated to failed")
-              {:error, reason}
+      {:error, reason} ->
+        Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
+        case Proofs.update_proof_status_failed(pending_proof.id) do
+          {:ok, updated_proof} ->
+            Logger.info("Proof #{pending_proof.id} status updated to failed")
+            {:error, reason}
 
-            {:error, changeset} ->
-              Logger.error("Failed to update proof #{pending_proof.id} status: #{inspect(changeset)}")
-              {:error, reason}
-          end
-      end
-    else
-      {:error, changeset} when is_map(changeset) ->
-        Logger.error("Failed to create proof: #{inspect(changeset)}")
-        {:error, changeset}
+          {:error, changeset} ->
+            Logger.error("Failed to update proof #{pending_proof.id} status: #{inspect(changeset)}")
+            {:error, reason}
+        end
     end
   end
 

@@ -138,20 +138,27 @@ defmodule ZkArcadeWeb.ProofController do
 
           proof ->
             Logger.info("Found proof with ID #{proof_id}, verification data: #{inspect(proof.verification_data)}")
-            Logger.info("Retrying proof submission with message: #{inspect(submit_proof_message)}")
-            case submit_to_batcher(submit_proof_message, address) do
-              {:ok, updated_proof} ->
-                Logger.info("Proof #{proof_id} retried successfully")
-                conn
-                |> put_flash(:info, "Proof retried successfully!")
-                |> redirect(to: "/game/beast?message=proof-retried")
+            with {:ok, true} <-
+              EIP712Verifier.verify_aligned_signature(
+                submit_proof_message,
+                address,
+                submit_proof_message["verificationData"]["chain_id"]
+              ) do
+              Logger.info("Message decoded and signature verified. Retrying proof submission.")
+                case submit_to_batcher(submit_proof_message, address) do
+                  {:ok, updated_proof} ->
+                    Logger.info("Proof #{proof_id} retried successfully")
+                    conn
+                    |> put_flash(:info, "Proof retried successfully!")
+                    |> redirect(to: "/game/beast?message=proof-retried")
 
-              {:error, reason} ->
-                Logger.error("Failed to retry proof submission: #{inspect(reason)}")
-                conn
-                |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
-                |> redirect(to: "/game/beast?message=proof-failed")
-            end
+                  {:error, reason} ->
+                    Logger.error("Failed to retry proof submission: #{inspect(reason)}")
+                    conn
+                    |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
+                    |> redirect(to: "/game/beast?message=proof-failed")
+                end
+              end
         end
       end
     else

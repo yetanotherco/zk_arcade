@@ -615,9 +615,9 @@ impl Game {
         };
 
         let address = self.address.clone();
-        let block_number = self.block_number.clone();
+        let levels = self.game_match.get_levels_in_json();
         let handle = std::thread::spawn(move || {
-            let res = prove(levels_completion_log, block_number, address);
+            let res = prove(levels_completion_log, levels, address);
             if let Ok(receipt) = res {
                 save_proof(receipt).expect("To be able to write proof");
             } else {

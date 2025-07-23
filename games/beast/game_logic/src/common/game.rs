@@ -43,42 +43,62 @@ impl GameLevels {
 
         for game in games.into_iter() {
             if game.from_block <= block_number && block_number < game.to_block {
-                let levels = game
-                    .levels
-                    .iter()
-                    .map(|lvl| LevelConfig {
-                        blocks: lvl.blocks.try_into().expect("blocks out of range"),
-                        static_blocks: lvl
-                            .static_blocks
-                            .try_into()
-                            .expect("static_blocks out of range"),
-                        common_beasts: lvl
-                            .common_beasts
-                            .try_into()
-                            .expect("common_beasts out of range"),
-                        super_beasts: lvl
-                            .super_beasts
-                            .try_into()
-                            .expect("super_beasts out of range"),
-                        eggs: lvl.eggs.try_into().expect("eggs out of range"),
-                        egg_hatching_time: Duration::from_millis(lvl.egg_hatching_time),
-                        beast_starting_distance: lvl
-                            .beast_starting_distance
-                            .try_into()
-                            .expect("beast_starting_distance out of range"),
-                        time: Duration::from_secs(lvl.time),
-                        completion_score: lvl
-                            .completion_score
-                            .try_into()
-                            .expect("completion_score out of range"),
-                    })
-                    .collect();
-
-                return GameLevels { levels };
+                return Self::from_levels_json(&game.levels);
             }
         }
 
         panic!("No game found to play yet");
+    }
+
+    pub fn from_levels_json(levels: &[LevelJson]) -> Self {
+        Self {
+            levels: levels
+                .iter()
+                .map(|lvl| LevelConfig {
+                    blocks: lvl.blocks.try_into().expect("blocks out of range"),
+                    static_blocks: lvl
+                        .static_blocks
+                        .try_into()
+                        .expect("static_blocks out of range"),
+                    common_beasts: lvl
+                        .common_beasts
+                        .try_into()
+                        .expect("common_beasts out of range"),
+                    super_beasts: lvl
+                        .super_beasts
+                        .try_into()
+                        .expect("super_beasts out of range"),
+                    eggs: lvl.eggs.try_into().expect("eggs out of range"),
+                    egg_hatching_time: Duration::from_millis(lvl.egg_hatching_time),
+                    beast_starting_distance: lvl
+                        .beast_starting_distance
+                        .try_into()
+                        .expect("beast_starting_distance out of range"),
+                    time: Duration::from_secs(lvl.time),
+                    completion_score: lvl
+                        .completion_score
+                        .try_into()
+                        .expect("completion_score out of range"),
+                })
+                .collect(),
+        }
+    }
+
+    pub fn get_levels_in_json(&self) -> Vec<LevelJson> {
+        self.levels
+            .iter()
+            .map(|lvl| LevelJson {
+                blocks: lvl.blocks,
+                static_blocks: lvl.static_blocks,
+                common_beasts: lvl.common_beasts,
+                super_beasts: lvl.super_beasts,
+                eggs: lvl.eggs,
+                egg_hatching_time: lvl.egg_hatching_time.as_secs(),
+                beast_starting_distance: lvl.beast_starting_distance,
+                time: lvl.time.as_secs(),
+                completion_score: lvl.completion_score,
+            })
+            .collect()
     }
 
     /// return the level config for a specific level

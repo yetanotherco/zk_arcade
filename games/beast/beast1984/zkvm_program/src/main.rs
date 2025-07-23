@@ -186,7 +186,7 @@ fn encode_game_config(game: GameLevels) -> [u8; 32] {
 
 fn main() {
     let input = env::read::<ProgramInput>();
-    let game_match = GameLevels::new(input.block_number);
+    let game_match = GameLevels::from_levels_json(&input.levels);
 
     let mut current_level_number: u16 = 0;
     for level_completion in input.levels_log {

@@ -230,14 +230,22 @@ defmodule ZkArcade.BatcherConnection do
 
     {:ok, ipv6_address} = :inet.getaddr(batcher_host, :inet6)
     {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
-    {:ok, _protocol} = :gun.await_up(new_conn_pid)
+
+    case :gun.await_up(new_conn_pid) do
+      {:ok, _protocol} ->
+        upgrade_connection(new_conn_pid)
+
+      {:error, reason} ->
+        Logger.error("Failed to open connection on #{inspect(ipv6_address)}:#{batcher_port} - #{inspect(reason)}")
+        {:error, reason}
+    end
 
     with {:ok, conn_pid} <- :gun.open(ipv6_address, batcher_port),
         {:ok, _protocol} <- :gun.await_up(conn_pid) do
       upgrade_connection(conn_pid)
     else
       {:error, reason} ->
-        Logger.error("Failed to open connection on #{host_to_resolve}:#{batcher_port} - #{inspect(reason)}")
+        Logger.error("Failed to open connection on #{inspect(ipv6_address)}:#{batcher_port} - #{inspect(reason)}")
         {:error, reason}
     end
   end

@@ -21,7 +21,8 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   def submit(conn, %{
-        "submit_proof_message" => submit_proof_message_json
+        "submit_proof_message" => submit_proof_message_json,
+        "game" => game
       }) do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
       address = get_session(conn, :wallet_address)
@@ -42,7 +43,13 @@ defmodule ZkArcadeWeb.ProofController do
                ) do
           Logger.info("Message decoded and signature verified. Sending async task.")
 
-          with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address) do
+          proving_system =
+            String.downcase(
+              submit_proof_message["verificationData"]["verificationData"]["provingSystem"]
+            )
+
+          with {:ok, pending_proof} <-
+                 Proofs.create_pending_proof(submit_proof_message, address, game, proving_system) do
             task =
               Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
                 Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)

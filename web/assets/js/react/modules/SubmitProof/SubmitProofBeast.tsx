@@ -187,6 +187,11 @@ export default ({ payment_service_address, user_address, batcher_host, batcher_p
 								name="_csrf_token"
 								value={csrfToken}
 							/>
+							<input
+								type="hidden"
+								name="game"
+								value={"Beast"}
+							/>
 						</form>
 
 						<div className="flex flex-col gap-6">

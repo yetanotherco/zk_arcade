@@ -38,40 +38,40 @@ defmodule ZkArcadeWeb.ProofController do
               ) do
           Logger.info("Message decoded and signature verified. Sending async task.")
 
-          task =
-            Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-              with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address) do
-                Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
-                submit_to_batcher(submit_proof_message, address, pending_proof.id)
-              else
-                {:error, changeset} when is_map(changeset) ->
-                  Logger.error("Failed to create proof: #{inspect(changeset)}")
-                  {:error, changeset}
+          with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address) do
+            task =
+              Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
+                  Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
+                  submit_to_batcher(submit_proof_message, address, pending_proof.id)
+              end)
+
+              case Task.yield(task, 10_000) do
+                {:ok, {:ok, result}} ->
+                  Logger.info("Task completed successfully: #{inspect(result)}")
+
+                  conn
+                  |> put_flash(:info, "Proof submitted successfully!")
+                  |> redirect(to: "/game/beast?message=proof-sent")
+
+                {:ok, {:error, reason}} ->
+                  Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
+
+                  conn
+                  |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
+                  |> redirect(to: "/game/beast?message=proof-failed")
+
+                nil ->
+                  Logger.info("Task is taking longer than 10 seconds, proceeding.")
+
+                  conn
+                  |> put_flash(:info, "Proof is being submitted to batcher.")
+                  |> redirect(to: "/game/beast?message=proof-sent")
               end
-            end)
-
-          case Task.yield(task, 10_000) do
-            {:ok, {:ok, result}} ->
-              Logger.info("Task completed successfully: #{inspect(result)}")
-
-              conn
-              |> put_flash(:info, "Proof submitted successfully!")
-              |> redirect(to: "/game/beast?message=proof-sent")
-
-            {:ok, {:error, reason}} ->
-              Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
-
-              conn
-              |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-              |> redirect(to: "/game/beast?message=proof-failed")
-
-            nil ->
-              Logger.info("Task is taking longer than 10 seconds, proceeding.")
-
-              conn
-              |> put_flash(:info, "Proof is being submitted to batcher.")
-              |> redirect(to: "/game/beast?message=proof-sent")
-          end
+            else
+              {:error, changeset} when is_map(changeset) ->
+                Logger.error("Failed to create proof: #{inspect(changeset)}")
+                {:error, changeset}
+            end
         else
           {:error, reason} ->
             Logger.error("Failed to verify the received signature: #{inspect(reason)}")
@@ -106,7 +106,7 @@ defmodule ZkArcadeWeb.ProofController do
       {:error, reason} ->
         Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
         case Proofs.update_proof_status_failed(pending_proof_id) do
-          {:ok, updated_proof} ->
+          {:ok, _} ->
             Logger.info("Proof #{pending_proof_id} status updated to failed")
             {:error, reason}
 
@@ -146,7 +146,7 @@ defmodule ZkArcadeWeb.ProofController do
               ) do
               Logger.info("Message decoded and signature verified. Retrying proof submission.")
                 case submit_to_batcher(submit_proof_message, address, proof.id) do
-                  {:ok, updated_proof} ->
+                  {:ok, _} ->
                     Logger.info("Proof #{proof_id} retried successfully")
                     conn
                     |> put_flash(:info, "Proof retried successfully!")

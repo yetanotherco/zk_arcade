@@ -3,30 +3,46 @@ defmodule ZkArcade.BatcherConnection do
   require CBOR
 
   def send_submit_proof_message(submit_proof_message, address) do
-    case open_and_upgrade_connection() do
-      {:ok, conn_pid, stream_ref} ->
-        receive do
-          {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
-            Logger.info("WebSocket upgrade successful!")
-            case send_message_and_handle_response(conn_pid, stream_ref, submit_proof_message, address) do
-              {:ok, _} = ok -> ok
-              other -> other
-            end
+    batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
+    batcher_port = Application.get_env(:zk_arcade, :batcher_port)
+    {:ok, conn_pid} = :gun.open(batcher_host, batcher_port)
 
-          {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
-            Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
-            close_connection(conn_pid, stream_ref)
-            {:error, :upgrade_failed}
-        after
-          25_000 ->
-            Logger.error("Timeout during WebSocket upgrade")
-            :gun.close(conn_pid)
-            {:error, "Failed to upgrade socket connection due to timeout"}
-        end
+    conn_pid =
+      case :gun.await_up(conn_pid) do
+        {:ok, _protocol} ->
+          conn_pid
 
-      {:error, reason} ->
-        Logger.error("Failed to connect to batcher: #{inspect(reason)}")
-        {:error, reason}
+        {:error, :timeout} ->
+          Logger.info("Connection timed out, trying to connect with IPv6.")
+
+          {:ok, ipv6_address} = :inet.getaddr(batcher_host, :inet6)
+          {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
+          {:ok, _protocol} = :gun.await_up(new_conn_pid)
+          new_conn_pid
+      end
+
+    stream_ref = :gun.ws_upgrade(conn_pid, "/")
+
+    receive do
+      {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
+        Logger.info("WebSocket upgrade successful!")
+        message = build_submit_proof_message(submit_proof_message, address)
+        binary = CBOR.encode(message)
+        Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
+
+        :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
+
+        handle_websocket_messages(conn_pid, stream_ref)
+
+      {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
+        Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
+        close_connection(conn_pid, stream_ref)
+        {:error, :upgrade_failed}
+    after
+      25_000 ->
+        Logger.error("Timeout during WebSocket upgrade")
+        :gun.close(conn_pid)
+        {:error, "Failed to upgrade socket connection due to timeout"}
     end
   end
 
@@ -137,83 +153,4 @@ defmodule ZkArcade.BatcherConnection do
   end
 
   defp parse_bigint(v) when is_integer(v), do: v
-
-  # Opens a connection to the batcher and upgrades it to web socket connection.
-  # First tries to connect to the batcher using the configured host and port via ipv4.
-  # If the connection fails, it tries to connect using ipv6 as a fallback
-  defp open_and_upgrade_connection() do
-    Logger.info("Host is #{inspect(Application.get_env(:zk_arcade, :batcher_host))}")
-    batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
-    batcher_port = Application.get_env(:zk_arcade, :batcher_port)
-
-    with {:ok, conn_pid} <- :gun.open(batcher_host, batcher_port),
-        {:ok, _protocol} <- :gun.await_up(conn_pid) do
-      upgrade_connection(conn_pid)
-    else
-      {:error, :timeout} ->
-        try_ipv6_connection()
-
-      {:error, reason} ->
-        Logger.error("Failed to open connection to #{inspect(batcher_host)}:#{batcher_port} - #{inspect(reason)}")
-        {:error, reason}
-    end
-  end
-
-  # Tries to open a connection to the batcher using ipv6 localhost address.
-  # This is a fallback in case the initial ipv4 connection fails, and depends on the
-  # ip protocol supported by the batcher.
-  defp try_ipv6_connection() do
-    Logger.info("Connection timed out, trying to connect with IPv6.")
-
-    batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
-    batcher_port = Application.get_env(:zk_arcade, :batcher_port)
-
-    {:ok, ipv6_address} = :inet.getaddr(batcher_host, :inet6)
-    {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
-
-    case :gun.await_up(new_conn_pid) do
-      {:ok, _protocol} ->
-        upgrade_connection(new_conn_pid)
-
-      {:error, reason} ->
-        Logger.error("Failed to open connection on #{inspect(ipv6_address)}:#{batcher_port} - #{inspect(reason)}")
-        {:error, reason}
-    end
-
-    with {:ok, conn_pid} <- :gun.open(ipv6_address, batcher_port),
-        {:ok, _protocol} <- :gun.await_up(conn_pid) do
-      upgrade_connection(conn_pid)
-    else
-      {:error, reason} ->
-        Logger.error("Failed to open connection on #{inspect(ipv6_address)}:#{batcher_port} - #{inspect(reason)}")
-        {:error, reason}
-    end
-  end
-
-  defp upgrade_connection(conn_pid) do
-    stream_ref = :gun.ws_upgrade(conn_pid, "/")
-    {:ok, conn_pid, stream_ref}
-  end
-
-  # Sends the message to the batcher and handles the batcher response
-  defp send_message_and_handle_response(conn_pid, stream_ref, submit_proof_message, address) do
-    message = build_submit_proof_message(submit_proof_message, address)
-    binary = CBOR.encode(message)
-    Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
-
-    :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
-
-    case handle_websocket_messages(conn_pid, stream_ref) do
-      {:ok, {:batch_inclusion, _}} = ok ->
-        ok
-
-      {:error, :connection_down} = err ->
-        Logger.info("Connection down while sending message")
-        err
-
-      other ->
-        other
-    end
-  end
-
 end

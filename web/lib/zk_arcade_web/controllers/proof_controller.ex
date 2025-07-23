@@ -41,6 +41,7 @@ defmodule ZkArcadeWeb.ProofController do
           task =
             Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
               with {:ok, pending_proof} <- Proofs.create_pending_proof(submit_proof_message, address) do
+                Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
                 submit_to_batcher(submit_proof_message, address)
               else
                 {:error, changeset} when is_map(changeset) ->
@@ -91,7 +92,6 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   defp submit_to_batcher(submit_proof_message, address) do
-    Logger.info("Proof created successfully with ID: #{pending_proof.id} with pending state")
     case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
       {:ok, {:batch_inclusion, batch_data}} ->
         case Proofs.update_proof_status_submitted(pending_proof.id, batch_data) do
@@ -122,7 +122,7 @@ defmodule ZkArcadeWeb.ProofController do
       Logger.info("Retrying proof submission for proof ID: #{proof_id}")
       address = get_session(conn, :wallet_address)
       if is_nil(address) do
-        Logger.error("Address not defined in session")
+        Logger.error("Address is not defined in session!")
         conn
         |> put_flash(:error, "Wallet address is undefined.")
         |> redirect(to: "/")
@@ -137,36 +137,21 @@ defmodule ZkArcadeWeb.ProofController do
             |> halt()
 
           proof ->
-              Logger.info("Found proof with ID #{proof_id}, verification data: #{inspect(proof.verification_data)}")
-              Logger.info("Retrying proof submission with message: #{inspect(submit_proof_message)}")
-              case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
-                {:ok, {:batch_inclusion, batch_data}} ->
-                  case Proofs.update_proof_status_submitted(proof_id, batch_data) do
-                    {:ok, updated_proof} ->
-                      Logger.info("Proof #{proof_id} verified and updated successfully")
-                      conn
-                      |> put_flash(:info, "Proof submitted successfully!")
-                      |> redirect(to: "/game/beast?message=proof-sent")
-                    {:error, reason} ->
-                      Logger.error("Failed to update proof status: #{inspect(reason)}")
-                      conn
-                      |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-                      |> redirect(to: "/game/beast?message=proof-failed")
-                  end
+            Logger.info("Found proof with ID #{proof_id}, verification data: #{inspect(proof.verification_data)}")
+            Logger.info("Retrying proof submission with message: #{inspect(submit_proof_message)}")
+            case submit_to_batcher(submit_proof_message, address) do
+              {:ok, updated_proof} ->
+                Logger.info("Proof #{proof_id} retried successfully")
+                conn
+                |> put_flash(:info, "Proof retried successfully!")
+                |> redirect(to: "/game/beast?message=proof-retried")
 
-                {:error, reason} ->
-                  Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-                  proof_to_delete = Proofs.get_proof!(proof_id)
-                  case Proofs.delete_proof(proof_to_delete) do
-                    {:ok, _deleted_proof} ->
-                      Logger.info("Proof #{proof_id} deleted successfully")
-                    {:error, changeset} ->
-                      Logger.error("Failed to delete proof #{proof_id} from database: #{inspect(changeset)}")
-                  end
-                  conn
-                  |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-                  |> redirect(to: "/game/beast?message=proof-failed")
-              end
+              {:error, reason} ->
+                Logger.error("Failed to retry proof submission: #{inspect(reason)}")
+                conn
+                |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
+                |> redirect(to: "/game/beast?message=proof-failed")
+            end
         end
       end
     else

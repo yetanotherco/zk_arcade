@@ -10,9 +10,6 @@ defmodule ZkArcade.BatcherConnection do
             Logger.info("WebSocket upgrade successful!")
             case send_message_and_handle_response(conn_pid, stream_ref, submit_proof_message, address) do
               {:ok, _} = ok -> ok
-              {:error, :connection_down} ->
-                Logger.info("Retrying to send message after connection down")
-                retry_send(submit_proof_message, address)
               other -> other
             end
 
@@ -140,37 +137,6 @@ defmodule ZkArcade.BatcherConnection do
   end
 
   defp parse_bigint(v) when is_integer(v), do: v
-
-  # Retries sending the message to the batcher with exponential backoff after a failure in
-  # the connection on the first attempt. Since we are using an exponential backoff,
-  # we are waiting (0, 5, 15, 35, 75, 155) seconds before each retry.
-  # If the connection is down, it will retry until it succeeds or exhausts the retries
-  defp retry_send(submit_proof_message, address) do
-    backoffs = [0, 5_000, 15_000, 35_000, 75_000, 155_000]
-
-    Enum.reduce_while(backoffs, {:error, :not_attempted}, fn backoff_ms, _last_result ->
-      Logger.info("Retrying in #{backoff_ms} ms...")
-      if backoff_ms > 0 do
-        Process.sleep(backoff_ms)
-      end
-
-      case try_connection(submit_proof_message, address) do
-        {:ok, result} ->
-          {:halt, {:ok, result}}
-
-        # This covers the case where the connection went down during the send attempt
-        {:error, :connection_down} = error ->
-          {:cont, error}
-
-        # This covers the case where the connection timed out during the send attempt
-        {:error, :timeout} = error ->
-          {:cont, error}
-
-        other ->
-          {:halt, other}
-      end
-    end)
-  end
 
   # Attempts to open a connection to the batcher and upgrade it to web socket.
   defp try_connection(submit_proof_message, address) do

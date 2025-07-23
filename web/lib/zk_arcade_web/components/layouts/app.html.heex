@@ -1,14 +1,14 @@
-<main class="pb-10">
-  <div id="gradient-bg" class="h-screen w-full absolute left-0 top-0" style="z-index: -1"></div>
-
-  <div class="left-0  w-full pt-10 section-width">
-    <.nav 
-      network={Application.get_env(:zk_arcade, :network)}
-      payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
-      leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
-      wallet={@conn.assigns.wallet} 
-      submitted_proofs={@conn.assigns.submitted_proofs}
-      />
+<main>
+  <div class="section-width" style="max-width: 1000px">
+    <div class="absolute left-0 w-full mt-10" style="z-index: 1">
+      <.nav 
+        network={Application.get_env(:zk_arcade, :network)}
+        payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+        leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
+        wallet={@conn.assigns.wallet} 
+        submitted_proofs={@conn.assigns.submitted_proofs}
+       />
+    </div>
   </div>
 
   <div class="w-full flex-1 flex flex-col">

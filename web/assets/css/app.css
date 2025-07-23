@@ -99,6 +99,7 @@ thead {
 	display: flex;
 	flex-direction: column;
 	gap: 1.5rem;
+	overflow: scroll;
 }
 
 /* Scroll up animation */

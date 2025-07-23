@@ -83,7 +83,9 @@ const Proof = ({
 		useAligned();
 
 
-	// TODO: Change the 'pending' status to 'failed' after proving the workflow works
+	// Here and in the Retry button, we control that retry is only available for proofs that are in "pending" status, but
+	// we can also do this for proofs that are in "failed" status, as they can be retried too.
+	// Note that the "failed" proofs are those that were sent but the verification failed after 10 seconds.
 	const handleRetrySubmitProof = useCallback(async () => {
 		if (proof.status !== "pending") {
 			alert("You can only retry submitting a proof that is in 'pending' status");

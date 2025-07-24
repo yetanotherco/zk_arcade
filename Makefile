@@ -113,7 +113,26 @@ create_env_mainnet:
 	@echo "PHX_HOST=${PHX_HOST}" >> /home/app/config/.env.zk_arcade
 	@echo "KEYFILE_PATH=/home/app/.ssl/key.pem" >> /home/app/config/.env.zk_arcade
 	@echo "CERTFILE_PATH=/home/app/.ssl/cert.pem" >> /home/app/config/.env.zk_arcade
-	@echo "ALIGNED_ZK_ARCADE_NETWORK=mainnet" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_NETWORK=mainnet" >> /home/app/config/.env.zk_arcade
+
+create_env_stage:
+	@truncate -s0 /home/app/config/.env.zk_arcade
+	@truncate -s0 /home/app/config/.env.zk_arcade
+	@echo "PHX_SERVER=true" >> /home/app/config/.env.zk_arcade
+	@echo "DATABASE_URL=ecto://aligned_zk_arcade_user:${DB_PASSWORD}@127.0.0.1/aligned_zk_arcade_db" >> /home/app/config/.env.zk_arcade
+	@echo "POOL_SIZE=64" >> /home/app/config/.env.zk_arcade
+	@echo "SECRET_KEY_BASE=${SECRET_KEY_BASE}" >> /home/app/config/.env.zk_arcade
+	@echo "PHX_HOST=${PHX_HOST}" >> /home/app/config/.env.zk_arcade
+	@echo "KEYFILE_PATH=/home/app/.ssl/key.pem" >> /home/app/config/.env.zk_arcade
+	@echo "CERTFILE_PATH=/home/app/.ssl/cert.pem" >> /home/app/config/.env.zk_arcade
+	@echo "RPC_URL=${RPC_URL}" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_NETWORK=holesky" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_PAYMENT_SERVICE_ADDRESS=0x7577Ec4ccC1E6C529162ec8019A49C13F6DAd98b" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=0x02792Dab0272BB69fEa61a69b934b44c69fD7b33" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_HOST=stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_PORT=443" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_URL=wss://stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+
 
 ## Deploy
 release: export MIX_ENV=prod

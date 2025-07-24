@@ -83,6 +83,16 @@ if config_env() == :prod do
          System.get_env("ZK_ARCADE_PROXY_CONTRACT_ADDRESS")
 
   config :zk_arcade, :network, System.get_env("ZK_ARCADE_NETWORK")
+  config :zk_arcade, :payment_service_address, System.get_env("ALIGNED_PAYMENT_SERVICE_ADDRESS")
+  # Deploy the contract with `make deploy_contract NETWORK=<network>` and put the address here
+  config :zk_arcade, :leaderboard_address, System.get_env("ZK_ARCADE_LEADERBOARD_ADDRESS")
+  config :ethereumex, url: System.get_env("RPC_URL")
+
+  config :zk_arcade, :campaign_started_at, 1753031818
+
+  config :zk_arcade, :batcher_host, System.get_env("BATCHER_HOST")
+  config :zk_arcade, :batcher_port, String.to_integer(System.get_env("BATCHER_PORT")
+  config :zk_arcade, :batcher_url, String.get_env("BATCHER_URL")
 
   newrelic_license_key = System.get_env("NEWRELIC_KEY")
   newrelic_app_name = System.get_env("NEWRELIC_APP_NAME")

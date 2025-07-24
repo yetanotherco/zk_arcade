@@ -107,7 +107,7 @@ debian_deps: debian_create_dirs debian_install_deps debian_apply_firewall debian
 create_env_mainnet:
 	@truncate -s0 /home/app/config/.env.zk_arcade
 	@echo "PHX_SERVER=true" >> /home/app/config/.env.zk_arcade
-	@echo "DATABASE_URL=ecto://aligned_zk_arcade_user:${DB_PASSWORD}@127.0.0.1/aligned_zk_arcade_db" >> /home/app/config/.env.zk_arcade
+	@echo "DATABASE_URL=ecto://zk_arcade_user:${DB_PASSWORD}@127.0.0.1/zk_arcade_db" >> /home/app/config/.env.zk_arcade
 	@echo "POOL_SIZE=64" >> /home/app/config/.env.zk_arcade
 	@echo "SECRET_KEY_BASE=${SECRET_KEY_BASE}" >> /home/app/config/.env.zk_arcade
 	@echo "PHX_HOST=${PHX_HOST}" >> /home/app/config/.env.zk_arcade
@@ -119,7 +119,7 @@ create_env_stage:
 	@truncate -s0 /home/app/config/.env.zk_arcade
 	@truncate -s0 /home/app/config/.env.zk_arcade
 	@echo "PHX_SERVER=true" >> /home/app/config/.env.zk_arcade
-	@echo "DATABASE_URL=ecto://aligned_zk_arcade_user:${DB_PASSWORD}@127.0.0.1/aligned_zk_arcade_db" >> /home/app/config/.env.zk_arcade
+	@echo "DATABASE_URL=ecto://zk_arcade_user:${DB_PASSWORD}@127.0.0.1/zk_arcade_db" >> /home/app/config/.env.zk_arcade
 	@echo "POOL_SIZE=64" >> /home/app/config/.env.zk_arcade
 	@echo "SECRET_KEY_BASE=${SECRET_KEY_BASE}" >> /home/app/config/.env.zk_arcade
 	@echo "PHX_HOST=${PHX_HOST}" >> /home/app/config/.env.zk_arcade

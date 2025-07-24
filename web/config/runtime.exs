@@ -92,7 +92,7 @@ if config_env() == :prod do
 
   config :zk_arcade, :batcher_host, System.get_env("BATCHER_HOST")
   config :zk_arcade, :batcher_port, String.to_integer(System.get_env("BATCHER_PORT"))
-  config :zk_arcade, :batcher_url, String.get_env("BATCHER_URL")
+  config :zk_arcade, :batcher_url, System.get_env("BATCHER_URL")
 
   newrelic_license_key = System.get_env("NEWRELIC_KEY")
   newrelic_app_name = System.get_env("NEWRELIC_APP_NAME")

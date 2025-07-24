@@ -1,5 +1,8 @@
 use alloy::hex;
-use game_logic::proving::{LevelLog, ProgramInput};
+use game_logic::{
+    common::levels::LevelJson,
+    proving::{LevelLog, ProgramInput},
+};
 use risc0_zkvm::{ExecutorEnv, ProverOpts, Receipt, default_prover};
 
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));
@@ -13,13 +16,21 @@ pub enum ProvingError {
     SavingProof(String),
 }
 
-pub fn prove(levels_log: Vec<LevelLog>, address: String) -> Result<Receipt, ProvingError> {
+pub fn prove(
+    levels_log: Vec<LevelLog>,
+    levels: Vec<LevelJson>,
+    address: String,
+) -> Result<Receipt, ProvingError> {
     let mut env_builder = ExecutorEnv::builder();
 
-    let address_bytes = hex::decode(address)
-        .map_err(|e| ProvingError::WriteInput(e.to_string()))?;
+    let address_bytes =
+        hex::decode(address).map_err(|e| ProvingError::WriteInput(e.to_string()))?;
     // write input data
-    let input = ProgramInput { levels_log, address: address_bytes };
+    let input = ProgramInput {
+        levels,
+        levels_log,
+        address: address_bytes,
+    };
     env_builder
         .write(&input)
         .map_err(|e| ProvingError::WriteInput(e.to_string()))?;

@@ -1,15 +1,12 @@
 //! this module contains the board logic including terrain generation and rendering the board
 use std::ops::{Index, IndexMut};
 
-use rand::{seq::SliceRandom, Rng};
-use std::{
-    fmt::Write,
-    time::{Duration, Instant},
-};
+use rand::seq::SliceRandom;
+use std::fmt::Write;
 
 use crate::{
     beasts::{Beast, CommonBeast, Egg, HatchedBeast, SuperBeast},
-    common::levels::Level,
+    common::levels::LevelConfig,
     player::Player,
     Coord, Tile, ANSI_LEFT_BORDER, ANSI_RESET_BG, ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH,
     PLAYER_START,
@@ -88,14 +85,12 @@ impl Board {
     }
 
     /// generate the terrain of the board according to the level config we pass in
-    pub fn generate_terrain(level: Level) -> BoardTerrainInfo {
+    pub fn generate_terrain(level_config: LevelConfig) -> BoardTerrainInfo {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
 
-        let level_config = level.get_config();
-
-        let mut common_beasts = Vec::with_capacity(level_config.common_beasts);
-        let mut super_beasts = Vec::with_capacity(level_config.super_beasts);
-        let mut eggs = Vec::with_capacity(level_config.eggs);
+        let mut common_beasts = Vec::with_capacity(level_config.common_beasts as usize);
+        let mut super_beasts = Vec::with_capacity(level_config.super_beasts as usize);
+        let eggs = Vec::with_capacity(level_config.eggs as usize);
 
         buffer[PLAYER_START.row][PLAYER_START.column] = Tile::Player;
 
@@ -104,24 +99,23 @@ impl Board {
             .filter(|coord| !(coord.row == BOARD_HEIGHT - 1 && coord.column == 0)) // filter out player position
             .collect::<Vec<Coord>>();
 
-        let total_entities = level_config.blocks
-            + level_config.static_blocks
-            + level_config.super_beasts
-            + level_config.eggs;
+        let total_entities = level_config.blocks as usize
+            + level_config.static_blocks as usize
+            + level_config.super_beasts as usize;
         let mut rng = rand::rng();
         all_positions.shuffle(&mut rng);
         let block_positions = all_positions
             .drain(0..total_entities)
             .collect::<Vec<Coord>>();
 
-        for &coord in block_positions.iter().take(level_config.blocks) {
+        for &coord in block_positions.iter().take(level_config.blocks as usize) {
             buffer[coord.row][coord.column] = Tile::Block;
         }
 
         for &coord in block_positions
             .iter()
-            .skip(level_config.blocks)
-            .take(level_config.static_blocks)
+            .skip(level_config.blocks as usize)
+            .take(level_config.static_blocks as usize)
         {
             buffer[coord.row][coord.column] = Tile::StaticBlock;
         }
@@ -144,10 +138,9 @@ impl Board {
 
         let mut placed_beasts = 0;
         let mut placed_super_beasts = 0;
-        let mut placed_eggs = 0;
         let mut i = 0;
-        while placed_beasts + placed_super_beasts + placed_eggs
-            < level_config.common_beasts + level_config.super_beasts + level_config.eggs
+        while (placed_beasts as usize + placed_super_beasts as usize)
+            < (level_config.common_beasts as usize + level_config.super_beasts as usize)
         {
             if i >= all_positions.len() {
                 panic!("Could not find a free spot to place all beasts");
@@ -158,12 +151,6 @@ impl Board {
                 super_beasts.push(SuperBeast::new(coord));
                 buffer[coord.row][coord.column] = Tile::SuperBeast;
                 placed_super_beasts += 1;
-            } else if placed_eggs < level_config.eggs {
-                let mut rng = rand::rng();
-                let time = Instant::now() - Duration::from_millis(rng.random_range(0..3000));
-                eggs.push(Egg::new(coord, time));
-                buffer[coord.row][coord.column] = Tile::Egg;
-                placed_eggs += 1;
             } else if placed_beasts < level_config.common_beasts {
                 common_beasts.push(CommonBeast::new(coord));
                 buffer[coord.row][coord.column] = Tile::CommonBeast;
@@ -171,7 +158,7 @@ impl Board {
             }
 
             // skipping a couple tiles to give beasts some room
-            i += level_config.beast_starting_distance;
+            i += level_config.beast_starting_distance as usize;
         }
 
         BoardTerrainInfo {

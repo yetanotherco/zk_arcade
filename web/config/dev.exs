@@ -83,7 +83,7 @@ config :phoenix_live_view,
   enable_expensive_runtime_checks: true
 
 config :zk_arcade, :payment_service_address, "0x7969c5ed335650692bc04293b07f5bf2e7a673c0"
-# Deploy the contract with make  make deploy_contract NETWORK=devnet and put the address here
+# Deploy the contract with `make deploy_contract NETWORK=devnet` and put the address here
 config :zk_arcade, :leaderboard_address, "<COMPLETE_ADDRESS_FROM_OUTPUT>"
 config :ethereumex,
   url: "http://localhost:8545"
@@ -93,3 +93,4 @@ config :zk_arcade, :campaign_started_at, 1753031818
 
 config :zk_arcade, :batcher_host, "localhost"
 config :zk_arcade, :batcher_port, 8080
+config :zk_arcade, :batcher_url, "ws://localhost:8080"

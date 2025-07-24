@@ -6,9 +6,19 @@ resolver = "2"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 rand = { version = "0.9.1", optional = true }
+hex = "0.4.3"
+primitive-types = "0.12.2"
 
 [features]
 default = ["dep:rand"]
-# This features disables the deps and logic that isn't risc0 compatible
 zkvm = []
+devnet = []
+stage = []
+holesky = []
+mainnet = []
+
+[[bin]]
+name = "gen_levels"
+path = "cmd/gen_levels.rs"

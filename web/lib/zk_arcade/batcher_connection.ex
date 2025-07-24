@@ -5,7 +5,11 @@ defmodule ZkArcade.BatcherConnection do
   def send_submit_proof_message(submit_proof_message, address) do
     batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
     batcher_port = Application.get_env(:zk_arcade, :batcher_port)
-    {:ok, conn_pid} = :gun.open(batcher_host, batcher_port)
+
+    connect_opts = %{
+      protocols: [:http], # Force HTTP/1.1
+    }
+    {:ok, conn_pid} = :gun.open(batcher_host, batcher_port, connect_opts)
 
     conn_pid =
       case :gun.await_up(conn_pid) do
@@ -14,7 +18,6 @@ defmodule ZkArcade.BatcherConnection do
 
         {:error, :timeout} ->
           Logger.info("Connection timed out, trying to connect with IPv6.")
-
           {:ok, ipv6_address} = :inet.getaddr(batcher_host, :inet6)
           {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
           {:ok, _protocol} = :gun.await_up(new_conn_pid)

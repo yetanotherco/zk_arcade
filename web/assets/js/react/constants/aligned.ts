@@ -1,3 +1,5 @@
+import { Address } from "viem";
+
 export const batcherPaymentServiceAbi = [
 	{
 		name: "user_balances",
@@ -40,12 +42,11 @@ export const leaderboardAbi = [
 	},
 ];
 
-export const eip712Domain = (chainId: number) => ({
+export const eip712Domain = (chainId: number, batcherPaymentServiceAddress: Address) => ({
 	name: "Aligned",
 	version: "1",
 	chainId,
-	verifyingContract:
-		"0x7969c5eD335650692Bc04293B07F5BF2e7A673C0" as `0x${string}`,
+	verifyingContract: batcherPaymentServiceAddress,
 });
 
 export const eip712Types = {

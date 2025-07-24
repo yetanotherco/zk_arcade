@@ -15,11 +15,10 @@ import { useToast } from "../../state/toast";
 type Props = {
 	payment_service_address: Address;
 	user_address?: Address;
-	batcher_host: string;
-	batcher_port: number;
+	batcher_url: string;
 };
 
-export default ({ payment_service_address, user_address, batcher_host, batcher_port }: Props) => {
+export default ({ payment_service_address, user_address, batcher_url }: Props) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
@@ -29,7 +28,7 @@ export default ({ payment_service_address, user_address, batcher_host, batcher_p
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const [maxFee, setMaxFee] = useState(BigInt(0));
-	const { nonce, isLoading: nonceLoading, error: nonceError } = useBatcherNonce(batcher_host, batcher_port, user_address);
+	const { nonce, isLoading: nonceLoading, error: nonceError } = useBatcherNonce(batcher_url, user_address);
 
 	const { addToast } = useToast();
 
@@ -121,7 +120,7 @@ export default ({ payment_service_address, user_address, batcher_host, batcher_p
 			verificationData,
 		};
 
-		const { r, s, v } = await signVerificationData(noncedVerificationdata);
+		const { r, s, v } = await signVerificationData(noncedVerificationdata, payment_service_address);
 
 		const submitProofMessage: SubmitProof = {
 			verificationData: noncedVerificationdata,

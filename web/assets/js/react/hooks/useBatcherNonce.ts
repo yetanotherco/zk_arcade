@@ -9,7 +9,7 @@ type GetNonceFromBatcherResponse = {
 	InvalidRequest: string;
 }
 
-export function useBatcherNonce(host: string, port: number, address?: string) {
+export function useBatcherNonce(batcher_url: string, address?: string) {
 	const [nonce, setNonce] = useState<bigint | null>(null);
 	const [error, setError] = useState<Error | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +22,7 @@ export function useBatcherNonce(host: string, port: number, address?: string) {
 				return
 			}
 			
-			ws = new WebSocket(`ws://${host}:${port}`);
+			ws = new WebSocket(`${batcher_url}`);
 			ws.binaryType = 'arraybuffer';
 
 			ws.onopen = () => {
@@ -66,7 +66,7 @@ export function useBatcherNonce(host: string, port: number, address?: string) {
 		return () => {
 			ws?.close();
 		};
-	}, [host, port, address]);
+	}, [batcher_url, address]);
 
 	return { nonce, isLoading, error };
 }

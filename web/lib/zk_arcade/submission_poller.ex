@@ -1,7 +1,6 @@
 defmodule ZkArcade.SubmissionPoller do
   use GenServer
   require Logger
-  alias Ethereumex.HttpClient
 
   @topic "0x" <>
            Base.encode16(ExKeccak.hash_256("NewSolutionSubmitted(address,uint256)"), case: :lower)
@@ -75,6 +74,7 @@ defmodule ZkArcade.SubmissionPoller do
       case decode_event_log(log) do
         {:ok, decoded} ->
           Logger.info("NewSolutionSubmitted: #{inspect(decoded)}")
+          handle_event(decoded)
 
         {:error, reason} ->
           Logger.warning("Failed to decode event log: #{inspect(reason)}")
@@ -82,8 +82,17 @@ defmodule ZkArcade.SubmissionPoller do
     end
   end
 
+  defp handle_event(%{user: user, level: level}) do
+    Logger.info("New solution submitted by #{user} for level #{level}")
+
+    ZkArcade.Leaderboard.add_entry(%{
+      user_address: user,
+      level: level
+    })
+  end
+
   defp decode_event_log(%{
-         "topics" => [event_sig],
+         "topics" => [_event_sig],
          "data" => data
        }) do
     <<user::binary-size(32), level::binary-size(32)>> =

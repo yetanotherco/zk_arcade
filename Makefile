@@ -133,7 +133,7 @@ release_install:
 	sudo mv /home/app/zk_arcade /home/app/zk_arcade_bk
 	sudo mv /tmp/zk_arcade /home/app/
 	sudo chown app:app -R /home/app/zk_arcade
-	sudo setcap CAP_NET_BIND_SERVICE=+eip /home/app/zk_arcade/_build/prod/rel/zk_arcade/erts-15.0/bin/beam.smp
+	sudo setcap CAP_NET_BIND_SERVICE=+eip /home/app/zk_arcade/web/_build/prod/rel/zk_arcade/erts-15.0/bin/beam.smp
 
 create_service:
 	@cp /home/app/zk_arcade/zk_arcade.service /home/app/.config/systemd/user/zk_arcade.service

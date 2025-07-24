@@ -135,7 +135,7 @@ create_env_stage:
 	@echo "RPC_URL=${RPC_URL}" >> /home/app/config/.env.zk_arcade
 	@echo "ZK_ARCADE_NETWORK=holesky" >> /home/app/config/.env.zk_arcade
 	@echo "ALIGNED_PAYMENT_SERVICE_ADDRESS=0x7577Ec4ccC1E6C529162ec8019A49C13F6DAd98b" >> /home/app/config/.env.zk_arcade
-	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=0x02792Dab0272BB69fEa61a69b934b44c69fD7b33" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=0x2811715902dA181FEe43B49b5A5DdBA88E7e6273" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_HOST=stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_PORT=443" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_URL=wss://stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade

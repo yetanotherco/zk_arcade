@@ -3,7 +3,6 @@
 use game_logic::{
     beasts::{Beast, BeastAction, CommonBeast, HatchedBeast, SuperBeast},
     board::Board,
-    common::{game::GameLevels, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog, ProgramInput},
     Coord, Tile,
@@ -12,7 +11,7 @@ use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
-fn prove_level_completed(game: GameLevels, input: &LevelLog) -> bool {
+fn prove_level_completed(input: &LevelLog) -> bool {
     let mut board = Board::new_from_matrix(&input.board);
 
     /*
@@ -22,7 +21,7 @@ fn prove_level_completed(game: GameLevels, input: &LevelLog) -> bool {
      * 2. Verify they match with the config
      * 3. Verify the distance between the player and the enemies match
      */
-    let level_config = game.get_config(input.level);
+    let level_config = input.level.get_config();
     let mut player: Option<Player> = None;
     let mut common_beasts: Vec<CommonBeast> = vec![];
     let mut super_beasts: Vec<SuperBeast> = vec![];
@@ -64,11 +63,11 @@ fn prove_level_completed(game: GameLevels, input: &LevelLog) -> bool {
     }
     let mut player = player.expect("A player to be in the board");
 
-    assert!(common_beasts.len() == level_config.common_beasts as usize);
-    assert!(super_beasts.len() == level_config.super_beasts as usize);
-    assert!(blocks_tiles_count == level_config.blocks as usize);
-    assert!(static_blocks_tiles_count == level_config.static_blocks as usize);
-    assert!(super_beasts.len() == level_config.super_beasts as usize);
+    assert!(common_beasts.len() == level_config.common_beasts);
+    assert!(super_beasts.len() == level_config.super_beasts);
+    assert!(blocks_tiles_count == level_config.blocks);
+    assert!(static_blocks_tiles_count == level_config.static_blocks);
+    assert!(super_beasts.len() == level_config.super_beasts);
 
     for log in &input.game_log {
         match log {
@@ -111,8 +110,7 @@ fn prove_level_completed(game: GameLevels, input: &LevelLog) -> bool {
             }
             GameLogEntry::CommonBeastMoved { old_pos, new_pos } => {
                 let beast_action = common_beasts
-                    .iter_mut()
-                    .find(|beast| beast.position == *old_pos)
+                    .iter_mut().find(|beast| beast.position == *old_pos)
                     .unwrap()
                     .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
@@ -124,8 +122,7 @@ fn prove_level_completed(game: GameLevels, input: &LevelLog) -> bool {
             }
             GameLogEntry::SuperBeastMoved { old_pos, new_pos } => {
                 let beast_action = super_beasts
-                    .iter_mut()
-                    .find(|beast| beast.position == *old_pos)
+                    .iter_mut().find(|beast| beast.position == *old_pos)
                     .unwrap()
                     .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
@@ -153,40 +150,8 @@ fn prove_level_completed(game: GameLevels, input: &LevelLog) -> bool {
     common_beasts.len() + super_beasts.len() + hatched_beasts.len() == 0 && player.lives > 0
 }
 
-fn encode_game_config(game: GameLevels) -> [u8; 32] {
-    let mut levels: [[u8; 4]; 8] = [[0u8; 4]; 8];
-
-    let mut level = Level::One;
-    let mut i = 0;
-    loop {
-        let config = game.get_config(level);
-        levels[i][0] = config.blocks;
-        levels[i][1] = config.static_blocks;
-        levels[i][2] = config.common_beasts;
-        levels[i][3] = config.super_beasts;
-
-        if let Some(next_level) = level.next() {
-            level = next_level;
-            i += 1;
-        } else {
-            break;
-        };
-    }
-
-    let mut packed_game = [0u8; 32];
-    for (i, level) in levels.iter().enumerate() {
-        packed_game[i * 4] = level[0];
-        packed_game[i * 4 + 1] = level[1];
-        packed_game[i * 4 + 2] = level[2];
-        packed_game[i * 4 + 3] = level[3];
-    }
-
-    packed_game
-}
-
 fn main() {
     let input = env::read::<ProgramInput>();
-    let game_match = GameLevels::from_levels_json(&input.levels);
 
     let mut current_level_number: u16 = 0;
     for level_completion in input.levels_log {
@@ -194,7 +159,7 @@ fn main() {
         if current_level_number != level_completion.level.number() {
             panic!("Level completion must be in order")
         };
-        if !prove_level_completed(game_match.clone(), &level_completion) {
+        if !prove_level_completed(&level_completion) {
             panic!("Level {} proving failed", level_completion.level.number());
         }
     }
@@ -203,13 +168,9 @@ fn main() {
     let mut number: [u8; 32] = [0; 32];
     let bytes = current_level_number.to_be_bytes();
     number[32 - bytes.len()..].copy_from_slice(&bytes);
-
-    let game = encode_game_config(game_match);
-
     let mut address: [u8; 32] = [0; 32];
-    address[12..32].copy_from_slice(&input.address);
+    address[12.. 32].copy_from_slice(&input.address);
 
     env::commit_slice(&number);
-    env::commit_slice(&game);
     env::commit_slice(&address);
 }

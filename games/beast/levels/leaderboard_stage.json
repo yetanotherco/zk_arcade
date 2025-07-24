@@ -1,10 +1,5 @@
 {
-    "permissions": {
-        "owner": "0xE3C695b73dbe27106aF4530b152de3e57456B385"
-    },
-    "alignedServiceManager": "0x9C5231FC88059C086Ea95712d105A2026048c39B",
-    "alignedBatcherPaymentService": "0x7577Ec4ccC1E6C529162ec8019A49C13F6DAd98b",
-    "games": [
+  "games": [
     {
       "endsAtBlock": "0x0000000000000000000000000000000000000000000000000000000000408426",
       "gameConfig": "0xff0a0300fa0c0500c8140c00b41e0c01aa1f0f03a61e0a07a0320f07a5650a0a",

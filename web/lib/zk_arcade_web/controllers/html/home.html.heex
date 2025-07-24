@@ -101,3 +101,15 @@
   </div>
 </div>
 
+<div class="section-width">
+  <section id="backend-leaderboard" class="section-spacer-lg">
+    <.section_header header="Backend Leaderboard" />
+    <.table id="backend-leaderboard" rows={ZkArcade.Leaderboard.get_users_by_highest_level()}>
+        <:col :let={user} label="Position"><%= user.position %></:col>
+        <:col :let={user} label="Address">
+          <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
+        </:col>
+        <:col :let={user} label="Score"><%= user.score %></:col>
+    </.table>
+  </section>
+</div>

@@ -39,6 +39,21 @@ defmodule ZkArcade.Proofs do
   def get_proof!(id), do: Repo.get!(Proof, id)
 
   @doc """
+  Gets a proof by ID.
+
+  ## Examples
+
+      iex> get_proof_by_id("123")
+      %Proof{}
+
+      iex> get_proof_by_id("456")
+      nil
+  """
+  def get_proof_by_id(id) do
+    Repo.get(Proof, id)
+  end
+
+  @doc """
   Gets proofs by wallet address.
 
   ## Examples
@@ -137,6 +152,22 @@ defmodule ZkArcade.Proofs do
           Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
           {:error, changeset}
       end
+    end
+  end
+
+  def update_proof_status_failed(proof_id) do
+    proof = get_proof!(proof_id)
+
+    changeset = change_proof(proof, %{status: "failed"})
+
+    case Repo.update(changeset) do
+      {:ok, updated_proof} ->
+        Logger.info("Updated proof #{proof_id} status to failed")
+        {:ok, updated_proof}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+        {:error, changeset}
     end
   end
 

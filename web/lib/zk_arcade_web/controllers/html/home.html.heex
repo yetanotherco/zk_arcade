@@ -1,0 +1,103 @@
+<div class="w-full">
+
+  <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
+
+  <div class="section-width flex flex-row h-screen items-center">
+    <div class="flex flex-row justify-between items-end w-full">
+      <div style="width: 70%">
+        <h1 class="typing md:text-5xl text-2xl font-normal mb-4 w-full">
+          Play. Prove. <span class="text-accent-100">Verify</span>. Compete
+        </h1>
+        <p class="text-text-200">
+          The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on 
+          <span class="text-accent-100">ALIGNED</span>. Climb the leaderboard, earn your rank.
+        </p>
+      </div>
+      <a href="#play-games">
+        <div class="hidden md:block cursor-pointer inline-flex items-center space-x-2 group">
+          <span>Play Games</span>
+          <.icon name="hero-arrow-long-right" class="size-7 transition-transform duration-200 group-hover:translate-x-1" />
+        </div>
+      </a>
+    </div>
+  </div>
+
+
+
+  <div class="w-full bg-accent-100 section-spacer-md">
+    <div class="section-width ">
+      <div class="flex flex-col gap-10 w-full justify-between md:flex-row">
+        <div class="select-invert w-full flex mt-5 md:mt-0 flex-col justify-center">
+          <h1 class="font-normal text-3xl md:text-left text-center mb-2 text-black">While you are resting,</h1>
+          <h1 class="font-normal text-3xl md:text-left text-center text-black"><span class="select-normal bg-black text-accent-100 px-2">ALIGNED</span> is verifying.</h1>
+        </div>
+        
+      <div class="marquee-container w-full flex gap-10 justify-center">
+          <div class="marquee-wrapper">
+            <div class="marquee-column scroll-up">
+              <div class="marquee-content">
+                <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+              </div>
+              <div class="marquee-content">
+                <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+              </div>
+            </div>
+          </div>
+
+          <div class="marquee-wrapper">
+            <div class="marquee-column scroll-down">
+               <div class="marquee-content">
+                <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+              </div>
+              <div class="marquee-content">
+                <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-width">
+    <section id="what-is-this" class="section-spacer-lg">
+      <.section_header header="What is this?" />
+      <p class="text-text-200 text-md">Sed rhoncus, lacus at tempor tempor, augue sem ornare leo, vitae finibus erat elit ac orci. Vestibulum mollis malesuada ullamcorper. Proin eget rhoncus lectus. Vestibulum in elit bibendum tellus sodales lobortis quis non quam. Donec vel interdum dolor, accumsan accumsan elit. Suspendisse maximus magna turpis, et fringilla leo dictum eu. Nunc vehicula enim in lorem tempus, eget pharetra metus porta. Aliquam posuere eros vel sagittis auctor. In finibus a erat fringilla porttitor. Vestibulum vel purus enim. Ut rutrum nulla sit amet lectus pharetra porta. Donec at diam purus. In hac habitasse platea dictumst. Nam tincidunt vitae magna ut scelerisque. Ut dapibus commodo enim et interdum. Donec vestibulum tellus vitae consectetur faucibus.
+      </p>
+    </section>
+  </div>
+
+  <div class="section-width">
+    <section id="play-games" class="section-spacer-lg">
+      <.section_header header="Play Games" />
+      <div class="flex w-full flex-wrap lg:justify-between gap-10">
+        <.home_game_component tags={[:cli, :risc0]} disabled="false"link="/game/beast"  title="Beast 1984" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/beast1984.webp"} />
+        <.home_game_component tags={[:browser, :circom]} disabled="true" link="/game/sudoku" title="Sudoku (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/sudoku.png"} />
+        <.home_game_component tags={[:browser, :circom]} disabled="true" link="/game/parity" title="Parity (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/parity.jpeg"} />
+      </div>
+    </section>
+  </div>
+
+
+  <div class="section-width">
+    <section id="leaderboard" class="section-spacer-lg">
+      <.section_header header="LeaderBoard" />
+      <.table id="leaderboard" rows={@leaderboard}>
+          <:col :let={user} label="Position"><%= user.position %></:col>
+          <:col :let={user} label="Address">
+            <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
+          </:col>
+          <:col :let={user} label="Score"><%= user.score%></:col>
+      </.table>
+    </section>
+  </div>
+</div>
+

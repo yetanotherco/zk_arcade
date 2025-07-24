@@ -1,14 +1,29 @@
-import { Signature } from "viem";
+import { Address, Hex } from "viem";
+
+export type ProofSubmission = {
+	id: string;
+	game: string;
+	status: "submitted" | "pending" | "failed" | "claimed";
+	insertedAt: string;
+	batchData?: BatchInclusionData;
+	verificationData: NoncedVerificationdata;
+};
 
 export type SubmitProof = {
 	verificationData: NoncedVerificationdata;
-	signature: Signature;
+	signature: {
+		r: Hex;
+		s: Hex;
+		v: number;
+	};
 };
 
 export type NoncedVerificationdata = {
 	verificationData: VerificationData;
 	nonce: `0x${string}`;
 	maxFee: `0x${string}`;
+	chain_id: `0x${string}`;
+	payment_service_addr: Address;
 };
 
 export type VerificationData = {
@@ -19,10 +34,10 @@ export type VerificationData = {
 		| "SP1"
 		| "Risc0"
 		| "CircomGroth16Bn256";
-	proof: Uint8Array;
-	publicInput?: Uint8Array;
-	verificationKey?: Uint8Array;
-	vmProgramCode?: Uint8Array;
+	proof: number[];
+	publicInput?: number[];
+	verificationKey?: number[];
+	vmProgramCode?: number[];
 	proofGeneratorAddress: string;
 };
 
@@ -46,13 +61,13 @@ export type VerificationDataCommitment = {
 };
 
 export type InclusionProof = {
-	merkle_path: Array<Uint8Array>;
+	merkle_path: Uint8Array[];
 };
 
 export type BatchInclusionData = {
-	batchMerkleRoot: Uint8Array;
-	batchInclusionProof: InclusionProof;
-	indexInBatch: number;
+	batch_merkle_root: Uint8Array;
+	batch_inclusion_proof: InclusionProof;
+	index_in_batch: number;
 };
 
 export type AlignedVerificationData = {

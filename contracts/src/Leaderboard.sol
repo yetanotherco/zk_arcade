@@ -10,6 +10,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
      */
     address public alignedServiceManager;
     address public alignedBatcherPaymentService;
+    address[10] public top10Score;
     mapping(address => uint256) public usersScore;
     mapping(address => uint256) public usersBeastLevelCompleted;
 
@@ -19,6 +20,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error CallToAlignedContractFailed();
     error ProofNotVerifiedOnAligned();
     error UserHasAlreadyCompletedThisLevel(uint256 level);
+    error UserAddressMismatch(address expected, address actual);
 
     /**
      * Events
@@ -50,6 +52,12 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes memory merkleProof,
         uint256 verificationDataBatchIndex
     ) public {
+        (uint256 levelCompleted, address userAddress) = abi.decode(publicInputs, (uint256, address));
+
+        if (userAddress != msg.sender) {
+            revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
+        }
+
         bytes32 pubInputCommitment = keccak256(abi.encodePacked(publicInputs));
         (bool callWasSuccessful, bytes memory proofIsIncluded) = alignedServiceManager.staticcall(
             abi.encodeWithSignature(
@@ -75,7 +83,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert ProofNotVerifiedOnAligned();
         }
 
-        uint256 levelCompleted = abi.decode(publicInputs, (uint256));
         uint256 currentLevelCompleted = usersBeastLevelCompleted[msg.sender];
         if (levelCompleted <= currentLevelCompleted) {
             revert UserHasAlreadyCompletedThisLevel(currentLevelCompleted);
@@ -83,6 +90,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         usersBeastLevelCompleted[msg.sender] = levelCompleted;
 
         usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
+
+        verifyAndReplaceInTop10(msg.sender);
 
         emit NewSolutionSubmitted(msg.sender, levelCompleted);
     }
@@ -93,5 +102,29 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function getUserBeastLevelCompleted(address user) public view returns (uint256) {
         return usersBeastLevelCompleted[user];
+    }
+
+    function getTop10Score() external view returns (address[10] memory) {
+        return top10Score;
+    }
+
+    function verifyAndReplaceInTop10(address user) internal {
+        uint256 userScore = usersScore[user];
+        if (userScore <= usersScore[top10Score[9]]) {
+            return;
+        }
+
+        uint256 i;
+        for (i = 0; i < 10; i++) {
+            if (userScore > usersScore[top10Score[i]]) {
+                break;
+            }
+        }
+
+        for (uint256 j = 9; j > i; j--) {
+            top10Score[j] = top10Score[j - 1];
+        }
+
+        top10Score[i] = user;
     }
 }

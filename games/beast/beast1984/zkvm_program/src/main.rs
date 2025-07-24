@@ -108,9 +108,9 @@ fn prove_level_completed(input: &LevelLog) -> bool {
                     PlayerAction::None => {}
                 }
             }
-            GameLogEntry::CommonBeastMoved { idx, new_pos } => {
+            GameLogEntry::CommonBeastMoved { old_pos, new_pos } => {
                 let beast_action = common_beasts
-                    .get_mut(*idx)
+                    .iter_mut().find(|beast| beast.position == *old_pos)
                     .unwrap()
                     .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
@@ -120,9 +120,9 @@ fn prove_level_completed(input: &LevelLog) -> bool {
                     player.respawn(&mut board);
                 }
             }
-            GameLogEntry::SuperBeastMoved { idx, new_pos } => {
+            GameLogEntry::SuperBeastMoved { old_pos, new_pos } => {
                 let beast_action = super_beasts
-                    .get_mut(*idx)
+                    .iter_mut().find(|beast| beast.position == *old_pos)
                     .unwrap()
                     .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
@@ -168,6 +168,9 @@ fn main() {
     let mut number: [u8; 32] = [0; 32];
     let bytes = current_level_number.to_be_bytes();
     number[32 - bytes.len()..].copy_from_slice(&bytes);
+    let mut address: [u8; 32] = [0; 32];
+    address[12.. 32].copy_from_slice(&input.address);
 
     env::commit_slice(&number);
+    env::commit_slice(&address);
 }

@@ -1,3 +1,5 @@
+import { Address } from "viem";
+
 export const batcherPaymentServiceAbi = [
 	{
 		name: "user_balances",
@@ -15,12 +17,36 @@ export const batcherPaymentServiceAbi = [
 	},
 ];
 
-export const eip712Domain = (chainId: number) => ({
+export const leaderboardAbi = [
+	{
+		type: "function",
+		name: "submitBeastSolution",
+		stateMutability: "nonpayable",
+		inputs: [
+			{ name: "proofCommitment", type: "bytes32" },
+			{ name: "publicInputs", type: "bytes" },
+			{ name: "provingSystemAuxDataCommitment", type: "bytes32" },
+			{ name: "proofGeneratorAddr", type: "bytes20" },
+			{ name: "batchMerkleRoot", type: "bytes32" },
+			{ name: "merkleProof", type: "bytes" },
+			{ name: "verificationDataBatchIndex", type: "uint256" },
+		],
+		outputs: [],
+	},
+	{
+		type: "function",
+		name: "getUserScore",
+		stateMutability: "view",
+		inputs: [{ name: "user", type: "address" }],
+		outputs: [{ type: "uint256" }],
+	},
+];
+
+export const eip712Domain = (chainId: number, batcherPaymentServiceAddress: Address) => ({
 	name: "Aligned",
 	version: "1",
 	chainId,
-	verifyingContract:
-		"0x7969c5eD335650692Bc04293B07F5BF2e7A673C0" as `0x${string}`,
+	verifyingContract: batcherPaymentServiceAddress,
 });
 
 export const eip712Types = {

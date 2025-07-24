@@ -1,5 +1,34 @@
-<main class="px-4 py-20 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-2xl">
+<main>
+  <div class="section-width" style="max-width: 1000px">
+    <div class="absolute left-0 w-full mt-10" style="z-index: 1">
+      <.nav 
+        network={Application.get_env(:zk_arcade, :network)}
+        payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+        leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
+        wallet={@conn.assigns.wallet} 
+        submitted_proofs={@conn.assigns.submitted_proofs}
+       />
+    </div>
+  </div>
+
+  <div class="w-full flex-1 flex flex-col">
     {@inner_content}
   </div>
+
+  <footer>
+    <.footer headers={[
+         {"Social",
+          [
+            {"Twitter", "https://x.com/alignedlayer"},
+            {"Telegram", "https://t.me/aligned_layer"},
+            {"Discord", "https://discord.gg/alignedlayer"},
+            {"Youtube", "https://youtube.com/@alignedlayer"}
+          ]},
+         {"Resources",
+          [
+            {"Blog", "https://blog.alignedlayer.com/"},
+            {"Contact", "https://alignedlayer.com/contact/"}
+          ]}
+       ]}/>
+  </footer>
 </main>

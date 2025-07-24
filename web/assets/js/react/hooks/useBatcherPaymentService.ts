@@ -1,6 +1,12 @@
-import { Address } from "viem";
-import { useChainId, useReadContract } from "wagmi";
+import { Address, parseEther } from "viem";
+import {
+	useChainId,
+	useReadContract,
+	useSendTransaction,
+	useWaitForTransactionReceipt,
+} from "wagmi";
 import { batcherPaymentServiceAbi } from "../constants/aligned";
+import { useCallback, useEffect } from "react";
 
 type Args = {
 	contractAddress: Address;
@@ -13,6 +19,16 @@ export const useBatcherPaymentService = ({
 }: Args) => {
 	const chainId = useChainId();
 
+	const {
+		data: hash,
+		sendTransactionAsync,
+		...transactionData
+	} = useSendTransaction();
+
+	const receiptData = useWaitForTransactionReceipt({
+		hash,
+	});
+
 	const { ...balanceFetchData } = useReadContract({
 		address: contractAddress,
 		abi: batcherPaymentServiceAbi,
@@ -21,6 +37,7 @@ export const useBatcherPaymentService = ({
 		chainId,
 	});
 
+	// TODO: get nonce from batcher
 	const { ...nonceFetchData } = useReadContract({
 		address: contractAddress,
 		abi: batcherPaymentServiceAbi,
@@ -28,6 +45,21 @@ export const useBatcherPaymentService = ({
 		args: [userAddress],
 		chainId,
 	});
+
+	const sendFunds = useCallback(
+		async (amountToDepositInEther: string) => {
+			const value = parseEther(amountToDepositInEther);
+			await sendTransactionAsync({
+				to: contractAddress,
+				value,
+			});
+		},
+		[sendTransactionAsync]
+	);
+
+	useEffect(() => {
+		balanceFetchData.refetch();
+	}, [receiptData.isSuccess]);
 
 	return {
 		balance: {
@@ -37,6 +69,11 @@ export const useBatcherPaymentService = ({
 		nonce: {
 			...nonceFetchData,
 			data: nonceFetchData.data as bigint | undefined,
+		},
+		sendFunds: {
+			send: sendFunds,
+			transaction: transactionData,
+			receipt: receiptData,
 		},
 	};
 };

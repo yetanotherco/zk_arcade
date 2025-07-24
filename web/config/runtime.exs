@@ -51,7 +51,7 @@ if config_env() == :prod do
       """
 
   host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "4000")
+  port = String.to_integer(System.get_env("PORT") || "4005")
   port_ssl = String.to_integer(System.get_env("PORT_SSL") || "443")
 
   config :zk_arcade, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")

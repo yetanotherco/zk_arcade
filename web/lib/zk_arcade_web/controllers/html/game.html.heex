@@ -1,0 +1,42 @@
+<div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 100%;"></div>
+<div class="w-full" style="margin-top: 150px">
+    <div class="section-width">
+        <div class="section-spacer-md section-">
+            <img src={@game.image} class="rounded" style="width: 600px; height: 300px" /> 
+            <div class="mt-8">
+                <h2 class="text-3xl text-text-100 font-normal mb-1"><%= @game.name %></h2>
+                <p class="text-md text-text-200"><%= @game.desc %></p>
+            </div>
+            <div class="flex mt-2 gap-2">
+                <%= for variant <- @game.tags do %>
+                    <.tag variant={variant} />
+                <% end %>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section-width section-width">
+        <section class="section-spacer-md">
+            <.section_header header="Description" />
+            <p class="text-md text-text-200"><%= @game.full_desc %></p>
+        </section>
+    </div>
+
+    <div class="section-width section-width">
+        <section class="section-spacer-md">
+            <.section_header header="How to play" />
+            <p class="text-md text-text-200"><%= raw(String.replace(@game.how_to_play, "\n", "<br>")) %></p>
+        </section>
+    </div>
+
+   <div class="section-width justify-center">
+        <x-app-submit-proof
+            network={Application.get_env(:zk_arcade, :network)}
+            payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+            user_address={@wallet}
+            batcher_url={Application.get_env(:zk_arcade, :batcher_url)}
+        />
+    </div>
+
+    <div class="section-spacer-md"></div>
+</div>

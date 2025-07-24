@@ -14,25 +14,18 @@ defmodule ZkArcadeWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/game/:name", PageController, :game
+    post "/wallet/sign", WalletController, :connect_wallet
+    get "/wallet/disconnect", WalletController, :disconnect_wallet
+
+    post "/proof/", ProofController, :submit
+    post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
+    post "/proof/status/retry", ProofController, :retry_submit_proof
   end
 
-  scope "/", ZkArcadeWeb do
-    pipe_through [:browser]
-
-    get "/terms-conditions", PageController, :terms
-
-    get "/sign", SignController, :home
-    post "/sign", SignController, :connect_wallet
-
-    get "/disconnect", PageController, :disconnect_wallet
-
-    get "/submit-proof", ProofController, :home
+  scope "/api", ZkArcadeWeb do
+    pipe_through :api
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", ZkArcadeWeb do
-  #   pipe_through :api
-  # end
 
   # Enable LiveDashboard in development
   if Application.compile_env(:zk_arcade, :dev_routes) do

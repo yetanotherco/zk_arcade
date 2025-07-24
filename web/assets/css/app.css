@@ -6,14 +6,27 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap");
 
 html {
-	font-family: "IBM Plex Mono", monospace;
+	font-family: "Space Mono", monospace;
+	scroll-behavior: smooth;
 }
 
 body {
-	/* padding: 1.5rem 0.5rem 1rem;
-  max-width: calc(min(90ch, round(down, 100%, 1ch))); */
 	margin: 0 auto;
 	box-sizing: border-box;
+	background-color: #060606;
+}
+
+.select-invert::selection,
+.select-invert *::selection {
+	background-color: rgb(0, 0, 0);
+	color: rgb(24 255 127);
+}
+
+::selection,
+.select-normal::selection,
+.select-normal *::selection {
+	background-color: rgb(24 255 127);
+	color: #000000;
 }
 
 a {
@@ -23,110 +36,153 @@ a {
 h1,
 h2 {
 	font-weight: 700;
-	text-transform: uppercase;
-}
-
-h2 {
-	font-size: 1.2rem;
-	margin: 2.3rem 0 1.2rem;
-}
-
-.content {
-	padding: 0 1rem;
 }
 
 ul {
 	padding: 0 1.2rem;
 }
 
-p,
-li {
-	font-size: 1rem;
-	line-height: 1.5;
-	word-break: break-word;
-	word-wrap: break-word;
-	hyphens: auto;
-}
-
-li {
-	margin-bottom: 0.3rem;
-}
-
-hr {
-	border: none;
-	height: 0.1rem;
-	background-color: transparent;
+table {
+	border-collapse: collapse;
 	width: 100%;
-	margin: 30px auto;
-	border-top: 3px solid black;
-	border-bottom: 3px solid black;
 }
 
-section {
-	margin-top: 24px;
+tbody tr td {
+	padding-block: 5px;
 }
 
-.word-wrap {
-	word-break: break-all;
+/* Add spacing effect between thead and tbody using a border or pseudo row */
+thead {
+	border-bottom: 5px solid transparent; /* simulates a margin */
 }
 
-.default-btn {
-	font-family: "IBM Plex Mono", monospace;
-	font-size: 1rem;
-	padding: 0.5rem 1rem;
-	margin-right: 12px;
-	margin-bottom: 12px;
-	border: 1px solid lightgray;
-	background-color: white;
-	cursor: pointer;
+.section-spacer-lg {
+	margin-bottom: 130px;
 }
 
-.default-btn:hover {
-	border: 1px solid black;
+.section-spacer-md {
+	margin-bottom: 70px;
 }
 
-.default-btn[disabled] {
-	cursor: not-allowed;
-	border: 1px solid lightgray;
+.section-width {
+	display: flex;
+	flex-direction: row;
+	position: relative;
+	margin: 0 auto;
+	max-width: 1000px;
 }
 
-.default-input {
-	font-family: "IBM Plex Mono", monospace;
-	font-size: 1rem;
-	padding: 0.5rem 1rem;
-	width: 60%;
-	margin-right: 12px;
-	margin-bottom: 12px;
-	border: 1px solid lightgray;
+@media (max-width: 1024px) {
+	.section-width {
+		padding-left: 1.5rem;
+		padding-right: 1.5rem;
+	}
+
+	nav {
+		padding-left: 1.5rem;
+		padding-right: 1.5rem;
+	}
 }
 
-.box-success {
-	background-color: lightgreen;
-	color: white;
-
-	padding: 1rem;
-	margin: 1rem 0;
+.marquee-wrapper {
+	overflow: hidden;
+	height: 300px;
 }
 
-.select-default {
-	font-family: "IBM Plex Mono", monospace;
-	font-size: 1rem;
-	padding: 0.5rem 1rem;
-	margin-right: 12px;
-	margin-bottom: 12px;
-	border: 1px solid lightgray;
-	background-color: white;
-	cursor: pointer;
+.marquee-column {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem; /* gap-6 */
 }
 
-.address-box {
-	font-family: "IBM Plex Mono", monospace;
-	font-size: 1rem;
-	padding: 0.3rem 1.5rem;
-	margin-right: 12px;
-	margin-bottom: 12px;
-	border: 1px solid lightgray;
-	background-color: lightgreen;
-	color: white;
-	border-radius: 1rem;
+.marquee-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	overflow: scroll;
+}
+
+/* Scroll up animation */
+.scroll-up {
+	animation: scroll-up 30s linear infinite;
+}
+
+/* Scroll down animation */
+.scroll-down {
+	animation: scroll-down 30s linear infinite;
+}
+
+/* Pause on hover */
+.marquee-container:hover .scroll-up,
+.marquee-container:hover .scroll-down {
+	animation-play-state: paused;
+}
+
+@keyframes scroll-up {
+	0% {
+		transform: translateY(0);
+	}
+	100% {
+		transform: translateY(-50%);
+	}
+}
+
+@keyframes scroll-down {
+	0% {
+		transform: translateY(-50%);
+	}
+	100% {
+		transform: translateY(0);
+	}
+}
+
+#gradient-bg {
+	background: radial-gradient(
+			66.17% 57.92% at 50% 48.52%,
+			rgba(6, 6, 6, 0) 0%,
+			#060606 100%
+		),
+		radial-gradient(
+			105.06% 110.34% at 48.01% 63.49%,
+			rgba(139, 252, 189, 0.2) 12.74%,
+			rgba(86, 237, 153, 0) 100%
+		),
+		radial-gradient(
+			73.48% 38.32% at 50.94% 52.83%,
+			rgba(255, 255, 255, 0.2) 12.74%,
+			rgba(255, 255, 255, 0) 100%
+		),
+		radial-gradient(
+			40.81% 33.22% at 47.55% 46.99%,
+			rgba(139, 252, 189, 0.2) 12.74%,
+			rgba(86, 237, 153, 0) 100%
+		),
+		linear-gradient(to bottom, rgba(6, 6, 6, 0) 0%, #060606 100%);
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.typing {
+	display: inline-block;
+	white-space: nowrap;
+	overflow: hidden;
+	border-right: 2px solid currentColor;
+	animation: typing 4s steps(40, end), blink 0.75s step-end infinite;
+}
+
+/* Typing effect */
+@keyframes typing {
+	from {
+		width: 0;
+	}
+	to {
+		width: 100%;
+	}
+}
+
+/* Blinking cursor effect */
+@keyframes blink {
+	50% {
+		border-color: transparent;
+	}
 }

@@ -91,7 +91,7 @@ debian_install_nodejs:
 	sudo rm /tmp/node-v23.4.0-linux-x64.tar.xz
 
 user_install_rust:
-	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain $$(grep '^rust ' .tool-versions | awk '{print $$2}')
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 debian_install_postgres:
 	sudo apt install -y postgresql-common

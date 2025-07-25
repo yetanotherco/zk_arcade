@@ -130,7 +130,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             }
         }
 
-        if ((insertIndex == -1 && existingIndex == -1) || existingIndex <= insertIndex) {
+        if (insertIndex == -1 || (existingIndex != -1 && existingIndex <= insertIndex)) {
             return;
         }
 

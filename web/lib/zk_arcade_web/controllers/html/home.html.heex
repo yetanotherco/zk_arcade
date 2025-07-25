@@ -82,29 +82,27 @@
    <div class="section-width">
     <section id="how-to-play" class="section-spacer-lg w-full">
       <.section_header header="How to play?" subtitle="Complete periodic challenges, submit solution proofs, and claim your rewards." />
-      <div class="flex gap-2 justify-between w-full items-center">
-          <.step_component 
-    show_line="true" 
-    number="1" 
-    title="Play & Prove" 
-    desc="Pick a game and complete the periodic challenges." 
-  />
-  <div class="w-full h-[0.2px] bg-accent-100"></div>
-  
-  <.step_component 
-    show_line="true" 
-    number="2" 
-    title="Verify" 
-    desc="Submit proof to ALIGNED and wait for verification." 
-  />
-  <div class="w-full h-[0.2px] bg-accent-100"></div>
-  
-  <.step_component 
-    show_line="false" 
-    number="3" 
-    title="Claim Points" 
-    desc="Get points once your proof is verified." 
-  />
+      <div class="flex gap-10 sm:gap-0 justify-between w-full items-center flex-wrap sm:flex-nowrap">
+        <.step_component 
+          show_line="true" 
+          number="1" 
+          title="Play & Prove" 
+          desc="Pick a game and complete the periodic challenges." 
+        />
+        <div class="w-full h-[0.2px] bg-accent-100 hidden sm:block"></div>
+        <.step_component 
+          show_line="true" 
+          number="2" 
+          title="Verify" 
+          desc="Submit your proof to ALIGNED and wait for its verification." 
+        />
+        <div class="w-full h-[0.2px] bg-accent-100 hidden sm:block"></div>
+        <.step_component 
+          show_line="false" 
+          number="3" 
+          title="Claim Points" 
+          desc="Get points once your proof is verified." 
+        />
       </div>
     </section>
   </div>

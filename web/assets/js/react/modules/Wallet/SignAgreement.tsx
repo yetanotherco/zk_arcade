@@ -127,7 +127,7 @@ export const SignAgreement = () => {
 						onClick={handleSignAgreement}
 						disabled={!isConnected || isSigningAgreement}
 					>
-						{isSigningAgreement ? "Signing..." : "I Agree & Sign Message"}
+						{isSigningAgreement ? "Signing..." : "Accept & Sign"}
 					</Button>
 				</div>
 			</div>

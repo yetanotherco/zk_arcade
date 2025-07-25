@@ -48,8 +48,8 @@ defmodule ZkArcade.SubmissionPoller do
   end
 
   # This method restarts the polling process by sending a message to itself after a delay.
-  # The delay is set to 10 seconds, but can be changed.
-  defp schedule_poll, do: Process.send_after(self(), :poll, 10_000)
+  # The delay is set to 12 seconds, but can be changed.
+  defp schedule_poll, do: Process.send_after(self(), :poll, 12_000)
 
   defp fetch_logs(from_block, to_block, contract_address) do
     filter = %{

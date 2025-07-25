@@ -102,28 +102,13 @@ export const SignAgreement = () => {
 					<h4 className="text-lg font-semibold mb-3">Terms of Service</h4>
 					<div className="overflow-y-auto max-h-60 text-sm text-text-200 leading-relaxed">
 						<p className="mb-4">
-							Welcome to ZK Arcade. By using our service, you agree to these terms.
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin dapibus, felis sit amet convallis iaculis, felis purus commodo nibh, at sodales velit arcu a odio. Pellentesque dapibus volutpat odio, eu rutrum mauris malesuada et. Aliquam ligula velit, ultricies et mattis quis, ultrices in elit. Nam eget erat finibus, scelerisque purus eleifend, pretium lacus. Nam vitae tellus rhoncus, ornare libero eget, aliquam risus. Morbi lacinia lacinia ultricies. Morbi volutpat sollicitudin eros at vehicula. Pellentesque sed neque luctus, laoreet mi id, luctus est. Vivamus dictum ullamcorper lorem, non hendrerit purus condimentum et. Vestibulum viverra ligula vel lacinia porttitor. Donec blandit, ligula sit amet condimentum accumsan, quam elit sagittis nisl, et commodo lorem justo eget erat. Nam maximus arcu vel nibh feugiat accumsan. Ut aliquam massa ut pulvinar sagittis. Sed dictum mauris nec pretium feugiat. Aliquam erat volutpat. Mauris scelerisque sodales ex vel convallis.
 						</p>
 						<p className="mb-4">
-							<strong>1. Service Description:</strong> ZK Arcade is a platform for zero-knowledge proof games 
-							where users can submit cryptographic proofs of game completion to earn rewards and compete 
-							on leaderboards.
-						</p>
-						<p className="mb-4">
-							<strong>2. Wallet Connection:</strong> You must connect an Ethereum-compatible wallet to use 
-							our services. You are responsible for the security of your wallet and private keys.
-						</p>
-						<p className="mb-4">
-							<strong>3. Proof Submission:</strong> By submitting proofs, you certify that they were 
-							generated honestly and represent legitimate gameplay.
-						</p>
-						<p className="mb-4">
-							<strong>4. Privacy:</strong> We use zero-knowledge proofs to verify gameplay without 
-							revealing private information about your game state.
+							Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
 						</p>
 						<p>
-							<strong>5. Limitation of Liability:</strong> ZK Arcade is provided "as is" without warranties. 
-							Use at your own risk.
+							TODO: Replace with actual terms of service content
 						</p>
 					</div>
 				</div>

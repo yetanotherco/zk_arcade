@@ -110,21 +110,43 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function verifyAndReplaceInTop10(address user) internal {
         uint256 userScore = usersScore[user];
+
+        // early return to not run the whole alg if the user does not have enough points to be in the top 10
         if (userScore <= usersScore[top10Score[9]]) {
             return;
         }
 
-        uint256 i;
-        for (i = 0; i < 10; i++) {
-            if (userScore > usersScore[top10Score[i]]) {
-                break;
+        int256 existingIndex = -1;
+        int256 insertIndex = -1;
+        for (uint256 i = 0; i < 10; i++) {
+            address addr = top10Score[i];
+
+            if (addr == user) {
+                existingIndex = int256(i);
+            }
+
+            if (insertIndex == -1 && userScore > usersScore[addr]) {
+                insertIndex = int256(i);
             }
         }
 
-        for (uint256 j = 9; j > i; j--) {
-            top10Score[j] = top10Score[j - 1];
+        if ((insertIndex == -1 && existingIndex == -1) || existingIndex <= insertIndex) {
+            return;
         }
 
-        top10Score[i] = user;
+        // If the user is already in the leaderboard
+        // shift all the elements from the insert place to existing
+        if (existingIndex != -1) {
+            for (uint256 i = uint256(existingIndex); i > uint256(insertIndex); i--) {
+                top10Score[i] = top10Score[i - 1];
+            }
+        } else {
+            // else (if not present already), simply shift down all the elements from the insert index
+            for (uint256 j = 9; j > uint256(insertIndex); j--) {
+                top10Score[j] = top10Score[j - 1];
+            }
+        }
+
+        top10Score[uint256(insertIndex)] = user;
     }
 }

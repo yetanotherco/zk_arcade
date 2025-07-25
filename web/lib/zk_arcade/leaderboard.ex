@@ -62,14 +62,14 @@ defmodule ZkArcade.Leaderboard do
 
   def get_top_users do
     from(e in LeaderboardEntry,
-      group_by: e.user_address,
-      order_by: [desc: sum(e.score)],
-      select: {e.user_address, sum(e.score)}
+      order_by: [desc: e.score],
+      limit: 10,
+      select: %{address: e.user_address, score: e.score}
     )
     |> Repo.all()
     |> Enum.with_index(1)
-    |> Enum.map(fn {{address, score}, index} ->
-      %{position: index, address: address, score: score}
+    |> Enum.map(fn {entry, index} ->
+      Map.put(entry, :position, index)
     end)
   end
 

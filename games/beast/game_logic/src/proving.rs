@@ -1,7 +1,4 @@
-use crate::{
-    common::levels::{Level, LevelJson},
-    Coord, Dir, Tile,
-};
+use crate::{common::levels::Level, Coord, Dir, Tile};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -24,7 +21,6 @@ pub struct LevelLog {
 
 #[derive(Serialize, Deserialize)]
 pub struct ProgramInput {
-    pub levels: Vec<LevelJson>,
     pub levels_log: Vec<LevelLog>,
     pub address: Vec<u8>,
 }

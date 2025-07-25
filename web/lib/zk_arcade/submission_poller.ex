@@ -18,7 +18,7 @@ defmodule ZkArcade.SubmissionPoller do
   def handle_info(:poll, %{last_block: last_block} = state) do
     contract_address = Application.get_env(:zk_arcade, :leaderboard_address)
 
-    rpc_url = Application.get_env(:zk_arcade, :rpc_url, "http://localhost:8545")
+    rpc_url = Application.get_env(:ethereumex, :url)
 
     with {:ok, latest_block} <- Ethereumex.HttpClient.eth_block_number(url: rpc_url),
          latest_block_int <- String.to_integer(String.trim_leading(latest_block, "0x"), 16) do
@@ -64,7 +64,7 @@ defmodule ZkArcade.SubmissionPoller do
       topics: [@topic]
     }
 
-    rpc_url = Application.get_env(:zk_arcade, :rpc_url, "http://localhost:8545")
+    rpc_url = Application.get_env(:ethereumex, :url)
 
     case Ethereumex.HttpClient.eth_get_logs(filter, url: rpc_url) do
       {:ok, logs} -> {:ok, logs}

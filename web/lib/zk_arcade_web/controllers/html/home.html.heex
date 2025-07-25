@@ -83,9 +83,32 @@
     <section id="play-games" class="section-spacer-lg">
       <.section_header header="Play Games" />
       <div class="flex w-full flex-wrap lg:justify-between gap-10">
-        <.home_game_component tags={[:cli, :risc0]} disabled="false"link="/game/beast"  title="Beast 1984" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/beast1984.webp"} />
-        <.home_game_component tags={[:browser, :circom]} disabled="true" link="/game/sudoku" title="Sudoku (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/sudoku.png"} />
-        <.home_game_component tags={[:browser, :circom]} disabled="true" link="/game/parity" title="Parity (Coming Soon)" desc="Survive the chaos. Each wave pushes you further, how long can you last when everything wants you dead?" img={~p"/images/parity.jpeg"} />
+        <.home_game_component 
+          tags={[:cli, :risc0]} 
+          disabled="false" 
+          link="/game/beast" 
+          title="Beast 1984" 
+          desc="Terminal-based survival game. Each wave ramps up the pressure. React fast, play smart, and see how far you can go." 
+          img={~p"/images/beast1984.webp"} 
+        />
+
+        <.home_game_component 
+          tags={[:browser, :circom]} 
+          disabled="true" 
+          link="/game/sudoku" 
+          title="Sudoku (Coming Soon)" 
+          desc="Browser-based Sudoku with a fresh puzzle each day. Classic rules, escalating challenge. How many days can you keep the streak alive?" 
+          img={~p"/images/sudoku.png"} 
+        />
+
+        <.home_game_component 
+          tags={[:browser, :circom]} 
+          disabled="true" 
+          link="/game/parity" 
+          title="Parity (Coming Soon)" 
+          desc="Daily parity puzzles in your browser. Simple rules, tricky patterns. Test your logic and stay sharp as difficulty builds." 
+          img={~p"/images/parity.jpeg"} 
+        />
       </div>
     </section>
   </div>

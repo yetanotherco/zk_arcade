@@ -16,11 +16,11 @@ body {
 	background-color: #060606;
 }
 
-a {
+.link {
 	color: rgb(64 165 254);
 }
 
-a:hover {
+.link:hover {
 	cursor: pointer;
 	text-decoration: underline;
 }

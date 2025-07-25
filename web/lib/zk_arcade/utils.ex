@@ -1,4 +1,12 @@
 defmodule ZkArcade.Utils do
+  @url_regex ~r{(https?://[^\s\)]+)}
+
+  def autolink_and_linebreak(text) do
+    text
+    |> String.replace(@url_regex, ~s(<a class="link" href="\\0" target="_blank" rel="noopener noreferrer">\\0</a>))
+    |> String.replace("\n", "<br>")
+  end
+
   def date_diff_days(unix_timestamp) do
     {:ok, start_datetime} = DateTime.from_unix(unix_timestamp)
 

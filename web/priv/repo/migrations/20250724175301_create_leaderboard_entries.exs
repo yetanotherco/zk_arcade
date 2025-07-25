@@ -5,8 +5,7 @@ defmodule ZkArcade.Repo.Migrations.CreateLeaderboardEntries do
     create table(:leaderboard_entries, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :user_address, :string, null: false
-      add :level, :integer, null: false
-      # add :game, :string, default: "beast", null: false
+      add :score, :integer, null: false
 
       timestamps()
     end

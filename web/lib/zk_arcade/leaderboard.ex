@@ -27,20 +27,44 @@ defmodule ZkArcade.Leaderboard do
     |> Repo.insert()
   end
 
+  def update_entry(%LeaderboardEntry{} = entry, attrs) do
+    entry
+    |> LeaderboardEntry.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def insert_or_update_entry(attrs) do
+    user_address = Map.get(attrs, "user_address")
+    score = Map.get(attrs, "score")
+
+    case Repo.get_by(LeaderboardEntry, user_address: user_address) do
+      nil ->
+        add_entry(attrs)
+
+      %LeaderboardEntry{} = entry ->
+        update_entry(entry, %{score: score})
+    end
+  end
+
   def delete_entry(%LeaderboardEntry{} = entry) do
     Repo.delete(entry)
   end
 
-  def get_user_highest_level(user_address) do
-    from(e in LeaderboardEntry, where: e.user_address == ^user_address)
-    |> Repo.aggregate(:max, :level)
+  def get_user_score(nil), do: 0
+  def get_user_score(user_address) when is_binary(user_address) do
+    user_address = String.trim(user_address)
+    if user_address == "" do
+      nil
+    else
+      Repo.one(from e in LeaderboardEntry, where: e.user_address == ^user_address, select: max(e.score))
+    end
   end
 
-  def get_users_by_highest_level do
+  def get_top_users do
     from(e in LeaderboardEntry,
-      select: {e.user_address, max(e.level)},
       group_by: e.user_address,
-      order_by: [desc: max(e.level)]
+      order_by: [desc: sum(e.score)],
+      select: {e.user_address, sum(e.score)}
     )
     |> Repo.all()
     |> Enum.with_index(1)
@@ -48,4 +72,5 @@ defmodule ZkArcade.Leaderboard do
       %{position: index, address: address, score: score}
     end)
   end
+
 end

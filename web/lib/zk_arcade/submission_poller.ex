@@ -85,10 +85,19 @@ defmodule ZkArcade.SubmissionPoller do
   defp handle_event(%{user: user, level: level}) do
     Logger.info("New solution submitted by #{user} for level #{level}")
 
-    ZkArcade.Leaderboard.add_entry(%{
-      user_address: user,
-      level: level
-    })
+    current_score = ZkArcade.LeaderboardContract.get_user_score(user)
+    Logger.info("New score for #{user}: #{current_score}")
+
+    case ZkArcade.Leaderboard.insert_or_update_entry(%{
+      "user_address" => user,
+      "score" => level
+    }) do
+      {:ok, _entry} ->
+        Logger.info("Leaderboard entry created/updated successfully.")
+
+      {:error, changeset} ->
+        Logger.error("Failed to create/update leaderboard entry: #{inspect(changeset)}")
+    end
   end
 
   defp decode_event_log(%{

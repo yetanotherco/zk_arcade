@@ -104,8 +104,8 @@
 <div class="section-width">
   <section id="backend-leaderboard" class="section-spacer-lg">
     <.section_header header="Backend Leaderboard" />
-    <p class="mb-6"> User position in Backend Leaderboard: <%= ZkArcade.Leaderboard.get_user_highest_level(@wallet) %> </p>
-    <.table id="backend-leaderboard" rows={ZkArcade.Leaderboard.get_users_by_highest_level()}>
+    <p class="mb-6"> User position in Backend Leaderboard: <%= ZkArcade.Leaderboard.get_user_score(@wallet) %> </p>
+    <.table id="backend-leaderboard" rows={ZkArcade.Leaderboard.get_top_users()}>
         <:col :let={user} label="Position"><%= user.position %></:col>
         <:col :let={user} label="Address">
           <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>

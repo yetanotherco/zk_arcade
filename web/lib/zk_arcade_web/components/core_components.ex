@@ -86,7 +86,7 @@ defmodule ZkArcadeWeb.CoreComponents do
 
   defp game_content(assigns) do
     ~H"""
-    <img class="rounded mb-1 w-full" src={@img} width={280} height={180} />
+    <img class="rounded mb-1 w-full sm:h-[170px]" src={@img} width={280} height={180}/>
     <div>
         <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
           <%= @title %>

@@ -16,7 +16,6 @@ defmodule ZkArcadeWeb.PageController do
       wallet
   end
 
-
   defp get_proofs(nil), do: []
 
   defp get_proofs(address) do

@@ -2,17 +2,25 @@ import React, { useEffect, useRef, useState } from "react";
 import { Modal } from "../../components/Modal";
 import { useModal } from "../../hooks/useModal";
 import { Button } from "../../components/Button";
-import { useAccount, useConnect, useConnectors, useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
+import { ConnectKitButton } from "connectkit";
 
 export const ConnectWalletWithAgreement = () => {
 	const { open, setOpen, toggleOpen } = useModal();
+	
+	// Custom modal control to prevent unwanted closing
+	const handleModalClose = () => {
+		if (!walletConnectionInProgress && !isSigningAgreement) {
+			setOpen(false);
+		}
+	};
 
 	const formRef = useRef<HTMLFormElement>(null);
 	const [csrfToken, setCsrfToken] = useState("");
-	const { address } = useAccount();
-	const { connectAsync } = useConnect();
+	const { address, isConnected } = useAccount();
 	const [signature, setSignature] = useState("");
-	const connectors = useConnectors();
+	const [isSigningAgreement, setIsSigningAgreement] = useState(false);
+	const [walletConnectionInProgress, setWalletConnectionInProgress] = useState(false);
 	const { signMessageAsync } = useSignMessage();
 
 	useEffect(() => {
@@ -23,39 +31,49 @@ export const ConnectWalletWithAgreement = () => {
 		setCsrfToken(csrfToken);
 	}, []);
 
-	const handleAgreement = async _e => {
-		if (!window.ethereum.isMetaMask) {
-			alert(
-				"Metamask not installed, this application only supports metamask currently"
-			);
+	const handleSignAgreement = async () => {
+		if (!isConnected || !address) {
+			alert("Please connect your wallet first.");
 			return;
 		}
 
 		try {
-			if (!address) {
-				const metamaskConnector = connectors[0];
-				await connectAsync({ connector: metamaskConnector });
-			}
+			setIsSigningAgreement(true);
 			const sig = await signMessageAsync({
 				message: "I agree with the service policy",
 			});
 			setSignature(sig);
 		} catch (err) {
 			alert(`Error signing: ${err}`);
+			setIsSigningAgreement(false);
 		}
 	};
 
 	useEffect(() => {
-		if (signature) formRef.current?.submit();
+		if (signature) {
+			formRef.current?.submit();
+		}
 	}, [signature]);
+
+	// Track wallet connection to prevent modal closing
+	useEffect(() => {
+		if (isConnected && walletConnectionInProgress) {
+			setWalletConnectionInProgress(false);
+			// Ensure modal stays open after wallet connection
+			if (!open) {
+				setOpen(true);
+			}
+		}
+	}, [isConnected, walletConnectionInProgress, open, setOpen]);
 
 	return (
 		<>
 			<div className="cursor-pointer" onClick={toggleOpen}>
 				Connect Wallet
 			</div>
-			<Modal maxWidth={800} open={open} setOpen={setOpen}>
-				<div className="bg-contrast-100 w-full p-10 rounded flex flex-col items-center gap-8">
+			
+			<Modal maxWidth={900} open={open} setOpen={handleModalClose}>
+				<div className="bg-contrast-100 w-full p-10 rounded flex flex-col gap-8">
 					<form ref={formRef} action="/wallet/sign" method="post">
 						<input
 							type="hidden"
@@ -74,60 +92,118 @@ export const ConnectWalletWithAgreement = () => {
 						/>
 					</form>
 
-					<h3 className="text-3xl text-center font-bold">
-						Agreement
-					</h3>
-					<div className="overflow-scroll" style={{ maxHeight: 400 }}>
-						<p className="text-sm text-text-200">
-							Lorem ipsum dolor sit amet, consectetur adipiscing
-							elit. Proin dapibus, felis sit amet convallis
-							iaculis, felis purus commodo nibh, at sodales velit
-							arcu a odio. Pellentesque dapibus volutpat odio, eu
-							rutrum mauris malesuada et. Aliquam ligula velit,
-							ultricies et mattis quis, ultrices in elit. Nam eget
-							erat finibus, scelerisque purus eleifend, pretium
-							lacus. Nam vitae tellus rhoncus, ornare libero eget,
-							aliquam risus. Morbi lacinia lacinia ultricies.
-							Morbi volutpat sollicitudin eros at vehicula.
-							Pellentesque sed neque luctus, laoreet mi id, luctus
-							est. Vivamus dictum ullamcorper lorem, non hendrerit
-							purus condimentum et. Vestibulum viverra ligula vel
-							lacinia porttitor. Donec blandit, ligula sit amet
-							condimentum accumsan, quam elit sagittis nisl, et
-							commodo lorem justo eget erat. Nam maximus arcu vel
-							nibh feugiat accumsan. Ut aliquam massa ut pulvinar
-							sagittis. Sed dictum mauris nec pretium feugiat.
-							Aliquam erat volutpat. Mauris scelerisque sodales ex
-							vel convallis. Lorem ipsum dolor sit amet,
-							consectetur adipiscing elit. Proin dapibus, felis
-							sit amet convallis iaculis, felis purus commodo
-							nibh, at sodales velit arcu a odio. Pellentesque
-							dapibus volutpat odio, eu rutrum mauris malesuada
-							et. Aliquam ligula velit, ultricies et mattis quis,
-							ultrices in elit. Nam eget erat finibus, scelerisque
-							purus eleifend, pretium lacus. Nam vitae tellus
-							rhoncus, ornare libero eget, aliquam risus. Morbi
-							lacinia lacinia ultricies. Morbi volutpat
-							sollicitudin eros at vehicula. Pellentesque sed
-							neque luctus, laoreet mi id, luctus est. Vivamus
-							dictum ullamcorper lorem, non hendrerit purus
-							condimentum et. Vestibulum viverra ligula vel
-							lacinia porttitor. Donec blandit, ligula sit amet
-							condimentum accumsan, quam elit sagittis nisl, et
-							commodo lorem justo eget erat. Nam maximus arcu vel
-							nibh feugiat accumsan. Ut aliquam massa ut pulvinar
-							sagittis. Sed dictum mauris nec pretium feugiat.
-							Aliquam erat volutpat. Mauris scelerisque sodales ex
-							vel convallis.
+					<div className="text-center">
+						<h3 className="text-3xl font-bold mb-2">
+							Connect Wallet & Accept Terms
+						</h3>
+						<p className="text-text-200">
+							Please read our terms of service and connect your wallet to continue
 						</p>
 					</div>
 
-					<div className="flex  gap-10">
-						<Button variant="text" onClick={toggleOpen}>
+					{/* Progress Steps */}
+					<div className="flex items-center justify-center gap-4 mb-4">
+						<div className="flex items-center gap-2">
+							<div className="w-8 h-8 rounded-full bg-accent-100 flex items-center justify-center text-white font-bold">
+								1
+							</div>
+							<span className="text-sm">Read Terms</span>
+						</div>
+						<div className="w-8 h-0.5 bg-text-200"></div>
+						<div className="flex items-center gap-2">
+							<div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+								isConnected ? 'bg-accent-100 text-white' : 'bg-text-300 text-text-200'
+							}`}>
+								2
+							</div>
+							<span className="text-sm">Connect Wallet</span>
+						</div>
+						<div className="w-8 h-0.5 bg-text-200"></div>
+						<div className="flex items-center gap-2">
+							<div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+								signature ? 'bg-accent-100 text-white' : 'bg-text-300 text-text-200'
+							}`}>
+								3
+							</div>
+							<span className="text-sm">Sign Agreement</span>
+						</div>
+					</div>
+
+					{/* Terms Section */}
+					<div className="bg-text-300 bg-opacity-20 p-6 rounded">
+						<h4 className="text-lg font-semibold mb-3">Terms of Service</h4>
+						<div className="overflow-y-auto max-h-60 text-sm text-text-200 leading-relaxed">
+							<p className="mb-4">
+								Welcome to ZK Arcade. By using our service, you agree to these terms.
+							</p>
+							<p className="mb-4">
+								<strong>1. Service Description:</strong> ZK Arcade is a platform for zero-knowledge proof games 
+								where users can submit cryptographic proofs of game completion to earn rewards and compete 
+								on leaderboards.
+							</p>
+							<p className="mb-4">
+								<strong>2. Wallet Connection:</strong> You must connect an Ethereum-compatible wallet to use 
+								our services. You are responsible for the security of your wallet and private keys.
+							</p>
+							<p className="mb-4">
+								<strong>3. Proof Submission:</strong> By submitting proofs, you certify that they were 
+								generated honestly and represent legitimate gameplay.
+							</p>
+							<p className="mb-4">
+								<strong>4. Privacy:</strong> We use zero-knowledge proofs to verify gameplay without 
+								revealing private information about your game state.
+							</p>
+							<p>
+								<strong>5. Limitation of Liability:</strong> ZK Arcade is provided "as is" without warranties. 
+								Use at your own risk.
+							</p>
+						</div>
+					</div>
+
+					{/* Wallet Connection Section */}
+					<div className="bg-text-300 bg-opacity-20 p-6 rounded">
+						<h4 className="text-lg font-semibold mb-3">Wallet Connection</h4>
+						{!isConnected ? (
+							<div className="text-center">
+								<p className="text-sm text-text-200 mb-4">
+									Connect your wallet to continue with the agreement
+								</p>
+								<ConnectKitButton.Custom>
+									{({ show }) => (
+										<Button 
+											variant="accent-fill" 
+											onClick={() => {
+												setWalletConnectionInProgress(true);
+												show();
+											}}
+										>
+											Connect Wallet
+										</Button>
+									)}
+								</ConnectKitButton.Custom>
+							</div>
+						) : (
+							<div className="text-center">
+								<p className="text-sm text-accent-100 mb-2">✓ Wallet Connected</p>
+								<p className="text-sm font-mono text-text-200">
+									{address?.slice(0, 6)}...{address?.slice(-4)}
+								</p>
+							</div>
+						)}
+					</div>
+
+					{/* Action Buttons */}
+					<div className="flex justify-between items-center">
+						<Button variant="text" onClick={() => setOpen(false)}>
 							Cancel
 						</Button>
-						<Button variant="accent-fill" onClick={handleAgreement}>
-							Agree
+						
+						<Button 
+							variant="accent-fill" 
+							onClick={handleSignAgreement}
+							disabled={!isConnected || isSigningAgreement}
+						>
+							{isSigningAgreement ? "Signing..." : "I Agree & Sign Message"}
 						</Button>
 					</div>
 				</div>

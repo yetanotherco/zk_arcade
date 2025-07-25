@@ -84,7 +84,7 @@ config :phoenix_live_view,
 
 config :zk_arcade, :payment_service_address, "0x7969c5ed335650692bc04293b07f5bf2e7a673c0"
 # Deploy the contract with `make deploy_contract NETWORK=devnet` and put the address here
-config :zk_arcade, :leaderboard_address, "<COMPLETE_ADDRESS_FROM_OUTPUT>"
+config :zk_arcade, :leaderboard_address, "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823"
 config :ethereumex,
   url: "http://localhost:8545"
 

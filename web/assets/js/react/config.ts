@@ -3,7 +3,7 @@ import { anvil, sepolia, mainnet, holesky } from "wagmi/chains";
 import { getDefaultConfig } from "connectkit";
 
 const common_config = {
-	walletConnectProjectId: "b2fb11724ae6170bc3e2cf2d6e19ec5a",
+	// walletConnectProjectId: "b2fb11724ae6170bc3e2cf2d6e19ec5a", // Disabled for localhost testing
 	appName: "Zk Arcade",
 };
 

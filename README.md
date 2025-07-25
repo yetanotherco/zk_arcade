@@ -6,6 +6,30 @@ Zk arcade repo
 
 - [Beast](./games/beast)
 
+## Run Locally
+
+1. You need to run [Aligned](https://github.com/yetanotherco/aligned_layer) locally.
+
+2. Make sure you are running Docker.
+
+3. Deploy the Leaderboard contract with:
+
+  ```
+  make deploy_contract NETWORK=devnet
+  ```
+
+4. Set the Contract proxy address in `web/config/dev.exs`:
+
+  ```elixir
+  config :zk_arcade, :leaderboard_address, "<COMPLETE_ADDRESS_FROM_OUTPUT>"
+  ```
+
+5. Start the server:
+
+  ```
+  make web_run
+  ```
+
 ## Deployment
 
 ### First Deploy

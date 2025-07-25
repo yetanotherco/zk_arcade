@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Web3EthProvider from "../../providers/web3-eth-provider";
-import { ConnectWalletOnly } from "./ConnectWalletOnly";
+import { ConnectWallet } from "./ConnectWallet";
 import { SignAgreement } from "./SignAgreement";
 import { WalletInfo } from "./WalletInfo";
 import { Address } from "../../types/blockchain";
@@ -73,7 +73,7 @@ const WalletContent = ({
 	}
 
 	// Case 3: No wallet connected or checking agreement status
-	return <ConnectWalletOnly />;
+	return <ConnectWallet />;
 };
 
 export default ({

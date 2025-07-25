@@ -1,7 +1,7 @@
 import React from "react";
 import { ConnectKitButton } from "connectkit";
 
-export const ConnectWalletOnly = () => {
+export const ConnectWallet = () => {
 	return (
 		<ConnectKitButton.Custom>
 			{({ isConnected, show, truncatedAddress, ensName }) => {

@@ -117,27 +117,17 @@
   <div class="section-width">
     <section id="leaderboard" class="section-spacer-lg">
       <.section_header header="LeaderBoard" />
-      <.table id="leaderboard" rows={@leaderboard}>
-          <:col :let={user} label="Position"><%= user.position %></:col>
-          <:col :let={user} label="Address">
-            <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-          </:col>
-          <:col :let={user} label="Score"><%= user.score%></:col>
-      </.table>
+      <%= if length(ZkArcade.Leaderboard.get_top_users(10)) > 0 do %>
+        <.table id="leaderboard" rows={ZkArcade.Leaderboard.get_top_users(10)}>
+            <:col :let={user} label="Position"><%= user.position %></:col>
+            <:col :let={user} label="Address">
+              <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
+            </:col>
+            <:col :let={user} label="Score"><%= user.score%></:col>
+        </.table>
+      <% else %>
+        <p class="text-text-200 text-md">No users found in the leaderboard.</p>
+      <% end %>
     </section>
   </div>
-</div>
-
-<div class="section-width">
-  <section id="backend-leaderboard" class="section-spacer-lg">
-    <.section_header header="Backend Leaderboard" />
-    <p class="mb-6"> User position in Backend Leaderboard: <%= ZkArcade.Leaderboard.get_user_score(@wallet) %> </p>
-    <.table id="backend-leaderboard" rows={ZkArcade.Leaderboard.get_top_users(10)}>
-        <:col :let={user} label="Position"><%= user.position %></:col>
-        <:col :let={user} label="Address">
-          <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-        </:col>
-        <:col :let={user} label="Score"><%= user.score %></:col>
-    </.table>
-  </section>
 </div>

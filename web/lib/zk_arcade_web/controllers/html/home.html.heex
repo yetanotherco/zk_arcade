@@ -121,7 +121,10 @@
         <.table id="leaderboard" rows={ZkArcade.Leaderboard.get_top_users(10)}>
             <:col :let={user} label="Position"><%= user.position %></:col>
             <:col :let={user} label="Address">
-              <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
+              <%= 
+                base = String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4)
+                if user.address == @wallet, do: base <> " (you)", else: base 
+              %>
             </:col>
             <:col :let={user} label="Score"><%= user.score%></:col>
         </.table>

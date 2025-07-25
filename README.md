@@ -35,21 +35,29 @@ Zk arcade repo
 
 5. Deploy the Leaderboard contract with:
 
-  ```
-  make deploy_contract NETWORK=devnet
-  ```
+   ```
+   make deploy_contract NETWORK=devnet
+   ```
 
 6. Set the Contract proxy address in `web/config/dev.exs`:
 
-  ```elixir
-  config :zk_arcade, :leaderboard_address, "<COMPLETE_ADDRESS_FROM_OUTPUT>"
-  ```
+   ```elixir
+   config :zk_arcade, :leaderboard_address, "<COMPLETE_ADDRESS_FROM_OUTPUT>"
+   ```
 
 7. Start the server:
 
-  ```
-  make web_run
-  ```
+   ```
+   make web_run
+   ```
+
+### Other commands
+
+If you want to clean the database, run:
+
+```
+web_clean_db
+```
 
 ## Deployment
 

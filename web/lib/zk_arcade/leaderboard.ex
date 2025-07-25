@@ -27,12 +27,19 @@ defmodule ZkArcade.Leaderboard do
     |> Repo.insert()
   end
 
+  @doc """
+  Updates a leaderboard entry.
+  """
   def update_entry(%LeaderboardEntry{} = entry, attrs) do
     entry
     |> LeaderboardEntry.changeset(attrs)
     |> Repo.update()
   end
 
+  @doc """
+  Inserts or updates a leaderboard entry based on user address. If the user address already exists,
+  updates the score. If it doesn't exist, creates a new entry.
+  """
   def insert_or_update_entry(attrs) do
     user_address = Map.get(attrs, "user_address")
     score = Map.get(attrs, "score")
@@ -46,20 +53,34 @@ defmodule ZkArcade.Leaderboard do
     end
   end
 
+  @doc """
+  Deletes a leaderboard entry.
+  """
   def delete_entry(%LeaderboardEntry{} = entry) do
     Repo.delete(entry)
   end
 
+  @doc """
+  Returns the highest score for a user. If the user address is nil or empty, returns 0.
+  """
   def get_user_score(nil), do: 0
+
   def get_user_score(user_address) when is_binary(user_address) do
     user_address = String.trim(user_address)
+
     if user_address == "" do
       nil
     else
-      Repo.one(from e in LeaderboardEntry, where: e.user_address == ^user_address, select: max(e.score))
+      Repo.one(
+        from(e in LeaderboardEntry, where: e.user_address == ^user_address, select: max(e.score))
+      )
     end
   end
 
+  @doc """
+  Returns the top 10 users based on their scores. The result is a list of maps with user address and score,
+  ordered by score in descending order.
+  """
   def get_top_users do
     from(e in LeaderboardEntry,
       order_by: [desc: e.score],
@@ -72,5 +93,4 @@ defmodule ZkArcade.Leaderboard do
       Map.put(entry, :position, index)
     end)
   end
-
 end

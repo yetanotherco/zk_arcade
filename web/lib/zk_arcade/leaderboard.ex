@@ -72,7 +72,7 @@ defmodule ZkArcade.Leaderboard do
       nil
     else
       Repo.one(
-        from(e in LeaderboardEntry, where: e.user_address == ^user_address, select: max(e.score))
+        from(e in LeaderboardEntry, where: e.user_address == ^user_address, select: e.score)
       )
     end
   end

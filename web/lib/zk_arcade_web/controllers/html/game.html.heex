@@ -19,6 +19,13 @@
         <section class="section-spacer-md">
             <.section_header header="Description" />
             <p class="text-md text-text-200"><%= @game.full_desc %></p>
+            <h3 class="mt-8 mb-2 text-lg">Acknowledgements:</h3>
+             <%= for %{text: text, link: link} <- @game.acknowledgments do %>
+             <div class="flex flex-row flex-wrap">
+                <p class="text-md mr-1 text-text-200"><%= text %>:</p>
+                <a href={link} class="text-md mb-1 text-blue hover:underline"><%= link %></a>
+            </div>
+            <% end %>
         </section>
     </div>
 

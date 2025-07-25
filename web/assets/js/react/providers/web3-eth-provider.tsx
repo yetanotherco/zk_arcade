@@ -38,7 +38,18 @@ const Web3EthProvider = ({ children, network }) => {
 		<>
 			<WagmiProvider config={configSelector(network)}>
 				<QueryClientProvider client={queryClient}>
-					<ConnectKitProvider theme="minimal">
+					<ConnectKitProvider 
+						theme="auto"
+						mode="light"
+						options={{
+							initialChainId: 0,
+							walletConnectName: "ZK Arcade",
+							enforceSupportedChains: true,
+							disclaimer: "By connecting your wallet, you agree to the Terms of Service and Privacy Policy.",
+							overlayBlur: 0,
+							embedGoogleFonts: false,
+						}}
+					>
 						{children}
 					</ConnectKitProvider>
 				</QueryClientProvider>

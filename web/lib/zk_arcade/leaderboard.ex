@@ -83,9 +83,9 @@ defmodule ZkArcade.Leaderboard do
   """
   def get_top_users(top_limit) do
     from(e in LeaderboardEntry,
+      select: %{address: e.user_address, score: e.score},
       order_by: [desc: e.score, asc: e.updated_at],
-      limit: ^top_limit,
-      select: %{address: e.user_address, score: e.score}
+      limit: ^top_limit
     )
     |> Repo.all()
     |> Enum.with_index(1)

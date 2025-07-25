@@ -13,6 +13,8 @@ defmodule ZkArcade.SubmissionPoller do
     {:ok, state}
   end
 
+  # This function is called periodically to poll for new events. It fetches logs from the blockchain, decodes
+  # them, and handles the events. If an error occurs, it logs the error and resets the poll cycle.
   def handle_info(:poll, %{last_block: last_block} = state) do
     contract_address = Application.get_env(:zk_arcade, :leaderboard_address)
 
@@ -51,6 +53,9 @@ defmodule ZkArcade.SubmissionPoller do
   # The delay is set to 12 seconds, but can be changed.
   defp schedule_poll, do: Process.send_after(self(), :poll, 12_000)
 
+  # This function fetches logs from the blockchain based on the specified block range and contract address.
+  # Constructs a filter for the logs and uses the Ethereumex HTTP client to retrieve them. If successful,
+  # returns the logs; otherwise, it returns an error.
   defp fetch_logs(from_block, to_block, contract_address) do
     filter = %{
       address: contract_address,
@@ -67,6 +72,8 @@ defmodule ZkArcade.SubmissionPoller do
     end
   end
 
+  # This function decodes the event logs and handles each event. It iterates through the logs, decodes each log,
+  # and calls the `handle_event/1` function to process the decoded event. If decoding fails, it logs a warning.
   defp decode_and_handle_events(logs, _contract_address) do
     for log <- logs do
       Logger.info("Raw log: #{inspect(log)}")
@@ -82,6 +89,8 @@ defmodule ZkArcade.SubmissionPoller do
     end
   end
 
+  # This function handles the decoded event by fetching the current score from the Leaderboard contract and
+  # updating the database leaderboard entry.
   defp handle_event(%{user: user, level: level}) do
     Logger.info("New solution submitted by #{user} for level #{level}")
 
@@ -100,6 +109,8 @@ defmodule ZkArcade.SubmissionPoller do
     end
   end
 
+  # This function extracts the user address and level from the log data. If the log format is unexpected,
+  # it logs a warning and returns an error.
   defp decode_event_log(%{
          "topics" => [_event_sig],
          "data" => data

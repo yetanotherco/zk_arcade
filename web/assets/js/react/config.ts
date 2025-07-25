@@ -5,9 +5,6 @@ import { getDefaultConfig } from "connectkit";
 const common_config = {
 	walletConnectProjectId: "b2fb11724ae6170bc3e2cf2d6e19ec5a",
 	appName: "Zk Arcade",
-	appDescription: "ZK Arcade - Zero Knowledge Proof Games",
-	appUrl: "https://zkarcade.com",
-	appIcon: "https://zkarcade.com/logo.svg",
 };
 
 export const ConfigAnvil = createConfig(

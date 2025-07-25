@@ -81,10 +81,10 @@ defmodule ZkArcade.Leaderboard do
   Returns the top 10 users based on their scores. The result is a list of maps with user address and score,
   ordered by score in descending order.
   """
-  def get_top_users do
+  def get_top_users(top_limit) do
     from(e in LeaderboardEntry,
       order_by: [desc: e.score],
-      limit: 10,
+      limit: ^top_limit,
       select: %{address: e.user_address, score: e.score}
     )
     |> Repo.all()

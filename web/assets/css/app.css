@@ -16,6 +16,15 @@ body {
 	background-color: #060606;
 }
 
+a {
+	color: rgb(64 165 254);
+}
+
+a:hover {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
 .select-invert::selection,
 .select-invert *::selection {
 	background-color: rgb(0, 0, 0);
@@ -27,6 +36,12 @@ body {
 .select-normal *::selection {
 	background-color: rgb(24 255 127);
 	color: #000000;
+}
+
+.code-block {
+	background-color: rgb(54 54 55);
+	padding-inline: 10px;
+	border-radius: 8px;
 }
 
 a {

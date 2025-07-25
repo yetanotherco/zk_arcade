@@ -32,7 +32,7 @@
     <div class="section-width section-width">
         <section class="section-spacer-md">
             <.section_header header="How to play" />
-            <p class="text-md text-text-200"><%= raw(String.replace(@game.how_to_play, "\n", "<br>")) %></p>
+            <p class="text-md text-text-200"><%= ZkArcade.Utils.autolink_and_linebreak(@game.how_to_play) |> raw() %></p>
         </section>
     </div>
 

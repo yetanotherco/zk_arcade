@@ -59,6 +59,16 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
+    def section_header(%{header: header, subtitle: subtitle} = assigns) do
+    ~H"""
+      <div class="mb-10 size-fit">
+        <h2 class="font-normal text-2xl size-fit" style="padding-right: 60px"><%= @header %></h2>
+        <p class="text-md text-text-200 mb-3" style="padding-right: 60px"><%= @subtitle %></p>
+        <.line />
+      </div>
+    """
+  end
+
   def section_header(%{header: header} = assigns) do
     ~H"""
       <div class="mb-10 size-fit">
@@ -81,6 +91,21 @@ defmodule ZkArcadeWeb.CoreComponents do
         </div>
       </.link>
     <% end %>
+    """
+  end
+
+  def step_component(%{number: number, title: title, desc: desc, show_line: show_line} = assigns) do
+    ~H"""
+    <div class="w-full">
+
+      <div class="flex flex-col w-full justify-center items-center">
+        <div class="mb-2 h-[100px] w-[100px] rounded-full bg-accent-100/20 border border-accent-100 flex items-center justify-center">
+          <p class="text-2xl text-text-100"><%= @number %></p>
+        </div>
+        <h3 class="text-text-100 text-xl"><%= @title %></h3>
+        <p class="text-text-200 text-md text-center" style="min-width: 220px;"><%= @desc %></p>
+      </div>
+    </div>
     """
   end
 

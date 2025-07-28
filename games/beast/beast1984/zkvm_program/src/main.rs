@@ -1,4 +1,5 @@
 #![no_main]
+sp1_zkvm::entrypoint!(main);
 
 use game_logic::{
     beasts::{Beast, BeastAction, CommonBeast, HatchedBeast, SuperBeast},
@@ -7,9 +8,6 @@ use game_logic::{
     proving::{GameLogEntry, LevelLog, ProgramInput},
     Coord, Tile,
 };
-use risc0_zkvm::guest::env;
-
-risc0_zkvm::guest::entry!(main);
 
 fn prove_level_completed(input: &LevelLog) -> bool {
     let mut board = Board::new_from_matrix(&input.board);
@@ -110,7 +108,8 @@ fn prove_level_completed(input: &LevelLog) -> bool {
             }
             GameLogEntry::CommonBeastMoved { old_pos, new_pos } => {
                 let beast_action = common_beasts
-                    .iter_mut().find(|beast| beast.position == *old_pos)
+                    .iter_mut()
+                    .find(|beast| beast.position == *old_pos)
                     .unwrap()
                     .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
@@ -122,7 +121,8 @@ fn prove_level_completed(input: &LevelLog) -> bool {
             }
             GameLogEntry::SuperBeastMoved { old_pos, new_pos } => {
                 let beast_action = super_beasts
-                    .iter_mut().find(|beast| beast.position == *old_pos)
+                    .iter_mut()
+                    .find(|beast| beast.position == *old_pos)
                     .unwrap()
                     .advance_to(&mut board, player.position, *new_pos)
                     .unwrap();
@@ -151,7 +151,7 @@ fn prove_level_completed(input: &LevelLog) -> bool {
 }
 
 fn main() {
-    let input = env::read::<ProgramInput>();
+    let input = sp1_zkvm::io::read::<ProgramInput>();
 
     let mut current_level_number: u16 = 0;
     for level_completion in input.levels_log {
@@ -169,8 +169,8 @@ fn main() {
     let bytes = current_level_number.to_be_bytes();
     number[32 - bytes.len()..].copy_from_slice(&bytes);
     let mut address: [u8; 32] = [0; 32];
-    address[12.. 32].copy_from_slice(&input.address);
+    address[12..32].copy_from_slice(&input.address);
 
-    env::commit_slice(&number);
-    env::commit_slice(&address);
+    sp1_zkvm::io::commit_slice(&number);
+    sp1_zkvm::io::commit_slice(&address);
 }

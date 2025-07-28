@@ -7,7 +7,7 @@ resolver = "2"
 [dependencies]
 serde = { version = "1.0.203" }
 serde_json = "1.0.117"
-risc0-zkvm = { git = "https://github.com/risc0/risc0", tag="v2.0.1", default-features = false, features = ["unstable", "std"] }
+sp1-zkvm = { version = "5.0.0", features = ["verify"] }
 game_logic = { path = "../../game_logic", features = ["zkvm"] }
 
 [[bin]]

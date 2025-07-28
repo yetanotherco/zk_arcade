@@ -1,6 +1,11 @@
 //! this module contains the main struct that orchestrates the game
 
-use crate::{ethereum, help::Help, prover::{prove, save_proof}, stty::{RawMode, install_raw_mode_signal_handler}};
+use crate::{
+    ethereum,
+    help::Help,
+    prover::{prove, save_proof},
+    stty::{RawMode, install_raw_mode_signal_handler},
+};
 use game_logic::{
     ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
     BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
@@ -108,7 +113,6 @@ pub struct Game {
 impl Game {
     /// create a new instance of the beast game
     pub fn new() -> Self {
-
         let address = ethereum::read_address();
 
         let board_terrain_info = Board::generate_terrain(Level::One);

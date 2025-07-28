@@ -7,7 +7,14 @@ echo "Installing Beast..."
 # Install RiscZero toolchain
 # Ask for confirmation before proceeding
 echo "This script will install the RiscZero toolchain and Beast."
-read -p "Do you want to proceed? (y/n): " confirm
+while true; do
+    read -p "Do you want to proceed? (y/n): " confirm
+    case "$confirm" in
+        [Yy]* ) echo "Proceeding..."; break;;
+        [Nn]* ) echo "Cancelling installation."; exit 1;;
+        * ) echo "Please enter y or n.";;
+    esac
+done
 curl -L https://risczero.com/install | bash
 $HOME/.risc0/bin/rzup install rust 1.88.0
 $HOME/.risc0/bin/rzup install cargo-risczero 2.3.0
@@ -76,6 +83,6 @@ if [[ ":$PATH:" != *":${BEAST_BIN_DIR}:"* ]]; then
     fi
 fi
 
-echo "Beasy $CURRENT_TAG installed successfully in $Beast_BIN_PATH."
+echo "Beast $CURRENT_TAG installed successfully in $BEAST_BIN_PATH."
 echo "Detected your preferred shell is $PREF_SHELL and added Beast to PATH."
 echo "Run 'source $PROFILE' or start a new terminal session to use Beast."

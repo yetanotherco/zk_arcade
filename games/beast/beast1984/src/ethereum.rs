@@ -30,7 +30,7 @@ fn match_network_rpc_url() -> Option<&'static str> {
     #[cfg(feature = "devnet")]
     return Some("http://localhost:8545");
 
-    #[cfg(feature = "stage")]
+    #[cfg(feature = "holesky-stage")]
     return Some("https://ethereum-holesky-rpc.publicnode.com");
 
     #[cfg(feature = "holesky")]

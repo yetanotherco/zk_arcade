@@ -23,8 +23,8 @@ const fn game_file() -> &'static str {
     #[cfg(feature = "devnet")]
     return "levels/devnet.json";
 
-    #[cfg(feature = "stage")]
-    return "levels/stage.json";
+    #[cfg(feature = "holesky-stage")]
+    return "levels/holesky-stage.json";
 
     #[cfg(feature = "holesky")]
     return "levels/holesky.json";

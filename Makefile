@@ -1,4 +1,5 @@
 
+# devnet | mainnet | holesky | holesky-stage
 NETWORK ?= devnet
 
 __DEPENDENCIES__: ## ____

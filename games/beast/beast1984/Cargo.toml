@@ -58,6 +58,6 @@ risc0-build = { version = "2.3.0" }
 
 [features]
 devnet = []
-stage = []
+holesky-stage = []
 holesky = []
 mainnet = []

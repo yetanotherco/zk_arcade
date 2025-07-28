@@ -28,6 +28,8 @@ jobs:
           toolchain: 1.88.0
           components: rustfmt, clippy
           override: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install risc0 toolchain
         run: |
@@ -35,14 +37,22 @@ jobs:
           source ~/.bashrc
           ~/.risc0/bin/rzup install rust
           ~/.risc0/bin/rzup install cargo-risczero 2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build Beast
         run: make beast_build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Rename Beast binary
         run: mv games/beast/target/release/beast beast_${{ matrix.artifact_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: beast_${{ matrix.artifact_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

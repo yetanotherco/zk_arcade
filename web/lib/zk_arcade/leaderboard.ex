@@ -93,4 +93,35 @@ defmodule ZkArcade.Leaderboard do
       Map.put(entry, :position, index)
     end)
   end
+
+  def get_user_position(user_address) when is_binary(user_address) do
+    user_address = String.trim(user_address)
+
+    if user_address == "" do
+      {:error, "User address cannot be empty"}
+    else
+      case Repo.one(
+            from(e in LeaderboardEntry,
+              where: e.user_address == ^user_address,
+              select: %{score: e.score}
+            )
+          ) do
+        nil -> nil
+        %{score: score} ->
+          position =
+            Repo.one(
+              from(e in LeaderboardEntry,
+                where: e.score >= ^score,
+                select: count(e.id)
+              )
+            )
+
+          %{
+            position: position,
+            address: user_address,
+            score: score
+          }
+      end
+    end
+  end
 end

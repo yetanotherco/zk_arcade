@@ -214,7 +214,7 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 
 						<div className="flex flex-col gap-6">
 							<FormInput
-								label="Proof file"
+								label="Solution file"
 								name="proof-data"
 								id="proof-data"
 								type="file"

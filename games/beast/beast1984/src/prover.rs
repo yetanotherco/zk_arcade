@@ -72,7 +72,7 @@ pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
     write_chunk(&mut buffer, &proof_id);
     write_chunk(&mut buffer, &public_inputs);
 
-    std::fs::write("proof_data.bin", &buffer)
+    std::fs::write("solution.bin", &buffer)
         .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
     Ok(())

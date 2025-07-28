@@ -1,16 +1,11 @@
-
 <div class="w-full mt-10 mb-10"> 
-    <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
 
     <div class="section-width flex flex-row h-screen items-center">
         <section id="leaderboard" class="section-spacer-lgmt mt-20">
-            <.section_header header="LeaderBoard"/>
-            <% top_users = ZkArcade.Leaderboard.get_top_users(10) %>
-            <% user_in_top? = Enum.any?(top_users, fn u -> u.address == @wallet end) %>
-            <% user_rank = if !user_in_top? && @wallet, do: ZkArcade.Leaderboard.get_user_position(@wallet), else: nil %>
+            <h1 class="text-3xl font-bold mb-4">Leaderboard</h1>
 
-            <%= if length(top_users) > 0 do %>
-                <.table id="leaderboard" rows={top_users}>
+            <%= if length(@top_users) > 0 do %>
+                <.table id="leaderboard" rows={@top_users}>
                     <:col :let={user} label="Position"><%= user.position %></:col>
                     <:col :let={user} label="Address">
                         <%= if user.address == @wallet do %>
@@ -27,34 +22,71 @@
                     <:col :let={user} label="Score"><%= user.score%></:col>
                 </.table>
 
-                <p> ... </p>
+                <%= if @user_rank do %>
+                    <p> ... </p>
 
-                <%= if user_rank do %>
                     <div class="">
-                        <.table id="user-position" rows={[user_rank]}>
+                        <.table id="user-position" rows={[@user_rank]}>
                             <:col :let={user}><%= user.position %></:col>
                             <:col :let={user}>
                                 <p class="text-text-200 text-md">
-                                <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-                                (<span class="text-accent-100">you</span>)
+                                    <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
+                                    (<span class="text-accent-100">you</span>)
                                 </p>
                             </:col>
                             <:col :let={user}><%= user.score %></:col>
                         </.table>
                     </div>
                 <% end %>
+
+                <div class="flex justify-center items-center mt-8 space-x-4">
+                    <%= if @pagination.has_prev do %>
+                        <a href={~p"/leaderboard?page=#{@pagination.current_page - 1}"} 
+                           class="px-4 py-2 bg-accent-100 text-white rounded hover:bg-accent-200 transition-colors">
+                            Previous
+                        </a>
+                    <% else %>
+                        <span class="px-4 py-2 bg-gray-400 text-gray-600 rounded cursor-not-allowed">
+                            Previous
+                        </span>
+                    <% end %>
+
+                    <div class="flex items-center space-x-2">
+                        <%= for page_num <- max(1, @pagination.current_page - 2)..min(@pagination.total_pages, @pagination.current_page + 2) do %>
+                            <%= if page_num == @pagination.current_page do %>
+                                <span class="px-3 py-2 bg-accent-100 text-white rounded">
+                                    <%= page_num %>
+                                </span>
+                            <% else %>
+                                <a href={~p"/leaderboard?page=#{page_num}"} 
+                                   class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                                    <%= page_num %>
+                                </a>
+                            <% end %>
+                        <% end %>
+                    </div>
+
+                    <%= if @pagination.has_next do %>
+                        <a href={~p"/leaderboard?page=#{@pagination.current_page + 1}"} 
+                           class="px-4 py-2 bg-accent-100 text-white rounded hover:bg-accent-200 transition-colors">
+                            Next
+                        </a>
+                    <% else %>
+                        <span class="px-4 py-2 bg-gray-400 text-gray-600 rounded cursor-not-allowed">
+                            Next
+                        </span>
+                    <% end %>
+                </div>
+
+                <div class="text-center mt-4 text-text-200">
+                    Showing <%= (@pagination.current_page - 1) * 10 + 1 %> to 
+                    <%= min(@pagination.current_page * 10, @pagination.total_users) %> 
+                    of <%= @pagination.total_users %> users
+                </div>
+
             <% else %>
                 <p class="text-text-200 text-md">No users found in the leaderboard.</p>
             <% end %>
-
-            <div class="flex justify-center mt-10">
-                <a href="/leaderboard">
-                    <div class="hidden md:block cursor-pointer inline-flex items-center space-x-2 group">
-                        <span>View complete leaderboard</span>
-                        <.icon name="hero-arrow-long-right" class="size-7 transition-transform duration-200 group-hover:translate-x-1" />
-                    </div>
-                </a>
-            </div>
         </section>
     </div>
 </div>

@@ -89,10 +89,18 @@ defmodule ZkArcade.Leaderboard do
       offset: ^offset
     )
     |> Repo.all()
-    |> Enum.with_index(1)
+    |> Enum.with_index(offset + 1)
     |> Enum.map(fn {entry, index} ->
       Map.put(entry, :position, index)
     end)
+  end
+
+  @doc """
+  Returns the total number of users in the leaderboard.
+  """
+  def get_total_users do
+    from(e in LeaderboardEntry, select: count(e.id))
+    |> Repo.one()
   end
 
   def get_user_position(user_address) when is_binary(user_address) do

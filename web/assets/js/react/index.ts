@@ -23,5 +23,5 @@ define(
 
 define(
 	{ "x-app-history": History },
-	{ attributes: ["proofs", "leaderboard_address"] }
+	{ attributes: ["network",  "proofs", "leaderboard_address", "payment_service_address", "user_address"] }
 )

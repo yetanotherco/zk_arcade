@@ -102,8 +102,11 @@ defmodule ZkArcadeWeb.PageController do
 
     conn
     |> assign(:wallet, wallet)
+    |> assign(:network, Application.get_env(:zk_arcade, :network))
+    |> assign(:proofs_sent_total, length(proofs))
     |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
+    |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
     |> render(:history)
   end
 end

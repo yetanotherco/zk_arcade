@@ -71,20 +71,20 @@ thead {
 	border-bottom: 5px solid transparent; /* simulates a margin */
 }
 
-.section-spacer-lg {
-	margin-bottom: 130px;
-}
-
-.section-spacer-md {
-	margin-bottom: 70px;
-}
-
 .section-width {
 	display: flex;
 	flex-direction: row;
 	position: relative;
 	margin: 0 auto;
 	max-width: 1000px;
+}
+
+.section-spacer-lg {
+	margin-bottom: 130px;
+}
+
+.section-spacer-md {
+	margin-bottom: 70px;
 }
 
 @media (max-width: 1024px) {

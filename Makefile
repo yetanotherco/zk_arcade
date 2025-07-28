@@ -53,6 +53,9 @@ CAMPAIGN_DAYS ?= 1
 beast_gen_levels:
 	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(STARTS_AT_BLOCK_NUMBER) $(CAMPAIGN_DAYS) $(NETWORK)
 	
+beast_build:
+	@cd games/beast/beast1984 && cargo build --release --bin beast
+
 __CONTRACTS__:
 deploy_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh

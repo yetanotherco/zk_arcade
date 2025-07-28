@@ -66,12 +66,6 @@ pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
     std::fs::write("proof_data.bin", &buffer)
         .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
-    std::fs::write("proof.bin", &proof).map_err(|e| ProvingError::SavingProof(e.to_string()))?;
-    std::fs::write("proof_id.bin", &proof_id)
-        .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
-    std::fs::write("public_inputs.bin", &public_inputs)
-        .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
-
     Ok(())
 }
 

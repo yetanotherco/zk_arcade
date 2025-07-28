@@ -21,7 +21,7 @@ export default ({
 	return (
 		<Web3EthProvider network={network}>
 			<ProofHistory
-				proofs={proofs}
+				proofs={JSON.parse(proofs)}
 				leaderboard_address={leaderboard_address}
 				payment_service_address={payment_service_address}
 				user_address={user_address}

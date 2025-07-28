@@ -27,3 +27,6 @@ pkg
 node_modules
 package-lock.json
 package.json
+
+# Generated solution binaries
+*.bin

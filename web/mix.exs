@@ -64,7 +64,8 @@ defmodule ZkArcade.MixProject do
       {:cbor, "~> 1.0"},
       {:ethers, "~> 0.4.4"},
       {:cachex, "~> 4.0"},
-      {:httpoison, "~> 2.0"}
+      {:httpoison, "~> 2.0"},
+      {:ethereumex, "~> 0.10.0"}
     ]
   end
 

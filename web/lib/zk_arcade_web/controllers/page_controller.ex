@@ -59,16 +59,35 @@ defmodule ZkArcadeWeb.PageController do
   def game(conn, %{"name" => _game_name}) do
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet)
+    acknowledgements = [
+      %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
+      %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
+    ]
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
       |> assign(:game, %{
-        image: "/images/beast1984.webp",
+        image: "/images/beast.jpg",
         name: "Beast 1984",
         desc: "Survive across waves of enemies",
-        full_desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin dapibus, felis sit amet convallis iaculis, felis purus commodo nibh, at sodales velit arcu a odio. Pellentesque dapibus volutpat odio, eu rutrum mauris malesuada et. Aliquam ligula velit, ultricies et mattis quis, ultrices in elit. Nam eget erat finibus, scelerisque purus eleifend, pretium lacus. Nam vitae tellus rhoncus, ornare libero eget, aliquam risus. Morbi lacinia lacinia ultricies. Morbi volutpat sollicitudin eros at vehicula. Pellentesque sed neque luctus, laoreet mi id, luctus est. Vivamus dictum ullamcorper lorem, non hendrerit purus condimentum et. Vestibulum viverra ligula vel lacinia porttitor. Donec blandit, ligula sit amet condimentum accumsan, quam elit sagittis nisl, et commodo lorem justo eget erat. Nam maximus arcu vel nibh feugiat accumsan. Ut aliquam massa ut pulvinar sagittis. Sed dictum mauris nec pretium feugiat. Aliquam erat volutpat. Mauris scelerisque sodales ex vel convallis.",
-        how_to_play: "1. Download game base on your platform [here]\n2. Play game\n3. Locate the generated proof\n4. Upload your proof",
+        full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
+        how_to_play: """
+        1. Install Rust by following the official guide: https://www.rust-lang.org/tools/install
+        2. Install the RiscZero toolchain: https://dev.risczero.com/api/zkvm/install
+        3. Clone the zk_arcade repository using: <span class="code-block">git clone https://github.com/yetanotherco/aligned_layer.git</span>
+        4. Run the game with the command: <span class="code-block">make play_beast</span>
+        5. Locate the generated proof file on your system
+        6. Upload your proof to verify your gameplay
+        7. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back later to submit it to the leaderboard contract to earn points.
+
+        Important notes about proof submissions:
+
+      - You can only submit <span class="text-accent-100">one proof per level</span>. For example, if you've reached level 5 and then try to submit a proof for level 4, it will fail.
+      - Each submission must be for a level <span class="text-accent-100">higher than any previously submitted proof</span>. So, if you've already submitted level 5, your next valid submission must be at least level 6.
+      - Points are awarded <span class="text-accent-100">per level</span>, not cumulatively. The best strategy is to submit a proof when you’re confident you won’t reach higher levels or after completing the entire game.
+        """,
+        acknowledgments: acknowledgements,
         tags: [:cli, :risc0]
       })
       |> render(:game)

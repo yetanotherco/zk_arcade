@@ -81,10 +81,48 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 			const buffer = await file.arrayBuffer();
 			const data = new Uint8Array(buffer);
 
-			if (type === "proof") setProof(data);
-			else if (type === "vm-program-code") setProofId(data);
-			else if (type === "pub") setPublicInputs(data);
+			if (type === "proof") {
+				console.log("Proof:", data);
+				setProof(data);
+			} else if (type === "vm-program-code") {
+				console.log("VM Program Code:", data);
+				setProofId(data);
+			} else if (type === "pub") {
+				console.log("Public Inputs:", data);
+				setPublicInputs(data);
+			}
 		};
+
+	const handleCombinedProofFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		const buffer = await file.arrayBuffer();
+		const view = new DataView(buffer);
+		const bytes = new Uint8Array(buffer);
+
+		let offset = 0;
+
+		function readChunk(): Uint8Array {
+			const len = view.getUint32(offset, true);
+			offset += 4;
+			const chunk = bytes.slice(offset, offset + len);
+			offset += len;
+			return chunk;
+		}
+
+		const proof = readChunk();
+		const proofId = readChunk();
+		const publicInputs = readChunk();
+
+		console.log("Proof:", proof);
+		console.log("Proof ID:", proofId);
+		console.log("Public Inputs:", publicInputs);
+
+		setProof(proof);
+		setProofId(proofId);
+		setPublicInputs(publicInputs);
+	};
 
 	const handleSubmission = useCallback(async () => {
 		if (!proof || !proofId || !publicInputs || !user_address) {
@@ -214,6 +252,14 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 								id="public-inputs"
 								type="file"
 								onChange={handleFile("pub")}
+							/>
+
+							<FormInput
+								label="Proof file"
+								name="proof-data"
+								id="proof-data"
+								type="file"
+								onChange={handleCombinedProofFile}
 							/>
 						</div>
 

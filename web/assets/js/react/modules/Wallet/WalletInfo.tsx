@@ -4,6 +4,7 @@ import { Address } from "../../types/blockchain";
 import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
+import { useDisconnect } from "wagmi";
 
 type Props = {
 	network: string;
@@ -20,8 +21,12 @@ export const WalletInfo = ({
 	proofs,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
+	const { disconnect } = useDisconnect();
 
 	const handleDisconnect = () => {
+		// First disconnect the wallet on frontend
+		disconnect();
+		// Then clear the backend session
 		formRef.current?.submit();
 	};
 
@@ -56,6 +61,7 @@ export const WalletInfo = ({
 						<form
 							ref={formRef}
 							action="/wallet/disconnect"
+							method="get"
 							className="hidden"
 						></form>
 						<Button

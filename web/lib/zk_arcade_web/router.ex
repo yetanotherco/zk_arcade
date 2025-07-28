@@ -21,11 +21,10 @@ defmodule ZkArcadeWeb.Router do
 
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
+    post "/proof/status/retry", ProofController, :retry_submit_proof
 
-  end
-
-  scope "/api", ZkArcadeWeb do
-    pipe_through :api
+    # API endpoint for wallet agreement status check
+    get "/api/wallet/:address/agreement-status", WalletApiController, :check_agreement_status
   end
 
   # Enable LiveDashboard in development

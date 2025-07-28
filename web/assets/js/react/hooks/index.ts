@@ -5,4 +5,5 @@ export * from "./useModal";
 export * from "./useOnClickOutside";
 export * from "./useOnClickOutside";
 export * from "./useBatcherNonce";
+export * from "./useLeaderboardContract";
 export * from "./useEthPrice";

@@ -83,9 +83,6 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 		let offset = 0;
 
 		const provingSystemId = bytes.slice(0, 1);
-
-		// Here we just log the proving system ID, but in a future it will be sent to the backend
-		console.log("Proving System ID:", provingSystemId);
 		offset += 1;
 
 		function readChunk(): Uint8Array {

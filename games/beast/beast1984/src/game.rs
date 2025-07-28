@@ -3,7 +3,8 @@
 use crate::{
     ethereum,
     help::Help,
-    prover::{prove, save_proof},
+    sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
+    risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
     stty::{RawMode, install_raw_mode_signal_handler},
 };
 use game_logic::{
@@ -598,25 +599,44 @@ impl Game {
         );
 
         // If it hasn't won, then don't include the last level as it wasn't completed
-        let levels_completion_log = if self.has_won {
+        let sp1_levels_completion_log = if self.has_won {
             self.levels_completion_log.clone()
         } else {
             let mut levels_log = self.levels_completion_log.clone();
             levels_log.pop();
             levels_log
         };
+        let sp1_address = self.address.clone();
 
-        let address = self.address.clone();
-        let handle = std::thread::spawn(move || {
-            let res = prove(levels_completion_log, address);
+        let sp1_handle = thread::spawn(move || {
+            let res = sp1_prove(sp1_levels_completion_log, sp1_address);
             if let Ok(receipt) = res {
-                save_proof(receipt).expect("To be able to write proof");
+                sp1_save_proof(receipt).expect("To be able to write proof");
             } else {
                 panic!("Could prove program")
             }
         });
+        let sp1_res = sp1_handle.join();
 
-        let res = handle.join();
+        let risc0_levels_completion_log = if self.has_won {
+            self.levels_completion_log.clone()
+        } else {
+            let mut levels_log = self.levels_completion_log.clone();
+            levels_log.pop();
+            levels_log
+        };
+        let risc0_address = self.address.clone();
+
+        let risc0_handle = thread::spawn(move || {
+            let res = risc0_prove(risc0_levels_completion_log, risc0_address);
+            if let Ok(receipt) = res {
+                risc0_save_proof(receipt).expect("To be able to write proof");
+            } else {
+                panic!("Could prove program")
+            }
+        });
+        let risc0_res = risc0_handle.join();
+
         let _ = proving_alert_handle.join();
 
         if self.has_won {
@@ -625,7 +645,7 @@ impl Game {
             println!("{}", self.render_death_screen());
         }
 
-        let msg = if let Ok(_) = res {
+        let msg = if sp1_res.is_ok() && risc0_res.is_ok() {
             "Proof saved to ./games/beast/beast1984/. Submit it to https://zkarcade.com and earn points!"
         } else {
             "Could not prove program, try again..."

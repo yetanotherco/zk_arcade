@@ -4,7 +4,7 @@ use alloy::hex;
 use game_logic::proving::{LevelLog, ProgramInput};
 use sp1_sdk::{EnvProver, ProverClient, SP1ProofWithPublicValues, SP1Stdin};
 
-const BEAST_1984_PROGRAM_ELF: &[u8] = include_bytes!("../zkvm_program/elf/beast_1984_program");
+const BEAST_1984_PROGRAM_ELF: &[u8] = include_bytes!("../sp1_program/elf/beast_1984_program");
 static SP1_PROVER_CLIENT: LazyLock<EnvProver> = LazyLock::new(ProverClient::from_env);
 
 #[derive(Debug, Clone)]
@@ -47,13 +47,13 @@ pub fn prove(
 
 pub fn save_proof(proof: SP1ProofWithPublicValues) -> Result<(), ProvingError> {
     proof
-        .save("./proof.bin")
+        .save("./sp1_proof.bin")
         .expect("Failed to serialize the receipt");
 
-    std::fs::write("proof_id.bin", BEAST_1984_PROGRAM_ELF)
+    std::fs::write("sp1_proof_id.bin", BEAST_1984_PROGRAM_ELF)
         .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
-    std::fs::write("public_inputs.bin", proof.public_values)
+    std::fs::write("sp1_public_inputs.bin", proof.public_values)
         .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
     Ok(())

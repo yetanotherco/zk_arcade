@@ -1,7 +1,6 @@
 use alloy::hex;
 use game_logic::proving::{LevelLog, ProgramInput};
 use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts, Receipt};
-use serde::{Deserialize, Serialize};
 
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 

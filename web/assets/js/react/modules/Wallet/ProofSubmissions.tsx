@@ -10,14 +10,23 @@ import { useToast } from "../../state/toast";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 
 const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
-	submitted: "text-accent-100",
-	pending: "text-yellow",
-	claimed: "text-blue",
-	failed: "text-red",
+	submitted: "bg-accent-100/20 text-accent-100",
+	pending: "bg-yellow/20 text-yellow",
+	claimed: "bg-blue/20 text-blue",
+	failed: "bg-red/20 text-red",
 };
 
-const btnText: { [key in ProofSubmission["status"]]: string } = {
-	submitted: "Submit solution",
+const tooltipStyleBasedOnStatus: {
+	[key in ProofSubmission["status"]]: string;
+} = {
+	submitted: "bg-accent-100 text-black",
+	pending: "bg-yellow text-black",
+	claimed: "bg-blue text-white",
+	failed: "bg-red text-white",
+};
+
+const tooltipText: { [key in ProofSubmission["status"]]: string } = {
+	submitted: "Solution verified and ready to be submitted",
 	claimed: "Already submitted to leaderboard",
 	pending:
 		"You need to wait until its verified before submitting the solution",
@@ -82,13 +91,14 @@ const Proof = ({
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
 
-
 	// Here and in the Retry button, we control that retry is only available for proofs that are in "pending" status, but
 	// we can also do this for proofs that are in "failed" status, as they can be retried too.
 	// Note that the "failed" proofs are those that were sent but the verification failed after 10 seconds.
 	const handleRetrySubmitProof = useCallback(async () => {
 		if (proof.status !== "pending") {
-			alert("You can only retry submitting a proof that is in 'pending' status");
+			alert(
+				"You can only retry submitting a proof that is in 'pending' status"
+			);
 			return;
 		}
 
@@ -112,8 +122,6 @@ const Proof = ({
 		};
 
 		setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
-		console.log("Submit proof message:", submitProofMessage);
 
 		window.setTimeout(() => {
 			formRefRetry.current?.submit();
@@ -163,8 +171,26 @@ const Proof = ({
 		<>
 			<tr>
 				<td>{proof.game}</td>
-				<td className={colorBasedOnStatus[proof.status]}>
-					{statusText[proof.status]}
+				<td>
+					<div
+						className={`relative group/tooltip flex flex-row gap-2 items-center bg-yellow/20 rounded px-1 w-fit ${
+							colorBasedOnStatus[proof.status]
+						}`}
+					>
+						<span className="hero-information-circle solid size-5"></span>
+						<p>{statusText[proof.status]}</p>
+
+						<div
+							className={`${
+								tooltipStyleBasedOnStatus[proof.status]
+							} rounded absolute rounded -left-1/2 top-full mb-2 text-sm rounded px-2 py-1 opacity-0 group-hover/tooltip:opacity-100 transition pointer-events-none`}
+							style={{ width: 300, zIndex: 10000 }}
+						>
+							<p className="text-center text-xs">
+								{tooltipText[proof.status]}
+							</p>
+						</div>
+					</div>
 				</td>
 				<td>
 					{proof.batchData?.batch_merkle_root ? (
@@ -179,59 +205,26 @@ const Proof = ({
 					)}
 				</td>
 				<td>{proofHashShorten}</td>
-				<td>
-					{proof.status === "pending" && (
-						<>
-							<Button
-								variant="text-accent"
-								className="text-sm"
-								onClick={handleRetrySubmitProof}
-							>
-								Retry
-							</Button>
-							<form
-								ref={formRefRetry}
-								action="/proof/status/retry"
-								method="post"
-								className="hidden"
-							>
-								<input
-									type="hidden"
-									name="submit_proof_message"
-									value={submitProofMessage}
-								/>
-								<input
-									type="hidden"
-									name="_csrf_token"
-									value={csrfToken}
-								/>
-								<input
-									type="hidden"
-									name="proof_id"
-									value={proof.id}
-								/>
-							</form>
-						</>
-					)}
-				</td>
 			</tr>
 
-			<tr>
-				<td colSpan={100}>
-					<Button
-						variant="text-accent"
-						className={`text-sm w-full ${
-							proof.status !== "submitted" ? "text-text-200" : ""
-						}`}
-						disabled={proof.status !== "submitted"}
-						onClick={handleSubmitProof}
-					>
-						{submitSolution.tx.isPending ||
-						submitSolution.receipt.isLoading
-							? "Sending..."
-							: btnText[proof.status]}
-					</Button>
-					{proof.status == "submitted" && (
+			{proof.status == "submitted" && (
+				<tr>
+					<td colSpan={100}>
+						<Button
+							variant="text-accent"
+							className={`text-sm w-full ${
+								proof.status !== "submitted"
+									? "text-text-200"
+									: ""
+							}`}
+							disabled={proof.status !== "submitted"}
+							onClick={handleSubmitProof}
+						>
+							{submitSolution.tx.isPending ||
+							submitSolution.receipt.isLoading
+								? "Sending..."
+								: "Submit solution"}
+						</Button>
 						<form
 							className="hidden"
 							ref={formRefSubmitted}
@@ -249,9 +242,9 @@ const Proof = ({
 								value={proof.id}
 							/>
 						</form>
-					)}
-				</td>
-			</tr>
+					</td>
+				</tr>
+			)}
 		</>
 	);
 };
@@ -292,6 +285,42 @@ export const ProofSubmissions = ({
 								</tr>
 							</thead>
 							<tbody className="text-text-100 text-sm">
+								{proofs.reverse().map(proof => (
+									<Proof
+										key={proof.id}
+										proof={proof}
+										leaderboard_address={
+											leaderboard_address
+										}
+									/>
+								))}
+								{proofs.reverse().map(proof => (
+									<Proof
+										key={proof.id}
+										proof={proof}
+										leaderboard_address={
+											leaderboard_address
+										}
+									/>
+								))}
+								{proofs.reverse().map(proof => (
+									<Proof
+										key={proof.id}
+										proof={proof}
+										leaderboard_address={
+											leaderboard_address
+										}
+									/>
+								))}
+								{proofs.reverse().map(proof => (
+									<Proof
+										key={proof.id}
+										proof={proof}
+										leaderboard_address={
+											leaderboard_address
+										}
+									/>
+								))}
 								{proofs.reverse().map(proof => (
 									<Proof
 										key={proof.id}

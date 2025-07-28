@@ -46,6 +46,10 @@ pub fn prove(levels_log: Vec<LevelLog>, address: String) -> Result<Receipt, Prov
 }
 
 fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
+    // Note: Here we use `u32` to store the length of the chunk assuming that the length of the generated
+    // proof file will not exceed 4GB. In case the length exceeds this limit, you would need to increase
+    // the size of the length field to `u64`, not only here but also in the file reading logic, on the
+    // SubmitProofBeast component.
     let len = chunk.len() as u32;
     buf.extend_from_slice(&len.to_le_bytes());
     buf.extend_from_slice(chunk);

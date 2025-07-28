@@ -146,6 +146,8 @@
     <section id="leaderboard" class="section-spacer-lg">
       <.section_header header="LeaderBoard" />
       <% top_users = ZkArcade.Leaderboard.get_top_users(10) %>
+      <% user_in_top? = Enum.any?(top_users, fn u -> u.address == @wallet end) %>
+      <% user_rank = if !user_in_top? && @wallet, do: ZkArcade.Leaderboard.get_user_position(@wallet), else: nil %>
 
       <%= if length(top_users) > 0 do %>
         <.table id="leaderboard" rows={top_users}>
@@ -164,6 +166,23 @@
           </:col>
           <:col :let={user} label="Score"><%= user.score%></:col>
         </.table>
+
+        <p> ... </p>
+
+        <%= if user_rank do %>
+          <div class="">
+            <.table id="user-position" rows={[user_rank]}>
+              <:col :let={user}><%= user.position %></:col>
+              <:col :let={user}>
+                <p class="text-text-200 text-md">
+                  <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
+                  (<span class="text-accent-100">you</span>)
+                </p>
+              </:col>
+              <:col :let={user}><%= user.score %></:col>
+            </.table>
+          </div>
+        <% end %>
       <% else %>
         <p class="text-text-200 text-md">No users found in the leaderboard.</p>
       <% end %>

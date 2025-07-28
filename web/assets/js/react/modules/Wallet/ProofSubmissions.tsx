@@ -272,7 +272,10 @@ export const ProofSubmissions = ({
 					<span className="hero-arrow-long-right size-5 transition group-hover/proof-submission:translate-x-0.5" />
 				</div>
 			</div>
-			<div className="overflow-scroll" style={{ maxHeight: 150 }}>
+			<div
+				className="overflow-scroll"
+				style={{ maxHeight: 150, minHeight: 100 }}
+			>
 				{proofs.length > 0 ? (
 					<div>
 						<table className="w-full text-left">
@@ -285,42 +288,6 @@ export const ProofSubmissions = ({
 								</tr>
 							</thead>
 							<tbody className="text-text-100 text-sm">
-								{proofs.reverse().map(proof => (
-									<Proof
-										key={proof.id}
-										proof={proof}
-										leaderboard_address={
-											leaderboard_address
-										}
-									/>
-								))}
-								{proofs.reverse().map(proof => (
-									<Proof
-										key={proof.id}
-										proof={proof}
-										leaderboard_address={
-											leaderboard_address
-										}
-									/>
-								))}
-								{proofs.reverse().map(proof => (
-									<Proof
-										key={proof.id}
-										proof={proof}
-										leaderboard_address={
-											leaderboard_address
-										}
-									/>
-								))}
-								{proofs.reverse().map(proof => (
-									<Proof
-										key={proof.id}
-										proof={proof}
-										leaderboard_address={
-											leaderboard_address
-										}
-									/>
-								))}
 								{proofs.reverse().map(proof => (
 									<Proof
 										key={proof.id}

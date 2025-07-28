@@ -8,7 +8,7 @@ echo "Installing Beast..."
 # Ask for confirmation before proceeding
 echo "This script will install the RiscZero toolchain and Beast."
 while true; do
-    read -p "Do you want to proceed? (y/n): " confirm
+    read -p "Do you want to proceed? (y/n): " confirm < /dev/tty
     case "$confirm" in
         [Yy]* ) echo "Proceeding..."; break;;
         [Nn]* ) echo "Cancelling installation."; exit 1;;

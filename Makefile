@@ -43,6 +43,8 @@ submit_beast_solution:
 	@cp games/beast/beast1984/cmd/.$(NETWORK).env games/beast/beast1984/cmd/.env
 	@cd games/beast && cargo run --manifest-path ./beast1984/Cargo.toml --release --bin submit_solution
 
+beast_build:
+	@cd games/beast/beast1984 && cargo build --release --bin beast
 
 
 __CONTRACTS__:

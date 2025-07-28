@@ -4,6 +4,14 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 echo "Installing Beast..."
 
+# Install RiscZero toolchain
+# Ask for confirmation before proceeding
+echo "This script will install the RiscZero toolchain and Beast."
+read -p "Do you want to proceed? (y/n): " confirm
+curl -L https://risczero.com/install | bash
+$HOME/.risc0/bin/rzup install rust 1.88.0
+$HOME/.risc0/bin/rzup install cargo-risczero 2.3.0
+
 BASE_DIR=$HOME
 BEAST_DIR="${BEAST_DIR-"$BASE_DIR/.beast"}"
 BEAST_BIN_DIR="$BEAST_DIR/bin"

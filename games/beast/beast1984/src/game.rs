@@ -22,6 +22,7 @@ use std::{
     thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
+use dialoguer::MultiSelect;
 
 /// the height of the board
 pub const ANSI_BOARD_HEIGHT: usize = BOARD_HEIGHT;
@@ -33,6 +34,9 @@ pub const ANSI_HEADER_HEIGHT: usize = 4;
 pub const ANSI_FOOTER_HEIGHT: usize = 2;
 /// the time between game ticks
 const TICK_DURATION: Duration = Duration::from_millis(200);
+
+const SP1: &str = "SP1";
+const RISC0: &str = "Risc0";
 
 /// we need the [Beat] to count down when we call the beast advance methods and for animations
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -109,12 +113,32 @@ pub struct Game {
     input_listener: mpsc::Receiver<u8>,
     _raw_mode: RawMode,
     address: String,
+    proving_systems: Vec<String>,
 }
 
 impl Game {
     /// create a new instance of the beast game
     pub fn new() -> Self {
         let address = ethereum::read_address();
+
+        let items = vec![SP1, RISC0];
+
+        let proving_systems = loop {
+            let selection = MultiSelect::new()
+                .with_prompt("What do you choose?")
+                .items(&items)
+                .interact()
+                .unwrap();
+
+            if !selection.is_empty() {
+                break selection
+                    .into_iter()
+                    .map(|i| items[i].to_string())
+                    .collect::<Vec<String>>();
+            }
+
+            eprintln!("You must select at least one proving system. Please try again.");
+        };
 
         let board_terrain_info = Board::generate_terrain(Level::One);
 
@@ -161,6 +185,7 @@ impl Game {
             input_listener: receiver,
             _raw_mode,
             address,
+            proving_systems
         }
     }
 
@@ -598,44 +623,52 @@ impl Game {
             true,
         );
 
-        // If it hasn't won, then don't include the last level as it wasn't completed
-        let sp1_levels_completion_log = if self.has_won {
-            self.levels_completion_log.clone()
-        } else {
-            let mut levels_log = self.levels_completion_log.clone();
-            levels_log.pop();
-            levels_log
-        };
-        let sp1_address = self.address.clone();
+        let mut sp1_res = Ok(());
+        let mut risc0_res= Ok(());
 
-        let sp1_handle = thread::spawn(move || {
-            let res = sp1_prove(sp1_levels_completion_log, sp1_address);
-            if let Ok(receipt) = res {
-                sp1_save_proof(receipt).expect("To be able to write proof");
+        if self.proving_systems.contains(&SP1.to_string()) {
+            // If it hasn't won, then don't include the last level as it wasn't completed
+            let sp1_levels_completion_log = if self.has_won {
+                self.levels_completion_log.clone()
             } else {
-                panic!("Could prove program")
+                let mut levels_log = self.levels_completion_log.clone();
+                levels_log.pop();
+                levels_log
+            };
+            let sp1_address = self.address.clone();
+
+            let sp1_handle = thread::spawn(move || {
+                let res = sp1_prove(sp1_levels_completion_log, sp1_address);
+                if let Ok(receipt) = res {
+                    sp1_save_proof(receipt).expect("To be able to write proof");
+                } else {
+                    panic!("Could prove program")
+                }
+            });
+            sp1_res = sp1_handle.join();
             }
-        });
-        let sp1_res = sp1_handle.join();
 
-        let risc0_levels_completion_log = if self.has_won {
-            self.levels_completion_log.clone()
-        } else {
-            let mut levels_log = self.levels_completion_log.clone();
-            levels_log.pop();
-            levels_log
-        };
-        let risc0_address = self.address.clone();
-
-        let risc0_handle = thread::spawn(move || {
-            let res = risc0_prove(risc0_levels_completion_log, risc0_address);
-            if let Ok(receipt) = res {
-                risc0_save_proof(receipt).expect("To be able to write proof");
+        if self.proving_systems.contains(&RISC0.to_string()) {
+            let risc0_levels_completion_log = if self.has_won {
+                self.levels_completion_log.clone()
             } else {
-                panic!("Could prove program")
-            }
-        });
-        let risc0_res = risc0_handle.join();
+                let mut levels_log = self.levels_completion_log.clone();
+                levels_log.pop();
+                levels_log
+            };
+            let risc0_address = self.address.clone();
+
+            let risc0_handle = thread::spawn(move || {
+                let res = risc0_prove(risc0_levels_completion_log, risc0_address);
+                if let Ok(receipt) = res {
+                    risc0_save_proof(receipt).expect("To be able to write proof");
+                } else {
+                    panic!("Could prove program")
+                }
+            });
+            risc0_res = risc0_handle.join();
+        }
+
 
         let _ = proving_alert_handle.join();
 

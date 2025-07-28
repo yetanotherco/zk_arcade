@@ -1316,6 +1316,7 @@ dependencies = [
  "aligned-sdk",
  "alloy",
  "bincode",
+ "dialoguer",
  "dotenv",
  "game_logic",
  "rand 0.9.1",

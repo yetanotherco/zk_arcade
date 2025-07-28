@@ -48,6 +48,7 @@ aligned-sdk = { git = "https://github.com/yetanotherco/aligned_layer/", rev = "8
 tokio = { version = "1", features = ["time"]}
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3.0", features = ["env-filter"] }
+dialoguer = { version = "0.11.0" }
 
 [package.metadata.risc0]
 methods = ["./risc0_program/"]

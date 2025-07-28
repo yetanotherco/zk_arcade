@@ -55,12 +55,18 @@ fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
     buf.extend_from_slice(chunk);
 }
 
+const RISC0_PROVING_SYSTEM: [u8; 1] = [0x01];
+
 pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
+    let proving_system_id = RISC0_PROVING_SYSTEM;
     let proof = bincode::serialize(&receipt.inner).expect("Failed to serialize receipt");
     let proof_id = image_id_words_to_bytes(BEAST_1984_PROGRAM_ID);
     let public_inputs = receipt.journal.bytes.clone();
 
     let mut buffer = Vec::new();
+
+    // We use the first byte of the generated file to indicate the proving system used
+    buffer.extend_from_slice(&proving_system_id);
 
     write_chunk(&mut buffer, &proof);
     write_chunk(&mut buffer, &proof_id);

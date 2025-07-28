@@ -83,7 +83,7 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 		let offset = 0;
 
 		function readChunk(): Uint8Array {
-			const len = view.getUint32(offset, true);
+			const len = view.getUint32(offset, true); // Check if this value is affected by endianness
 			offset += 4;
 			const chunk = bytes.slice(offset, offset + len);
 			offset += len;

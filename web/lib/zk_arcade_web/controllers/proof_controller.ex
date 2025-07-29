@@ -234,7 +234,7 @@ defmodule ZkArcadeWeb.ProofController do
 
                   conn
                   |> put_flash(:info, "Proof is being submitted to batcher.")
-                  |> redirect(to: build_redirect_url(conn, "proof-send"))
+                  |> redirect(to: build_redirect_url(conn, "proof-sent"))
               end
             end
         end

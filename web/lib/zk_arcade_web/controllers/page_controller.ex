@@ -58,7 +58,7 @@ defmodule ZkArcadeWeb.PageController do
 
   def game(conn, %{"name" => _game_name}) do
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet, 1, 10)
+    proofs = get_proofs(wallet, 1, 5)
     acknowledgements = [
       %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
       %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}

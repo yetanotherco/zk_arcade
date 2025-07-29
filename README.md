@@ -6,6 +6,14 @@ Zk arcade repo
 
 - [Beast](./games/beast)
 
+### Installation
+
+To install Beast, run the following command:
+
+```bash
+curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash
+```
+
 ## Requirements
 
 - Rust

@@ -12,7 +12,7 @@ use game_logic::{
     BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
     board::Board,
-    common::levels::Level,
+    common::{game::GameLevels, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog},
 };
@@ -88,10 +88,12 @@ pub enum GameState {
 
 /// this is our main game struct that orchestrates the game and its bits
 pub struct Game {
+    pub block_number: u64,
     /// our board
     pub board: Board,
     /// the current level we're in
     pub level: Level,
+    pub game_match: GameLevels,
     /// when we started the level
     pub level_start: Instant,
     /// all of our common beasts instances
@@ -140,7 +142,11 @@ impl Game {
             eprintln!("You must select at least one proving system. Please try again.");
         };
 
-        let board_terrain_info = Board::generate_terrain(Level::One);
+        let block_number =
+            ethereum::get_current_block_number().expect("Could not get block number from rpc");
+        println!("Loading game for block number {}...", block_number);
+        let game_match = GameLevels::new(block_number);
+        let board_terrain_info = Board::generate_terrain(game_match.get_config(Level::One));
 
         install_raw_mode_signal_handler();
         let _raw_mode = RawMode::enter().unwrap_or_else(|error| {
@@ -171,8 +177,10 @@ impl Game {
 
         Self {
             levels_completion_log: vec![fist_level_log],
+            block_number: 0,
             board: Board::new(board_terrain_info.buffer),
             level: Level::One,
+            game_match,
             level_start: Instant::now(),
             common_beasts: board_terrain_info.common_beasts,
             super_beasts: board_terrain_info.super_beasts,
@@ -190,7 +198,7 @@ impl Game {
     }
 
     pub fn start_new_game(&mut self) {
-        let board_terrain_info = Board::generate_terrain(Level::One);
+        let board_terrain_info = Board::generate_terrain(self.game_match.get_config(self.level));
         let board = Board::new(board_terrain_info.buffer);
         let fist_level_log = LevelLog {
             level: Level::One,
@@ -390,8 +398,8 @@ impl Game {
             }
 
             // eggs hatching
-            self.eggs
-                .retain_mut(|egg| match egg.hatch(self.level.get_config()) {
+            self.eggs.retain_mut(
+                |egg| match egg.hatch(self.game_match.get_config(self.level)) {
                     HatchingState::Incubating => true,
                     HatchingState::Hatching(position, _instant) => {
                         self.board[&position] = Tile::EggHatching;
@@ -402,7 +410,8 @@ impl Game {
                         self.board[&position] = Tile::HatchedBeast;
                         false
                     }
-                });
+                },
+            );
 
             // end game through no more beasts
             if self.common_beasts.len()
@@ -545,7 +554,7 @@ impl Game {
         let _ = handle.join();
 
         if let Some(level) = self.level.next() {
-            let board_terrain_info = Board::generate_terrain(level);
+            let board_terrain_info = Board::generate_terrain(self.game_match.get_config(level));
             let board = Board::new(board_terrain_info.buffer);
 
             let level_log = LevelLog {
@@ -562,7 +571,7 @@ impl Game {
             self.eggs = board_terrain_info.eggs;
             self.hatched_beasts = board_terrain_info.hatched_beasts;
             self.player.position = board_terrain_info.player.position;
-            self.player.score += self.level.get_config().completion_score;
+            self.player.score += self.game_match.get_config(self.level).completion_score;
             self.state = GameState::Playing;
         } else {
             self.has_won = true;
@@ -690,7 +699,7 @@ impl Game {
 
     fn get_secs_remaining(&self) -> u64 {
         let elapsed = Instant::now().duration_since(self.level_start);
-        let total_time = self.level.get_config().time;
+        let total_time = self.game_match.get_config(self.level).time;
         if total_time > elapsed {
             total_time - elapsed
         } else {

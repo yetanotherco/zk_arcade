@@ -20,4 +20,10 @@ defmodule ZkArcade.LeaderboardContract do
       }
     end)
   end
+
+  def get_user_score(user_address) do
+    contract_address = Application.get_env(:zk_arcade, :leaderboard_address)
+    {:ok, score} = users_score(user_address) |> Ethers.call(to: contract_address)
+    score
+  end
 end

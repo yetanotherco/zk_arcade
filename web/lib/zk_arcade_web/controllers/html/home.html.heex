@@ -144,56 +144,16 @@
 
   <div class="section-width">
     <section id="leaderboard" class="section-spacer-lg">
-      <.section_header header="LeaderBoard" />
-      <% top_users = ZkArcade.Leaderboard.get_top_users(10) %>
-      <% user_in_top? = Enum.any?(top_users, fn u -> u.address == @wallet end) %>
-      <% user_rank = if !user_in_top? && @wallet, do: ZkArcade.Leaderboard.get_user_and_position(@wallet), else: nil %>
+        <.section_header header="LeaderBoard" />
+        <% top_users = ZkArcade.Leaderboard.get_top_users(10) %>
+        <% user_in_top? = Enum.any?(top_users, fn u -> u.address == @wallet end) %>
+        <% user_rank = if !user_in_top? && @wallet, do: ZkArcade.Leaderboard.get_user_and_position(@wallet), else: nil %>
 
-      <%= if length(top_users) > 0 do %>
-        <.table id="leaderboard" rows={top_users}>
-          <:col :let={user} label="Position"><%= user.position %></:col>
-          <:col :let={user} label="Address">
-            <%= if user.address == @wallet do %>
-              <p class="text-text-200 text-md">
-                <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-                 (<span class="text-accent-100">you</span>)
-              </p>
-            <% else %>
-              <p class="text-text-200 text-md">
-                <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-              </p>
-            <% end %>
-          </:col>
-          <:col :let={user} label="Score"><%= user.score%></:col>
-        </.table>
-
-        <%= if user_rank do %>
-          <p> ... </p>
-          <div class="">
-            <.table id="user-position" rows={[user_rank]}>
-              <:col :let={user}><%= user.position %></:col>
-              <:col :let={user}>
-                <p class="text-text-200 text-md">
-                  <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-                  (<span class="text-accent-100">you</span>)
-                </p>
-              </:col>
-              <:col :let={user}><%= user.score %></:col>
-            </.table>
-          </div>
-        <% end %>
-      <% else %>
-        <p class="text-text-200 text-md">No users found in the leaderboard.</p>
-      <% end %>
-
-      <div class="flex justify-end mt-10">
-        <a href="/leaderboard">
-          <div class="hidden md:block cursor-pointer inline-flex items-center space-x-2 group">
-            <span>View complete leaderboard</span>
-            <.icon name="hero-arrow-long-right" class="size-7 transition-transform duration-200 group-hover:translate-x-1" />
-          </div>
-        </a>
-      </div>
-    </section>
+        <.leaderboard_section 
+          users={top_users}
+          current_wallet={@wallet}
+          user_rank={user_rank}
+          show_view_all_link={true} />
+      </section>
   </div>
 </div>

@@ -254,4 +254,151 @@ defmodule ZkArcadeWeb.CoreComponents do
     </div>
     """
   end
+
+  attr :address, :string, required: true
+  attr :current_wallet, :string, default: nil
+  attr :show_you_label, :boolean, default: true
+  def wallet_address(assigns) do
+    ~H"""
+    <p class="text-text-200 text-md">
+      <%= String.slice(@address, 0, 6) <> "..." <> String.slice(@address, -4, 4) %>
+      <%= if @show_you_label && @address == @current_wallet do %>
+        (<span class="text-accent-100">you</span>)
+      <% end %>
+    </p>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :users, :list, required: true
+  attr :current_wallet, :string, default: nil
+  attr :show_labels, :boolean, default: true
+  def leaderboard_table(assigns) do
+    ~H"""
+    <.table id={@id} rows={@users}>
+      <:col :let={user} label={if @show_labels, do: "Position", else: ""}>
+        <%= user.position %>
+      </:col>
+      <:col :let={user} label={if @show_labels, do: "Address", else: ""}>
+        <.wallet_address address={user.address} current_wallet={@current_wallet} />
+      </:col>
+      <:col :let={user} label={if @show_labels, do: "Score", else: ""}>
+        <%= user.score %>
+      </:col>
+    </.table>
+    """
+  end
+
+  attr :pagination, :map, required: true
+  attr :base_path, :string, required: true
+  def pagination_controls(assigns) do
+    ~H"""
+    <div class="flex justify-center items-center mt-8 space-x-4">
+      <%= if @pagination.has_prev do %>
+        <a href={"#{@base_path}?page=#{@pagination.current_page - 1}"}
+          class="px-4 py-2 bg-accent-100 text-white rounded hover:bg-accent-200 transition-colors">
+          Previous
+        </a>
+      <% else %>
+        <span class="px-4 py-2 bg-gray-400 text-gray-600 rounded cursor-not-allowed">
+          Previous
+        </span>
+      <% end %>
+
+      <div class="flex items-center space-x-2">
+        <%= for page_num <- max(1, @pagination.current_page - 2)..min(@pagination.total_pages, @pagination.current_page + 2) do %>
+          <%= if page_num == @pagination.current_page do %>
+            <span class="px-3 py-2 bg-accent-100 text-white rounded">
+              <%= page_num %>
+            </span>
+          <% else %>
+            <a href={"#{@base_path}?page=#{page_num}"}
+              class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+              <%= page_num %>
+            </a>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%= if @pagination.has_next do %>
+        <a href={"#{@base_path}?page=#{@pagination.current_page + 1}"}
+          class="px-4 py-2 bg-accent-100 text-white rounded hover:bg-accent-200 transition-colors">
+          Next
+        </a>
+      <% else %>
+        <span class="px-4 py-2 bg-gray-400 text-gray-600 rounded cursor-not-allowed">
+          Next
+        </span>
+      <% end %>
+    </div>
+    """
+  end
+
+  attr :pagination, :map, required: true
+  attr :items_per_page, :integer, default: 10
+  def pagination_info(assigns) do
+    ~H"""
+    <div class="text-center mt-4 text-text-200">
+      Showing <%= (@pagination.current_page - 1) * @items_per_page + 1 %> to
+      <%= min(@pagination.current_page * @items_per_page, @pagination.total_users) %>
+      of <%= @pagination.total_users %> users
+    </div>
+    """
+  end
+
+  attr :user_rank, :map, required: true
+  attr :current_wallet, :string, required: true
+  def user_rank_display(assigns) do
+    ~H"""
+    <div>
+      <p> ... </p>
+      <div class="">
+        <.leaderboard_table
+          id="user-position"
+          users={[@user_rank]}
+          current_wallet={@current_wallet}
+          show_labels={false} />
+      </div>
+    </div>
+    """
+  end
+
+  attr :users, :list, required: true
+  attr :current_wallet, :string, default: nil
+  attr :user_rank, :map, default: nil
+  attr :pagination, :map, default: nil
+  attr :show_pagination, :boolean, default: false
+  attr :show_view_all_link, :boolean, default: false
+  def leaderboard_section(assigns) do
+    ~H"""
+    <%= if length(@users) > 0 do %>
+      <.leaderboard_table
+        id="leaderboard"
+        users={@users}
+        current_wallet={@current_wallet} />
+
+      <%= if @user_rank do %>
+        <.user_rank_display user_rank={@user_rank} current_wallet={@current_wallet} />
+      <% end %>
+
+      <%= if @show_pagination && @pagination do %>
+        <.pagination_controls pagination={@pagination} base_path="/leaderboard" />
+        <.pagination_info pagination={@pagination} />
+      <% end %>
+
+      <%= if @show_view_all_link do %>
+        <div class="flex justify-end mt-10">
+          <a href="/leaderboard">
+            <div class="hidden md:block cursor-pointer inline-flex items-center space-x-2 group">
+              <span>View complete leaderboard</span>
+              <.icon name="hero-arrow-long-right" class="size-7 transition-transform duration-200 group-hover:translate-x-1" />
+            </div>
+          </a>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-text-200 text-md">No users found in the leaderboard.</p>
+    <% end %>
+    """
+  end
 end

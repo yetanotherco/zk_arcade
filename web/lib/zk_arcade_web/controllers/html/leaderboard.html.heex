@@ -22,7 +22,7 @@
                     <:col :let={user} label="Score"><%= user.score%></:col>
                 </.table>
 
-                <%= if @user_rank do %>
+                <%= if @pagination.current_page == 1 && @user_rank do %>
                     <p> ... </p>
 
                     <div class="">

@@ -51,7 +51,7 @@ defmodule ZkArcadeWeb.LeaderboardController do
     user_in_current_page? = Enum.any?(top_users, fn u -> u.address == wallet end)
 
     user_rank = if !user_in_current_page? && wallet do
-      ZkArcade.Leaderboard.get_user_position(wallet)
+      ZkArcade.Leaderboard.get_user_and_position(wallet)
     else
       nil
     end

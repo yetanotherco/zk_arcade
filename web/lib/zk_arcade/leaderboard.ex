@@ -103,7 +103,7 @@ defmodule ZkArcade.Leaderboard do
     |> Repo.one()
   end
 
-  def get_user_position(user_address) when is_binary(user_address) do
+  def get_user_and_position(user_address) when is_binary(user_address) do
     user_address = String.trim(user_address)
 
     if user_address == "" do
@@ -112,21 +112,25 @@ defmodule ZkArcade.Leaderboard do
       case Repo.one(
             from(e in LeaderboardEntry,
               where: e.user_address == ^user_address,
-              select: %{score: e.score}
+              select: %{score: e.score, updated_at: e.updated_at}
             )
           ) do
-        nil -> nil
-        %{score: score} ->
+        nil ->
+          nil
+
+        %{score: score, updated_at: user_updated_at} ->
           position =
             Repo.one(
               from(e in LeaderboardEntry,
-                where: e.score >= ^score,
-                select: count(e.id)
+                where:
+                  e.score > ^score or
+                    (e.score == ^score and e.updated_at < ^user_updated_at),
+                select: count()
               )
             )
 
           %{
-            position: position,
+            position: position + 1,
             address: user_address,
             score: score
           }

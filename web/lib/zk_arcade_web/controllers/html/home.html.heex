@@ -147,7 +147,7 @@
       <.section_header header="LeaderBoard" />
       <% top_users = ZkArcade.Leaderboard.get_top_users(10) %>
       <% user_in_top? = Enum.any?(top_users, fn u -> u.address == @wallet end) %>
-      <% user_rank = if !user_in_top? && @wallet, do: ZkArcade.Leaderboard.get_user_position(@wallet), else: nil %>
+      <% user_rank = if !user_in_top? && @wallet, do: ZkArcade.Leaderboard.get_user_and_position(@wallet), else: nil %>
 
       <%= if length(top_users) > 0 do %>
         <.table id="leaderboard" rows={top_users}>

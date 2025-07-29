@@ -7,6 +7,7 @@ import { Address } from "../../types/blockchain";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { useAccount } from "wagmi";
+import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 
 type Props = {
 	network: string;
@@ -23,10 +24,11 @@ const WalletContent = ({
 	leaderboard_address,
 	user_address,
 	proofs,
-}: Omit<Props, 'needs_agreement'>) => {
+}: Omit<Props, "needs_agreement">) => {
 	const { address, isConnected } = useAccount();
 	const [needsAgreement, setNeedsAgreement] = useState(false);
 	const [isCheckingAgreement, setIsCheckingAgreement] = useState(false);
+	useProofSentMessageReader();
 
 	// Check if connected wallet needs agreement
 	useEffect(() => {
@@ -44,7 +46,7 @@ const WalletContent = ({
 					}
 				})
 				.catch(error => {
-					console.error('Error checking agreement status:', error);
+					console.error("Error checking agreement status:", error);
 					setNeedsAgreement(true); // Default to showing agreement on error
 					setIsCheckingAgreement(false);
 				});
@@ -82,7 +84,7 @@ export default ({
 	leaderboard_address,
 	user_address,
 	proofs,
-}: Omit<Props, 'needs_agreement'>) => {
+}: Omit<Props, "needs_agreement">) => {
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>

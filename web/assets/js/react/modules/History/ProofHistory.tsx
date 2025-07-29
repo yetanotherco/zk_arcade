@@ -1,13 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Address } from "../../types/blockchain";
-import { useBatcherPaymentService, useLeaderboardContract } from "../../hooks";
-import { bytesToHex, formatEther } from "viem";
+import {
+	useAligned,
+	useBatcherPaymentService,
+	useLeaderboardContract,
+} from "../../hooks";
+import { bytesToHex, formatEther, toHex } from "viem";
 import { ColumnBody, Table, TableBodyItem } from "../../components/Table";
-import { ProofSubmission } from "../../types/aligned";
+import { ProofSubmission, SubmitProof } from "../../types/aligned";
 import { timeAgo } from "../../utils/date";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { shortenHash } from "../../utils/crypto";
 import { Button } from "../../components";
+import { useCSRFToken } from "../../hooks/useCSRFToken";
+import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 
 const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
 	submitted: "bg-accent-100/20 text-accent-100",
@@ -61,16 +67,24 @@ export const ProofHistory = ({
 	payment_service_address,
 }: Props) => {
 	const [proofsTableRows, setProofsTableRows] = useState<ColumnBody[]>([]);
+	const { csrfToken } = useCSRFToken();
+	const formRetryRef = useRef<HTMLFormElement>(null);
+	const formSubmittedRef = useRef<HTMLFormElement>(null);
+	const [submitProofMessage, setSubmitProofMessage] = useState("");
+	useProofSentMessageReader();
 
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
 	});
 
-	const { score } = useLeaderboardContract({
+	const { score, submitSolution } = useLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});
+
+	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
+		useAligned();
 
 	useEffect(() => {
 		const historyBalance = document.getElementById("history-balance");
@@ -82,7 +96,15 @@ export const ProofHistory = ({
 			historyScore.innerText = score.data?.toString() || "...";
 	}, [balance, score]);
 
-	const handleBtnClick = (proof: ProofSubmission) => () => {
+	useEffect(() => {
+		if (submitSolution.receipt.isSuccess) {
+			window.setTimeout(() => {
+				formSubmittedRef.current?.submit();
+			}, 1000);
+		}
+	}, [submitSolution.receipt]);
+
+	const handleBtnClick = (proof: ProofSubmission) => async () => {
 		if (proof.status === "failed") {
 			// nothing to do
 			return;
@@ -102,13 +124,46 @@ export const ProofHistory = ({
 		}
 
 		if (proof.status === "submitted") {
-			// todo: submit proof to contract
+			if (!proof.batchData) {
+				alert("Batch data not available for this proof");
+				return;
+			}
+
+			await submitSolution.submitBeastSolution(
+				proof.verificationData.verificationData,
+				proof.batchData
+			);
 			return;
 		}
 
-		// check time passed in hours to retry
 		if (proof.status === "pending") {
-			return;
+			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
+			if (!maxFee) {
+				alert("Could not estimate max fee");
+				return;
+			}
+
+			proof.verificationData.maxFee = toHex(maxFee, { size: 32 });
+
+			const { r, s, v } = await signVerificationData(
+				proof.verificationData,
+				payment_service_address
+			);
+
+			const submitProofMessage: SubmitProof = {
+				verificationData: proof.verificationData,
+				signature: {
+					r,
+					s,
+					v: Number(v),
+				},
+			};
+
+			setSubmitProofMessage(JSON.stringify(submitProofMessage));
+
+			window.setTimeout(() => {
+				formRetryRef.current?.submit();
+			}, 1000);
 		}
 	};
 
@@ -177,12 +232,56 @@ export const ProofHistory = ({
 					>
 						{actionBtn[proof.status]}
 					</Button>
+
+					{proof.status === "pending" && (
+						<form
+							ref={formRetryRef}
+							action="/proof/status/retry"
+							method="post"
+							className="hidden"
+						>
+							<input
+								type="hidden"
+								name="_csrf_token"
+								value={csrfToken}
+							/>
+							<input
+								type="hidden"
+								name="submit_proof_message"
+								value={submitProofMessage}
+							/>
+							<input
+								type="hidden"
+								name="proof_id"
+								value={proof.id}
+							/>
+						</form>
+					)}
+					{proof.status == "submitted" && (
+						<form
+							className="hidden"
+							ref={formSubmittedRef}
+							action="/proof/status/submitted"
+							method="POST"
+						>
+							<input
+								type="hidden"
+								name="_csrf_token"
+								value={csrfToken}
+							/>
+							<input
+								type="hidden"
+								name="proof_id"
+								value={proof.id}
+							/>
+						</form>
+					)}
 				</td>,
 			],
 		}));
 
 		setProofsTableRows(rows);
-	}, []);
+	}, [csrfToken]);
 
 	return (
 		<div className="overflow-auto" style={{ maxHeight: 500 }}>

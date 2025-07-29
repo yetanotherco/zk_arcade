@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ProofSubmission, SubmitProof } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
-import { bytesToHex, toHex } from "viem";
+import { bytesToHex } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { Button } from "../../components";
 import { useAccount } from "wagmi";
-import { useLeaderboardContract, useAligned } from "../../hooks";
-import { useToast } from "../../state/toast";
+import { useLeaderboardContract } from "../../hooks";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 
 const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
@@ -51,12 +50,10 @@ const Proof = ({
 	const formRefSubmitted = useRef<HTMLFormElement>(null);
 	const formRefRetry = useRef<HTMLFormElement>(null);
 	const { address } = useAccount();
-	const { addToast } = useToast();
-	const { submitSolution, score } = useLeaderboardContract({
+	const { submitSolution } = useLeaderboardContract({
 		contractAddress: leaderboard_address,
 		userAddress: address || "0x0",
 	});
-	const [submitProofMessage, setSubmitProofMessage] = useState("");
 
 	const merkleRoot = bytesToHex(
 		proof.batchData?.batch_merkle_root || Uint8Array.from([])
@@ -87,85 +84,6 @@ const Proof = ({
 			proof.batchData
 		);
 	};
-
-	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
-		useAligned();
-
-	// Here and in the Retry button, we control that retry is only available for proofs that are in "pending" status, but
-	// we can also do this for proofs that are in "failed" status, as they can be retried too.
-	// Note that the "failed" proofs are those that were sent but the verification failed after 10 seconds.
-	const handleRetrySubmitProof = useCallback(async () => {
-		if (proof.status !== "pending") {
-			alert(
-				"You can only retry submitting a proof that is in 'pending' status"
-			);
-			return;
-		}
-
-		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-		if (!maxFee) {
-			alert("Could not estimate max fee");
-			return;
-		}
-
-		proof.verificationData.maxFee = toHex(maxFee, { size: 32 });
-
-		const { r, s, v } = await signVerificationData(proof.verificationData);
-
-		const submitProofMessage: SubmitProof = {
-			verificationData: proof.verificationData,
-			signature: {
-				r,
-				s,
-				v: Number(v),
-			},
-		};
-
-		setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
-		window.setTimeout(() => {
-			formRefRetry.current?.submit();
-		}, 100);
-	}, [proof, estimateMaxFeeForBatchOfProofs, signVerificationData]);
-
-	useEffect(() => {
-		if (submitSolution.tx.isSuccess) {
-			addToast({
-				title: "Solution verified",
-				desc: "Your proof was submitted and verified successfully, waiting for receipt....",
-				type: "success",
-			});
-		}
-
-		if (submitSolution.tx.isError) {
-			addToast({
-				title: "Solution failed",
-				desc: "The transaction was sent but the verification failed.",
-				type: "error",
-			});
-		}
-	}, [submitSolution.tx.isSuccess, submitSolution.tx.isError]);
-
-	useEffect(() => {
-		if (submitSolution.receipt.isError) {
-			addToast({
-				title: "Receipt error",
-				desc: "Failed to retrieve receipt from the transaction.",
-				type: "error",
-			});
-		}
-
-		if (submitSolution.receipt.isSuccess) {
-			addToast({
-				title: "Receipt received",
-				desc: "Your solution receipt has been received, your score has been updated.",
-				type: "success",
-			});
-			window.setTimeout(() => {
-				formRefSubmitted.current?.submit();
-			}, 1000);
-		}
-	}, [submitSolution.receipt.isLoading, submitSolution.receipt.isError]);
 
 	return (
 		<>

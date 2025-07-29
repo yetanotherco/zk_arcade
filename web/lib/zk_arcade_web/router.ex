@@ -18,7 +18,7 @@ defmodule ZkArcadeWeb.Router do
     post "/wallet/sign", WalletController, :connect_wallet
     get "/wallet/disconnect", WalletController, :disconnect_wallet
 
-    get "/leaderboard", LeaderboardController, :index
+    get "/leaderboard", PageController, :leaderboard
 
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard

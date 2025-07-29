@@ -92,4 +92,45 @@ defmodule ZkArcadeWeb.PageController do
       })
       |> render(:game)
   end
+
+  def leaderboard(conn, params) do
+    wallet = get_wallet_from_session(conn)
+    proofs = get_proofs(wallet)
+
+    entries_per_page = 10
+
+    page = String.to_integer(params["page"] || "1")
+    offset = (page - 1) * entries_per_page
+
+    top_users = ZkArcade.Leaderboard.get_top_users(entries_per_page, offset)
+
+    total_users = ZkArcade.Leaderboard.get_total_users()
+    total_pages = ceil(total_users / entries_per_page)
+    has_prev = page > 1
+    has_next = page < total_pages
+
+    user_in_current_page? = Enum.any?(top_users, fn u -> u.address == wallet end)
+
+    user_rank =
+      if !user_in_current_page? && wallet do
+        ZkArcade.Leaderboard.get_user_and_position(wallet)
+      else
+        nil
+      end
+
+    conn
+    |> assign(:wallet, wallet)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:top_users, top_users)
+    |> assign(:user_rank, user_rank)
+    |> assign(:user_in_current_page, user_in_current_page?)
+    |> assign(:pagination, %{
+      current_page: page,
+      total_pages: total_pages,
+      has_prev: has_prev,
+      has_next: has_next,
+      total_users: total_users
+    })
+    |> render(:leaderboard)
+  end
 end

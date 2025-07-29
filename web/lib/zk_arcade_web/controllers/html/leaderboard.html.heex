@@ -1,14 +1,18 @@
-<div class="w-full mt-10 mb-10"> 
-    <div class="section-width flex flex-row h-screen items-center">
-        <section id="leaderboard" class="section-spacer-lgmt mt-20">
-            <h1 class="text-3xl font-bold mb-4">Leaderboard</h1>
-            
-            <.leaderboard_section 
-              users={@top_users}
-              current_wallet={@wallet}
-              user_rank={if @pagination.current_page == 1, do: @user_rank, else: nil}
-              pagination={@pagination}
-              show_pagination={true} />
-        </section>
+<div class="w-full" style="margin-top: 130px"> 
+    <div class="section-width">
+        <div class="section-spacer-md flex flex-col gap-10">
+            <div>
+                <h1 class="text-3xl text-text-100 font-normal mb-4">Leaderboard</h1>
+                <p class="text-md text-text-200">Full leaderboard view</p>
+            </div>
+            <div>
+                <.leaderboard_section 
+                users={@top_users}
+                current_wallet={@wallet}
+                user_rank={if @pagination.current_page == 1, do: @user_rank, else: nil}
+                pagination={@pagination}
+                show_pagination={true} />
+            </div>
+        </div>
     </div>
 </div>

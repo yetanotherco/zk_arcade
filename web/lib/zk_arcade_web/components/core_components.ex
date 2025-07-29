@@ -371,8 +371,7 @@ defmodule ZkArcadeWeb.CoreComponents do
   def pagination_info(assigns) do
     ~H"""
     <div class="text-center mt-4 text-text-200">
-      Showing <%= (@pagination.current_page - 1) * @items_per_page + 1 %> to
-      <%= min(@pagination.current_page * @items_per_page, @pagination.total_users) %>
+      Showing <%= (@pagination.current_page - 1) * @items_per_page + 1 %>-<%= min(@pagination.current_page * @items_per_page, @pagination.total_users) %>
       of <%= @pagination.total_users %> users
     </div>
     """
@@ -404,18 +403,22 @@ defmodule ZkArcadeWeb.CoreComponents do
   def leaderboard_section(assigns) do
     ~H"""
     <%= if length(@users) > 0 do %>
+      <div >
       <.leaderboard_table
         id="leaderboard"
         users={@users}
         current_wallet={@current_wallet} />
+      </div>
 
       <%= if @user_rank do %>
         <.user_rank_display user_rank={@user_rank} current_wallet={@current_wallet} />
       <% end %>
 
       <%= if @show_pagination && @pagination do %>
+      <div class="mt-8">
         <.pagination_controls pagination={@pagination} base_path="/leaderboard" />
         <.pagination_info pagination={@pagination} />
+        </div>
       <% end %>
 
       <%= if @show_view_all_link do %>

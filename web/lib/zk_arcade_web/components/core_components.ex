@@ -307,46 +307,60 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
+  slot(:inner_block, required: true)
+  def button(assigns) do
+    ~H"""
+    <button class={"rounded-lg py-2 px-3 text-sm border inline-flex"}>
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
+
   attr :pagination, :map, required: true
   attr :base_path, :string, required: true
   def pagination_controls(assigns) do
     ~H"""
-    <div class="flex justify-center items-center mt-8 space-x-4">
-      <%= if @pagination.has_prev do %>
-        <a href={"#{@base_path}?page=#{@pagination.current_page - 1}"}
-          class="px-4 py-2 bg-accent-100 text-white rounded hover:bg-accent-200 transition-colors">
-          Previous
-        </a>
-      <% else %>
-        <span class="px-4 py-2 bg-gray-400 text-gray-600 rounded cursor-not-allowed">
-          Previous
-        </span>
+    <div class="flex gap-x-2 items-center justify-center w-full">
+      <%= if @pagination.current_page >= 2 do %>
+        <.link href={"/leaderboard?page=#{1}"}>
+          <.button>
+            First
+          </.button>
+        </.link>
       <% end %>
-
-      <div class="flex items-center space-x-2">
-        <%= for page_num <- max(1, @pagination.current_page - 2)..min(@pagination.total_pages, @pagination.current_page + 2) do %>
-          <%= if page_num == @pagination.current_page do %>
-            <span class="px-3 py-2 bg-accent-100 text-white rounded">
-              <%= page_num %>
-            </span>
-          <% else %>
-            <a href={"#{@base_path}?page=#{page_num}"}
-              class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
-              <%= page_num %>
-            </a>
-          <% end %>
-        <% end %>
-      </div>
-
-      <%= if @pagination.has_next do %>
-        <a href={"#{@base_path}?page=#{@pagination.current_page + 1}"}
-          class="px-4 py-2 bg-accent-100 text-white rounded hover:bg-accent-200 transition-colors">
-          Next
-        </a>
-      <% else %>
-        <span class="px-4 py-2 bg-gray-400 text-gray-600 rounded cursor-not-allowed">
-          Next
-        </span>
+      <%= if @pagination.current_page > 1 do %>
+        <.link href={"/leaderboard?page=#{@pagination.current_page - 1}"}>
+          <.button>
+            <.icon
+              name="hero-arrow-left-solid"
+              class={"stroke-inherit flex group-hover:-translate-x-0.5 transition-all duration-150"}
+            />
+          </.button>
+        </.link>
+      <% end %>
+      <form phx-submit="change_page" class="">
+        <input
+          name="page"
+          id="page"
+          class={ "text-center w-20 rounded-lg py-2 px-3 bg-black text-white border" }
+          value={@pagination.current_page}
+          min="1"
+        />
+      </form>
+      <%= if @pagination.current_page != @pagination.total_pages do %>
+        <.link href={"/leaderboard?page=#{@pagination.current_page + 1}"}>
+          <.button>
+            <.icon
+              name="hero-arrow-right-solid"
+              class={"stroke-inherit group-hover:translate-x-0.5 transition-all duration-150"}
+            />
+          </.button>
+        </.link>
+        <.link href={"/leaderboard?page=#{@pagination.total_pages}"}>
+          <.button>
+            Last
+          </.button>
+        </.link>
       <% end %>
     </div>
     """

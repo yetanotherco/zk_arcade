@@ -53,19 +53,34 @@ pub fn prove(
     Ok(receipt)
 }
 
+fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
+    // Note: Here we use `u32` to store the length of the chunk assuming that the length of the generated
+    // proof file will not exceed 4GB. In case the length exceeds this limit, you would need to increase
+    // the size of the length field to `u64`, not only here but also in the file reading logic, on the
+    // SubmitProofBeast component.
+    let len = chunk.len() as u32;
+    buf.extend_from_slice(&len.to_le_bytes());
+    buf.extend_from_slice(chunk);
+}
+
+const RISC0_PROVING_SYSTEM: [u8; 1] = [0x01];
+
 pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
-    let serialized = bincode::serialize(&receipt.inner).expect("Failed to serialize the receipt");
+    let proving_system_id = RISC0_PROVING_SYSTEM;
+    let proof = bincode::serialize(&receipt.inner).expect("Failed to serialize receipt");
+    let proof_id = image_id_words_to_bytes(BEAST_1984_PROGRAM_ID);
+    let public_inputs = receipt.journal.bytes.clone();
 
-    std::fs::write("./proof.bin", serialized)
-        .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+    let mut buffer = Vec::new();
 
-    std::fs::write(
-        "proof_id.bin",
-        image_id_words_to_bytes(BEAST_1984_PROGRAM_ID),
-    )
-    .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+    // We use the first byte of the generated file to indicate the proving system used
+    buffer.extend_from_slice(&proving_system_id);
 
-    std::fs::write("public_inputs.bin", receipt.journal.bytes)
+    write_chunk(&mut buffer, &proof);
+    write_chunk(&mut buffer, &proof_id);
+    write_chunk(&mut buffer, &public_inputs);
+
+    std::fs::write("solution.bin", &buffer)
         .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
     Ok(())

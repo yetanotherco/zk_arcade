@@ -72,19 +72,35 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 		userAddress: user_address,
 	});
 
-	const handleFile =
-		(type: "proof" | "vm-program-code" | "vk" | "pub") =>
-		async (e: React.ChangeEvent<HTMLInputElement>) => {
-			const file = e.target.files?.[0];
-			if (!file) return;
+	const handleCombinedProofFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
 
-			const buffer = await file.arrayBuffer();
-			const data = new Uint8Array(buffer);
+		const buffer = await file.arrayBuffer();
+		const view = new DataView(buffer);
+		const bytes = new Uint8Array(buffer);
 
-			if (type === "proof") setProof(data);
-			else if (type === "vm-program-code") setProofId(data);
-			else if (type === "pub") setPublicInputs(data);
-		};
+		let offset = 0;
+
+		const provingSystemId = bytes.slice(0, 1);
+		offset += 1;
+
+		function readChunk(): Uint8Array {
+			const len = view.getUint32(offset, true);
+			offset += 4;
+			const chunk = bytes.slice(offset, offset + len);
+			offset += len;
+			return chunk;
+		}
+
+		const proof = readChunk();
+		const proofId = readChunk();
+		const publicInputs = readChunk();
+
+		setProof(proof);
+		setProofId(proofId);
+		setPublicInputs(publicInputs);
+	};
 
 	const handleSubmission = useCallback(async () => {
 		if (!proof || !proofId || !publicInputs || !user_address) {
@@ -195,25 +211,11 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 
 						<div className="flex flex-col gap-6">
 							<FormInput
-								label="Proof bytes"
-								name="proof"
-								id="proof"
+								label="Solution file"
+								name="proof-data"
+								id="proof-data"
 								type="file"
-								onChange={handleFile("proof")}
-							/>
-							<FormInput
-								label="Proof id"
-								name="prood-id"
-								id="prood-id"
-								type="file"
-								onChange={handleFile("vm-program-code")}
-							/>
-							<FormInput
-								label="Public inputs"
-								name="public-inputs"
-								id="public-inputs"
-								type="file"
-								onChange={handleFile("pub")}
+								onChange={handleCombinedProofFile}
 							/>
 						</div>
 

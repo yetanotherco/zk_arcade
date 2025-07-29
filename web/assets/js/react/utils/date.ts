@@ -17,3 +17,11 @@ export const timeAgo = (dateString: string) => {
 		return `${days} day${days === 1 ? "" : "s"} ago`;
 	}
 };
+
+export const timeAgoInHs = (dateString: string) => {
+	const pastDate = new Date(dateString);
+	const diffInMs = Date.now() - pastDate.getTime();
+	const hours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+	return hours;
+};

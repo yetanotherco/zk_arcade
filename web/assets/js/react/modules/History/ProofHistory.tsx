@@ -1,49 +1,52 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Address } from "../../types/blockchain";
-import {
-	useAligned,
-	useBatcherPaymentService,
-	useLeaderboardContract,
-} from "../../hooks";
-import { bytesToHex, formatEther, toHex } from "viem";
+import { useBatcherPaymentService, useLeaderboardContract } from "../../hooks";
+import { bytesToHex, formatEther } from "viem";
 import { ColumnBody, Table, TableBodyItem } from "../../components/Table";
-import { ProofSubmission, SubmitProof } from "../../types/aligned";
-import { timeAgo } from "../../utils/date";
+import { ProofSubmission } from "../../types/aligned";
+import { timeAgo, timeAgoInHs } from "../../utils/date";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { shortenHash } from "../../utils/crypto";
-import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
-import { ProofEntryActionBtn } from "./ProofEntry";
+import { ProofEntryActionBtn } from "./ProofEntryActionBtn";
 
-const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
+type KeysForStatus = ProofSubmission["status"];
+
+const colorBasedOnStatus: {
+	[key in KeysForStatus]: string;
+} = {
 	submitted: "bg-accent-100/20 text-accent-100",
 	pending: "bg-yellow/20 text-yellow",
 	claimed: "bg-blue/20 text-blue",
 	failed: "bg-red/20 text-red",
+	underpriced: "bg-orange/20 text-orange",
 };
 
 const tooltipStyleBasedOnStatus: {
-	[key in ProofSubmission["status"]]: string;
+	[key in KeysForStatus]: string;
 } = {
 	submitted: "bg-accent-100 text-black",
 	pending: "bg-yellow text-black",
 	claimed: "bg-blue text-white",
 	failed: "bg-red text-white",
+	underpriced: "bg-orange text-black",
 };
 
-const tooltipText: { [key in ProofSubmission["status"]]: string } = {
+const tooltipText: { [key in KeysForStatus]: string } = {
 	submitted: "Solution verified and ready to be submitted",
 	claimed: "Already submitted to leaderboard",
 	pending:
 		"You need to wait until its verified before submitting the solution",
 	failed: "The proof failed to be verified, you have to re-send it",
+	underpriced: "The proof is underpriced, we suggest you bump the fee",
 };
 
-const statusText: { [key in ProofSubmission["status"]]: string } = {
+const statusText: { [key in KeysForStatus]: string } = {
 	claimed: "Claimed",
 	submitted: "Ready",
 	pending: "Pending",
 	failed: "Failed",
+	underpriced: "Pending",
 };
 
 type Props = {
@@ -60,7 +63,6 @@ export const ProofHistory = ({
 	payment_service_address,
 }: Props) => {
 	const [proofsTableRows, setProofsTableRows] = useState<ColumnBody[]>([]);
-	const { csrfToken } = useCSRFToken();
 	useProofSentMessageReader();
 
 	const { balance } = useBatcherPaymentService({
@@ -84,65 +86,82 @@ export const ProofHistory = ({
 	}, [balance, score]);
 
 	useEffect(() => {
-		const rows: ColumnBody[] = proofs.map(proof => ({
-			rows: [
-				<TableBodyItem text={proof.game} />,
-				<td>
-					<div
-						className={`relative group/tooltip flex flex-row gap-2 items-center rounded px-1 w-fit ${
-							colorBasedOnStatus[proof.status]
-						}`}
-					>
-						<span className="hero-information-circle solid size-5"></span>
-						<p>{statusText[proof.status]}</p>
+		const rows: ColumnBody[] = proofs.map(item => {
+			const proof = { ...item };
 
+			// if the proof is pending and it has passed more than 6 hours
+			// mark it as underpriced
+			if (proof.status === "pending") {
+				if (timeAgoInHs(proof.status) > 6) {
+					proof.status = "underpriced";
+				}
+			}
+
+			return {
+				rows: [
+					<TableBodyItem text={proof.game} />,
+					<td>
 						<div
-							className={`${
-								tooltipStyleBasedOnStatus[proof.status]
-							} rounded absolute mt-2 rounded -left-1/2 top-full mb-2 text-sm rounded px-2 py-1 opacity-0 group-hover/tooltip:opacity-100 transition pointer-events-none`}
-							style={{ width: 300, zIndex: 10000 }}
+							className={`relative group/tooltip flex flex-row gap-2 items-center rounded px-1 w-fit ${
+								colorBasedOnStatus[proof.status]
+							}`}
 						>
-							<p className="text-center text-xs">
-								{tooltipText[proof.status]}
-							</p>
+							<span className="hero-information-circle solid size-5"></span>
+							<p>{statusText[proof.status]}</p>
+
+							<div
+								className={`${
+									tooltipStyleBasedOnStatus[proof.status]
+								} rounded absolute mt-2 rounded -left-1/2 top-full mb-2 text-sm rounded px-2 py-1 opacity-0 group-hover/tooltip:opacity-100 transition pointer-events-none`}
+								style={{ width: 300, zIndex: 10000 }}
+							>
+								<p className="text-center text-xs">
+									{tooltipText[proof.status]}
+								</p>
+							</div>
 						</div>
-					</div>
-				</td>,
-				<TableBodyItem text={timeAgo(proof.insertedAt)} />,
-				<td>
-					{proof.batchData?.batch_merkle_root ? (
-						<a
-							href={`https://explorer.alignedlayer.com/batches/${proof.batchData.batch_merkle_root}`}
-							className="underline"
-						>
-							{shortenHash(
-								bytesToHex(proof.batchData.batch_merkle_root)
-							)}
-						</a>
-					) : (
-						<p>...</p>
-					)}
-				</td>,
-				<TableBodyItem
-					text={shortenHash(
-						bytesToHex(
-							computeVerificationDataCommitment(
-								proof.verificationData.verificationData
-							).commitmentDigest
-						)
-					)}
-				/>,
-				<TableBodyItem
-					text={proof.verificationData.verificationData.provingSystem}
-				/>,
-				<ProofEntryActionBtn
-					leaderboard_address={leaderboard_address}
-					payment_service_address={payment_service_address}
-					user_address={user_address}
-					proof={proof}
-				/>,
-			],
-		}));
+					</td>,
+					<TableBodyItem text={timeAgo(proof.insertedAt)} />,
+					<td>
+						{proof.batchData?.batch_merkle_root ? (
+							<a
+								href={`https://explorer.alignedlayer.com/batches/${proof.batchData.batch_merkle_root}`}
+								className="underline"
+							>
+								{shortenHash(
+									bytesToHex(
+										proof.batchData.batch_merkle_root
+									)
+								)}
+							</a>
+						) : (
+							<p>...</p>
+						)}
+					</td>,
+					<TableBodyItem
+						text={shortenHash(
+							bytesToHex(
+								computeVerificationDataCommitment(
+									proof.verificationData.verificationData
+								).commitmentDigest
+							)
+						)}
+					/>,
+					<TableBodyItem
+						text={
+							proof.verificationData.verificationData
+								.provingSystem
+						}
+					/>,
+					<ProofEntryActionBtn
+						leaderboard_address={leaderboard_address}
+						payment_service_address={payment_service_address}
+						user_address={user_address}
+						proof={proof}
+					/>,
+				],
+			};
+		});
 
 		setProofsTableRows(rows);
 	}, []);

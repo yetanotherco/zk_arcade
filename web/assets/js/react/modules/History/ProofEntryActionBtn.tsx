@@ -9,8 +9,9 @@ import { toHex } from "viem";
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
 	submitted: "Submit solution",
-	pending: "Bump fee",
+	pending: "None",
 	failed: "None",
+	underpriced: "Bump fee",
 };
 
 type Props = {
@@ -49,7 +50,7 @@ export const ProofEntryActionBtn = ({
 		}
 	}, [submitSolution.receipt]);
 
-	const handleBtnClick = (proof: ProofSubmission) => async () => {
+	const handleBtnClick = async () => {
 		if (proof.status === "failed") {
 			// nothing to do
 			return;
@@ -81,7 +82,7 @@ export const ProofEntryActionBtn = ({
 			return;
 		}
 
-		if (proof.status === "pending") {
+		if (proof.status === "underpriced") {
 			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
 			if (!maxFee) {
 				alert("Could not estimate max fee");
@@ -118,24 +119,28 @@ export const ProofEntryActionBtn = ({
 
 	return (
 		<td>
-			<Button
-				variant="contrast"
-				className="text-nowrap text-sm w-full"
-				disabled={proof.status === "failed"}
-				style={{
-					paddingLeft: 0,
-					paddingRight: 0,
-				}}
-				onClick={handleBtnClick(proof)}
-				isLoading={
-					submitSolution.receipt.isLoading ||
-					submitProofMessageLoading
-				}
-			>
-				{actionBtn[proof.status]}
-			</Button>
+			<div className="relative group/proof-history-item w-full">
+				<Button
+					variant="contrast"
+					className="text-nowrap text-sm w-full"
+					disabled={
+						proof.status === "failed" || proof.status === "pending"
+					}
+					style={{
+						paddingLeft: 0,
+						paddingRight: 0,
+					}}
+					onClick={handleBtnClick}
+					isLoading={
+						submitSolution.receipt.isLoading ||
+						submitProofMessageLoading
+					}
+				>
+					{actionBtn[proof.status]}
+				</Button>
+			</div>
 
-			{proof.status === "pending" && (
+			{proof.status === "underpriced" && (
 				<form
 					ref={formRetryRef}
 					action="/proof/status/retry"

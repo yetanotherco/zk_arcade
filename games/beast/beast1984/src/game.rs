@@ -644,10 +644,11 @@ impl Game {
                 levels_log.pop();
                 levels_log
             };
+            let sp1_levels = self.game_match.get_levels_in_json();
             let sp1_address = self.address.clone();
 
             let sp1_handle = thread::spawn(move || {
-                let res = sp1_prove(sp1_levels_completion_log, sp1_address);
+                let res = sp1_prove(sp1_levels_completion_log, sp1_levels, sp1_address);
                 if let Ok(receipt) = res {
                     sp1_save_proof(receipt).expect("To be able to write proof");
                 } else {
@@ -665,10 +666,11 @@ impl Game {
                 levels_log.pop();
                 levels_log
             };
+            let risc0_levels = self.game_match.get_levels_in_json();
             let risc0_address = self.address.clone();
 
             let risc0_handle = thread::spawn(move || {
-                let res = risc0_prove(risc0_levels_completion_log, risc0_address);
+                let res = risc0_prove(risc0_levels_completion_log, risc0_levels, risc0_address);
                 if let Ok(receipt) = res {
                     risc0_save_proof(receipt).expect("To be able to write proof");
                 } else {

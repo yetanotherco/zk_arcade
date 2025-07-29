@@ -3,9 +3,12 @@ use std::sync::LazyLock;
 use alloy::hex;
 use game_logic::proving::{LevelLog, ProgramInput};
 use sp1_sdk::{EnvProver, ProverClient, SP1ProofWithPublicValues, SP1Stdin};
+use game_logic::common::levels::LevelJson;
 
 const BEAST_1984_PROGRAM_ELF: &[u8] = include_bytes!("../sp1_program/elf/beast_1984_program");
 static SP1_PROVER_CLIENT: LazyLock<EnvProver> = LazyLock::new(ProverClient::from_env);
+
+const SP1_PROVING_SYSTEM: [u8; 1] = [aligned_sdk::common::types::ProvingSystemId::SP1 as u8];
 
 #[derive(Debug, Clone)]
 pub enum ProvingError {
@@ -18,6 +21,7 @@ pub enum ProvingError {
 
 pub fn prove(
     levels_log: Vec<LevelLog>,
+    levels: Vec<LevelJson>,
     address: String,
 ) -> Result<SP1ProofWithPublicValues, ProvingError> {
     let mut stdin = SP1Stdin::new();
@@ -26,6 +30,7 @@ pub fn prove(
         hex::decode(address).map_err(|e| ProvingError::WriteInput(e.to_string()))?;
     // write input data
     let input = ProgramInput {
+        levels,
         levels_log,
         address: address_bytes,
     };
@@ -45,16 +50,46 @@ pub fn prove(
     Ok(proof)
 }
 
+fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
+    // Note: Here we use `u32` to store the length of the chunk assuming that the length of the generated
+    // proof file will not exceed 4GB. In case the length exceeds this limit, you would need to increase
+    // the size of the length field to `u64`, not only here but also in the file reading logic, on the
+    // SubmitProofBeast component.
+    let len = chunk.len() as u32;
+    buf.extend_from_slice(&len.to_le_bytes());
+    buf.extend_from_slice(chunk);
+}
+
 pub fn save_proof(proof: SP1ProofWithPublicValues) -> Result<(), ProvingError> {
-    proof
-        .save("./sp1_proof.bin")
-        .expect("Failed to serialize the receipt");
+    let proving_system_id = SP1_PROVING_SYSTEM;
+    let proof_data = bincode::serialize(&proof).expect("Failed to serialize the proof");
+    let proof_id = BEAST_1984_PROGRAM_ELF
+        .to_vec();
+    let public_inputs = proof.public_values.to_vec();
 
-    std::fs::write("sp1_proof_id.bin", BEAST_1984_PROGRAM_ELF)
+    let mut buffer = Vec::new();
+
+    // We use the first byte of the generated file to indicate the proving system used
+    buffer.extend_from_slice(&proving_system_id);
+
+    write_chunk(&mut buffer, &proof_data);
+    write_chunk(&mut buffer, &proof_id);
+    write_chunk(&mut buffer, &public_inputs);
+
+    // Save the proof to a file
+    std::fs::write("sp1_proof.bin", buffer)
         .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
-    std::fs::write("sp1_public_inputs.bin", proof.public_values)
-        .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+
+    // proof
+    //     .save("./sp1_proof.bin")
+    //     .expect("Failed to serialize the receipt");
+    //
+    // std::fs::write("sp1_proof_id.bin", BEAST_1984_PROGRAM_ELF)
+    //     .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+    //
+    // std::fs::write("sp1_public_inputs.bin", proof.public_values)
+    //     .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
     Ok(())
 }

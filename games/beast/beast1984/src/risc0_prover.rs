@@ -7,6 +7,8 @@ use risc0_zkvm::{ExecutorEnv, ProverOpts, Receipt, default_prover};
 
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 
+const RISC0_PROVING_SYSTEM: [u8; 1] = [aligned_sdk::common::types::ProvingSystemId::Risc0 as u8];
+
 #[derive(Debug, Clone)]
 pub enum ProvingError {
     WriteInput(String),
@@ -63,7 +65,6 @@ fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
     buf.extend_from_slice(chunk);
 }
 
-const RISC0_PROVING_SYSTEM: [u8; 1] = [0x01];
 
 pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
     let proving_system_id = RISC0_PROVING_SYSTEM;

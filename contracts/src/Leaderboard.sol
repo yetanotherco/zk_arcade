@@ -5,14 +5,28 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
-    /**
-     * Storage
-     */
+    // ======== Storage ========
+    // == General ==
     address public alignedServiceManager;
     address public alignedBatcherPaymentService;
     address[10] public top10Score;
     mapping(address => uint256) public usersScore;
-    mapping(address => uint256) public usersBeastLevelCompleted;
+
+    // == Beast storages ==
+    struct BeastGame {
+        uint256 endsAtBlock;
+        uint256 gameConfig;
+        uint256 startsAtBlock;
+    }
+
+    BeastGame[] public beastGames;
+    /// See `getBeastKey` to see the key implementation
+    mapping(bytes32 => uint256) public usersBeastLevelCompleted;
+
+    function getBeastKey(address user, uint256 game) internal pure returns (bytes32) {
+        bytes32 gameHash = keccak256(abi.encodePacked(game));
+        return keccak256(abi.encodePacked(user, gameHash));
+    }
 
     /**
      * Errors
@@ -21,6 +35,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error ProofNotVerifiedOnAligned();
     error UserHasAlreadyCompletedThisLevel(uint256 level);
     error UserAddressMismatch(address expected, address actual);
+    error InvalidGame(uint256 expected, uint256 provided);
+    error NoActiveBeastGame();
 
     /**
      * Events
@@ -31,17 +47,24 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(address owner, address _alignedServiceManager, address _alignedBatcherPaymentService)
-        public
-        initializer
-    {
+    function initialize(
+        address owner,
+        address _alignedServiceManager,
+        address _alignedBatcherPaymentService,
+        BeastGame[] calldata _beastGames
+    ) public initializer {
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
+        beastGames = _beastGames;
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
+    function setBeastGames(BeastGame[] calldata _beastGames) public onlyOwner {
+        beastGames = _beastGames;
+    }
 
     function submitBeastSolution(
         bytes32 proofCommitment,
@@ -52,7 +75,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes memory merkleProof,
         uint256 verificationDataBatchIndex
     ) public {
-        (uint256 levelCompleted, address userAddress) = abi.decode(publicInputs, (uint256, address));
+        (uint256 levelCompleted, uint256 gameConfig, address userAddress) =
+            abi.decode(publicInputs, (uint256, uint256, address));
 
         if (userAddress != msg.sender) {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
@@ -78,16 +102,22 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
 
         bool proofIncluded = abi.decode(proofIsIncluded, (bool));
-
         if (!proofIncluded) {
             revert ProofNotVerifiedOnAligned();
         }
 
-        uint256 currentLevelCompleted = usersBeastLevelCompleted[msg.sender];
+        // Validate the game is available and the config is correct
+        BeastGame memory currentGame = getCurrentBeastGame();
+        if (currentGame.gameConfig != gameConfig) {
+            revert InvalidGame(currentGame.gameConfig, gameConfig);
+        }
+
+        bytes32 key = getBeastKey(msg.sender, gameConfig);
+        uint256 currentLevelCompleted = usersBeastLevelCompleted[key];
         if (levelCompleted <= currentLevelCompleted) {
             revert UserHasAlreadyCompletedThisLevel(currentLevelCompleted);
         }
-        usersBeastLevelCompleted[msg.sender] = levelCompleted;
+        usersBeastLevelCompleted[key] = levelCompleted;
 
         usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
 
@@ -100,8 +130,18 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         return usersScore[user];
     }
 
-    function getUserBeastLevelCompleted(address user) public view returns (uint256) {
-        return usersBeastLevelCompleted[user];
+    function getUserBeastLevelCompleted(bytes32 key) public view returns (uint256) {
+        return usersBeastLevelCompleted[key];
+    }
+
+    function getCurrentBeastGame() public view returns (BeastGame memory) {
+        for (uint256 i = 0; i < beastGames.length; i++) {
+            if (block.number >= beastGames[i].startsAtBlock && block.number <= beastGames[i].endsAtBlock) {
+                return beastGames[i];
+            }
+        }
+
+        revert NoActiveBeastGame();
     }
 
     function getTop10Score() external view returns (address[10] memory) {

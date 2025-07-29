@@ -23,10 +23,19 @@ defmodule ZkArcadeWeb.CoreComponents do
   end
 
   def icon(%{name: "hero-" <> _} = assigns) do
+    assigns =
+      assigns
+      |> Map.put_new(:class, "")
+      |> Map.put_new(:style, style_from_color(assigns))
+
     ~H"""
-    <span class={classes([@name, @class])} />
+    <span class={classes([@name, @class])} style={@style} />
     """
   end
+
+  defp style_from_color(%{color: color}) when is_binary(color), do: "color: #{color};"
+  defp style_from_color(%{style: style}) when is_binary(style), do: style
+  defp style_from_color(_), do: nil
 
   def nav(assigns) do
     ~H"""
@@ -278,6 +287,15 @@ defmodule ZkArcadeWeb.CoreComponents do
     <.table id={@id} rows={@users}>
       <:col :let={user} label={if @show_labels, do: "Position", else: ""}>
         <%= user.position %>
+        <%= case user.position do %>
+          <%= 1 -> %>
+          <.icon name="hero-trophy" color="#FFD700" class="" />
+          <%= 2 -> %>
+          <.icon name="hero-trophy" color="#6a697a" class="" />
+          <%= 3 -> %>
+          <.icon name="hero-trophy" color="#b36839" class="" />
+          <%= _ ->  %>
+        <% end %>
       </:col>
       <:col :let={user} label={if @show_labels, do: "Address", else: ""}>
         <.wallet_address address={user.address} current_wallet={@current_wallet} />

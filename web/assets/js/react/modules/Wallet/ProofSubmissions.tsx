@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ProofSubmission, SubmitProof } from "../../types/aligned";
+import React, { useRef } from "react";
+import { ProofSubmission } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import { bytesToHex } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
+import { timeAgoInHs } from "../../utils/date";
 import { Button } from "../../components";
 import { useAccount } from "wagmi";
 import { useLeaderboardContract } from "../../hooks";
@@ -13,6 +14,7 @@ const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
 	pending: "bg-yellow/20 text-yellow",
 	claimed: "bg-blue/20 text-blue",
 	failed: "bg-red/20 text-red",
+	underpriced: "bg-orange/20 text-orange",
 };
 
 const tooltipStyleBasedOnStatus: {
@@ -22,6 +24,7 @@ const tooltipStyleBasedOnStatus: {
 	pending: "bg-yellow text-black",
 	claimed: "bg-blue text-white",
 	failed: "bg-red text-white",
+	underpriced: "bg-orange text-black",
 };
 
 const tooltipText: { [key in ProofSubmission["status"]]: string } = {
@@ -30,6 +33,7 @@ const tooltipText: { [key in ProofSubmission["status"]]: string } = {
 	pending:
 		"You need to wait until its verified before submitting the solution",
 	failed: "The proof failed to be verified, you have to re-send it",
+	underpriced: "The proof is underpriced, we suggest you bump the fee",
 };
 
 const statusText: { [key in ProofSubmission["status"]]: string } = {
@@ -37,6 +41,7 @@ const statusText: { [key in ProofSubmission["status"]]: string } = {
 	submitted: "Ready",
 	pending: "Pending",
 	failed: "Failed",
+	underpriced: "Pending",
 };
 
 const Proof = ({
@@ -205,15 +210,25 @@ export const ProofSubmissions = ({
 								</tr>
 							</thead>
 							<tbody className="text-text-100 text-sm">
-								{proofs.map(proof => (
-									<Proof
-										key={proof.id}
-										proof={proof}
-										leaderboard_address={
-											leaderboard_address
+								{proofs.map(item => {
+									const proof = { ...item };
+
+									if (proof.status === "pending") {
+										if (timeAgoInHs(proof.insertedAt) > 6) {
+											proof.status = "underpriced";
 										}
-									/>
-								))}
+									}
+
+									return (
+										<Proof
+											key={proof.id}
+											proof={proof}
+											leaderboard_address={
+												leaderboard_address
+											}
+										/>
+									);
+								})}
 							</tbody>
 						</table>
 					</div>

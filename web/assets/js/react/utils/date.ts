@@ -1,7 +1,6 @@
 export const timeAgo = (dateString: string) => {
 	const pastDate = new Date(dateString);
-	const now = new Date();
-	const diffInMs = now.getTime() - pastDate.getTime();
+	const diffInMs = Date.now() - pastDate.getTime();
 
 	const seconds = Math.floor(diffInMs / 1000);
 	const minutes = Math.floor(diffInMs / (1000 * 60));
@@ -11,7 +10,7 @@ export const timeAgo = (dateString: string) => {
 	if (seconds < 60) {
 		return "just now";
 	} else if (minutes < 60) {
-		return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+		return `${minutes} min${minutes === 1 ? "" : "s"} ago`;
 	} else if (hours < 24) {
 		return `${hours} hour${hours === 1 ? "" : "s"} ago`;
 	} else {

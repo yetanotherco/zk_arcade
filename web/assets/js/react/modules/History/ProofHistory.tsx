@@ -41,7 +41,7 @@ const statusText: { [key in ProofSubmission["status"]]: string } = {
 };
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
-	claimed: "None",
+	claimed: "Share",
 	submitted: "Submit solution",
 	pending: "Bump fee",
 	failed: "None",
@@ -82,8 +82,38 @@ export const ProofHistory = ({
 			historyScore.innerText = score.data?.toString() || "...";
 	}, [balance, score]);
 
+	const handleBtnClick = (proof: ProofSubmission) => () => {
+		if (proof.status === "failed") {
+			// nothing to do
+			return;
+		}
+
+		if (proof.status === "claimed") {
+			const text = encodeURIComponent(
+				"🟩 I just claimed my proof on zk-arcade!\n\n"
+			);
+			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
+			const hashtags = `\naligned,proof,${proof.verificationData.verificationData.provingSystem}`;
+			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
+
+			window.open(twitterShareUrl, "_blank");
+
+			return;
+		}
+
+		if (proof.status === "submitted") {
+			// todo: submit proof to contract
+			return;
+		}
+
+		// check time passed in hours to retry
+		if (proof.status === "pending") {
+			return;
+		}
+	};
+
 	useEffect(() => {
-		const rows: ColumnBody = proofs.map(proof => ({
+		const rows: ColumnBody[] = proofs.map(proof => ({
 			rows: [
 				<TableBodyItem text={proof.game} />,
 				<td>
@@ -138,20 +168,19 @@ export const ProofHistory = ({
 					<Button
 						variant="contrast"
 						className="text-nowrap text-sm w-full"
-						disabled={
-							proof.status === "claimed" ||
-							proof.status === "failed"
-						}
+						disabled={proof.status === "failed"}
 						style={{
 							paddingLeft: 0,
 							paddingRight: 0,
 						}}
+						onClick={handleBtnClick(proof)}
 					>
 						{actionBtn[proof.status]}
 					</Button>
 				</td>,
 			],
 		}));
+
 		setProofsTableRows(rows);
 	}, []);
 
@@ -170,6 +199,7 @@ export const ProofHistory = ({
 				]}
 				body={proofsTableRows}
 			/>
+			<div></div>
 		</div>
 	);
 };

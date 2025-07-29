@@ -18,8 +18,8 @@ defmodule ZkArcadeWeb.PageController do
 
   defp get_proofs(nil), do: []
 
-  defp get_proofs(address) do
-    proofs = ZkArcade.Proofs.get_proofs_by_address(address)
+  defp get_proofs(address, page, size) do
+    proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})
 
     Enum.map(proofs, fn proof ->
       %{
@@ -36,7 +36,7 @@ defmodule ZkArcadeWeb.PageController do
   def home(conn, _params) do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet)
+    proofs = get_proofs(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.list_proofs() |> length()
     total_players = ZkArcade.Accounts.list_wallets() |> length()
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
@@ -58,7 +58,7 @@ defmodule ZkArcadeWeb.PageController do
 
   def game(conn, %{"name" => _game_name}) do
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet)
+    proofs = get_proofs(wallet, 1, 10)
     acknowledgements = [
       %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
       %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
@@ -95,10 +95,7 @@ defmodule ZkArcadeWeb.PageController do
 
   def history(conn, _params) do
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet)
-
-    # print proofs
-    Logger.info("Proofs for wallet #{wallet}: #{inspect(proofs)}")
+    proofs = get_proofs(wallet, 1, 10)
 
     conn
     |> assign(:wallet, wallet)

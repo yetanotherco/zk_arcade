@@ -8,7 +8,7 @@ export type ColumnHead = {
 	text: string;
 };
 
-type Props = {
+type Props = React.ComponentProps<"table"> & {
 	header: ColumnHead[];
 	body: ColumnBody[];
 };
@@ -25,9 +25,12 @@ export const TableBodyItem = ({
 	);
 };
 
-export const Table = ({ header, body }: Props) => {
+export const Table = ({ header, body, className, ...props }: Props) => {
 	return (
-		<table className="table-fixed border-collapse w-full">
+		<table
+			className={`table-fixed h-full w-full border-collapse ${className}`}
+			{...props}
+		>
 			<thead>
 				<tr>
 					{header.map((row, i) => (
@@ -44,7 +47,7 @@ export const Table = ({ header, body }: Props) => {
 				{body.map((item, i) => (
 					<tr
 						key={i}
-						className="gap-y-2 [&>td]:pb-4 animate-in fade-in-0 duration-700 truncat"
+						className="gap-y-2 [&>td]:pb-2 animate-in fade-in-0 duration-700 truncat"
 					>
 						{item.rows.map(row => row)}
 					</tr>

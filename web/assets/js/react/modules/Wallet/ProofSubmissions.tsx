@@ -173,7 +173,7 @@ const Proof = ({
 				<td>{proof.game}</td>
 				<td>
 					<div
-						className={`relative group/tooltip flex flex-row gap-2 items-center bg-yellow/20 rounded px-1 w-fit ${
+						className={`relative group/tooltip flex flex-row gap-2 items-center rounded px-1 w-fit ${
 							colorBasedOnStatus[proof.status]
 						}`}
 					>
@@ -288,7 +288,7 @@ export const ProofSubmissions = ({
 								</tr>
 							</thead>
 							<tbody className="text-text-100 text-sm">
-								{proofs.reverse().map(proof => (
+								{proofs.map(proof => (
 									<Proof
 										key={proof.id}
 										proof={proof}

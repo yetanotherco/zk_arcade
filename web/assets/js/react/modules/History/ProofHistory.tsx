@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Address } from "../../types/blockchain";
 import { useBatcherPaymentService, useLeaderboardContract } from "../../hooks";
-import { bytesToHex, formatEther, toHex } from "viem";
+import { bytesToHex, formatEther } from "viem";
 import { ColumnBody, Table, TableBodyItem } from "../../components/Table";
 import { ProofSubmission } from "../../types/aligned";
 import { timeAgo } from "../../utils/date";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { shortenHash } from "../../utils/crypto";
+import { Button } from "../../components";
 
 const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
 	submitted: "bg-accent-100/20 text-accent-100",
@@ -37,6 +38,13 @@ const statusText: { [key in ProofSubmission["status"]]: string } = {
 	submitted: "Ready",
 	pending: "Pending",
 	failed: "Failed",
+};
+
+const actionBtn: { [key in ProofSubmission["status"]]: string } = {
+	claimed: "None",
+	submitted: "Submit solution",
+	pending: "Bump fee",
+	failed: "None",
 };
 
 type Props = {
@@ -80,7 +88,7 @@ export const ProofHistory = ({
 				<TableBodyItem text={proof.game} />,
 				<td>
 					<div
-						className={`relative group/tooltip flex flex-row gap-2 items-center bg-yellow/20 rounded px-1 w-fit ${
+						className={`relative group/tooltip flex flex-row gap-2 items-center rounded px-1 w-fit ${
 							colorBasedOnStatus[proof.status]
 						}`}
 					>
@@ -106,7 +114,9 @@ export const ProofHistory = ({
 							href={`https://explorer.alignedlayer.com/batches/${proof.batchData.batch_merkle_root}`}
 							className="underline"
 						>
-							{proof.batchData.batch_merkle_root}
+							{shortenHash(
+								bytesToHex(proof.batchData.batch_merkle_root)
+							)}
 						</a>
 					) : (
 						<p>...</p>
@@ -124,14 +134,31 @@ export const ProofHistory = ({
 				<TableBodyItem
 					text={proof.verificationData.verificationData.provingSystem}
 				/>,
+				<td>
+					<Button
+						variant="contrast"
+						className="text-nowrap text-sm w-full"
+						disabled={
+							proof.status === "claimed" ||
+							proof.status === "failed"
+						}
+						style={{
+							paddingLeft: 0,
+							paddingRight: 0,
+						}}
+					>
+						{actionBtn[proof.status]}
+					</Button>
+				</td>,
 			],
 		}));
 		setProofsTableRows(rows);
 	}, []);
 
 	return (
-		<div>
+		<div className="overflow-auto" style={{ maxHeight: 500 }}>
 			<Table
+				style={{ minWidth: 1000 }}
 				header={[
 					{ text: "Game" },
 					{ text: "Status" },

@@ -113,8 +113,6 @@ const Proof = ({
 
 		setSubmitProofMessage(JSON.stringify(submitProofMessage));
 
-		console.log("Submit proof message:", submitProofMessage);
-
 		window.setTimeout(() => {
 			formRefRetry.current?.submit();
 		}, 100);

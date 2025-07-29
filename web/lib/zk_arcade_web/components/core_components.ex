@@ -284,26 +284,28 @@ defmodule ZkArcadeWeb.CoreComponents do
   attr :show_labels, :boolean, default: true
   def leaderboard_table(assigns) do
     ~H"""
-    <.table id={@id} rows={@users}>
-      <:col :let={user} label={if @show_labels, do: "Position", else: ""}>
-        <%= user.position %>
-        <%= case user.position do %>
-          <%= 1 -> %>
-          <.icon name="hero-trophy" color="#FFD700" class="" />
-          <%= 2 -> %>
-          <.icon name="hero-trophy" color="#6a697a" class="" />
-          <%= 3 -> %>
-          <.icon name="hero-trophy" color="#b36839" class="" />
-          <%= _ ->  %>
-        <% end %>
-      </:col>
-      <:col :let={user} label={if @show_labels, do: "Address", else: ""}>
-        <.wallet_address address={user.address} current_wallet={@current_wallet} />
-      </:col>
-      <:col :let={user} label={if @show_labels, do: "Score", else: ""}>
-        <%= user.score %>
-      </:col>
-    </.table>
+    <div style="min-width:1000px;">
+      <.table id={@id} rows={@users}>
+        <:col :let={user} label={if @show_labels, do: "Position", else: ""}>
+          <%= user.position %>
+          <%= case user.position do %>
+            <%= 1 -> %>
+            <.icon name="hero-trophy" color="#FFD700" class="" />
+            <%= 2 -> %>
+            <.icon name="hero-trophy" color="#6a697a" class="" />
+            <%= 3 -> %>
+            <.icon name="hero-trophy" color="#b36839" class="" />
+            <%= _ ->  %>
+          <% end %>
+        </:col>
+        <:col :let={user} label={if @show_labels, do: "Address", else: ""}>
+          <.wallet_address address={user.address} current_wallet={@current_wallet} />
+        </:col>
+        <:col :let={user} label={if @show_labels, do: "Score", else: ""}>
+          <%= user.score %>
+        </:col>
+      </.table>
+    </div>
     """
   end
 
@@ -320,7 +322,7 @@ defmodule ZkArcadeWeb.CoreComponents do
   attr :base_path, :string, required: true
   def pagination_controls(assigns) do
     ~H"""
-    <div class="flex gap-x-2 items-center justify-center w-full">
+    <div class="flex gap-x-2 items-center justify-center min-w-full">
       <%= if @pagination.current_page >= 2 do %>
         <.link href={"/leaderboard?page=#{1}"}>
           <.button>
@@ -400,24 +402,27 @@ defmodule ZkArcadeWeb.CoreComponents do
   attr :pagination, :map, default: nil
   attr :show_pagination, :boolean, default: false
   attr :show_view_all_link, :boolean, default: false
+
   def leaderboard_section(assigns) do
     ~H"""
     <%= if length(@users) > 0 do %>
-      <div >
-      <.leaderboard_table
-        id="leaderboard"
-        users={@users}
-        current_wallet={@current_wallet} />
+      <div class="w-full">
+        <div class="overflow-x-auto">
+          <.leaderboard_table
+            id="leaderboard"
+            users={@users}
+            current_wallet={@current_wallet} />
+
+          <%= if @user_rank do %>
+            <.user_rank_display user_rank={@user_rank} current_wallet={@current_wallet} />
+          <% end %>
+        </div>
       </div>
 
-      <%= if @user_rank do %>
-        <.user_rank_display user_rank={@user_rank} current_wallet={@current_wallet} />
-      <% end %>
-
       <%= if @show_pagination && @pagination do %>
-      <div class="mt-8">
-        <.pagination_controls pagination={@pagination} base_path="/leaderboard" />
-        <.pagination_info pagination={@pagination} />
+        <div class="mt-8">
+          <.pagination_controls pagination={@pagination} base_path="/leaderboard" />
+          <.pagination_info pagination={@pagination} />
         </div>
       <% end %>
 

@@ -167,9 +167,8 @@
           <:col :let={user} label="Score"><%= user.score%></:col>
         </.table>
 
-        <p> ... </p>
-
         <%= if user_rank do %>
+          <p> ... </p>
           <div class="">
             <.table id="user-position" rows={[user_rank]}>
               <:col :let={user}><%= user.position %></:col>

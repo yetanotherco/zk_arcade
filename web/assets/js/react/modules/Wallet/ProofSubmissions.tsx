@@ -48,7 +48,6 @@ const Proof = ({
 }) => {
 	const { csrfToken } = useCSRFToken();
 	const formRefSubmitted = useRef<HTMLFormElement>(null);
-	const formRefRetry = useRef<HTMLFormElement>(null);
 	const { address } = useAccount();
 	const { submitSolution } = useLeaderboardContract({
 		contractAddress: leaderboard_address,

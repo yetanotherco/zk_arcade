@@ -1,6 +1,6 @@
 [package]
 name = "beast1984"
-version = "1.0.2"
+version = "0.1.0"
 edition = "2024"
 authors = ["Dominik Wilkowski <Hi@Dominik-Wilkowski.com>"]
 license = "GPL-3.0-or-later"
@@ -47,9 +47,17 @@ aligned-sdk = { git = "https://github.com/yetanotherco/aligned_layer/", rev = "8
 tokio = { version = "1", features = ["time"]}
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3.0", features = ["env-filter"] }
+ureq = "2"
+serde_json = "1.0"
 
 [package.metadata.risc0]
 methods = ["./zkvm_program/"]
 
 [build-dependencies]
 risc0-build = { version = "2.3.0" }
+
+[features]
+devnet = []
+holesky-stage = []
+holesky = []
+mainnet = []

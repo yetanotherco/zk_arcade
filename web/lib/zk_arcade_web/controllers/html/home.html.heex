@@ -143,7 +143,7 @@
 
 
   <div class="section-width">
-    <section id="leaderboard" class="section-spacer-lg">
+    <section id="leaderboard" class="section-spacer-lg" style="width: 100%;">
         <.section_header header="LeaderBoard" />
         <% top_users = ZkArcade.Leaderboard.get_top_users(10) %>
         <% user_in_top? = Enum.any?(top_users, fn u -> u.address == @wallet end) %>

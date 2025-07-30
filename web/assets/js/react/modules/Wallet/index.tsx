@@ -8,6 +8,7 @@ import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { useAccount } from "wagmi";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
+import { NotificationBell } from "./Notifications";
 
 type Props = {
 	network: string;
@@ -58,14 +59,18 @@ const WalletContent = ({
 
 	// Case 1: User has completed session (signed agreement)
 	if (user_address) {
+		const decodedProofs = JSON.parse(proofs);
 		return (
-			<WalletInfo
-				network={network}
-				leaderboard_address={leaderboard_address}
-				payment_service_address={payment_service_address}
-				user_address={user_address}
-				proofs={JSON.parse(proofs)}
-			/>
+			<div className="flex flex-row items-center gap-8">
+				<NotificationBell proofs={decodedProofs} />
+				<WalletInfo
+					network={network}
+					leaderboard_address={leaderboard_address}
+					payment_service_address={payment_service_address}
+					user_address={user_address}
+					proofs={decodedProofs}
+				/>
+			</div>
 		);
 	}
 

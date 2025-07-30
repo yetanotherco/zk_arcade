@@ -125,7 +125,7 @@ defmodule ZkArcadeWeb.PageController do
   
   def leaderboard(conn, params) do
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet)
+    proofs = get_proofs(wallet, 1, 5)
 
     entries_per_page = 10
 

@@ -145,14 +145,11 @@
   <div class="section-width">
     <section id="leaderboard" class="section-spacer-lg" style="width: 100%;">
         <.section_header header="LeaderBoard" />
-        <% top_users = ZkArcade.Leaderboard.get_top_users(10) %>
-        <% user_in_top? = Enum.any?(top_users, fn u -> u.address == @wallet end) %>
-        <% user_rank = if !user_in_top? && @wallet, do: ZkArcade.Leaderboard.get_user_and_position(@wallet), else: nil %>
 
         <.leaderboard_section 
-          users={top_users}
+          users={@top_users}
           current_wallet={@wallet}
-          user_rank={user_rank}
+          user_data={@user_data}
           show_view_all_link={true} />
       </section>
   </div>

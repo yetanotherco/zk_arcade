@@ -47,11 +47,27 @@ defmodule ZkArcadeWeb.PageController do
     days = ZkArcade.Utils.date_diff_days(campaign_started_at_unix_timestamp)
     desc = "Last #{days} days"
 
+    top_users = ZkArcade.Leaderboard.get_top_users(10)
+    user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
+
+    user_data =
+      if !user_in_top? && wallet do
+        case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+          %{user: user, position: position} ->
+            %{address: wallet, position: position, score: user.score}
+          _ ->
+            nil
+        end
+      else
+        nil
+      end
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
       |> assign(:leaderboard, leaderboard)
+      |> assign(:top_users, top_users)
+      |> assign(:user_data, user_data)
       |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
       |> render(:home)
   end
@@ -111,9 +127,14 @@ defmodule ZkArcadeWeb.PageController do
 
     user_in_current_page? = Enum.any?(top_users, fn u -> u.address == wallet end)
 
-    user_rank =
+    user_data =
       if !user_in_current_page? && wallet do
-        ZkArcade.Leaderboard.get_user_and_position(wallet)
+        case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+          %{user: user, position: position} ->
+            %{address: wallet, position: position, score: user.score}
+          _ ->
+            nil
+        end
       else
         nil
       end
@@ -122,7 +143,7 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:wallet, wallet)
     |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:top_users, top_users)
-    |> assign(:user_rank, user_rank)
+    |> assign(:user_data, user_data)
     |> assign(:user_in_current_page, user_in_current_page?)
     |> assign(:pagination, %{
       current_page: page,

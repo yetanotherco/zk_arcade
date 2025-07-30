@@ -9,7 +9,7 @@
                 <.leaderboard_section 
                 users={@top_users}
                 current_wallet={@wallet}
-                user_rank={if @pagination.current_page == 1, do: @user_rank, else: nil}
+                user_data={if @pagination.current_page == 1, do: @user_data, else: nil}
                 pagination={@pagination}
                 show_pagination={true} />
             </div>

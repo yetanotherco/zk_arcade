@@ -379,16 +379,16 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  attr :user_rank, :map, required: true
+  attr :user_data, :map, required: true
   attr :current_wallet, :string, required: true
-  def user_rank_display(assigns) do
+  def user_position_display(assigns) do
     ~H"""
     <div>
       <p> ... </p>
       <div class="">
         <.leaderboard_table
           id="user-position"
-          users={[@user_rank]}
+          users={[@user_data]}
           current_wallet={@current_wallet}
           show_labels={false} />
       </div>
@@ -398,7 +398,7 @@ defmodule ZkArcadeWeb.CoreComponents do
 
   attr :users, :list, required: true
   attr :current_wallet, :string, default: nil
-  attr :user_rank, :map, default: nil
+  attr :user_data, :map, default: nil
   attr :pagination, :map, default: nil
   attr :show_pagination, :boolean, default: false
   attr :show_view_all_link, :boolean, default: false
@@ -413,8 +413,8 @@ defmodule ZkArcadeWeb.CoreComponents do
             users={@users}
             current_wallet={@current_wallet} />
 
-          <%= if @user_rank do %>
-            <.user_rank_display user_rank={@user_rank} current_wallet={@current_wallet} />
+          <%= if @user_data do %>
+            <.user_position_display user_data={@user_data} current_wallet={@current_wallet} />
           <% end %>
         </div>
       </div>

@@ -111,32 +111,24 @@ defmodule ZkArcade.Leaderboard do
     user_address = String.trim(user_address)
 
     if user_address == "" do
-      {:error, "User address cannot be empty"}
+      nil
     else
-      case Repo.one(
-             from(e in LeaderboardEntry,
-               where: e.user_address == ^user_address,
-               select: %{score: e.score, updated_at: e.updated_at}
-             )
-           ) do
+      case Repo.get_by(LeaderboardEntry, user_address: user_address) do
         nil ->
           nil
 
-        %{score: score, updated_at: user_updated_at} ->
-          position =
-            Repo.one(
+        %LeaderboardEntry{} = user ->
+          users_ahead =
+            Repo.aggregate(
               from(e in LeaderboardEntry,
                 where:
-                  e.score > ^score or (e.score == ^score and e.updated_at < ^user_updated_at),
-                select: count()
-              )
+                  e.score > ^user.score or (e.score == ^user.score and e.updated_at < ^user.updated_at)
+              ),
+              :count,
+              :id
             )
 
-          %{
-            position: position + 1,
-            address: user_address,
-            score: score
-          }
+          %{user: user, position: users_ahead + 1}
       end
     end
   end

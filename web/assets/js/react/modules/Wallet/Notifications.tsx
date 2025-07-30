@@ -246,16 +246,24 @@ export const NotificationBell = ({
 						className="overflow-scroll flex flex-col gap-4"
 						style={{ maxHeight: 200 }}
 					>
-						{allProofs.map(proof => (
-							<NotificationEntry
-								proof={proof}
-								leaderboard_address={leaderboard_address}
-								payment_service_address={
-									payment_service_address
-								}
-								user_address={user_address}
-							/>
-						))}
+						{allProofs.length > 0 ? (
+							allProofs.map(proof => (
+								<NotificationEntry
+									proof={proof}
+									leaderboard_address={leaderboard_address}
+									payment_service_address={
+										payment_service_address
+									}
+									user_address={user_address}
+								/>
+							))
+						) : (
+							<p className="text-sm text-text-200">
+								No updates at the moment. We'll notify you if
+								there are any changes to the status of your
+								proofs.
+							</p>
+						)}
 					</div>
 				</div>
 			</div>

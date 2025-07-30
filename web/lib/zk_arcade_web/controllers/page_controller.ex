@@ -16,7 +16,7 @@ defmodule ZkArcadeWeb.PageController do
       wallet
   end
 
-  defp get_proofs(nil), do: []
+  defp get_proofs(nil, page, size), do: []
 
   defp get_proofs(address, page, size) do
     proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})

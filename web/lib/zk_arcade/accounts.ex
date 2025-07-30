@@ -58,6 +58,13 @@ defmodule ZkArcade.Accounts do
     end
   end
 
+  def create_random_name do
+    names_seed_list_1 = ["Decentralized", "Trustless", "Permissionless", "Immutable", "Transparent", "Secure", "Scalable", "Efficient", "Encrypted", "Auditable", "Interoperable", "Deterministic", "Resilient", "Succinct", "Verifiable", "Private", "Compact", "Efficient", "Anonymous", "Zk", "Transparent", "Updatable", "Robust", "Distributed", "Programmable", "Tokenized", "Decentralized", "scalable", "modular", "asynchronous", "deterministic", "parallel", "distributed", "dynamic", "stateless", "typed", "compiled", "interpreted", "declarative", "functional", "immutable", "portable", "lightweight", "robust", "secure", "encrypted", "authenticated", "reliable", "responsive", "efficient", "optimized", "resilient", "redundant", "extensible", "maintainable", "performant", "Optimistic"]
+    names_seed_list_2 = ["lion", "tiger", "eagle", "wolf", "falcon", "bear", "fox", "owl", "panther", "shark", "whale", "snake", "rhino", "leopard", "jaguar", "bull", "antelope", "hawk", "cheetah", "lynx", "cougar", "crocodile", "buffalo", "scorpion", "lizard", "viper", "horse", "deer", "bison", "gorilla", "chimpanzee", "orangutan", "panda", "koala", "kangaroo", "dolphin", "octopus", "squid", "starfish", "seahorse", "jellyfish", "crab", "lobster", "shrimp", "anemone", "coral"]
+
+    Enum.random(names_seed_list_1) <> " " <> Enum.random(names_seed_list_2)
+  end
+
   @doc """
   Creates a wallet.
 
@@ -71,6 +78,9 @@ defmodule ZkArcade.Accounts do
 
   """
   def create_wallet(attrs \\ %{}) do
+    username = create_random_name()
+    attrs = attrs |> Map.put_new(:username, username)
+
     %Wallet{}
     |> Wallet.changeset(attrs)
     |> Repo.insert()

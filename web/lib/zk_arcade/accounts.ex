@@ -59,10 +59,10 @@ defmodule ZkArcade.Accounts do
   end
 
   def create_random_name do
-    names_seed_list_1 = ["Decentralized", "Trustless", "Permissionless", "Immutable", "Transparent", "Secure", "Scalable", "Efficient", "Encrypted", "Auditable", "Interoperable", "Deterministic", "Resilient", "Succinct", "Verifiable", "Private", "Compact", "Efficient", "Anonymous", "Zk", "Transparent", "Updatable", "Robust", "Distributed", "Programmable", "Tokenized", "Decentralized", "scalable", "modular", "asynchronous", "deterministic", "parallel", "distributed", "dynamic", "stateless", "typed", "compiled", "interpreted", "declarative", "functional", "immutable", "portable", "lightweight", "robust", "secure", "encrypted", "authenticated", "reliable", "responsive", "efficient", "optimized", "resilient", "redundant", "extensible", "maintainable", "performant", "Optimistic"]
-    names_seed_list_2 = ["lion", "tiger", "eagle", "wolf", "falcon", "bear", "fox", "owl", "panther", "shark", "whale", "snake", "rhino", "leopard", "jaguar", "bull", "antelope", "hawk", "cheetah", "lynx", "cougar", "crocodile", "buffalo", "scorpion", "lizard", "viper", "horse", "deer", "bison", "gorilla", "chimpanzee", "orangutan", "panda", "koala", "kangaroo", "dolphin", "octopus", "squid", "starfish", "seahorse", "jellyfish", "crab", "lobster", "shrimp", "anemone", "coral"]
+    adjectives = ["Homomorphic", "Elliptic", "ZKSnarky", "Snarky", "Plonkish", "Recursive", "Succinct", "NonInteractive", "Interactive", "Merkleized", "CommitmentBased", "VerifierFriendly", "ProofCarrying", "Polynomial", "TranscriptSafe", "Poseidonic", "HashBased", "GrothFriendly", "Bulletproofed", "Immutable", "CensorshipResistant", "Permissionless", "Byzantine", "Trustless", "SybilResistant", "Deterministic", "GasEfficient", "Composable", "EVMCompatible", "Layered", "RollupNative", "Bridgeable", "Optimistic", "Finalized", "Verifiable", "Algebraic", "Linear", "Modular", "Elliptic", "Isomorphic", "Prime", "Discrete", "Finite", "Bijective", "Injective", "Surjective", "Monoidal", "Canonical", "Fractal", "Probabilistic", "Geometric", "Affine", "Spectral", "Topological"]
+    animals = ["Tiger", "Fox", "Panda", "Lynx", "Wolf", "Owl", "Eagle", "Shark", "Panther", "Koala", "Cobra", "Falcon", "Rabbit", "Turtle", "Jaguar", "Bear", "Leopard", "Chameleon", "Penguin", "Sloth", "Dolphin", "Octopus", "Crab", "Lizard", "Scorpion", "Hawk", "Cheetah", "Rhino", "Buffalo", "Antelope", "Gorilla", "Chimpanzee", "Orangutan", "Bison", "Giraffe", "Kangaroo"]
 
-    Enum.random(names_seed_list_1) <> " " <> Enum.random(names_seed_list_2)
+    Enum.random(adjectives) <> Enum.random(animals)
   end
 
   @doc """

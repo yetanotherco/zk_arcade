@@ -34,9 +34,11 @@ const statusText: { [key in ProofSubmission["status"]]: string } = {
 const Proof = ({
 	proof,
 	leaderboard_address,
+	payment_service_address,
 }: {
 	proof: ProofSubmission;
 	leaderboard_address: Address;
+	payment_service_address: Address;
 }) => {
 	const { csrfToken } = useCSRFToken();
 	const formRefSubmitted = useRef<HTMLFormElement>(null);
@@ -100,7 +102,7 @@ const Proof = ({
 
 		proof.verificationData.maxFee = toHex(maxFee, { size: 32 });
 
-		const { r, s, v } = await signVerificationData(proof.verificationData);
+		const { r, s, v } = await signVerificationData(proof.verificationData, payment_service_address);
 
 		const submitProofMessage: SubmitProof = {
 			verificationData: proof.verificationData,
@@ -257,11 +259,13 @@ const Proof = ({
 type Props = {
 	proofs: ProofSubmission[];
 	leaderboard_address: Address;
+	payment_service_address: Address;
 };
 
 export const ProofSubmissions = ({
 	proofs = [],
 	leaderboard_address,
+	payment_service_address
 }: Props) => {
 	return (
 		<div>
@@ -285,6 +289,9 @@ export const ProofSubmissions = ({
 										proof={proof}
 										leaderboard_address={
 											leaderboard_address
+										}
+										payment_service_address={
+											payment_service_address
 										}
 									/>
 								))}

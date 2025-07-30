@@ -3,18 +3,20 @@
 use crate::{
     ethereum,
     help::Help,
-    sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
+    prover::{prove, save_proof},
     risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
-    stty::{RawMode, install_raw_mode_signal_handler},
+    sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
+    stty::{install_raw_mode_signal_handler, RawMode},
 };
+use dialoguer::MultiSelect;
 use game_logic::{
-    ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
-    BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
     board::Board,
-    common::levels::Level,
+    common::{game::GameLevels, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog},
+    Dir, Tile, ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT,
+    ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH, LOGO,
 };
 use std::{
     io::{self, Read},
@@ -22,7 +24,6 @@ use std::{
     thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
-use dialoguer::MultiSelect;
 
 /// the height of the board
 pub const ANSI_BOARD_HEIGHT: usize = BOARD_HEIGHT;
@@ -88,10 +89,12 @@ pub enum GameState {
 
 /// this is our main game struct that orchestrates the game and its bits
 pub struct Game {
+    pub block_number: u64,
     /// our board
     pub board: Board,
     /// the current level we're in
     pub level: Level,
+    pub game_match: GameLevels,
     /// when we started the level
     pub level_start: Instant,
     /// all of our common beasts instances
@@ -141,6 +144,11 @@ impl Game {
         };
 
         let board_terrain_info = Board::generate_terrain(Level::One);
+        let block_number =
+            ethereum::get_current_block_number().expect("Could not get block number from rpc");
+        println!("Loading game for block number {}...", block_number);
+        let game_match = GameLevels::new(block_number);
+        let board_terrain_info = Board::generate_terrain(game_match.get_config(Level::One));
 
         install_raw_mode_signal_handler();
         let _raw_mode = RawMode::enter().unwrap_or_else(|error| {
@@ -171,8 +179,10 @@ impl Game {
 
         Self {
             levels_completion_log: vec![fist_level_log],
+            block_number: 0,
             board: Board::new(board_terrain_info.buffer),
             level: Level::One,
+            game_match,
             level_start: Instant::now(),
             common_beasts: board_terrain_info.common_beasts,
             super_beasts: board_terrain_info.super_beasts,
@@ -185,12 +195,12 @@ impl Game {
             input_listener: receiver,
             _raw_mode,
             address,
-            proving_systems
+            proving_systems,
         }
     }
 
     pub fn start_new_game(&mut self) {
-        let board_terrain_info = Board::generate_terrain(Level::One);
+        let board_terrain_info = Board::generate_terrain(self.game_match.get_config(self.level));
         let board = Board::new(board_terrain_info.buffer);
         let fist_level_log = LevelLog {
             level: Level::One,
@@ -390,8 +400,8 @@ impl Game {
             }
 
             // eggs hatching
-            self.eggs
-                .retain_mut(|egg| match egg.hatch(self.level.get_config()) {
+            self.eggs.retain_mut(
+                |egg| match egg.hatch(self.game_match.get_config(self.level)) {
                     HatchingState::Incubating => true,
                     HatchingState::Hatching(position, _instant) => {
                         self.board[&position] = Tile::EggHatching;
@@ -402,7 +412,8 @@ impl Game {
                         self.board[&position] = Tile::HatchedBeast;
                         false
                     }
-                });
+                },
+            );
 
             // end game through no more beasts
             if self.common_beasts.len()
@@ -545,7 +556,7 @@ impl Game {
         let _ = handle.join();
 
         if let Some(level) = self.level.next() {
-            let board_terrain_info = Board::generate_terrain(level);
+            let board_terrain_info = Board::generate_terrain(self.game_match.get_config(level));
             let board = Board::new(board_terrain_info.buffer);
 
             let level_log = LevelLog {
@@ -562,7 +573,7 @@ impl Game {
             self.eggs = board_terrain_info.eggs;
             self.hatched_beasts = board_terrain_info.hatched_beasts;
             self.player.position = board_terrain_info.player.position;
-            self.player.score += self.level.get_config().completion_score;
+            self.player.score += self.game_match.get_config(self.level).completion_score;
             self.state = GameState::Playing;
         } else {
             self.has_won = true;
@@ -624,7 +635,7 @@ impl Game {
         );
 
         let mut sp1_res = Ok(());
-        let mut risc0_res= Ok(());
+        let mut risc0_res = Ok(());
 
         if self.proving_systems.contains(&SP1.to_string()) {
             // If it hasn't won, then don't include the last level as it wasn't completed
@@ -646,7 +657,7 @@ impl Game {
                 }
             });
             sp1_res = sp1_handle.join();
-            }
+        }
 
         if self.proving_systems.contains(&RISC0.to_string()) {
             let risc0_levels_completion_log = if self.has_won {
@@ -669,7 +680,6 @@ impl Game {
             risc0_res = risc0_handle.join();
         }
 
-
         let _ = proving_alert_handle.join();
 
         if self.has_won {
@@ -690,7 +700,7 @@ impl Game {
 
     fn get_secs_remaining(&self) -> u64 {
         let elapsed = Instant::now().duration_since(self.level_start);
-        let total_time = self.level.get_config().time;
+        let total_time = self.game_match.get_config(self.level).time;
         if total_time > elapsed {
             total_time - elapsed
         } else {

@@ -1,6 +1,9 @@
 use alloy::hex;
-use game_logic::proving::{LevelLog, ProgramInput};
-use risc0_zkvm::{ExecutorEnv, ProverOpts, Receipt, default_prover};
+use game_logic::{
+    common::levels::LevelJson,
+    proving::{LevelLog, ProgramInput},
+};
+use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts, Receipt};
 
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 
@@ -15,14 +18,19 @@ pub enum ProvingError {
 
 pub fn prove(
     levels_log: Vec<LevelLog>,
+    levels: Vec<LevelJson>,
     address: String,
 ) -> Result<Receipt, ProvingError> {
     let mut env_builder = ExecutorEnv::builder();
 
-    let address_bytes = hex::decode(address)
-        .map_err(|e| ProvingError::WriteInput(e.to_string()))?;
+    let address_bytes =
+        hex::decode(address).map_err(|e| ProvingError::WriteInput(e.to_string()))?;
     // write input data
-    let input = ProgramInput { levels_log:levels_log.to_vec(), address: address_bytes };
+    let input = ProgramInput {
+        levels,
+        levels_log,
+        address: address_bytes,
+    };
     env_builder
         .write(&input)
         .map_err(|e| ProvingError::WriteInput(e.to_string()))?;
@@ -45,19 +53,34 @@ pub fn prove(
     Ok(receipt)
 }
 
+fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
+    // Note: Here we use `u32` to store the length of the chunk assuming that the length of the generated
+    // proof file will not exceed 4GB. In case the length exceeds this limit, you would need to increase
+    // the size of the length field to `u64`, not only here but also in the file reading logic, on the
+    // SubmitProofBeast component.
+    let len = chunk.len() as u32;
+    buf.extend_from_slice(&len.to_le_bytes());
+    buf.extend_from_slice(chunk);
+}
+
+const RISC0_PROVING_SYSTEM: [u8; 1] = [0x01];
+
 pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
-    let serialized = bincode::serialize(&receipt.inner).expect("Failed to serialize the receipt");
+    let proving_system_id = RISC0_PROVING_SYSTEM;
+    let proof = bincode::serialize(&receipt.inner).expect("Failed to serialize receipt");
+    let proof_id = image_id_words_to_bytes(BEAST_1984_PROGRAM_ID);
+    let public_inputs = receipt.journal.bytes.clone();
 
-    std::fs::write("./risc0_proof.bin", serialized)
-        .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+    let mut buffer = Vec::new();
 
-    std::fs::write(
-        "risc0_proof_id.bin",
-        image_id_words_to_bytes(BEAST_1984_PROGRAM_ID),
-    )
-        .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+    // We use the first byte of the generated file to indicate the proving system used
+    buffer.extend_from_slice(&proving_system_id);
 
-    std::fs::write("risc0_public_inputs.bin", receipt.journal.bytes)
+    write_chunk(&mut buffer, &proof);
+    write_chunk(&mut buffer, &proof_id);
+    write_chunk(&mut buffer, &public_inputs);
+
+    std::fs::write("risc0_solution.bin", &buffer)
         .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
     Ok(())

@@ -143,16 +143,14 @@
 
 
   <div class="section-width">
-    <section id="leaderboard" class="section-spacer-lg">
-      <.section_header header="LeaderBoard" />
-      <.table id="leaderboard" rows={@leaderboard}>
-          <:col :let={user} label="Position"><%= user.position %></:col>
-          <:col :let={user} label="Address">
-            <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-          </:col>
-          <:col :let={user} label="Score"><%= user.score%></:col>
-      </.table>
-    </section>
+    <section id="leaderboard" class="section-spacer-lg" style="width: 100%;">
+        <.section_header header="LeaderBoard" />
+
+        <.leaderboard_section 
+          users={@top_users}
+          current_wallet={@wallet}
+          user_data={@user_data}
+          show_view_all_link={true} />
+      </section>
   </div>
 </div>
-

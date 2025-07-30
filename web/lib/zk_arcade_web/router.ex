@@ -15,6 +15,7 @@ defmodule ZkArcadeWeb.Router do
 
     get "/", PageController, :home
     get "/game/:name", PageController, :game
+    get "/history", PageController, :history
     post "/wallet/sign", WalletController, :connect_wallet
     get "/wallet/disconnect", WalletController, :disconnect_wallet
 
@@ -23,6 +24,7 @@ defmodule ZkArcadeWeb.Router do
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
     post "/proof/status/retry", ProofController, :retry_submit_proof
+
     # API endpoint for wallet agreement status check
     get "/api/wallet/:address/agreement-status", WalletApiController, :check_agreement_status
   end

@@ -5,7 +5,8 @@ type ButtonVariant =
 	| "text-accent"
 	| "text"
 	| "disabled"
-	| "disabled-text";
+	| "disabled-text"
+	| "contrast";
 
 const buttonVariantStyles: { [key in ButtonVariant]: string } = {
 	"accent-fill": "px-10 text-black py-2 bg-accent-100",
@@ -13,6 +14,7 @@ const buttonVariantStyles: { [key in ButtonVariant]: string } = {
 	"disabled-text": "font-normal",
 	text: "font-bold hover:underline",
 	"text-accent": "font-bold text-accent-100 hover:underline",
+	contrast: "border border-contrast-100 px-2 text-sm py-2",
 };
 
 type Props = React.ComponentProps<"button"> & {
@@ -26,6 +28,7 @@ export const Button = ({
 	isLoading,
 	className,
 	children,
+	style,
 	...props
 }: Props) => {
 	const [currentVariant, setCurrentVariant] =
@@ -33,7 +36,11 @@ export const Button = ({
 
 	useEffect(() => {
 		if (isLoading || disabled) {
-			if (variant == "text-accent" || variant == "text")
+			if (
+				variant == "text-accent" ||
+				variant == "text" ||
+				variant == "contrast"
+			)
 				setCurrentVariant("disabled-text");
 			else setCurrentVariant("disabled");
 		} else {
@@ -44,10 +51,11 @@ export const Button = ({
 	return (
 		<button
 			className={`rounded text-md ${buttonVariantStyles[currentVariant]} ${className}`}
-			{...props}
 			disabled={disabled || isLoading}
+			style={style}
+			{...props}
 		>
-			{isLoading ? <p>Loading...</p> : children}
+			{isLoading ? "Loading..." : children}
 		</button>
 	);
 };

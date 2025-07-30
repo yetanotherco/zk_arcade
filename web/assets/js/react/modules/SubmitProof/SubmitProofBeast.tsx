@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, FormInput, Modal } from "../../components";
-import { useAligned, useBatcherPaymentService, useModal, useBatcherNonce } from "../../hooks";
+import {
+	useAligned,
+	useBatcherPaymentService,
+	useModal,
+	useBatcherNonce,
+} from "../../hooks";
 import { Address } from "../../types/blockchain";
 import { formatEther, toHex } from "viem";
 import {
@@ -11,6 +16,7 @@ import {
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useChainId } from "wagmi";
 import { useToast } from "../../state/toast";
+import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 import { ProvingSystem, provingSystemByteToName } from "../../types/aligned";
 
 type Props = {
@@ -19,7 +25,11 @@ type Props = {
 	batcher_url: string;
 };
 
-export default ({ payment_service_address, user_address, batcher_url }: Props) => {
+export default ({
+	payment_service_address,
+	user_address,
+	batcher_url,
+}: Props) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
@@ -30,46 +40,18 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const [maxFee, setMaxFee] = useState(BigInt(0));
-	const { nonce, isLoading: nonceLoading, error: nonceError } = useBatcherNonce(batcher_url, user_address);
-
-	const { addToast } = useToast();
-
-
-	useEffect(() => {
-		const params = new URLSearchParams(window.location.search);
-		const message = params.get("message");
-
-		if (message == "proof-failed") {
-			addToast({
-				title: "Proof failed",
-				desc: "The proof was sent but the verification failed",
-				type: "error",
-			});
-		}
-
-		if (message == "proof-sent") {
-			addToast({
-				title: "Proof sent",
-				desc: "The proof was sent and it will be verified soon",
-				type: "success",
-			});
-		}
-
-		// Remove the message param from the URL without reloading the page
-		// this prevents showing the message again when the user refreshes the page
-		if (message) {
-			const newUrl = window.location.pathname;
-			window.history.replaceState({}, "", newUrl);
-		}
-	}, []);
+	const {
+		nonce,
+		isLoading: nonceLoading,
+		error: nonceError,
+	} = useBatcherNonce(batcher_url, user_address);
+	useProofSentMessageReader();
 
 	const chainId = useChainId();
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
 
-	const {
-		balance,
-	} = useBatcherPaymentService({
+	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
 	});
@@ -140,7 +122,10 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 			verificationData,
 		};
 
-		const { r, s, v } = await signVerificationData(noncedVerificationdata, payment_service_address);
+		const { r, s, v } = await signVerificationData(
+			noncedVerificationdata,
+			payment_service_address
+		);
 
 		const submitProofMessage: SubmitProof = {
 			verificationData: noncedVerificationdata,
@@ -206,11 +191,7 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 								name="_csrf_token"
 								value={csrfToken}
 							/>
-							<input
-								type="hidden"
-								name="game"
-								value={"Beast"}
-							/>
+							<input type="hidden" name="game" value={"Beast"} />
 						</form>
 
 						<div className="flex flex-col gap-6">

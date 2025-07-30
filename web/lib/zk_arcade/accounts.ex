@@ -114,4 +114,24 @@ defmodule ZkArcade.Accounts do
   def change_wallet(%Wallet{} = wallet, attrs \\ %{}) do
     Wallet.changeset(wallet, attrs)
   end
+
+  def get_wallet_username(address) do
+    case fetch_wallet_by_address(address) do
+      {:ok, wallet} -> wallet.username
+      {:error, :not_found} -> nil
+    end
+  end
+
+  def set_wallet_username(address, username) do
+    case fetch_wallet_by_address(address) do
+      {:ok, wallet} ->
+        changeset = Wallet.changeset(wallet, %{username: username})
+        case Repo.update(changeset) do
+          {:ok, updated_wallet} -> {:ok, updated_wallet}
+          {:error, changeset} -> {:error, changeset}
+        end
+
+      {:error, :not_found} -> {:error, :not_found}
+    end
+  end
 end

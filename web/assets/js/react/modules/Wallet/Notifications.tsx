@@ -111,7 +111,7 @@ export const NotificationBell = ({ proofs }: Props) => {
 			</div>
 
 			<div className="pt-2">
-				<div className="flex flex-col gap-8 p-8 absolute max-sm:left-0 sm:w-[350px] w-full sm:right-0 shadow-2xl bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10">
+				<div className="flex flex-col gap-8 p-8 absolute max-sm:left-0 sm:w-[400px] w-full sm:right-0 shadow-2xl bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10">
 					<div>
 						<h1 className="text-text-100 text-lg mb-2">
 							Notifications
@@ -124,9 +124,6 @@ export const NotificationBell = ({ proofs }: Props) => {
 						className="overflow-scroll flex flex-col gap-4"
 						style={{ maxHeight: 200 }}
 					>
-						{allProofs.map(proof => (
-							<NotificationEntry proof={proof} />
-						))}
 						{allProofs.map(proof => (
 							<NotificationEntry proof={proof} />
 						))}

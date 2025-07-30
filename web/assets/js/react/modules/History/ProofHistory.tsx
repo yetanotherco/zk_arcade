@@ -43,9 +43,14 @@ export const ProofHistory = ({
 	useEffect(() => {
 		const historyBalance = document.getElementById("history-balance");
 		const historyScore = document.getElementById("history-score");
+		const balanceText = Number(
+			formatEther(balance.data || BigInt(0))
+		).toLocaleString(undefined, {
+			maximumFractionDigits: 5,
+		});
+
 		if (historyBalance)
-			historyBalance.innerText =
-				`${formatEther(balance.data || BigInt(0))} ETH` || "...";
+			historyBalance.innerText = `${balanceText} ETH` || "...";
 		if (historyScore)
 			historyScore.innerText = score.data?.toString() || "...";
 	}, [balance, score]);

@@ -165,10 +165,6 @@ defmodule ZkArcadeWeb.ProofController do
             |> halt()
 
           proof ->
-            Logger.info(
-              "Found proof with ID #{proof_id}, verification data: #{inspect(proof.verification_data)}"
-            )
-
             case EIP712Verifier.verify_aligned_signature(
                   submit_proof_message,
                   address,
@@ -186,7 +182,6 @@ defmodule ZkArcadeWeb.ProofController do
                     Logger.error("No running task found for proof #{proof.id}")
                 end
 
-                Logger.info("Updating proof status to retry for proof ID: #{inspect(proof)}")
                 case Proofs.update_proof_retry(proof.id) do
                   {:ok, _} ->
                     Logger.info("Proof #{proof.id} updated before retrying")
@@ -194,8 +189,6 @@ defmodule ZkArcadeWeb.ProofController do
                   {:error, changeset} ->
                     Logger.error("Failed to update proof #{proof.id} status: #{inspect(changeset)}")
                 end
-
-                Logger.info("Updated proof status to retry for proof ID: #{inspect(proof)}")
 
                 task =
                   Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->

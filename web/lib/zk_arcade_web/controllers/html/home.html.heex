@@ -143,30 +143,14 @@
 
 
   <div class="section-width">
-    <section id="leaderboard" class="section-spacer-lg">
-      <.section_header header="LeaderBoard" />
-      <% top_users = ZkArcade.Leaderboard.get_top_users(10) %>
+    <section id="leaderboard" class="section-spacer-lg" style="width: 100%;">
+        <.section_header header="LeaderBoard" />
 
-      <%= if length(top_users) > 0 do %>
-        <.table id="leaderboard" rows={top_users}>
-          <:col :let={user} label="Position"><%= user.position %></:col>
-          <:col :let={user} label="Address">
-            <%= if user.address == @wallet do %>
-              <p class="text-text-200 text-md">
-                <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-                 (<span class="text-accent-100">you</span>)
-              </p>
-            <% else %>
-              <p class="text-text-200 text-md">
-                <%= String.slice(user.address, 0, 6) <> "..." <> String.slice(user.address, -4, 4) %>
-              </p>
-            <% end %>
-          </:col>
-          <:col :let={user} label="Score"><%= user.score%></:col>
-        </.table>
-      <% else %>
-        <p class="text-text-200 text-md">No users found in the leaderboard.</p>
-      <% end %>
-    </section>
+        <.leaderboard_section 
+          users={@top_users}
+          current_wallet={@wallet}
+          user_data={@user_data}
+          show_view_all_link={true} />
+      </section>
   </div>
 </div>

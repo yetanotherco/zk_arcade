@@ -169,55 +169,70 @@ defmodule ZkArcadeWeb.ProofController do
               "Found proof with ID #{proof_id}, verification data: #{inspect(proof.verification_data)}"
             )
 
-            with {:ok, true} <-
-                   EIP712Verifier.verify_aligned_signature(
-                     submit_proof_message,
-                     address,
-                     submit_proof_message["verificationData"]["chain_id"]
-                   ) do
-              Logger.info("Message decoded and signature verified. Retrying proof submission.")
+            case EIP712Verifier.verify_aligned_signature(
+                  submit_proof_message,
+                  address,
+                  submit_proof_message["verificationData"]["chain_id"]
+                ) do
+              {:ok, true} ->
+                Logger.info("Message decoded and signature verified. Retrying proof submission.")
 
-              case Registry.lookup(ZkArcade.ProofRegistry, proof.id) do
-                [{pid, _value}] when is_pid(pid) ->
-                  Logger.info("Killing task for proof #{proof.id}")
+                case Registry.lookup(ZkArcade.ProofRegistry, proof.id) do
+                  [{pid, _value}] when is_pid(pid) ->
+                    Logger.info("Killing task for proof #{proof.id}")
+                    Process.exit(pid, :kill)
 
-                  Process.exit(pid, :kill)
+                  [] ->
+                    Logger.error("No running task found for proof #{proof.id}")
+                end
 
-                [] ->
-                  Logger.error("No running task found for proof #{proof.id}")
-              end
+                Logger.info("Updated proof status to retry for proof ID: #{inspect(proof)}")
 
-              task =
-                Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-                  Registry.register(ZkArcade.ProofRegistry, proof.id, nil)
+                task =
+                  Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
+                    Registry.register(ZkArcade.ProofRegistry, proof.id, nil)
 
-                  Logger.info("Retrying proof submission for ID: #{proof.id}")
+                    Logger.info("Retrying proof submission for ID: #{proof.id}")
 
-                  submit_to_batcher(submit_proof_message, address, proof.id)
-                end)
+                    submit_to_batcher(submit_proof_message, address, proof.id)
+                  end)
 
-              case Task.yield(task, 10_000) do
-                {:ok, {:ok, result}} ->
-                  Logger.info("Task completed successfully: #{inspect(result)}")
+                case Task.yield(task, 10_000) do
+                  {:ok, {:ok, result}} ->
+                    Logger.info("Task completed successfully: #{inspect(result)}")
 
-                  conn
-                  |> put_flash(:info, "Proof retried successfully!")
-                  |> redirect(to: "/game/beast?message=proof-retried")
+                    conn
+                    |> put_flash(:info, "Proof retried successfully!")
+                    |> redirect(to: "/game/beast?message=proof-retried")
 
-                {:ok, {:error, reason}} ->
-                  Logger.error("Failed to retry proof submission: #{inspect(reason)}")
+                  {:ok, {:error, reason}} ->
+                    Logger.error("Failed to retry proof submission: #{inspect(reason)}")
 
-                  conn
-                  |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
-                  |> redirect(to: "/game/beast?message=proof-failed")
+                    conn
+                    |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
+                    |> redirect(to: "/game/beast?message=proof-failed")
 
-                nil ->
-                  Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                  nil ->
+                    Logger.info("Task is taking longer than 10 seconds, proceeding.")
 
-                  conn
-                  |> put_flash(:info, "Proof is being submitted to batcher.")
-                  |> redirect(to: "/game/beast?message=proof-sent")
-              end
+                    conn
+                    |> put_flash(:info, "Proof is being submitted to batcher.")
+                    |> redirect(to: "/game/beast?message=proof-sent")
+                end
+
+              {:ok, false} ->
+                Logger.error("Signature verification failed for proof #{proof_id}")
+
+                conn
+                |> put_flash(:error, "Signature verification failed.")
+                |> redirect(to: "/game/beast?message=proof-failed")
+
+              {:error, reason} ->
+                Logger.error("Signature verification error for proof #{proof_id}: #{inspect(reason)}")
+
+                conn
+                |> put_flash(:error, "Signature verification error: #{inspect(reason)}")
+                |> redirect(to: "/game/beast?message=proof-failed")
             end
         end
       end

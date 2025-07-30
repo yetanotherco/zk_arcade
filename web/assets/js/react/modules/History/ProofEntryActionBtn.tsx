@@ -129,6 +129,8 @@ export const ProofEntryActionBtn = ({
 					style={{
 						paddingLeft: 0,
 						paddingRight: 0,
+						paddingTop: 8,
+						paddingBottom: 8,
 					}}
 					onClick={handleBtnClick}
 					isLoading={

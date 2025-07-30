@@ -1,72 +1,16 @@
-import React, { useRef } from "react";
+import React from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import { bytesToHex } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { timeAgoInHs } from "../../utils/date";
-import { Button } from "../../components";
-import { useAccount } from "wagmi";
-import { useLeaderboardContract } from "../../hooks";
-import { useCSRFToken } from "../../hooks/useCSRFToken";
+import { TableBodyItem } from "../../components/Table";
+import {
+	ProofBatchMerkleRoot,
+	ProofStatusWithTooltipDesc,
+} from "../../components/Table/ProofBodyItems";
 
-const colorBasedOnStatus: { [key in ProofSubmission["status"]]: string } = {
-	submitted: "bg-accent-100/20 text-accent-100",
-	pending: "bg-yellow/20 text-yellow",
-	claimed: "bg-blue/20 text-blue",
-	failed: "bg-red/20 text-red",
-	underpriced: "bg-orange/20 text-orange",
-};
-
-const tooltipStyleBasedOnStatus: {
-	[key in ProofSubmission["status"]]: string;
-} = {
-	submitted: "bg-accent-100 text-black",
-	pending: "bg-yellow text-black",
-	claimed: "bg-blue text-white",
-	failed: "bg-red text-white",
-	underpriced: "bg-orange text-black",
-};
-
-const tooltipText: { [key in ProofSubmission["status"]]: string } = {
-	submitted: "Solution verified and ready to be submitted",
-	claimed: "Already submitted to leaderboard",
-	pending:
-		"You need to wait until its verified before submitting the solution",
-	failed: "The proof failed to be verified, you have to re-send it",
-	underpriced: "The proof is underpriced, we suggest you bump the fee",
-};
-
-const statusText: { [key in ProofSubmission["status"]]: string } = {
-	claimed: "Claimed",
-	submitted: "Ready",
-	pending: "Pending",
-	failed: "Failed",
-	underpriced: "Pending",
-};
-
-const Proof = ({
-	proof,
-	leaderboard_address,
-}: {
-	proof: ProofSubmission;
-	leaderboard_address: Address;
-}) => {
-	const { csrfToken } = useCSRFToken();
-	const formRefSubmitted = useRef<HTMLFormElement>(null);
-	const { address } = useAccount();
-	const { submitSolution } = useLeaderboardContract({
-		contractAddress: leaderboard_address,
-		userAddress: address || "0x0",
-	});
-
-	const merkleRoot = bytesToHex(
-		proof.batchData?.batch_merkle_root || Uint8Array.from([])
-	);
-
-	const merkleRootHash = `${merkleRoot.slice(0, 2)}...${merkleRoot.slice(
-		-4
-	)}`;
-
+const Proof = ({ proof }: { proof: ProofSubmission }) => {
 	const commitment = computeVerificationDataCommitment(
 		proof.verificationData.verificationData
 	);
@@ -77,97 +21,13 @@ const Proof = ({
 		-4
 	)}`;
 
-	const handleSubmitProof = async () => {
-		if (!proof.batchData) {
-			alert("Batch data not available for this proof");
-			return;
-		}
-
-		await submitSolution.submitBeastSolution(
-			proof.verificationData.verificationData,
-			proof.batchData
-		);
-	};
-
 	return (
-		<>
-			<tr>
-				<td>{proof.game}</td>
-				<td>
-					<div
-						className={`relative group/tooltip flex flex-row gap-2 items-center rounded px-1 w-fit ${
-							colorBasedOnStatus[proof.status]
-						}`}
-					>
-						<span className="hero-information-circle solid size-5"></span>
-						<p>{statusText[proof.status]}</p>
-
-						<div
-							className={`${
-								tooltipStyleBasedOnStatus[proof.status]
-							} rounded absolute rounded -left-1/2 top-full mb-2 text-sm rounded px-2 py-1 opacity-0 group-hover/tooltip:opacity-100 transition pointer-events-none`}
-							style={{ width: 300, zIndex: 10000 }}
-						>
-							<p className="text-center text-xs">
-								{tooltipText[proof.status]}
-							</p>
-						</div>
-					</div>
-				</td>
-				<td>
-					{proof.batchData?.batch_merkle_root ? (
-						<a
-							href={`https://explorer.alignedlayer.com/batches/${merkleRoot}`}
-							className="underline"
-						>
-							{merkleRootHash}
-						</a>
-					) : (
-						<>...</>
-					)}
-				</td>
-				<td>{proofHashShorten}</td>
-			</tr>
-
-			{proof.status == "submitted" && (
-				<tr>
-					<td colSpan={100}>
-						<Button
-							variant="text-accent"
-							className={`text-sm w-full ${
-								proof.status !== "submitted"
-									? "text-text-200"
-									: ""
-							}`}
-							disabled={proof.status !== "submitted"}
-							onClick={handleSubmitProof}
-						>
-							{submitSolution.tx.isPending ||
-							submitSolution.receipt.isLoading
-								? "Sending..."
-								: "Submit solution"}
-						</Button>
-						<form
-							className="hidden"
-							ref={formRefSubmitted}
-							action="/proof/status/submitted"
-							method="POST"
-						>
-							<input
-								type="hidden"
-								name="_csrf_token"
-								value={csrfToken}
-							/>
-							<input
-								type="hidden"
-								name="proof_id"
-								value={proof.id}
-							/>
-						</form>
-					</td>
-				</tr>
-			)}
-		</>
+		<tr>
+			<TableBodyItem text={proof.game} />
+			<ProofStatusWithTooltipDesc proof={proof} />
+			<ProofBatchMerkleRoot proof={proof} />
+			<TableBodyItem text={proofHashShorten} />
+		</tr>
 	);
 };
 
@@ -176,10 +36,7 @@ type Props = {
 	leaderboard_address: Address;
 };
 
-export const ProofSubmissions = ({
-	proofs = [],
-	leaderboard_address,
-}: Props) => {
+export const ProofSubmissions = ({ proofs = [] }: Props) => {
 	return (
 		<div>
 			<div className="flex justify-between mb-6">
@@ -220,13 +77,7 @@ export const ProofSubmissions = ({
 									}
 
 									return (
-										<Proof
-											key={proof.id}
-											proof={proof}
-											leaderboard_address={
-												leaderboard_address
-											}
-										/>
+										<Proof key={proof.id} proof={proof} />
 									);
 								})}
 							</tbody>

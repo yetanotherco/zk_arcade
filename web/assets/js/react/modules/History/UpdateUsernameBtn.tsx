@@ -42,6 +42,7 @@ const UpdateUsernameBtn = ({
                         onChange={e => setUsername(e.target.value)}
                         className="border border-contrast-100 bg-black rounded text-text-100 placeholder:text-white -mb-0.5"
                         label=""
+                        maxLength={20}
                     />
                 </div>
 

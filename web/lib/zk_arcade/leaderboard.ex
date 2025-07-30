@@ -81,16 +81,55 @@ defmodule ZkArcade.Leaderboard do
   Returns the top 10 users based on their scores. The result is a list of maps with user address and score,
   ordered by score in descending order.
   """
-  def get_top_users(top_limit) do
+  def get_top_users(top_limit, offset \\ 0) do
     from(e in LeaderboardEntry,
       select: %{address: e.user_address, score: e.score},
       order_by: [desc: e.score, asc: e.updated_at],
-      limit: ^top_limit
+      limit: ^top_limit,
+      offset: ^offset
     )
     |> Repo.all()
-    |> Enum.with_index(1)
+    |> Enum.with_index(offset + 1)
     |> Enum.map(fn {entry, index} ->
       Map.put(entry, :position, index)
     end)
+  end
+
+  @doc """
+  Returns the total number of users in the leaderboard.
+  """
+  def get_total_users do
+    from(e in LeaderboardEntry, select: count(e.id))
+    |> Repo.one()
+  end
+
+  @doc """
+  Returns the user and its position in the leaderboard based on its address.
+  If the user address is nil or empty, returns nil.
+  """
+  def get_user_and_position(user_address) when is_binary(user_address) do
+    user_address = String.trim(user_address)
+
+    if user_address == "" do
+      nil
+    else
+      case Repo.get_by(LeaderboardEntry, user_address: user_address) do
+        nil ->
+          nil
+
+        %LeaderboardEntry{} = user ->
+          users_ahead =
+            Repo.aggregate(
+              from(e in LeaderboardEntry,
+                where:
+                  e.score > ^user.score or (e.score == ^user.score and e.updated_at < ^user.updated_at)
+              ),
+              :count,
+              :id
+            )
+
+          %{user: user, position: users_ahead + 1}
+      end
+    end
   end
 end

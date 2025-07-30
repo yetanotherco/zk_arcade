@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { ProofSubmission } from "../../types/aligned";
+import React, { useEffect, useRef, useState } from "react";
+import { ProofSubmission, SubmitProof } from "../../types/aligned";
 import { timeAgoInHs } from "../../utils/date";
 import { Button } from "../../components";
-import { bytesToHex } from "viem";
+import { bytesToHex, toHex } from "viem";
 import { computeVerificationDataCommitment } from "../../utils/aligned";
+import { useCSRFToken } from "../../hooks/useCSRFToken";
+import { useAligned, useLeaderboardContract } from "../../hooks";
+import { Address } from "../../types/blockchain";
 
 type Props = {
 	proofs: ProofSubmission[];
+	leaderboard_address: Address;
+	payment_service_address: Address;
+	user_address: Address;
 };
 
 const textBasedOnNotEntry = {
@@ -24,8 +30,32 @@ const textBasedOnNotEntry = {
 	),
 };
 
-const NotificationEntry = ({ proof }: { proof: ProofSubmission }) => {
+const NotificationEntry = ({
+	proof,
+	leaderboard_address,
+	payment_service_address,
+	user_address,
+}: {
+	proof: ProofSubmission;
+	leaderboard_address: Address;
+	payment_service_address: Address;
+	user_address: Address;
+}) => {
 	const [proofCommitment, setProofCommitment] = useState("");
+	const { csrfToken } = useCSRFToken();
+	const formRetryRef = useRef<HTMLFormElement>(null);
+	const formSubmittedRef = useRef<HTMLFormElement>(null);
+	const [submitProofMessage, setSubmitProofMessage] = useState("");
+	const [submitProofMessageLoading, setSubmitProofMessageLoading] =
+		useState(false);
+
+	const { submitSolution } = useLeaderboardContract({
+		userAddress: user_address,
+		contractAddress: leaderboard_address,
+	});
+
+	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
+		useAligned();
 
 	useEffect(() => {
 		const commitment = computeVerificationDataCommitment(
@@ -41,7 +71,62 @@ const NotificationEntry = ({ proof }: { proof: ProofSubmission }) => {
 		setProofCommitment(proofHashShorten);
 	}, [proof, setProofCommitment]);
 
-	const handleClick = () => {};
+	useEffect(() => {
+		if (submitSolution.receipt.isSuccess) {
+			window.setTimeout(() => {
+				formSubmittedRef.current?.submit();
+			}, 1000);
+		}
+	}, [submitSolution.receipt]);
+
+	const handleClick = async () => {
+		if (proof.status === "submitted") {
+			if (!proof.batchData) {
+				alert("Batch data not available for this proof");
+				return;
+			}
+
+			await submitSolution.submitBeastSolution(
+				proof.verificationData.verificationData,
+				proof.batchData
+			);
+			return;
+		}
+
+		if (proof.status === "pending") {
+			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
+			if (!maxFee) {
+				alert("Could not estimate max fee");
+				return;
+			}
+			proof.verificationData.maxFee = toHex(maxFee, { size: 32 });
+
+			setSubmitProofMessageLoading(true);
+			try {
+				const { r, s, v } = await signVerificationData(
+					proof.verificationData,
+					payment_service_address
+				);
+
+				const submitProofMessage: SubmitProof = {
+					verificationData: proof.verificationData,
+					signature: {
+						r,
+						s,
+						v: Number(v),
+					},
+				};
+
+				setSubmitProofMessage(JSON.stringify(submitProofMessage));
+
+				window.setTimeout(() => {
+					formRetryRef.current?.submit();
+				}, 1000);
+			} catch {
+				setSubmitProofMessageLoading(false);
+			}
+		}
+	};
 
 	return (
 		<div className="flex flex-row w-full items-end justify-between gap-4">
@@ -61,14 +146,51 @@ const NotificationEntry = ({ proof }: { proof: ProofSubmission }) => {
 				variant="text-accent"
 				className="text-sm text-nowrap"
 				onClick={handleClick}
+				isLoading={
+					submitProofMessageLoading ||
+					submitSolution.receipt.isLoading
+				}
 			>
 				{proof.status === "submitted" ? "Submit" : "Bump fee"}
 			</Button>
+
+			{proof.status === "pending" && (
+				<form
+					ref={formRetryRef}
+					action="/proof/status/retry"
+					method="post"
+					className="hidden"
+				>
+					<input type="hidden" name="_csrf_token" value={csrfToken} />
+					<input
+						type="hidden"
+						name="submit_proof_message"
+						value={submitProofMessage}
+					/>
+					<input type="hidden" name="proof_id" value={proof.id} />
+				</form>
+			)}
+			{proof.status == "submitted" && (
+				<form
+					className="hidden"
+					ref={formSubmittedRef}
+					action="/proof/status/submitted"
+					method="POST"
+				>
+					<input type="hidden" name="_csrf_token" value={csrfToken} />
+					<input type="hidden" name="proof_id" value={proof.id} />
+				</form>
+			)}
 		</div>
 	);
 };
 
-export const NotificationBell = ({ proofs }: Props) => {
+export const NotificationBell = ({
+	proofs,
+	leaderboard_address,
+	payment_service_address,
+	user_address,
+}: Props) => {
 	const [proofsReady, setProofsReady] = useState<ProofSubmission[]>([]);
 	const [proofsUnderpriced, setProofsUnderpriced] = useState<
 		ProofSubmission[]
@@ -125,7 +247,14 @@ export const NotificationBell = ({ proofs }: Props) => {
 						style={{ maxHeight: 200 }}
 					>
 						{allProofs.map(proof => (
-							<NotificationEntry proof={proof} />
+							<NotificationEntry
+								proof={proof}
+								leaderboard_address={leaderboard_address}
+								payment_service_address={
+									payment_service_address
+								}
+								user_address={user_address}
+							/>
 						))}
 					</div>
 				</div>

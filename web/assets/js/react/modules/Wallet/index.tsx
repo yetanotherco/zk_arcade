@@ -62,7 +62,12 @@ const WalletContent = ({
 		const decodedProofs = JSON.parse(proofs);
 		return (
 			<div className="flex flex-row items-center gap-8">
-				<NotificationBell proofs={decodedProofs} />
+				<NotificationBell
+					proofs={decodedProofs}
+					leaderboard_address={leaderboard_address}
+					payment_service_address={payment_service_address}
+					user_address={user_address}
+				/>
 				<WalletInfo
 					network={network}
 					leaderboard_address={leaderboard_address}

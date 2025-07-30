@@ -36,5 +36,5 @@ define(
 
 define(
 	{ "x-app-history-update-username-btn": UpdateUsernameBtn },
-	{ attributes: ["network", "payment_service_address", "user_address", "username"] }
+	{ attributes: ["network", "username"] }
 );

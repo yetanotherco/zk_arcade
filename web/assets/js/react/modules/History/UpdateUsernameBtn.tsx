@@ -7,15 +7,11 @@ import { FormInput } from "../../components/Form";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 
 type Props = {
-    payment_service_address: Address;
-    user_address: Address;
     network: string;
     username: string
 };
 
 const UpdateUsernameBtn = ({
-	payment_service_address,
-	user_address,
     username,
 }: Omit<Props, "network">) => {
     const [newUsername, setUsername] = React.useState("");
@@ -83,14 +79,12 @@ const UpdateUsernameBtn = ({
 }
 
 
-export default ({ network, payment_service_address, user_address, username }: Props) => {
+export default ({ network, username }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
 				<ToastContainer />
 				<UpdateUsernameBtn
-					payment_service_address={payment_service_address}
-					user_address={user_address}
 					username={username}
 				/>
 			</ToastsProvider>

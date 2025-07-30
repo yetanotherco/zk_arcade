@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Address } from "../types/blockchain";
 import {
 	useChainId,
@@ -10,6 +10,7 @@ import { leaderboardAbi } from "../constants/aligned";
 import { BatchInclusionData, VerificationData } from "../types/aligned";
 import { computeVerificationDataCommitment } from "../utils/aligned";
 import { bytesToHex } from "viem";
+import { useToast } from "../state/toast";
 
 type Args = {
 	userAddress: Address;
@@ -29,6 +30,7 @@ export const useLeaderboardContract = ({
 		args: [userAddress],
 		chainId,
 	});
+	const { addToast } = useToast();
 
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
@@ -70,6 +72,42 @@ export const useLeaderboardContract = ({
 		},
 		[writeContractAsync]
 	);
+
+	useEffect(() => {
+		if (txRest.isSuccess) {
+			addToast({
+				title: "Solution verified",
+				desc: "Your proof was submitted and verified successfully, waiting for receipt....",
+				type: "success",
+			});
+		}
+
+		if (txRest.isError) {
+			addToast({
+				title: "Solution failed",
+				desc: "The transaction was sent but the verification failed.",
+				type: "error",
+			});
+		}
+	}, [txRest.isSuccess, txRest.isError]);
+
+	useEffect(() => {
+		if (receipt.isError) {
+			addToast({
+				title: "Receipt error",
+				desc: "Failed to retrieve receipt from the transaction.",
+				type: "error",
+			});
+		}
+
+		if (receipt.isSuccess) {
+			addToast({
+				title: "Receipt received",
+				desc: "Your solution receipt has been received, your score has been updated.",
+				type: "success",
+			});
+		}
+	}, [receipt.isLoading, receipt.isError]);
 
 	return {
 		score,

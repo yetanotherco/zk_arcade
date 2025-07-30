@@ -16,10 +16,10 @@ defmodule ZkArcadeWeb.PageController do
       wallet
   end
 
-  defp get_proofs(nil), do: []
+  defp get_proofs(nil, page, size), do: []
 
-  defp get_proofs(address) do
-    proofs = ZkArcade.Proofs.get_proofs_by_address(address)
+  defp get_proofs(address, page, size) do
+    proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})
 
     Enum.map(proofs, fn proof ->
       %{
@@ -36,7 +36,7 @@ defmodule ZkArcadeWeb.PageController do
   def home(conn, _params) do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet)
+    proofs = get_proofs(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.list_proofs() |> length()
     total_players = ZkArcade.Accounts.list_wallets() |> length()
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
@@ -47,18 +47,34 @@ defmodule ZkArcadeWeb.PageController do
     days = ZkArcade.Utils.date_diff_days(campaign_started_at_unix_timestamp)
     desc = "Last #{days} days"
 
+    top_users = ZkArcade.Leaderboard.get_top_users(10)
+    user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
+
+    user_data =
+      if !user_in_top? && wallet do
+        case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+          %{user: user, position: position} ->
+            %{address: wallet, position: position, score: user.score}
+          _ ->
+            nil
+        end
+      else
+        nil
+      end
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
       |> assign(:leaderboard, leaderboard)
+      |> assign(:top_users, top_users)
+      |> assign(:user_data, user_data)
       |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
       |> render(:home)
   end
 
   def game(conn, %{"name" => _game_name}) do
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet)
+    proofs = get_proofs(wallet, 1, 5)
     acknowledgements = [
       %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
       %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
@@ -83,13 +99,73 @@ defmodule ZkArcadeWeb.PageController do
 
         Important notes about proof submissions:
 
-      - You can only submit <span class="text-accent-100">one proof per level</span>. For example, if you've reached level 5 and then try to submit a proof for level 4, it will fail.
-      - Each submission must be for a level <span class="text-accent-100">higher than any previously submitted proof</span>. So, if you've already submitted level 5, your next valid submission must be at least level 6.
-      - Points are awarded <span class="text-accent-100">per level</span>, not cumulatively. The best strategy is to submit a proof when you’re confident you won’t reach higher levels or after completing the entire game.
+        - You can only submit <span class="text-accent-100">one proof per level</span>. For example, if you've reached level 5 and then try to submit a proof for level 4, it will fail.
+        - Each submission must be for a level <span class="text-accent-100">higher than any previously submitted proof</span>. So, if you've already submitted level 5, your next valid submission must be at least level 6.
+        - Points are awarded <span class="text-accent-100">per level</span>, not cumulatively. The best strategy is to submit a proof when you’re confident you won’t reach higher levels or after completing the entire game.
         """,
         acknowledgments: acknowledgements,
         tags: [:cli, :risc0]
       })
       |> render(:game)
+  end
+
+  def history(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    proofs = get_proofs(wallet, 1, 10)
+
+    conn
+    |> assign(:wallet, wallet)
+    |> assign(:network, Application.get_env(:zk_arcade, :network))
+    |> assign(:proofs_sent_total, length(proofs))
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
+    |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
+    |> render(:history)
+  end
+  
+  def leaderboard(conn, params) do
+    wallet = get_wallet_from_session(conn)
+    proofs = get_proofs(wallet, 1, 5)
+
+    entries_per_page = 10
+
+    page = String.to_integer(params["page"] || "1")
+    offset = (page - 1) * entries_per_page
+
+    top_users = ZkArcade.Leaderboard.get_top_users(entries_per_page, offset)
+
+    total_users = ZkArcade.Leaderboard.get_total_users()
+    total_pages = ceil(total_users / entries_per_page)
+    has_prev = page > 1
+    has_next = page < total_pages
+
+    user_in_current_page? = Enum.any?(top_users, fn u -> u.address == wallet end)
+
+    user_data =
+      if !user_in_current_page? && wallet do
+        case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+          %{user: user, position: position} ->
+            %{address: wallet, position: position, score: user.score}
+          _ ->
+            nil
+        end
+      else
+        nil
+      end
+
+    conn
+    |> assign(:wallet, wallet)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:top_users, top_users)
+    |> assign(:user_data, user_data)
+    |> assign(:user_in_current_page, user_in_current_page?)
+    |> assign(:pagination, %{
+      current_page: page,
+      total_pages: total_pages,
+      has_prev: has_prev,
+      has_next: has_next,
+      total_users: total_users
+    })
+    |> render(:leaderboard)
   end
 end

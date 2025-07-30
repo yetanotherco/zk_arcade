@@ -36,11 +36,11 @@ defmodule ZkArcadeWeb.ProofController do
         |> halt()
       else
         with {:ok, true} <-
-               EIP712Verifier.verify_aligned_signature(
-                 submit_proof_message,
-                 address,
-                 submit_proof_message["verificationData"]["chain_id"]
-               ) do
+              EIP712Verifier.verify_aligned_signature(
+                submit_proof_message,
+                address,
+                submit_proof_message["verificationData"]["chain_id"]
+              ) do
           Logger.info("Message decoded and signature verified. Sending async task.")
 
           proving_system =
@@ -49,7 +49,7 @@ defmodule ZkArcadeWeb.ProofController do
             )
 
           with {:ok, pending_proof} <-
-                 Proofs.create_pending_proof(submit_proof_message, address, game, proving_system) do
+                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system) do
             task =
               Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
                 Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)
@@ -67,21 +67,21 @@ defmodule ZkArcadeWeb.ProofController do
 
                 conn
                 |> put_flash(:info, "Proof submitted successfully!")
-                |> redirect(to: "/game/beast?message=proof-sent")
+                |> redirect(to: build_redirect_url(conn, "proof-sent"))
 
               {:ok, {:error, reason}} ->
                 Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
 
                 conn
                 |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-                |> redirect(to: "/game/beast?message=proof-failed")
+                |> redirect(to: build_redirect_url(conn, "proof-failed"))
 
               nil ->
                 Logger.info("Task is taking longer than 10 seconds, proceeding.")
 
                 conn
                 |> put_flash(:info, "Proof is being submitted to batcher.")
-                |> redirect(to: "/game/beast?message=proof-sent")
+                |> redirect(to: build_redirect_url(conn, "proof-sent"))
             end
           else
             {:error, changeset} when is_map(changeset) ->
@@ -94,7 +94,7 @@ defmodule ZkArcadeWeb.ProofController do
 
             conn
             |> put_flash(:error, "Failed to verify the received signature: #{inspect(reason)}")
-            |> redirect(to: "/game/beast?message=proof-failed")
+            |> redirect(to: build_redirect_url(conn, "proof-failed"))
         end
       end
     else
@@ -103,9 +103,27 @@ defmodule ZkArcadeWeb.ProofController do
 
         conn
         |> put_flash(:error, "Invalid input: #{inspect(error)}")
-        |> redirect(to: "/game/beast?message=proof-failed")
+        |> redirect(to: build_redirect_url(conn, "proof-failed"))
         |> halt()
     end
+  end
+
+  defp build_redirect_url(conn, message) do
+    referer = get_req_header(conn, "referer") |> List.first() || "/"
+    uri = URI.parse(referer)
+
+    query_params =
+      case uri.query do
+        nil -> %{}
+        q -> URI.decode_query(q)
+      end
+
+    new_query =
+      query_params
+      |> Map.put("message", message)
+      |> URI.encode_query()
+
+    uri.path <> "?" <> new_query
   end
 
   defp submit_to_batcher(submit_proof_message, address, pending_proof_id) do
@@ -152,7 +170,7 @@ defmodule ZkArcadeWeb.ProofController do
 
         conn
         |> put_flash(:error, "Wallet address is undefined.")
-        |> redirect(to: "/")
+        |> redirect(to: build_redirect_url(conn, ""))
         |> halt()
       else
         case Proofs.get_proof_by_id(proof_id) do
@@ -161,63 +179,80 @@ defmodule ZkArcadeWeb.ProofController do
 
             conn
             |> put_flash(:error, "Proof not found.")
-            |> redirect(to: "/")
+            |> redirect(to: build_redirect_url(conn, "proof-failed"))
             |> halt()
 
           proof ->
-            Logger.info(
-              "Found proof with ID #{proof_id}, verification data: #{inspect(proof.verification_data)}"
-            )
+            case EIP712Verifier.verify_aligned_signature(
+                  submit_proof_message,
+                  address,
+                  submit_proof_message["verificationData"]["chain_id"]
+                ) do
+              {:ok, true} ->
+                Logger.info("Message decoded and signature verified. Retrying proof submission.")
 
-            with {:ok, true} <-
-                   EIP712Verifier.verify_aligned_signature(
-                     submit_proof_message,
-                     address,
-                     submit_proof_message["verificationData"]["chain_id"]
-                   ) do
-              Logger.info("Message decoded and signature verified. Retrying proof submission.")
+                case Registry.lookup(ZkArcade.ProofRegistry, proof.id) do
+                  [{pid, _value}] when is_pid(pid) ->
+                    Logger.info("Killing task for proof #{proof.id}")
+                    Process.exit(pid, :kill)
 
-              case Registry.lookup(ZkArcade.ProofRegistry, proof.id) do
-                [{pid, _value}] when is_pid(pid) ->
-                  Logger.info("Killing task for proof #{proof.id}")
+                  [] ->
+                    Logger.error("No running task found for proof #{proof.id}")
+                end
 
-                  Process.exit(pid, :kill)
+                case Proofs.update_proof_retry(proof.id) do
+                  {:ok, _} ->
+                    Logger.info("Proof #{proof.id} updated before retrying")
 
-                [] ->
-                  Logger.error("No running task found for proof #{proof.id}")
-              end
+                  {:error, changeset} ->
+                    Logger.error("Failed to update proof #{proof.id} status: #{inspect(changeset)}")
+                end
 
-              task =
-                Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-                  Registry.register(ZkArcade.ProofRegistry, proof.id, nil)
+                task =
+                  Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
+                    Registry.register(ZkArcade.ProofRegistry, proof.id, nil)
 
-                  Logger.info("Retrying proof submission for ID: #{proof.id}")
+                    Logger.info("Retrying proof submission for ID: #{proof.id}")
 
-                  submit_to_batcher(submit_proof_message, address, proof.id)
-                end)
+                    submit_to_batcher(submit_proof_message, address, proof.id)
+                  end)
 
-              case Task.yield(task, 10_000) do
-                {:ok, {:ok, result}} ->
-                  Logger.info("Task completed successfully: #{inspect(result)}")
+                case Task.yield(task, 10_000) do
+                  {:ok, {:ok, result}} ->
+                    Logger.info("Task completed successfully: #{inspect(result)}")
 
-                  conn
-                  |> put_flash(:info, "Proof retried successfully!")
-                  |> redirect(to: "/game/beast?message=proof-retried")
+                    conn
+                    |> put_flash(:info, "Proof retried successfully!")
+                    |> redirect(to: build_redirect_url(conn, "proof-sent"))
 
-                {:ok, {:error, reason}} ->
-                  Logger.error("Failed to retry proof submission: #{inspect(reason)}")
+                  {:ok, {:error, reason}} ->
+                    Logger.error("Failed to retry proof submission: #{inspect(reason)}")
 
-                  conn
-                  |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
-                  |> redirect(to: "/game/beast?message=proof-failed")
+                    conn
+                    |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
+                    |> redirect(to: build_redirect_url(conn, "proof-failed"))
 
-                nil ->
-                  Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                  nil ->
+                    Logger.info("Task is taking longer than 10 seconds, proceeding.")
 
-                  conn
-                  |> put_flash(:info, "Proof is being submitted to batcher.")
-                  |> redirect(to: "/game/beast?message=proof-sent")
-              end
+                    conn
+                    |> put_flash(:info, "Proof is being submitted to batcher.")
+                    |> redirect(to: build_redirect_url(conn, "proof-sent"))
+                end
+
+              {:ok, false} ->
+                Logger.error("Signature verification failed for proof #{proof_id}")
+
+                conn
+                |> put_flash(:error, "Signature verification failed.")
+                |> redirect(to: build_redirect_url(conn, "proof-failed"))
+
+              {:error, reason} ->
+                Logger.error("Signature verification error for proof #{proof_id}: #{inspect(reason)}")
+
+                conn
+                |> put_flash(:error, "Signature verification error: #{inspect(reason)}")
+                |> redirect(to: build_redirect_url(conn, "proof-failed"))
             end
         end
       end
@@ -227,7 +262,7 @@ defmodule ZkArcadeWeb.ProofController do
 
         conn
         |> put_flash(:error, "Invalid input: #{inspect(error)}")
-        |> redirect(to: "/game/beast?message=proof-failed")
+        |> redirect(to: build_redirect_url(conn, "proof-failed"))
         |> halt()
     end
   end

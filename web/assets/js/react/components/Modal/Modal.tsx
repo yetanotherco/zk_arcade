@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useOnClickOutside } from "../hooks/useOnClickOutside";
-import { useOnKeyDown } from "../hooks/useOnKeyDown";
+import { useOnClickOutside } from "../../hooks/useOnClickOutside";
+import { useOnKeyDown } from "../../hooks/useOnKeyDown";
 import { useIsMounted } from "connectkit";
 
 type Props = {

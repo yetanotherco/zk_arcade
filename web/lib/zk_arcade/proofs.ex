@@ -64,8 +64,20 @@ defmodule ZkArcade.Proofs do
   """
   def get_proofs_by_address(address) do
     downcased_addr = String.downcase(address)
-    from(p in Proof, where: p.wallet_address == ^downcased_addr)
+    from(p in Proof, where: p.wallet_address == ^downcased_addr, limit: 10)
     |> Repo.all()
+  end
+
+  def get_proofs_by_address(address, %{page: page, page_size: size}) do
+    downcased_addr = String.downcase(address)
+
+    from(proof in Proof,
+      select: proof,
+      where: proof.wallet_address == ^downcased_addr,
+      order_by: [desc: proof.inserted_at],
+      limit: ^size,
+      offset: ^((page - 1) * size)
+    ) |> Repo.all()
   end
 
   def create_pending_proof(submit_proof_message, address, game, proving_system) do
@@ -163,6 +175,27 @@ defmodule ZkArcade.Proofs do
     case Repo.update(changeset) do
       {:ok, updated_proof} ->
         Logger.info("Updated proof #{proof_id} status to failed")
+        {:ok, updated_proof}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+        {:error, changeset}
+    end
+  end
+
+  def update_proof_retry(proof_id) do
+    proof = get_proof!(proof_id)
+
+    changeset = change_proof(proof, %{
+      status: "pending",
+      inserted_at: DateTime.utc_now(),
+      updated_at: DateTime.utc_now(),
+      times_retried: proof.times_retried + 1
+    })
+
+    case Repo.update(changeset) do
+      {:ok, updated_proof} ->
+        Logger.info("Updated proof #{proof_id} status to pending for retry")
         {:ok, updated_proof}
 
       {:error, changeset} ->

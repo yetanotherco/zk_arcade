@@ -171,6 +171,22 @@ defmodule ZkArcade.Proofs do
     end
   end
 
+  def update_proof_retry(proof_id) do
+    proof = get_proof!(proof_id)
+
+    changeset = change_proof(proof, %{status: "pending", inserted_at: DateTime.utc_now()})
+
+    case Repo.update(changeset) do
+      {:ok, updated_proof} ->
+        Logger.info("Updated proof #{proof_id} status to pending for retry")
+        {:ok, updated_proof}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+        {:error, changeset}
+    end
+  end
+
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking proof changes.
 

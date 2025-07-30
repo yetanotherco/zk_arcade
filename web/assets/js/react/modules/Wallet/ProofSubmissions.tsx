@@ -34,6 +34,7 @@ const Proof = ({ proof }: { proof: ProofSubmission }) => {
 type Props = {
 	proofs: ProofSubmission[];
 	leaderboard_address: Address;
+	payment_service_address: Address;
 };
 
 export const ProofSubmissions = ({ proofs = [] }: Props) => {

@@ -62,6 +62,7 @@ export const WalletInfo = ({
 					<ProofSubmissions
 						proofs={proofs}
 						leaderboard_address={leaderboard_address}
+						payment_service_address={payment_service_address}
 					/>
 					<div>
 						<form

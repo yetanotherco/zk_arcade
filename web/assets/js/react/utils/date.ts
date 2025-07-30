@@ -1,5 +1,5 @@
 export const timeAgo = (dateString: string) => {
-	const pastDate = new Date(dateString);
+	const pastDate = new Date(dateString + "Z");
 	const diffInMs = Date.now() - pastDate.getTime();
 
 	const seconds = Math.floor(diffInMs / 1000);
@@ -19,8 +19,10 @@ export const timeAgo = (dateString: string) => {
 };
 
 export const timeAgoInHs = (dateString: string) => {
-	const pastDate = new Date(dateString);
-	const diffInMs = Date.now() - pastDate.getTime();
+	const pastDate = new Date(dateString + "Z");
+
+	const nowUtc = Date.now();
+	const diffInMs = nowUtc - pastDate.getTime();
 	const hours = Math.floor(diffInMs / (1000 * 60 * 60));
 
 	return hours;

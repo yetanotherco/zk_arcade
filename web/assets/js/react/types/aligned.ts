@@ -26,14 +26,10 @@ export type NoncedVerificationdata = {
 	payment_service_addr: Address;
 };
 
+export type ProvingSystem = "GnarkPlonkBls12_381" | "GnarkPlonkBn254" | "GnarkGroth16Bn254" | "SP1" | "Risc0" | "CircomGroth16Bn256";
+
 export type VerificationData = {
-	provingSystem:
-		| "GnarkPlonkBls12_381"
-		| "GnarkPlonkBn254"
-		| "GnarkGroth16Bn254"
-		| "SP1"
-		| "Risc0"
-		| "CircomGroth16Bn256";
+	provingSystem: ProvingSystem;
 	proof: number[];
 	publicInput?: number[];
 	verificationKey?: number[];
@@ -51,6 +47,15 @@ export const provingSystemNameToByte: Record<
 	SP1: 3,
 	Risc0: 4,
 	CircomGroth16Bn256: 5,
+};
+
+export const provingSystemByteToName: Record<number, VerificationData["provingSystem"]> = {
+	0: "GnarkPlonkBls12_381",
+	1: "GnarkPlonkBn254",
+	2: "GnarkGroth16Bn254",
+	3: "SP1",
+	4: "Risc0",
+	5: "CircomGroth16Bn256",
 };
 
 export type VerificationDataCommitment = {

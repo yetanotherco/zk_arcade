@@ -44,9 +44,7 @@ defmodule ZkArcadeWeb.ProofController do
           Logger.info("Message decoded and signature verified. Sending async task.")
 
           proving_system =
-            String.downcase(
               submit_proof_message["verificationData"]["verificationData"]["provingSystem"]
-            )
 
           with {:ok, pending_proof} <-
                  Proofs.create_pending_proof(submit_proof_message, address, game, proving_system) do

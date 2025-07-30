@@ -11,6 +11,7 @@ import {
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useChainId } from "wagmi";
 import { useToast } from "../../state/toast";
+import { ProvingSystem, provingSystemByteToName } from "../../types/aligned";
 
 type Props = {
 	payment_service_address: Address;
@@ -22,6 +23,7 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 	const { open, setOpen, toggleOpen } = useModal();
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
+	const [provingSystem, setProvingSystem] = useState<ProvingSystem>("");
 	const [proof, setProof] = useState<Uint8Array>();
 	const [proofId, setProofId] = useState<Uint8Array>();
 	const [publicInputs, setPublicInputs] = useState<Uint8Array>();
@@ -83,6 +85,7 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 		let offset = 0;
 
 		const provingSystemId = bytes.slice(0, 1);
+		const provingSystem = provingSystemByteToName[provingSystemId[0]];
 		offset += 1;
 
 		function readChunk(): Uint8Array {
@@ -97,6 +100,7 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 		const proofId = readChunk();
 		const publicInputs = readChunk();
 
+		setProvingSystem(provingSystem);
 		setProof(proof);
 		setProofId(proofId);
 		setPublicInputs(publicInputs);
@@ -120,7 +124,7 @@ export default ({ payment_service_address, user_address, batcher_url }: Props) =
 		}
 
 		const verificationData: VerificationData = {
-			provingSystem: "Risc0",
+			provingSystem: provingSystem,
 			proof: Array.from(proof),
 			publicInput: Array.from(publicInputs),
 			vmProgramCode: Array.from(proofId),

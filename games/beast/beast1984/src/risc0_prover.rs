@@ -1,3 +1,4 @@
+use aligned_sdk::common::types::ProvingSystemId;
 use alloy::hex;
 use game_logic::{
     common::levels::LevelJson,
@@ -15,6 +16,8 @@ pub enum ProvingError {
     Verification(String),
     SavingProof(String),
 }
+
+const RISC0_PROVING_SYSTEM: [u8; 1] = [ProvingSystemId::Risc0 as u8];
 
 pub fn prove(
     levels_log: Vec<LevelLog>,
@@ -62,8 +65,6 @@ fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
     buf.extend_from_slice(&len.to_le_bytes());
     buf.extend_from_slice(chunk);
 }
-
-const RISC0_PROVING_SYSTEM: [u8; 1] = [0x01];
 
 pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
     let proving_system_id = RISC0_PROVING_SYSTEM;

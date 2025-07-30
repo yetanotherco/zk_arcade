@@ -64,8 +64,20 @@ defmodule ZkArcade.Proofs do
   """
   def get_proofs_by_address(address) do
     downcased_addr = String.downcase(address)
-    from(p in Proof, where: p.wallet_address == ^downcased_addr)
+    from(p in Proof, where: p.wallet_address == ^downcased_addr, limit: 10)
     |> Repo.all()
+  end
+
+  def get_proofs_by_address(address, %{page: page, page_size: size}) do
+    downcased_addr = String.downcase(address)
+
+    from(proof in Proof,
+      select: proof,
+      where: proof.wallet_address == ^downcased_addr,
+      order_by: [desc: proof.inserted_at],
+      limit: ^size,
+      offset: ^((page - 1) * size)
+    ) |> Repo.all()
   end
 
   def create_pending_proof(submit_proof_message, address, game, proving_system) do

@@ -7,6 +7,8 @@ import { Address } from "../../types/blockchain";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { useAccount } from "wagmi";
+import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
+import { NotificationBell } from "./Notifications";
 
 type Props = {
 	network: string;
@@ -23,10 +25,11 @@ const WalletContent = ({
 	leaderboard_address,
 	user_address,
 	proofs,
-}: Omit<Props, 'needs_agreement'>) => {
+}: Omit<Props, "needs_agreement">) => {
 	const { address, isConnected } = useAccount();
 	const [needsAgreement, setNeedsAgreement] = useState(false);
 	const [isCheckingAgreement, setIsCheckingAgreement] = useState(false);
+	useProofSentMessageReader();
 
 	// Check if connected wallet needs agreement
 	useEffect(() => {
@@ -44,7 +47,7 @@ const WalletContent = ({
 					}
 				})
 				.catch(error => {
-					console.error('Error checking agreement status:', error);
+					console.error("Error checking agreement status:", error);
 					setNeedsAgreement(true); // Default to showing agreement on error
 					setIsCheckingAgreement(false);
 				});
@@ -56,14 +59,23 @@ const WalletContent = ({
 
 	// Case 1: User has completed session (signed agreement)
 	if (user_address) {
+		const decodedProofs = JSON.parse(proofs);
 		return (
-			<WalletInfo
-				network={network}
-				leaderboard_address={leaderboard_address}
-				payment_service_address={payment_service_address}
-				user_address={user_address}
-				proofs={JSON.parse(proofs)}
-			/>
+			<div className="flex flex-row items-center gap-8">
+				<NotificationBell
+					proofs={decodedProofs}
+					leaderboard_address={leaderboard_address}
+					payment_service_address={payment_service_address}
+					user_address={user_address}
+				/>
+				<WalletInfo
+					network={network}
+					leaderboard_address={leaderboard_address}
+					payment_service_address={payment_service_address}
+					user_address={user_address}
+					proofs={decodedProofs}
+				/>
+			</div>
 		);
 	}
 
@@ -82,7 +94,7 @@ export default ({
 	leaderboard_address,
 	user_address,
 	proofs,
-}: Omit<Props, 'needs_agreement'>) => {
+}: Omit<Props, "needs_agreement">) => {
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>

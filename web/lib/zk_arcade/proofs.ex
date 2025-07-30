@@ -174,7 +174,12 @@ defmodule ZkArcade.Proofs do
   def update_proof_retry(proof_id) do
     proof = get_proof!(proof_id)
 
-    changeset = change_proof(proof, %{status: "pending", inserted_at: DateTime.utc_now()})
+    changeset = change_proof(proof, %{
+      status: "pending",
+      inserted_at: DateTime.utc_now(),
+      updated_at: DateTime.utc_now(),
+      times_retried: proof.times_retried + 1
+    })
 
     case Repo.update(changeset) do
       {:ok, updated_proof} ->

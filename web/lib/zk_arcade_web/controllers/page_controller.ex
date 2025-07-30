@@ -113,6 +113,8 @@ defmodule ZkArcadeWeb.PageController do
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 10)
 
+    username = ZkArcade.Accounts.get_wallet_username(wallet)
+
     conn
     |> assign(:wallet, wallet)
     |> assign(:network, Application.get_env(:zk_arcade, :network))
@@ -120,9 +122,10 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
     |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
+    |> assign(:username, username)
     |> render(:history)
   end
-  
+
   def leaderboard(conn, params) do
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 5)

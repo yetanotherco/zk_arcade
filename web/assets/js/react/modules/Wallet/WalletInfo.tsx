@@ -31,7 +31,7 @@ export const WalletInfo = ({
 	};
 
 	return (
-		<div className="relative group">
+		<div className="sm:relative group">
 			<div className="flex flex-row items-center gap-3">
 				<div>
 					<p className="text-xs">Connected:</p>
@@ -45,8 +45,8 @@ export const WalletInfo = ({
 			</div>
 			<div className="pt-2">
 				<div
-					className="flex flex-col gap-8 p-8 absolute right-0 shadow-2xl bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10"
-					style={{ width: 400, maxHeight: 400 }}
+					className="flex flex-col gap-8 p-8 absolute max-sm:left-0 sm:w-[400px] w-full sm:right-0 shadow-2xl bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10"
+					style={{ maxHeight: 400 }}
 				>
 					<BalanceScoreInAligned
 						payment_service_address={payment_service_address}

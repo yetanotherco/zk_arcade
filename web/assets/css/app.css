@@ -87,6 +87,12 @@ thead {
 	margin-bottom: 70px;
 }
 
+.ellipsis {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 @media (max-width: 1024px) {
 	.section-width {
 		padding-left: 1.5rem;

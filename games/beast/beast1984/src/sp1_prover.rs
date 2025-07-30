@@ -1,7 +1,10 @@
 use std::sync::LazyLock;
 
 use alloy::hex;
-use game_logic::proving::{LevelLog, ProgramInput};
+use game_logic::{
+    common::levels::LevelJson,
+    proving::{LevelLog, ProgramInput},
+};
 use sp1_sdk::{EnvProver, ProverClient, SP1ProofWithPublicValues, SP1Stdin};
 
 const BEAST_1984_PROGRAM_ELF: &[u8] = include_bytes!("../sp1_program/elf/beast_1984_program");
@@ -18,6 +21,7 @@ pub enum ProvingError {
 
 pub fn prove(
     levels_log: Vec<LevelLog>,
+    levels: Vec<LevelJson>,
     address: String,
 ) -> Result<SP1ProofWithPublicValues, ProvingError> {
     let mut stdin = SP1Stdin::new();
@@ -26,6 +30,7 @@ pub fn prove(
         hex::decode(address).map_err(|e| ProvingError::WriteInput(e.to_string()))?;
     // write input data
     let input = ProgramInput {
+        levels,
         levels_log,
         address: address_bytes,
     };

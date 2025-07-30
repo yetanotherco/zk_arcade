@@ -3,20 +3,19 @@
 use crate::{
     ethereum,
     help::Help,
-    prover::{prove, save_proof},
     risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
     sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
-    stty::{install_raw_mode_signal_handler, RawMode},
+    stty::{RawMode, install_raw_mode_signal_handler},
 };
 use dialoguer::MultiSelect;
 use game_logic::{
+    ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
+    BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
     board::Board,
     common::{game::GameLevels, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog},
-    Dir, Tile, ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT,
-    ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH, LOGO,
 };
 use std::{
     io::{self, Read},
@@ -143,7 +142,6 @@ impl Game {
             eprintln!("You must select at least one proving system. Please try again.");
         };
 
-        let board_terrain_info = Board::generate_terrain(Level::One);
         let block_number =
             ethereum::get_current_block_number().expect("Could not get block number from rpc");
         println!("Loading game for block number {}...", block_number);
@@ -647,9 +645,10 @@ impl Game {
                 levels_log
             };
             let sp1_address = self.address.clone();
+            let levels = self.game_match.get_levels_in_json();
 
             let sp1_handle = thread::spawn(move || {
-                let res = sp1_prove(sp1_levels_completion_log, sp1_address);
+                let res = sp1_prove(sp1_levels_completion_log, levels, sp1_address);
                 if let Ok(receipt) = res {
                     sp1_save_proof(receipt).expect("To be able to write proof");
                 } else {
@@ -668,9 +667,10 @@ impl Game {
                 levels_log
             };
             let risc0_address = self.address.clone();
+            let levels = self.game_match.get_levels_in_json();
 
             let risc0_handle = thread::spawn(move || {
-                let res = risc0_prove(risc0_levels_completion_log, risc0_address);
+                let res = risc0_prove(risc0_levels_completion_log, levels, risc0_address);
                 if let Ok(receipt) = res {
                     risc0_save_proof(receipt).expect("To be able to write proof");
                 } else {

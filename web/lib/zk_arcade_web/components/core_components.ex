@@ -56,6 +56,8 @@ defmodule ZkArcadeWeb.CoreComponents do
             user_address={@wallet}
             proofs={@submitted_proofs}
             leaderboard_address={@leaderboard_address}
+            username={@username}
+            user_position={@user_position}
           />
         </div>
       </nav>
@@ -297,6 +299,9 @@ defmodule ZkArcadeWeb.CoreComponents do
             <.icon name="hero-trophy" color="#b36839" class="" />
             <%= _ ->  %>
           <% end %>
+        </:col>
+        <:col :let={user} label={if @show_labels, do: "Username", else: ""}>
+          <p class="text-text-100 text-md"><%= user.username %></p>
         </:col>
         <:col :let={user} label={if @show_labels, do: "Address", else: ""}>
           <.wallet_address address={user.address} current_wallet={@current_wallet} />

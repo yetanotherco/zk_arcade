@@ -44,4 +44,27 @@ defmodule ZkArcadeWeb.WalletController do
     |> delete_session(:wallet_address)
     |> redirect(to: ~p"/")
   end
+
+  def set_username(conn, %{"new_username" => username}) do
+    Logger.info("Setting username to #{username}")
+    wallet_address = get_session(conn, :wallet_address)
+
+    if wallet_address do
+      case ZkArcade.Accounts.set_wallet_username(wallet_address, username) do
+        {:ok, _wallet} ->
+          conn
+          |> put_flash(:info, "Username updated successfully")
+          |> redirect(to: ~p"/history")
+
+        {:error, changeset} ->
+          conn
+          |> assign(:error, "Error updating username: #{inspect(changeset.errors)}")
+          |> render(:history)
+      end
+    else
+      conn
+      |> assign(:error, "No wallet connected")
+      |> render(:home)
+    end
+  end
 end

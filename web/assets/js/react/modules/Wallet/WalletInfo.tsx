@@ -12,6 +12,8 @@ type Props = {
 	leaderboard_address: Address;
 	user_address: Address;
 	proofs: ProofSubmission[];
+	username: string;
+	user_position: number;
 };
 
 export const WalletInfo = ({
@@ -19,6 +21,8 @@ export const WalletInfo = ({
 	leaderboard_address,
 	user_address,
 	proofs,
+	username,
+	user_position,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const { disconnect } = useDisconnect();
@@ -51,7 +55,9 @@ export const WalletInfo = ({
 					<div className="flex gap-2 items-center">
 						<span className="hero-user"></span>
 						<a href="/history" className="text-lg hover:underline">
-							Vitalik Buterin (#120)
+							{username} {user_position === null
+								? "(#None)"
+								: `(#${user_position})`}
 						</a>
 					</div>
 					<BalanceScoreInAligned

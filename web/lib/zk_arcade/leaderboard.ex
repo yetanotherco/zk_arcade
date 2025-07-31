@@ -91,7 +91,9 @@ defmodule ZkArcade.Leaderboard do
     |> Repo.all()
     |> Enum.with_index(offset + 1)
     |> Enum.map(fn {entry, index} ->
-      Map.put(entry, :position, index)
+      entry = Map.put(entry, :position, index)
+      ZkArcade.Accounts.get_wallet_username(entry.address)
+      |> then(&Map.put(entry, :username, &1))
     end)
   end
 

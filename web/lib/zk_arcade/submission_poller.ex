@@ -99,7 +99,7 @@ defmodule ZkArcade.SubmissionPoller do
 
     case ZkArcade.Leaderboard.insert_or_update_entry(%{
            "user_address" => user,
-           "score" => level
+           "score" => current_score
          }) do
       {:ok, _entry} ->
         Logger.info("Leaderboard entry created/updated successfully.")

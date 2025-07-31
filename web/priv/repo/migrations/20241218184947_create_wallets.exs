@@ -8,6 +8,7 @@ defmodule ZkArcade.Repo.Migrations.CreateWallets do
       add :points, :integer, default: 0, null: false
       add :balance, :float, default: 0.0, null: false
       add :agreement_signature, :string
+      add :username, :string, null: false
 
       timestamps()
     end

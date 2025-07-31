@@ -2,6 +2,20 @@ defmodule ZkArcadeWeb.PageController do
   require Logger
   use ZkArcadeWeb, :controller
 
+  defp get_username_and_position(wallet) do
+    if !wallet do
+      {nil, nil}
+    else
+      username = ZkArcade.Accounts.get_wallet_username(wallet)
+      position =
+        case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+          %{position: position} -> position
+        _ -> nil
+      end
+      {username, position}
+    end
+  end
+
   defp get_wallet_from_session(conn) do
      wallet =
       if address = get_session(conn, :wallet_address) do
@@ -54,7 +68,7 @@ defmodule ZkArcadeWeb.PageController do
       if !user_in_top? && wallet do
         case ZkArcade.Leaderboard.get_user_and_position(wallet) do
           %{user: user, position: position} ->
-            %{address: wallet, position: position, score: user.score}
+            %{address: wallet, position: position, score: user.score, username: user.username}
           _ ->
             nil
         end
@@ -62,12 +76,7 @@ defmodule ZkArcadeWeb.PageController do
         nil
       end
 
-    username = ZkArcade.Accounts.get_wallet_username(wallet)
-    position =
-      case ZkArcade.Leaderboard.get_user_and_position(wallet) do
-        %{position: position} -> position
-        _ -> nil
-      end
+    {username, position} = get_username_and_position(wallet)
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -89,12 +98,7 @@ defmodule ZkArcadeWeb.PageController do
       %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
     ]
 
-    username = ZkArcade.Accounts.get_wallet_username(wallet)
-    position =
-      case ZkArcade.Leaderboard.get_user_and_position(wallet) do
-        %{position: position} -> position
-        _ -> nil
-      end
+    {username, position} = get_username_and_position(wallet)
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -131,12 +135,7 @@ defmodule ZkArcadeWeb.PageController do
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 10)
 
-    username = ZkArcade.Accounts.get_wallet_username(wallet)
-    position =
-      case ZkArcade.Leaderboard.get_user_and_position(wallet) do
-        %{position: position} -> position
-        _ -> nil
-      end
+    {username, position} = get_username_and_position(wallet)
 
     conn
     |> assign(:wallet, wallet)
@@ -168,11 +167,13 @@ defmodule ZkArcadeWeb.PageController do
 
     user_in_current_page? = Enum.any?(top_users, fn u -> u.address == wallet end)
 
+    {username, position} = get_username_and_position(wallet)
+
     user_data =
       if !user_in_current_page? && wallet do
         case ZkArcade.Leaderboard.get_user_and_position(wallet) do
           %{user: user, position: position} ->
-            %{address: wallet, position: position, score: user.score}
+            %{address: wallet, position: position, score: user.score, username: user.username}
           _ ->
             nil
         end
@@ -186,6 +187,8 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:top_users, top_users)
     |> assign(:user_data, user_data)
     |> assign(:user_in_current_page, user_in_current_page?)
+    |> assign(:username, username)
+    |> assign(:user_position, position)
     |> assign(:pagination, %{
       current_page: page,
       total_pages: total_pages,

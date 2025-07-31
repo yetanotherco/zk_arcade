@@ -1,9 +1,10 @@
+use aligned_sdk::common::types::ProvingSystemId;
 use alloy::hex;
 use game_logic::{
     common::levels::LevelJson,
     proving::{LevelLog, ProgramInput},
 };
-use risc0_zkvm::{ExecutorEnv, ProverOpts, Receipt, default_prover};
+use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts, Receipt};
 
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 
@@ -15,6 +16,8 @@ pub enum ProvingError {
     Verification(String),
     SavingProof(String),
 }
+
+const RISC0_PROVING_SYSTEM: [u8; 1] = [ProvingSystemId::Risc0 as u8];
 
 pub fn prove(
     levels_log: Vec<LevelLog>,
@@ -63,8 +66,6 @@ fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
     buf.extend_from_slice(chunk);
 }
 
-const RISC0_PROVING_SYSTEM: [u8; 1] = [0x01];
-
 pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
     let proving_system_id = RISC0_PROVING_SYSTEM;
     let proof = bincode::serialize(&receipt.inner).expect("Failed to serialize receipt");
@@ -80,7 +81,7 @@ pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
     write_chunk(&mut buffer, &proof_id);
     write_chunk(&mut buffer, &public_inputs);
 
-    std::fs::write("solution.bin", &buffer)
+    std::fs::write("risc0_solution.bin", &buffer)
         .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
     Ok(())

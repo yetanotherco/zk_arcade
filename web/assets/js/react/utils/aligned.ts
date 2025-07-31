@@ -28,7 +28,7 @@ export const computeVerificationDataCommitment = (
 		provingSystemAuxDataCommitment = hasher.digest();
 	} else if (verificationData.vmProgramCode) {
 		hasher.update(Buffer.from(verificationData.vmProgramCode));
-		hasher.update(Buffer.from(provingSystemByte));
+		hasher.update(provingSystemByte);
 		provingSystemAuxDataCommitment = hasher.digest();
 	}
 

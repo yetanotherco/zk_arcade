@@ -30,7 +30,7 @@
     </div>
 
      <div class="section-width section-width">
-        <section class="section-spacer-md">
+        <section class="section-spacer-md w-full">
             <.section_header header="Current game" />
             <x-app-current-game-beast 
                 network={Application.get_env(:zk_arcade, :network)}
@@ -43,7 +43,7 @@
     <div class="section-width section-width">
         <section class="section-spacer-md">
             <.section_header header="How to play" />
-            <p class="text-md text-text-200"><%= ZkArcade.Utils.autolink_and_linebreak(@game.how_to_play) |> raw() %></p>
+            <p class="text-md text-text-200 text-wrap"><%= ZkArcade.Utils.autolink_and_linebreak(@game.how_to_play) |> raw() %></p>
         </section>
     </div>
 

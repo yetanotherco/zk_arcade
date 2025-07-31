@@ -40,9 +40,49 @@ export const leaderboardAbi = [
 		inputs: [{ name: "user", type: "address" }],
 		outputs: [{ type: "uint256" }],
 	},
+	{
+		type: "function",
+		name: "usersBeastLevelCompleted",
+		inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
+		name: "getCurrentBeastGame",
+		inputs: [],
+		outputs: [
+			{
+				name: "",
+				type: "tuple",
+				internalType: "struct Leaderboard.BeastGame",
+				components: [
+					{
+						name: "endsAtBlock",
+						type: "uint256",
+						internalType: "uint256",
+					},
+					{
+						name: "gameConfig",
+						type: "uint256",
+						internalType: "uint256",
+					},
+					{
+						name: "startsAtBlock",
+						type: "uint256",
+						internalType: "uint256",
+					},
+				],
+			},
+		],
+		stateMutability: "view",
+	},
 ];
 
-export const eip712Domain = (chainId: number, batcherPaymentServiceAddress: Address) => ({
+export const eip712Domain = (
+	chainId: number,
+	batcherPaymentServiceAddress: Address
+) => ({
 	name: "Aligned",
 	version: "1",
 	chainId,

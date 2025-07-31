@@ -9,13 +9,22 @@ import {
 import { leaderboardAbi } from "../constants/aligned";
 import { BatchInclusionData, VerificationData } from "../types/aligned";
 import { computeVerificationDataCommitment } from "../utils/aligned";
-import { bytesToHex } from "viem";
+import { bytesToHex, keccak256, encodePacked } from "viem";
+
 import { useToast } from "../state/toast";
 
 type Args = {
 	userAddress: Address;
 	contractAddress: Address;
 };
+
+function getBeastKey(user: `0x${string}`, game: bigint): `0x${string}` {
+	const gameHash = keccak256(encodePacked(["uint256"], [game]));
+	const beastKey = keccak256(
+		encodePacked(["address", "bytes32"], [user, gameHash])
+	);
+	return beastKey;
+}
 
 export const useLeaderboardContract = ({
 	contractAddress,
@@ -30,6 +39,25 @@ export const useLeaderboardContract = ({
 		args: [userAddress],
 		chainId,
 	});
+
+	const currentGame = useReadContract({
+		address: contractAddress,
+		abi: leaderboardAbi,
+		functionName: "getCurrentBeastGame",
+		args: [],
+		chainId,
+	});
+
+	const currentGameLevelCompleted = useReadContract({
+		address: contractAddress,
+		abi: leaderboardAbi,
+		functionName: "usersBeastLevelCompleted",
+		args: [
+			getBeastKey(userAddress, currentGame.data?.gameConfig || BigInt(0)),
+		],
+		chainId,
+	});
+
 	const { addToast } = useToast();
 
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
@@ -119,5 +147,7 @@ export const useLeaderboardContract = ({
 				...txRest,
 			},
 		},
+		currentGameLevelCompleted,
+		currentGame,
 	};
 };

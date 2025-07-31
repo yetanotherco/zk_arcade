@@ -45,6 +45,8 @@ export const CurrentBeastGame = ({
 		userAddress: user_address,
 	});
 
+	const endsAtBlock = currentGame.data?.endsAtBlock || 0;
+
 	return (
 		<div className="w-full">
 			<div className="flex flex-col gap-8 w-full">
@@ -54,13 +56,21 @@ export const CurrentBeastGame = ({
 				<div className="flex items-center w-full overflow-scroll">
 					<div className="w-full relative" style={{ width: 1000 }}>
 						<div className="relative w-full flex gap-2 justify-between">
-							{Array.from({ length: 8 }, (_, i) => i).map(i => (
-								<LevelComponent
-									level_number={i + 1}
-									claimed={false}
-									points={1}
-								/>
-							))}
+							{Array.from({ length: 8 }, (_, i) => i + 1).map(
+								i => (
+									<LevelComponent
+										level_number={i}
+										claimed={
+											i <=
+												Number(
+													currentGameLevelCompleted.data ||
+														0
+												) || false
+										}
+										points={1}
+									/>
+								)
+							)}
 						</div>
 					</div>
 				</div>

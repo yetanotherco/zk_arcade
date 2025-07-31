@@ -17,6 +17,8 @@ type Props = {
 	user_address?: Address;
 	proofs: string;
 	needs_agreement?: boolean;
+	username: string;
+	user_position: number;
 };
 
 const WalletContent = ({
@@ -25,6 +27,8 @@ const WalletContent = ({
 	leaderboard_address,
 	user_address,
 	proofs,
+	username,
+	user_position,
 }: Omit<Props, "needs_agreement">) => {
 	const { address, isConnected } = useAccount();
 	const [needsAgreement, setNeedsAgreement] = useState(false);
@@ -74,6 +78,8 @@ const WalletContent = ({
 					payment_service_address={payment_service_address}
 					user_address={user_address}
 					proofs={decodedProofs}
+					username={username}
+					user_position={user_position}
 				/>
 			</div>
 		);
@@ -94,6 +100,8 @@ export default ({
 	leaderboard_address,
 	user_address,
 	proofs,
+	username,
+	user_position,
 }: Omit<Props, "needs_agreement">) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -105,6 +113,8 @@ export default ({
 					leaderboard_address={leaderboard_address}
 					user_address={user_address}
 					proofs={proofs}
+					username={username}
+					user_position={user_position}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

@@ -56,6 +56,8 @@ defmodule ZkArcadeWeb.CoreComponents do
             user_address={@wallet}
             proofs={@submitted_proofs}
             leaderboard_address={@leaderboard_address}
+            username={@username}
+            user_position={@user_position}
           />
         </div>
       </nav>

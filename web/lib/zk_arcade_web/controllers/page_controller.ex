@@ -62,6 +62,13 @@ defmodule ZkArcadeWeb.PageController do
         nil
       end
 
+    username = ZkArcade.Accounts.get_wallet_username(wallet)
+    position =
+      case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+        %{position: position} -> position
+        _ -> nil
+      end
+
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
@@ -69,6 +76,8 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:top_users, top_users)
       |> assign(:user_data, user_data)
       |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
+      |> assign(:username, username)
+      |> assign(:user_position, position)
       |> render(:home)
   end
 
@@ -79,6 +88,13 @@ defmodule ZkArcadeWeb.PageController do
       %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
       %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
     ]
+
+    username = ZkArcade.Accounts.get_wallet_username(wallet)
+    position =
+      case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+        %{position: position} -> position
+        _ -> nil
+      end
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -106,6 +122,8 @@ defmodule ZkArcadeWeb.PageController do
         acknowledgments: acknowledgements,
         tags: [:cli, :risc0]
       })
+      |> assign(:username, username)
+      |> assign(:user_position, position)
       |> render(:game)
   end
 
@@ -114,6 +132,11 @@ defmodule ZkArcadeWeb.PageController do
     proofs = get_proofs(wallet, 1, 10)
 
     username = ZkArcade.Accounts.get_wallet_username(wallet)
+    position =
+      case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+        %{position: position} -> position
+        _ -> nil
+      end
 
     conn
     |> assign(:wallet, wallet)
@@ -123,6 +146,7 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
     |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
     |> assign(:username, username)
+    |> assign(:user_position, position)
     |> render(:history)
   end
 

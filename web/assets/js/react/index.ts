@@ -14,6 +14,8 @@ define(
 			"leaderboard_address",
 			"user_address",
 			"proofs",
+			"username",
+			"user_position",
 		],
 	}
 );

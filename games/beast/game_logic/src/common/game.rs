@@ -8,8 +8,8 @@ use crate::common::levels::{Level, LevelConfig, LevelJson};
 pub struct GameJson {
     pub levels: Vec<LevelJson>,
     pub game_config: String,
-    pub from_block: u64,
-    pub to_block: u64,
+    pub from_time: u64,
+    pub to_time: u64,
 }
 
 #[derive(Clone, Debug)]
@@ -36,17 +36,23 @@ const fn game_file() -> &'static str {
 }
 
 impl GameLevels {
-    pub fn new(block_number: u64) -> GameLevels {
+    pub fn new(block_timestamp: u64) -> GameLevels {
         let file = File::open(GAME_FILE).expect("Cannot open game levels file");
         let reader = BufReader::new(file);
         let games: Vec<GameJson> = serde_json::from_reader(reader).expect("Invalid JSON format");
 
+        let file2 = File::open(GAME_FILE).expect("Cannot open game levels file");
+        let reader2 = BufReader::new(file2);
+        let games2: Vec<GameJson> = serde_json::from_reader(reader2).expect("Invalid JSON format");
+
         for game in games.into_iter() {
-            if game.from_block <= block_number && block_number < game.to_block {
+            if game.from_time <= block_timestamp && block_timestamp < game.to_time {
                 return Self::from_levels_json(&game.levels);
             }
         }
 
+        println!("No game found for block timestamp: {}", block_timestamp);
+        println!("Available games: {:?}", games2);
         panic!("No game found to play yet");
     }
 

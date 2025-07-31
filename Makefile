@@ -48,10 +48,10 @@ submit_beast_solution:
 
 NUM_GAMES ?= 10
 LEVELS_PER_GAME ?= 8
-STARTS_AT_BLOCK_NUMBER ?= 0
+STARTS_AT_BLOCK_TIMESTAMP ?= 1753998098 # Should be fetched from rpc url
 CAMPAIGN_DAYS ?= 1
 beast_gen_levels:
-	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(STARTS_AT_BLOCK_NUMBER) $(CAMPAIGN_DAYS) $(NETWORK)
+	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(STARTS_AT_BLOCK_TIMESTAMP) $(CAMPAIGN_DAYS) $(NETWORK)
 	
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast

@@ -5,17 +5,17 @@ use crate::{
     help::Help,
     risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
     sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
-    stty::{RawMode, install_raw_mode_signal_handler},
+    stty::{install_raw_mode_signal_handler, RawMode},
 };
 use dialoguer::MultiSelect;
 use game_logic::{
-    ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
-    BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
     board::Board,
     common::{game::GameLevels, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog},
+    Dir, Tile, ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT,
+    ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH, LOGO,
 };
 use std::{
     io::{self, Read},
@@ -198,6 +198,7 @@ impl Game {
     }
 
     pub fn start_new_game(&mut self) {
+        self.level = Level::One;
         let board_terrain_info = Board::generate_terrain(self.game_match.get_config(self.level));
         let board = Board::new(board_terrain_info.buffer);
         let fist_level_log = LevelLog {

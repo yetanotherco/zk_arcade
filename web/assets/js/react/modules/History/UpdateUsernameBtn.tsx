@@ -15,7 +15,7 @@ type Props = {
 const UpdateUsernameBtn = ({
     username,
 }: Omit<Props, "network">) => {
-    const [newUsername, setUsername] = React.useState("");
+    const [newUsername, setUsername] = React.useState(username);
     const { csrfToken } = useCSRFToken();
 
     const formRef = useRef<HTMLFormElement>(null);
@@ -37,7 +37,6 @@ const UpdateUsernameBtn = ({
             <div className="flex items-center">
                 <div>
                     <FormInput
-                        placeholder={username}
                         type="text"
                         value={newUsername}
                         onChange={e => setUsername(e.target.value)}
@@ -47,7 +46,7 @@ const UpdateUsernameBtn = ({
                     />
                 </div>
 
-                {newUsername && (
+                {(newUsername !== username) && (
                     <Button variant="text-accent" onClick={handleSubmission} className="ml-8">
                         Submit
                     </Button>

@@ -5,6 +5,7 @@ import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { FormInput } from "../../components/Form";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
+import { Button } from "../../components/Button";
 
 type Props = {
     network: string;
@@ -47,12 +48,9 @@ const UpdateUsernameBtn = ({
                 </div>
 
                 {newUsername && (
-                    <button
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                        onClick={handleSubmission}
-                    >
-                        Update Username
-                    </button>
+                    <Button variant="text-accent" onClick={handleSubmission} className="ml-8">
+                        Submit
+                    </Button>
                 )}
 
 			    <form

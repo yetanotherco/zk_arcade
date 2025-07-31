@@ -1,5 +1,5 @@
 [package]
-name = "beast_1984_program"
+name = "beast_1984_risc0_program"
 version = "0.1.0"
 edition = "2021"
 resolver = "2"

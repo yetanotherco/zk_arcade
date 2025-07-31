@@ -3,9 +3,11 @@
 use crate::{
     ethereum,
     help::Help,
-    prover::{prove, save_proof},
+    risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
+    sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
     stty::{RawMode, install_raw_mode_signal_handler},
 };
+use dialoguer::MultiSelect;
 use game_logic::{
     ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
     BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
@@ -32,6 +34,9 @@ pub const ANSI_HEADER_HEIGHT: usize = 4;
 pub const ANSI_FOOTER_HEIGHT: usize = 2;
 /// the time between game ticks
 const TICK_DURATION: Duration = Duration::from_millis(200);
+
+const SP1: &str = "SP1";
+const RISC0: &str = "Risc0";
 
 /// we need the [Beat] to count down when we call the beast advance methods and for animations
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -110,12 +115,33 @@ pub struct Game {
     input_listener: mpsc::Receiver<u8>,
     _raw_mode: RawMode,
     address: String,
+    proving_systems: Vec<String>,
 }
 
 impl Game {
     /// create a new instance of the beast game
     pub fn new() -> Self {
         let address = ethereum::read_address();
+
+        let items = vec![SP1, RISC0];
+
+        let proving_systems = loop {
+            let selection = MultiSelect::new()
+                .with_prompt("What do you choose?")
+                .items(&items)
+                .interact()
+                .unwrap();
+
+            if !selection.is_empty() {
+                break selection
+                    .into_iter()
+                    .map(|i| items[i].to_string())
+                    .collect::<Vec<String>>();
+            }
+
+            eprintln!("You must select at least one proving system. Please try again.");
+        };
+
         let block_number =
             ethereum::get_current_block_number().expect("Could not get block number from rpc");
         println!("Loading game for block number {}...", block_number);
@@ -167,6 +193,7 @@ impl Game {
             input_listener: receiver,
             _raw_mode,
             address,
+            proving_systems,
         }
     }
 
@@ -605,27 +632,54 @@ impl Game {
             true,
         );
 
-        // If it hasn't won, then don't include the last level as it wasn't completed
-        let levels_completion_log = if self.has_won {
-            self.levels_completion_log.clone()
-        } else {
-            let mut levels_log = self.levels_completion_log.clone();
-            levels_log.pop();
-            levels_log
-        };
+        let mut sp1_res = Ok(());
+        let mut risc0_res = Ok(());
 
-        let address = self.address.clone();
-        let levels = self.game_match.get_levels_in_json();
-        let handle = std::thread::spawn(move || {
-            let res = prove(levels_completion_log, levels, address);
-            if let Ok(receipt) = res {
-                save_proof(receipt).expect("To be able to write proof");
+        if self.proving_systems.contains(&SP1.to_string()) {
+            // If it hasn't won, then don't include the last level as it wasn't completed
+            let sp1_levels_completion_log = if self.has_won {
+                self.levels_completion_log.clone()
             } else {
-                panic!("Could prove program")
-            }
-        });
+                let mut levels_log = self.levels_completion_log.clone();
+                levels_log.pop();
+                levels_log
+            };
+            let sp1_address = self.address.clone();
+            let levels = self.game_match.get_levels_in_json();
 
-        let res = handle.join();
+            let sp1_handle = thread::spawn(move || {
+                let res = sp1_prove(sp1_levels_completion_log, levels, sp1_address);
+                if let Ok(receipt) = res {
+                    sp1_save_proof(receipt).expect("To be able to write proof");
+                } else {
+                    panic!("Could prove program")
+                }
+            });
+            sp1_res = sp1_handle.join();
+        }
+
+        if self.proving_systems.contains(&RISC0.to_string()) {
+            let risc0_levels_completion_log = if self.has_won {
+                self.levels_completion_log.clone()
+            } else {
+                let mut levels_log = self.levels_completion_log.clone();
+                levels_log.pop();
+                levels_log
+            };
+            let risc0_address = self.address.clone();
+            let levels = self.game_match.get_levels_in_json();
+
+            let risc0_handle = thread::spawn(move || {
+                let res = risc0_prove(risc0_levels_completion_log, levels, risc0_address);
+                if let Ok(receipt) = res {
+                    risc0_save_proof(receipt).expect("To be able to write proof");
+                } else {
+                    panic!("Could prove program")
+                }
+            });
+            risc0_res = risc0_handle.join();
+        }
+
         let _ = proving_alert_handle.join();
 
         if self.has_won {
@@ -634,7 +688,7 @@ impl Game {
             println!("{}", self.render_death_screen());
         }
 
-        let msg = if let Ok(_) = res {
+        let msg = if sp1_res.is_ok() && risc0_res.is_ok() {
             "Proof saved to ./games/beast/beast1984/. Submit it to https://zkarcade.com and earn points!"
         } else {
             "Could not prove program, try again..."

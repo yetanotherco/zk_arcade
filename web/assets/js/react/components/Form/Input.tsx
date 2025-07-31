@@ -8,7 +8,7 @@ export const FormInput = forwardRef<HTMLInputElement, Props>(
 	({ label, type = "text", ...props }, ref) => {
 		return (
 			<div className="w-full">
-				<p className="mb-2 text-sm">{label}</p>
+				{label && <p className="mb-2 text-sm">{label}</p>}
 				<input
 					type={type}
 					ref={ref}

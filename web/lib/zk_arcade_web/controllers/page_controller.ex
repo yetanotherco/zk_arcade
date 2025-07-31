@@ -2,6 +2,20 @@ defmodule ZkArcadeWeb.PageController do
   require Logger
   use ZkArcadeWeb, :controller
 
+  defp get_username_and_position(wallet) do
+    if !wallet do
+      {nil, nil}
+    else
+      username = ZkArcade.Accounts.get_wallet_username(wallet)
+      position =
+        case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+          %{position: position} -> position
+        _ -> nil
+      end
+      {username, position}
+    end
+  end
+
   defp get_wallet_from_session(conn) do
      wallet =
       if address = get_session(conn, :wallet_address) do
@@ -50,17 +64,20 @@ defmodule ZkArcadeWeb.PageController do
     top_users = ZkArcade.Leaderboard.get_top_users(10)
     user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
 
+    {username, position} = get_username_and_position(wallet)
+
     user_data =
       if !user_in_top? && wallet do
         case ZkArcade.Leaderboard.get_user_and_position(wallet) do
           %{user: user, position: position} ->
-            %{address: wallet, position: position, score: user.score}
+            %{address: wallet, position: position, score: user.score, username: username}
           _ ->
             nil
         end
       else
         nil
       end
+
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -69,6 +86,8 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:top_users, top_users)
       |> assign(:user_data, user_data)
       |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
+      |> assign(:username, username)
+      |> assign(:user_position, position)
       |> render(:home)
   end
 
@@ -79,6 +98,8 @@ defmodule ZkArcadeWeb.PageController do
       %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
       %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
     ]
+
+    {username, position} = get_username_and_position(wallet)
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -106,12 +127,16 @@ defmodule ZkArcadeWeb.PageController do
         acknowledgments: acknowledgements,
         tags: [:cli, :risc0]
       })
+      |> assign(:username, username)
+      |> assign(:user_position, position)
       |> render(:game)
   end
 
   def history(conn, _params) do
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 10)
+
+    {username, position} = get_username_and_position(wallet)
 
     conn
     |> assign(:wallet, wallet)
@@ -120,9 +145,11 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
     |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
+    |> assign(:username, username)
+    |> assign(:user_position, position)
     |> render(:history)
   end
-  
+
   def leaderboard(conn, params) do
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 5)
@@ -141,11 +168,13 @@ defmodule ZkArcadeWeb.PageController do
 
     user_in_current_page? = Enum.any?(top_users, fn u -> u.address == wallet end)
 
+    {username, position} = get_username_and_position(wallet)
+
     user_data =
       if !user_in_current_page? && wallet do
         case ZkArcade.Leaderboard.get_user_and_position(wallet) do
           %{user: user, position: position} ->
-            %{address: wallet, position: position, score: user.score}
+            %{address: wallet, position: position, score: user.score, username: username}
           _ ->
             nil
         end
@@ -159,6 +188,8 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:top_users, top_users)
     |> assign(:user_data, user_data)
     |> assign(:user_in_current_page, user_in_current_page?)
+    |> assign(:username, username)
+    |> assign(:user_position, position)
     |> assign(:pagination, %{
       current_page: page,
       total_pages: total_pages,

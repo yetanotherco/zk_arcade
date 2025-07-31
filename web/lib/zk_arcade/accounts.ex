@@ -58,6 +58,13 @@ defmodule ZkArcade.Accounts do
     end
   end
 
+  def create_random_name do
+    adjectives = ["Homomorphic", "Elliptic", "ZKSnarky", "Snarky", "Plonkish", "Recursive", "Succinct", "NonInteractive", "Interactive", "Merkleized", "CommitmentBased", "VerifierFriendly", "ProofCarrying", "Polynomial", "TranscriptSafe", "Poseidonic", "HashBased", "GrothFriendly", "Bulletproofed", "Immutable", "CensorshipResistant", "Permissionless", "Byzantine", "Trustless", "SybilResistant", "Deterministic", "GasEfficient", "Composable", "EVMCompatible", "Layered", "RollupNative", "Bridgeable", "Optimistic", "Finalized", "Verifiable", "Algebraic", "Linear", "Modular", "Elliptic", "Isomorphic", "Prime", "Discrete", "Finite", "Bijective", "Injective", "Surjective", "Monoidal", "Canonical", "Fractal", "Probabilistic", "Geometric", "Affine", "Spectral", "Topological"]
+    animals = ["Tiger", "Fox", "Panda", "Lynx", "Wolf", "Owl", "Eagle", "Shark", "Panther", "Koala", "Cobra", "Falcon", "Rabbit", "Turtle", "Jaguar", "Bear", "Leopard", "Chameleon", "Penguin", "Sloth", "Dolphin", "Octopus", "Crab", "Lizard", "Scorpion", "Hawk", "Cheetah", "Rhino", "Buffalo", "Antelope", "Gorilla", "Chimpanzee", "Orangutan", "Bison", "Giraffe", "Kangaroo"]
+
+    Enum.random(adjectives) <> Enum.random(animals)
+  end
+
   @doc """
   Creates a wallet.
 
@@ -71,6 +78,9 @@ defmodule ZkArcade.Accounts do
 
   """
   def create_wallet(attrs \\ %{}) do
+    username = create_random_name()
+    attrs = attrs |> Map.put_new(:username, username)
+
     %Wallet{}
     |> Wallet.changeset(attrs)
     |> Repo.insert()
@@ -103,5 +113,25 @@ defmodule ZkArcade.Accounts do
   """
   def change_wallet(%Wallet{} = wallet, attrs \\ %{}) do
     Wallet.changeset(wallet, attrs)
+  end
+
+  def get_wallet_username(address) do
+    case fetch_wallet_by_address(address) do
+      {:ok, wallet} -> wallet.username
+      {:error, :not_found} -> nil
+    end
+  end
+
+  def set_wallet_username(address, username) do
+    case fetch_wallet_by_address(address) do
+      {:ok, wallet} ->
+        changeset = Wallet.changeset(wallet, %{username: username})
+        case Repo.update(changeset) do
+          {:ok, updated_wallet} -> {:ok, updated_wallet}
+          {:error, changeset} -> {:error, changeset}
+        end
+
+      {:error, :not_found} -> {:error, :not_found}
+    end
   end
 end

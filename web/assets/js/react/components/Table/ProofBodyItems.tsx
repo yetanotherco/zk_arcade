@@ -77,7 +77,7 @@ export const ProofBatchMerkleRoot = ({ proof }: Props) => {
 		<td>
 			{proof.batchData?.batch_merkle_root ? (
 				<a
-					href={`https://explorer.alignedlayer.com/batches/${proof.batchData.batch_merkle_root}`}
+					href={`https://explorer.alignedlayer.com/batches/${bytesToHex(proof.batchData.batch_merkle_root)}`}
 					className="underline"
 				>
 					{shortenHash(bytesToHex(proof.batchData.batch_merkle_root))}

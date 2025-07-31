@@ -64,11 +64,13 @@ defmodule ZkArcadeWeb.PageController do
     top_users = ZkArcade.Leaderboard.get_top_users(10)
     user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
 
+    {username, position} = get_username_and_position(wallet)
+
     user_data =
       if !user_in_top? && wallet do
         case ZkArcade.Leaderboard.get_user_and_position(wallet) do
           %{user: user, position: position} ->
-            %{address: wallet, position: position, score: user.score, username: user.username}
+            %{address: wallet, position: position, score: user.score, username: username}
           _ ->
             nil
         end
@@ -76,7 +78,6 @@ defmodule ZkArcadeWeb.PageController do
         nil
       end
 
-    {username, position} = get_username_and_position(wallet)
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -173,7 +174,7 @@ defmodule ZkArcadeWeb.PageController do
       if !user_in_current_page? && wallet do
         case ZkArcade.Leaderboard.get_user_and_position(wallet) do
           %{user: user, position: position} ->
-            %{address: wallet, position: position, score: user.score, username: user.username}
+            %{address: wallet, position: position, score: user.score, username: username}
           _ ->
             nil
         end

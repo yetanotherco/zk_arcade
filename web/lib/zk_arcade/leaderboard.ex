@@ -43,14 +43,13 @@ defmodule ZkArcade.Leaderboard do
   def insert_or_update_entry(attrs) do
     user_address = Map.get(attrs, "user_address")
     score = Map.get(attrs, "score")
-    username = Map.get(attrs, "username")
 
     case Repo.get_by(LeaderboardEntry, user_address: user_address) do
       nil ->
         add_entry(attrs)
 
       %LeaderboardEntry{} = entry ->
-        update_entry(entry, %{score: score, username: username})
+        update_entry(entry, %{score: score})
     end
   end
 
@@ -84,7 +83,7 @@ defmodule ZkArcade.Leaderboard do
   """
   def get_top_users(top_limit, offset \\ 0) do
     from(e in LeaderboardEntry,
-      select: %{address: e.user_address, score: e.score, username: e.username},
+      select: %{address: e.user_address, score: e.score},
       order_by: [desc: e.score, asc: e.updated_at],
       limit: ^top_limit,
       offset: ^offset
@@ -92,7 +91,9 @@ defmodule ZkArcade.Leaderboard do
     |> Repo.all()
     |> Enum.with_index(offset + 1)
     |> Enum.map(fn {entry, index} ->
-      Map.put(entry, :position, index)
+      entry = Map.put(entry, :position, index)
+      ZkArcade.Accounts.get_wallet_username(entry.address)
+      |> then(&Map.put(entry, :username, &1))
     end)
   end
 

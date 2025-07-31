@@ -6,7 +6,6 @@ defmodule ZkArcade.Leaderboard.LeaderboardEntry do
   @foreign_key_type :binary_id
   schema "leaderboard_entries" do
     field :user_address, :string
-    field :username, :string
     field :score, :integer
 
     timestamps()
@@ -14,7 +13,7 @@ defmodule ZkArcade.Leaderboard.LeaderboardEntry do
 
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:user_address, :score, :username])
-    |> validate_required([:user_address, :score, :username])
+    |> cast(attrs, [:user_address, :score])
+    |> validate_required([:user_address, :score])
   end
 end

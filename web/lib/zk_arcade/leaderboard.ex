@@ -43,13 +43,14 @@ defmodule ZkArcade.Leaderboard do
   def insert_or_update_entry(attrs) do
     user_address = Map.get(attrs, "user_address")
     score = Map.get(attrs, "score")
+    username = Map.get(attrs, "username")
 
     case Repo.get_by(LeaderboardEntry, user_address: user_address) do
       nil ->
         add_entry(attrs)
 
       %LeaderboardEntry{} = entry ->
-        update_entry(entry, %{score: score})
+        update_entry(entry, %{score: score, username: username})
     end
   end
 
@@ -83,7 +84,7 @@ defmodule ZkArcade.Leaderboard do
   """
   def get_top_users(top_limit, offset \\ 0) do
     from(e in LeaderboardEntry,
-      select: %{address: e.user_address, score: e.score},
+      select: %{address: e.user_address, score: e.score, username: e.username},
       order_by: [desc: e.score, asc: e.updated_at],
       limit: ^top_limit,
       offset: ^offset

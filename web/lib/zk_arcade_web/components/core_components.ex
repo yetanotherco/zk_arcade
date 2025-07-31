@@ -300,6 +300,9 @@ defmodule ZkArcadeWeb.CoreComponents do
             <%= _ ->  %>
           <% end %>
         </:col>
+        <:col :let={user} label={if @show_labels, do: "Username", else: ""}>
+          <p class="text-text-100 text-md"><%= user.username %></p>
+        </:col>
         <:col :let={user} label={if @show_labels, do: "Address", else: ""}>
           <.wallet_address address={user.address} current_wallet={@current_wallet} />
         </:col>

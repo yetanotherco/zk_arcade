@@ -1,5 +1,5 @@
-use std::sync::LazyLock;
 use aligned_sdk::common::types::ProvingSystemId;
+use std::sync::LazyLock;
 
 use alloy::hex;
 use game_logic::{
@@ -43,6 +43,7 @@ pub fn prove(
     let (pk, vk) = client.setup(BEAST_1984_PROGRAM_ELF);
     let proof = client
         .prove(&pk, &stdin)
+        .compressed()
         .run()
         .map_err(|e| ProvingError::Prove(e.to_string()))?;
 
@@ -66,8 +67,7 @@ fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
 pub fn save_proof(proof: SP1ProofWithPublicValues) -> Result<(), ProvingError> {
     let proving_system_id = SP1_PROVING_SYSTEM;
     let proof_data = bincode::serialize(&proof).expect("Failed to serialize the proof");
-    let proof_id = BEAST_1984_PROGRAM_ELF
-        .to_vec();
+    let proof_id = BEAST_1984_PROGRAM_ELF.to_vec();
     let public_inputs = proof.public_values.to_vec();
 
     let mut buffer = Vec::new();

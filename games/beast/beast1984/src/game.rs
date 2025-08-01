@@ -5,17 +5,17 @@ use crate::{
     help::Help,
     risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
     sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
-    stty::{RawMode, install_raw_mode_signal_handler},
+    stty::{install_raw_mode_signal_handler, RawMode},
 };
 use dialoguer::MultiSelect;
 use game_logic::{
-    ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT, ANSI_RIGHT_BORDER,
-    BOARD_HEIGHT, BOARD_WIDTH, Dir, LOGO, Tile,
     beasts::{Beast, BeastAction, CommonBeast, Egg, HatchedBeast, HatchingState, SuperBeast},
     board::Board,
     common::{game::GameLevels, levels::Level},
     player::{Player, PlayerAction},
     proving::{GameLogEntry, LevelLog},
+    Dir, Tile, ANSI_BOLD, ANSI_LEFT_BORDER, ANSI_RESET, ANSI_RESET_BG, ANSI_RESET_FONT,
+    ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH, LOGO,
 };
 use std::{
     io::{self, Read},
@@ -88,7 +88,7 @@ pub enum GameState {
 
 /// this is our main game struct that orchestrates the game and its bits
 pub struct Game {
-    pub block_timestamp: u64,
+    pub block_timestamp: u64, // Currently unused
     /// our board
     pub board: Board,
     /// the current level we're in
@@ -177,7 +177,7 @@ impl Game {
 
         Self {
             levels_completion_log: vec![fist_level_log],
-            block_timestamp: 0, // Check if this should be block_timestamp or is not even required
+            block_timestamp,
             board: Board::new(board_terrain_info.buffer),
             level: Level::One,
             game_match,

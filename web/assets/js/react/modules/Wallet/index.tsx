@@ -103,6 +103,7 @@ export default ({
 	username,
 	user_position,
 }: Omit<Props, "needs_agreement">) => {
+	console.log(proofs);
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>

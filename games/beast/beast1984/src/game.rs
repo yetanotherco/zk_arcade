@@ -1,5 +1,6 @@
 //! this module contains the main struct that orchestrates the game
 
+use crate::levels::get_game_levels;
 use crate::{
     ethereum,
     help::Help,
@@ -127,7 +128,9 @@ impl Game {
 
         let proving_systems = loop {
             let selection = MultiSelect::new()
-                .with_prompt("What do you choose?")
+                .with_prompt(
+                    "Choose proving systems to use\n(Press [SPACE] to select, [ENTER] to confirm)",
+                )
                 .items(&items)
                 .interact()
                 .unwrap();
@@ -146,6 +149,11 @@ impl Game {
             .expect("Could not get block timestamp from rpc");
         println!("Loading game for block timestamp {}...", block_timestamp);
         let game_match = GameLevels::new(block_timestamp);
+
+        let game_levels = get_game_levels();
+
+        let game_match = GameLevels::new(block_number, game_levels);
+
         let board_terrain_info = Board::generate_terrain(game_match.get_config(Level::One));
 
         install_raw_mode_signal_handler();
@@ -250,8 +258,17 @@ impl Game {
                     self.handle_win_state();
                 }
                 GameState::Quit => {
-                    println!("Proof saved to ./games/beast/beast1984/. ");
-                    println!("Submit it to https://zkarcade.com and earn points!");
+                    let file_names: Vec<&str> = self
+                        .proving_systems
+                        .iter()
+                        .map(|system| match system.as_str() {
+                            SP1 => "sp1_solution.bin",
+                            RISC0 => "risc0_solution.bin",
+                            _ => "",
+                        })
+                        .collect();
+                    println!("Proof saved to {}", file_names.join(", "));
+                    println!("Submit it to https://test.zkarcade.com and earn points!");
                     println!("Bye...");
                     break;
                 }
@@ -689,12 +706,24 @@ impl Game {
             println!("{}", self.render_death_screen());
         }
 
+        let file_names: Vec<&str> = self
+            .proving_systems
+            .iter()
+            .map(|system| match system.as_str() {
+                SP1 => "sp1_solution.bin",
+                RISC0 => "risc0_solution.bin",
+                _ => "",
+            })
+            .collect();
         let msg = if sp1_res.is_ok() && risc0_res.is_ok() {
-            "Proof saved to ./games/beast/beast1984/. Submit it to https://zkarcade.com and earn points!"
+            format!(
+                "Proof saved to {}. Submit it to https://test.zkarcade.com and earn points!",
+                file_names.join(", ")
+            )
         } else {
-            "Could not prove program, try again..."
+            "Could not prove program, try again...".to_string()
         };
-        let handle = Self::render_loader_in_new_thread(msg, 3000, false);
+        let handle = Self::render_loader_in_new_thread(&msg, 3000, false);
         let _ = handle.join();
         self.state = GameState::Quit;
     }

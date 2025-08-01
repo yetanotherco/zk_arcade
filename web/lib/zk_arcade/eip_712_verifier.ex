@@ -82,12 +82,12 @@ defmodule ZkArcade.EIP712Verifier do
       "verificationData" => verification_data
     } = signature_data
 
-    case compute_verification_data_hash(verification_data["verificationData"]) do
+    case ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(verification_data["verificationData"]) do
       {:ok, verification_data_hash} ->
         verify_signature(
           signature,
           address,
-          verification_data_hash,
+          verification_data_hash.commitment,
           verification_data["nonce"],
           verification_data["maxFee"],
           chain_id
@@ -167,59 +167,6 @@ defmodule ZkArcade.EIP712Verifier do
         {:ok, address}
       _ ->
         {:error, "Invalid public key format"}
-    end
-  end
-
-  defp compute_verification_data_hash(verification_data) do
-    try do
-      proving_system_to_byte = %{
-        "GnarkPlonkBls12_381" => 0,
-        "GnarkPlonkBn254" => 1,
-        "GnarkGroth16Bn254" => 2,
-        "SP1" => 3,
-        "Risc0" => 4,
-        "CircomGroth16Bn256" => 5
-      }
-
-      proof = verification_data["proof"]
-      proof_bin = if is_list(proof), do: :erlang.list_to_binary(proof), else: proof
-      proof_commitment = keccak256(proof_bin)
-
-      pub_input_commitment = case verification_data["publicInput"] do
-        nil -> <<0::size(256)>>
-        public_input ->
-          pub_input_bin = if is_list(public_input), do: :erlang.list_to_binary(public_input), else: public_input
-          keccak256(pub_input_bin)
-      end
-
-      proving_system_byte = Map.get(proving_system_to_byte, verification_data["provingSystem"], 0)
-      proving_system_aux_data_commitment =
-        cond do
-          verification_data["verificationKey"] ->
-            vk_data = verification_data["verificationKey"]
-            vk_bin = if is_list(vk_data), do: :erlang.list_to_binary(vk_data), else: vk_data
-            keccak256(vk_bin <> <<proving_system_byte>>)
-          verification_data["vmProgramCode"] ->
-            vm_program_data = verification_data["vmProgramCode"]
-            vm_program_bin = if is_list(vm_program_data), do: :erlang.list_to_binary(vm_program_data), else: vm_program_data
-            keccak256(vm_program_bin <> <<proving_system_byte>>)
-          true ->
-            <<0::size(256)>>
-        end
-
-      {:ok, proof_generator_address} = decode_hex(verification_data["proofGeneratorAddress"])
-      proof_generator_address_bytes = proof_generator_address
-
-      commitment_digest = keccak256(
-        proof_commitment <>
-        pub_input_commitment <>
-        proving_system_aux_data_commitment <>
-        proof_generator_address_bytes
-      )
-
-      {:ok, "0x" <> Base.encode16(commitment_digest, case: :lower)}
-    rescue
-      e -> {:error, "Error computing verification data hash: #{inspect(e)}"}
     end
   end
 

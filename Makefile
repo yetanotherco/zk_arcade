@@ -53,7 +53,7 @@ beast_gen_levels:
 	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(NETWORK)
 	
 beast_build:
-	@cd games/beast/beast1984 && cargo build --release --bin beast
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
 
 __CONTRACTS__:
 deploy_contract: submodules

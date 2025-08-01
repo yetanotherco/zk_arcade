@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Address } from "../../types/blockchain";
 import { useBatcherPaymentService, useLeaderboardContract } from "../../hooks";
-import { bytesToHex, formatEther } from "viem";
+import { formatEther } from "viem";
 import { ColumnBody, Table, TableBodyItem } from "../../components/Table";
 import { ProofSubmission } from "../../types/aligned";
 import { timeAgo, timeAgoInHs } from "../../utils/date";
-import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { shortenHash } from "../../utils/crypto";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 import { ProofEntryActionBtn } from "./ProofEntryActionBtn";
@@ -62,7 +61,7 @@ export const ProofHistory = ({
 			// if the proof is pending and it has passed more than 6 hours
 			// mark it as underpriced
 			if (proof.status === "pending") {
-				if (timeAgoInHs(proof.insertedAt) > 6) {
+				if (timeAgoInHs(proof.inserted_at) > 6) {
 					proof.status = "underpriced";
 				}
 			}
@@ -71,23 +70,12 @@ export const ProofHistory = ({
 				rows: [
 					<TableBodyItem text={proof.game} />,
 					<ProofStatusWithTooltipDesc proof={proof} />,
-					<TableBodyItem text={timeAgo(proof.insertedAt)} />,
+					<TableBodyItem text={timeAgo(proof.inserted_at)} />,
 					<ProofBatchMerkleRoot proof={proof} />,
 					<TableBodyItem
-						text={shortenHash(
-							bytesToHex(
-								computeVerificationDataCommitment(
-									proof.verificationData.verificationData
-								).commitmentDigest
-							)
-						)}
+						text={shortenHash(proof.verification_data_commitment)}
 					/>,
-					<TableBodyItem
-						text={
-							proof.verificationData.verificationData
-								.provingSystem
-						}
-					/>,
+					<TableBodyItem text={proof.proving_system} />,
 					<ProofEntryActionBtn
 						leaderboard_address={leaderboard_address}
 						payment_service_address={payment_service_address}

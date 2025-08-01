@@ -35,24 +35,16 @@ defmodule ZkArcadeWeb.PageController do
   defp get_proofs(address, page, size) do
     proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})
 
-    Enum.map(proofs, fn proof ->
-      %{
-        id: proof.id,
-        status: proof.status,
-        game: proof.game,
-        insertedAt: NaiveDateTime.to_iso8601(proof.inserted_at),
-        batchData: proof.batch_data,
-        verificationData: proof.verification_data
-      }
-    end)
+    proofs
   end
 
   def home(conn, _params) do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 5)
-    proofs_verified = ZkArcade.Proofs.list_proofs() |> length()
-    total_players = ZkArcade.Accounts.list_wallets() |> length()
+    proofs_verified = ZkArcade.Proofs.list_proofs()
+    total_players = ZkArcade.Accounts.list_wallets()
+
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
     # In the future, we'd have to sum the savings of all the proofs for each proving system
     {:ok, eth_price} = ZkArcade.EthPrice.get_eth_price_usd()
@@ -111,21 +103,22 @@ defmodule ZkArcadeWeb.PageController do
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
         how_to_play: """
         1. Install Rust by following the official guide: https://www.rust-lang.org/tools/install
-        2. Install the RiscZero toolchain: https://dev.risczero.com/api/zkvm/install
-        3. Clone the zk_arcade repository using: <span class="code-block">git clone https://github.com/yetanotherco/aligned_layer.git</span>
-        4. Run the game with the command: <span class="code-block">make play_beast</span>
-        5. Locate the generated proof file on your system
-        6. Upload your proof to verify your gameplay
-        7. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back later to submit it to the leaderboard contract to earn points.
+        2. Install Beast with the following command: <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
+        3. Run the game with the command: <span class="code-block">beast</span>
+        4. Locate the generated proof file on your system
+        5. Upload your proof to verify your gameplay
+        6. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back later to submit it to the leaderboard contract to earn points.
 
         Important notes about proof submissions:
 
         - You can only submit <span class="text-accent-100">one proof per level</span>. For example, if you've reached level 5 and then try to submit a proof for level 4, it will fail.
         - Each submission must be for a level <span class="text-accent-100">higher than any previously submitted proof</span>. So, if you've already submitted level 5, your next valid submission must be at least level 6.
         - Points are awarded <span class="text-accent-100">per level</span>, not cumulatively. The best strategy is to submit a proof when you’re confident you won’t reach higher levels or after completing the entire game.
+
+        You can uninstall Beast at any time with the command: <span class="code-block">rm $(which beast)</span>
         """,
         acknowledgments: acknowledgements,
-        tags: [:cli, :risc0]
+        tags: [:cli, :risc0, :sp1]
       })
       |> assign(:username, username)
       |> assign(:user_position, position)

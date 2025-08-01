@@ -6,7 +6,7 @@ echo "Installing Beast..."
 
 # Install RiscZero toolchain
 # Ask for confirmation before proceeding
-echo "This script will install the RiscZero toolchain and Beast."
+echo "This script will install the RiscZero and SP1 toolchains and Beast."
 while true; do
     read -p "Do you want to proceed? (y/n): " confirm < /dev/tty
     case "$confirm" in
@@ -15,9 +15,13 @@ while true; do
         * ) echo "Please enter y or n.";;
     esac
 done
+
 curl -L https://risczero.com/install | bash
 $HOME/.risc0/bin/rzup install rust 1.88.0
 $HOME/.risc0/bin/rzup install cargo-risczero 2.3.0
+
+curl -L https://sp1.succinct.xyz | bash
+ ~/.sp1/bin/sp1up --version v5.0.0
 
 BASE_DIR=$HOME
 BEAST_DIR="${BEAST_DIR-"$BASE_DIR/.beast"}"

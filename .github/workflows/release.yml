@@ -39,6 +39,13 @@ jobs:
           ~/.risc0/bin/rzup install cargo-risczero 2.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Reference: https://github.com/succinctlabs/sp1/actions/runs/8886659400/workflow#L61-L65
+      - name: Install sp1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          source ~/.bashrc
+           ~/.sp1/bin/sp1up --version v5.0.0 
       
       - name: Build Beast
         run: make beast_build

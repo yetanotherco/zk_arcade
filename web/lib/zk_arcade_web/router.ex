@@ -2,7 +2,7 @@ defmodule ZkArcadeWeb.Router do
   use ZkArcadeWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
+    plug :accepts, ["html", "json"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {ZkArcadeWeb.Layouts, :root}
@@ -22,6 +22,7 @@ defmodule ZkArcadeWeb.Router do
 
     get "/leaderboard", PageController, :leaderboard
 
+    get "/proof/verification-data", ProofController, :get_proof_verification_data
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
     post "/proof/status/retry", ProofController, :retry_submit_proof

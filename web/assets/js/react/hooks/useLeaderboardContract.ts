@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Address } from "../types/blockchain";
 import {
 	useChainId,
@@ -7,8 +7,11 @@ import {
 	useWriteContract,
 } from "wagmi";
 import { leaderboardAbi } from "../constants/aligned";
-import { BatchInclusionData, VerificationData } from "../types/aligned";
-import { computeVerificationDataCommitment } from "../utils/aligned";
+import { ProofSubmission } from "../types/aligned";
+import {
+	computeVerificationDataCommitment,
+	fetchProofVerificationData,
+} from "../utils/aligned";
 import { bytesToHex, keccak256, encodePacked } from "viem";
 
 import { useToast } from "../state/toast";
@@ -31,6 +34,10 @@ export const useLeaderboardContract = ({
 	userAddress,
 }: Args) => {
 	const chainId = useChainId();
+	const [
+		submitSolutionFetchingVDataIsLoading,
+		setSubmitSolutionFetchingVDataIsLoading,
+	] = useState(false);
 
 	const score = useReadContract({
 		address: contractAddress,
@@ -64,17 +71,34 @@ export const useLeaderboardContract = ({
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
 	const submitBeastSolution = useCallback(
-		async (
-			verificationData: VerificationData,
-			batchData: BatchInclusionData
-		) => {
+		async (proof: ProofSubmission) => {
+			setSubmitSolutionFetchingVDataIsLoading(true);
+			const res = await fetchProofVerificationData(proof.id);
+			setSubmitSolutionFetchingVDataIsLoading(false);
+			if (!res) {
+				alert(
+					"There was a problem while sending the proof, please try again"
+				);
+				return;
+			}
+
+			const {
+				verification_data: { verificationData },
+				batch_data,
+			} = res;
+
+			if (!batch_data) {
+				alert("Proof hasn't been verified, try again later");
+				return;
+			}
+
 			const commitment =
 				computeVerificationDataCommitment(verificationData);
 
-			const merkleRoot = bytesToHex(batchData.batch_merkle_root);
+			const merkleRoot = bytesToHex(batch_data.batch_merkle_root);
 
 			const hexPath: string[] =
-				batchData.batch_inclusion_proof.merkle_path.map(
+				batch_data.batch_inclusion_proof.merkle_path.map(
 					p => `${Buffer.from(p).toString("hex")}`
 				);
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
@@ -88,7 +112,7 @@ export const useLeaderboardContract = ({
 				verificationData.proofGeneratorAddress,
 				merkleRoot,
 				encodedMerkleProof,
-				batchData.index_in_batch,
+				batch_data.index_in_batch,
 			];
 
 			await writeContractAsync({
@@ -141,6 +165,7 @@ export const useLeaderboardContract = ({
 		score,
 		submitSolution: {
 			submitBeastSolution,
+			submitSolutionFetchingVDataIsLoading,
 			receipt,
 			tx: {
 				hash: txHash,

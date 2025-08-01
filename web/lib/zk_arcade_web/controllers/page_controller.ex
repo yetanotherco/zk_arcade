@@ -35,24 +35,16 @@ defmodule ZkArcadeWeb.PageController do
   defp get_proofs(address, page, size) do
     proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})
 
-    Enum.map(proofs, fn proof ->
-      %{
-        id: proof.id,
-        status: proof.status,
-        game: proof.game,
-        insertedAt: NaiveDateTime.to_iso8601(proof.inserted_at),
-        batchData: proof.batch_data,
-        verificationData: proof.verification_data
-      }
-    end)
+    proofs
   end
 
   def home(conn, _params) do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 5)
-    proofs_verified = ZkArcade.Proofs.list_proofs() |> length()
-    total_players = ZkArcade.Accounts.list_wallets() |> length()
+    proofs_verified = ZkArcade.Proofs.list_proofs()
+    total_players = ZkArcade.Accounts.list_wallets()
+
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
     # In the future, we'd have to sum the savings of all the proofs for each proving system
     {:ok, eth_price} = ZkArcade.EthPrice.get_eth_price_usd()

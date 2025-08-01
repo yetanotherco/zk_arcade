@@ -46,7 +46,11 @@ export const CurrentBeastGame = ({
 		contractAddress: leaderboard_address,
 		userAddress: user_address,
 	});
-	const [hoursRemaining, setHoursRemaining] = useState<number | null>(null);
+
+	const [timeRemaining, setTimeRemaining] = useState<{
+		hours: number;
+		minutes: number;
+	} | null>(null);
 
 	const endsAtBlock = currentGame.data?.endsAtBlock || 0;
 
@@ -56,10 +60,14 @@ export const CurrentBeastGame = ({
 				Number(endsAtBlock) - Number(currentBlockNumber.data);
 			const secondsRemaining = blocksRemaining * 12;
 			const hours = secondsRemaining / 3600;
+			const minutes = Math.floor(secondsRemaining / 60);
 
-			setHoursRemaining(hours > 0 ? hours : 0);
+			setTimeRemaining({
+				hours: Math.floor(hours),
+				minutes,
+			});
 		}
-	}, [endsAtBlock, currentBlockNumber]);
+	}, [endsAtBlock, currentBlockNumber.data]);
 
 	return (
 		<div className="w-full">
@@ -67,11 +75,9 @@ export const CurrentBeastGame = ({
 				{currentGame.isLoading ? (
 					"Loading..."
 				) : currentGame.gamesHaveFinished ? (
-					<>
-						<p className="text-lg text-text-100">
-							There are no more games avaiable to play...
-						</p>
-					</>
+					<p className="text-lg text-text-100">
+						There are no more games available to play...
+					</p>
 				) : (
 					<>
 						<p className="text-lg text-text-100">
@@ -107,9 +113,11 @@ export const CurrentBeastGame = ({
 
 						<p className="text-lg text-text-200 text-center">
 							Levels renew in{" "}
-							{hoursRemaining !== null ? (
+							{timeRemaining ? (
 								<span className="text-accent-100">
-									{Math.floor(hoursRemaining)} hours
+									{timeRemaining.hours > 0
+										? `${timeRemaining.hours} hours`
+										: `${timeRemaining.minutes} minutes`}
 								</span>
 							) : (
 								<span className="text-accent-100">

@@ -15,5 +15,6 @@ pub mod risc0_prover;
 pub mod start;
 pub mod stty;
 mod ethereum;
+mod levels;
 
 pub use start::*;

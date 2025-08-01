@@ -28,6 +28,7 @@ module.exports = {
 				yellow: "rgb(241 254 64 / <alpha-value>)",
 				risc0: "rgb(254 254 157 / <alpha-value>)",
 				circom: "rgb(148 148 148 / <alpha-value>)",
+				sp1: "rgb(255 105 180 / <alpha-value>)",
 				blue: "rgb(64 165 254 / <alpha-value>)",
 				accent: {
 					100: "rgb(24 255 127 / <alpha-value>)",

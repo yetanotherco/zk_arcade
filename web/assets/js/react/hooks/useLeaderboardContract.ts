@@ -22,6 +22,9 @@ type Args = {
 };
 
 function getBeastKey(user: `0x${string}`, game: bigint): `0x${string}` {
+	if (!user) {
+		return "0x0";
+	}
 	const gameHash = keccak256(encodePacked(["uint256"], [game]));
 	const beastKey = keccak256(
 		encodePacked(["address", "bytes32"], [user, gameHash])

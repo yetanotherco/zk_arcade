@@ -81,9 +81,11 @@ defmodule ZkArcade.Proofs do
   end
 
   def create_pending_proof(submit_proof_message, address, game, proving_system) do
+    {:ok, verification_data_commitment} = ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(submit_proof_message["verificationData"]["verificationData"])
     proof_params = %{
       wallet_address: address,
       verification_data: submit_proof_message["verificationData"],
+      verification_data_commitment: verification_data_commitment,
       status: "pending",
       batch_data: nil,
       game: game,

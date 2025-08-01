@@ -61,7 +61,7 @@ export const ProofHistory = ({
 			// if the proof is pending and it has passed more than 6 hours
 			// mark it as underpriced
 			if (proof.status === "pending") {
-				if (timeAgoInHs(proof.inserted_At) > 6) {
+				if (timeAgoInHs(proof.inserted_at) > 6) {
 					proof.status = "underpriced";
 				}
 			}
@@ -70,7 +70,7 @@ export const ProofHistory = ({
 				rows: [
 					<TableBodyItem text={proof.game} />,
 					<ProofStatusWithTooltipDesc proof={proof} />,
-					<TableBodyItem text={timeAgo(proof.inserted_At)} />,
+					<TableBodyItem text={timeAgo(proof.inserted_at)} />,
 					<ProofBatchMerkleRoot proof={proof} />,
 					<TableBodyItem
 						text={shortenHash(proof.verification_data_commitment)}

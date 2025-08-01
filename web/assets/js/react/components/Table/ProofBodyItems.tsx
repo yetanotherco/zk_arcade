@@ -74,12 +74,12 @@ export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
 export const ProofBatchMerkleRoot = ({ proof }: Props) => {
 	return (
 		<td>
-			{proof.batchHash ? (
+			{proof.batch_hash ? (
 				<a
-					href={`https://explorer.alignedlayer.com/batches/${proof.batchHash}`}
+					href={`https://explorer.alignedlayer.com/batches/${proof.batch_hash}`}
 					className="underline"
 				>
-					{shortenHash(proof.batchHash)}
+					{shortenHash(proof.batch_hash)}
 				</a>
 			) : (
 				<p>...</p>

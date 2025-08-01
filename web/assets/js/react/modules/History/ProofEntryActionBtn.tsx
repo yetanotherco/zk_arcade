@@ -63,7 +63,7 @@ export const ProofEntryActionBtn = ({
 
 		if (proof.status === "claimed") {
 			const text = encodeURIComponent(
-				"🟩 I just claimed my proof on zk-arcade!\n\n"
+				"🟩 I just claimed my points on zk-arcade!\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
 			const hashtags = `\naligned,proof,${proof.proving_system}`;

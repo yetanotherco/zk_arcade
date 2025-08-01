@@ -88,6 +88,24 @@ defmodule ZkArcade.Proofs do
         wallet_address: p.wallet_address
       })
       |> Repo.all()
+      |> Enum.map(fn proof ->
+        hex_batch_hash =
+          case proof.batch_hash do
+            nil -> nil
+
+            string when is_binary(string) ->
+              with {:ok, list} <- Jason.decode(string),
+                  true <- is_list(list) do
+                "0x" <> (:erlang.list_to_binary(list) |> Base.encode16(case: :lower))
+              else
+                _ -> nil
+              end
+
+            _ -> nil
+          end
+
+        Map.put(proof, :batch_hash, hex_batch_hash)
+      end)
   end
 
 

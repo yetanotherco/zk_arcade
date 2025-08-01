@@ -111,7 +111,7 @@ defmodule ZkArcadeWeb.PageController do
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
         how_to_play: """
         1. Install Rust by following the official guide: https://www.rust-lang.org/tools/install
-        2. Instal Beast with the following command: <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
+        2. Install Beast with the following command: <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
         3. Run the game with the command: <span class="code-block">beast</span>
         4. Locate the generated proof file on your system
         5. Upload your proof to verify your gameplay

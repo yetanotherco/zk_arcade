@@ -41,18 +41,12 @@ impl GameLevels {
         let reader = BufReader::new(file);
         let games: Vec<GameJson> = serde_json::from_reader(reader).expect("Invalid JSON format");
 
-        let file2 = File::open(GAME_FILE).expect("Cannot open game levels file");
-        let reader2 = BufReader::new(file2);
-        let games2: Vec<GameJson> = serde_json::from_reader(reader2).expect("Invalid JSON format");
-
         for game in games.into_iter() {
             if game.from_time <= block_timestamp && block_timestamp < game.to_time {
                 return Self::from_levels_json(&game.levels);
             }
         }
 
-        println!("No game found for block timestamp: {}", block_timestamp);
-        println!("Available games: {:?}", games2);
         panic!("No game found to play yet");
     }
 

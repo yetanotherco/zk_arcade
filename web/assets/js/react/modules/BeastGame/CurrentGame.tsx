@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Address } from "../../types/blockchain";
 import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
-import { useBlockNumber } from "wagmi";
+import { useBlock } from "wagmi";
 
 type Props = {
 	leaderboard_address: Address;
@@ -41,7 +41,13 @@ export const CurrentBeastGame = ({
 	leaderboard_address,
 	user_address,
 }: Props) => {
-	const currentBlockNumber = useBlockNumber();
+	// Get the block timestamp for the current block
+	const currentBlock = useBlock();
+
+	const currentBlockTimestamp = currentBlock.data
+		? currentBlock.data.timestamp
+		: 0;
+
 	const { currentGame, currentGameLevelCompleted } = useLeaderboardContract({
 		contractAddress: leaderboard_address,
 		userAddress: user_address,
@@ -52,12 +58,12 @@ export const CurrentBeastGame = ({
 		minutes: number;
 	} | null>(null);
 
-	const endsAtBlock = currentGame.data?.endsAtBlock || 0;
+	const endsAtTime = currentGame.data?.endsAtTime || 0;
 
 	useEffect(() => {
-		if (endsAtBlock > 0 && currentBlockNumber.data) {
+		if (endsAtTime > 0 && currentBlockTimestamp) {
 			const blocksRemaining =
-				Number(endsAtBlock) - Number(currentBlockNumber.data);
+				Number(endsAtTime) - Number(currentBlockTimestamp);
 			const secondsRemaining = blocksRemaining * 12;
 			const hours = secondsRemaining / 3600;
 			const minutes = Math.floor(secondsRemaining / 60);
@@ -67,7 +73,7 @@ export const CurrentBeastGame = ({
 				minutes,
 			});
 		}
-	}, [endsAtBlock, currentBlockNumber.data]);
+	}, [endsAtTime, currentBlockTimestamp]);
 
 	return (
 		<div className="w-full">

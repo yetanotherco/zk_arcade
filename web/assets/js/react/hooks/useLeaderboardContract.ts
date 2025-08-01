@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Address } from "../types/blockchain";
 import {
 	useChainId,
@@ -7,11 +7,7 @@ import {
 	useWriteContract,
 } from "wagmi";
 import { leaderboardAbi } from "../constants/aligned";
-import {
-	BatchInclusionData,
-	ProofSubmission,
-	VerificationData,
-} from "../types/aligned";
+import { ProofSubmission } from "../types/aligned";
 import {
 	computeVerificationDataCommitment,
 	fetchProofVerificationData,
@@ -38,6 +34,10 @@ export const useLeaderboardContract = ({
 	userAddress,
 }: Args) => {
 	const chainId = useChainId();
+	const [
+		submitSolutionFetchingVDataIsLoading,
+		setSubmitSolutionFetchingVDataIsLoading,
+	] = useState(false);
 
 	const score = useReadContract({
 		address: contractAddress,
@@ -72,8 +72,9 @@ export const useLeaderboardContract = ({
 
 	const submitBeastSolution = useCallback(
 		async (proof: ProofSubmission) => {
-			// TODO: request nonced verification data to server
+			setSubmitSolutionFetchingVDataIsLoading(true);
 			const res = await fetchProofVerificationData(proof.id);
+			setSubmitSolutionFetchingVDataIsLoading(false);
 			if (!res) {
 				alert(
 					"There was a problem while sending the proof, please try again"
@@ -164,6 +165,7 @@ export const useLeaderboardContract = ({
 		score,
 		submitSolution: {
 			submitBeastSolution,
+			submitSolutionFetchingVDataIsLoading,
 			receipt,
 			tx: {
 				hash: txHash,

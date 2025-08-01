@@ -141,7 +141,8 @@ const NotificationEntry = ({
 				onClick={handleClick}
 				isLoading={
 					submitProofMessageLoading ||
-					submitSolution.receipt.isLoading
+					submitSolution.receipt.isLoading ||
+					submitSolution.submitSolutionFetchingVDataIsLoading
 				}
 			>
 				{proof.status === "submitted" ? "Submit" : "Bump fee"}

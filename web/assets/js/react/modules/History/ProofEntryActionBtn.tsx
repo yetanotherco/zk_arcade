@@ -145,6 +145,7 @@ export const ProofEntryActionBtn = ({
 					}}
 					onClick={handleBtnClick}
 					isLoading={
+						submitSolution.submitSolutionFetchingVDataIsLoading ||
 						submitSolution.receipt.isLoading ||
 						submitProofMessageLoading
 					}

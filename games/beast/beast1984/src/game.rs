@@ -24,8 +24,6 @@ use std::{
     time::{Duration, Instant},
 };
 use crate::levels::get_game_levels;
-// use game_logic::common::game::GameJson;
-// use crate::levels::get_game_levels;
 
 /// the height of the board
 pub const ANSI_BOARD_HEIGHT: usize = BOARD_HEIGHT;

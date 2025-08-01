@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ProofSubmission, SubmitProof } from "../../types/aligned";
+import {
+	NoncedVerificationdata,
+	ProofSubmission,
+	SubmitProof,
+} from "../../types/aligned";
 import { Button } from "../../components";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { Address } from "../../types/blockchain";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { toHex } from "viem";
+import { fetchProofVerificationData } from "../../utils/aligned";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
@@ -58,10 +63,10 @@ export const ProofEntryActionBtn = ({
 
 		if (proof.status === "claimed") {
 			const text = encodeURIComponent(
-				"🟩 I just claimed my proof on zk-arcade!\n\n"
+				"🟩 I just claimed my points on zk-arcade!\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,proof,${proof.verificationData.verificationData.provingSystem}`;
+			const hashtags = `\naligned,proof,${proof.proving_system}`;
 			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 			window.open(twitterShareUrl, "_blank");
@@ -70,35 +75,41 @@ export const ProofEntryActionBtn = ({
 		}
 
 		if (proof.status === "submitted") {
-			if (!proof.batchData) {
+			if (!proof.batch_hash) {
 				alert("Batch data not available for this proof");
 				return;
 			}
 
-			await submitSolution.submitBeastSolution(
-				proof.verificationData.verificationData,
-				proof.batchData
-			);
+			await submitSolution.submitBeastSolution(proof);
 			return;
 		}
 
 		if (proof.status === "underpriced") {
+			const res = await fetchProofVerificationData(proof.id);
+			if (!res) {
+				alert(
+					"There was a problem while sending the proof, please try again"
+				);
+				return;
+			}
+
+			const noncedVerificationData = res.verification_data;
 			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
 			if (!maxFee) {
 				alert("Could not estimate max fee");
 				return;
 			}
-			proof.verificationData.maxFee = toHex(maxFee, { size: 32 });
+			noncedVerificationData.maxFee = toHex(maxFee, { size: 32 });
 
 			setSubmitProofMessageLoading(true);
 			try {
 				const { r, s, v } = await signVerificationData(
-					proof.verificationData,
+					noncedVerificationData,
 					payment_service_address
 				);
 
 				const submitProofMessage: SubmitProof = {
-					verificationData: proof.verificationData,
+					verificationData: noncedVerificationData,
 					signature: {
 						r,
 						s,
@@ -134,6 +145,7 @@ export const ProofEntryActionBtn = ({
 					}}
 					onClick={handleBtnClick}
 					isLoading={
+						submitSolution.submitSolutionFetchingVDataIsLoading ||
 						submitSolution.receipt.isLoading ||
 						submitProofMessageLoading
 					}

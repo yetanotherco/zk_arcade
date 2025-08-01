@@ -10,16 +10,16 @@ defmodule ZkArcade.Proofs do
 
   require Logger
   @doc """
-  Returns the list of proofs.
+  Returns the total count of proofs.
 
   ## Examples
 
       iex> list_proofs()
-      [%Proof{}, ...]
+      42
 
   """
   def list_proofs do
-    Repo.all(Proof)
+    Repo.aggregate(Proof, :count, :id)
   end
 
   @doc """
@@ -71,19 +71,61 @@ defmodule ZkArcade.Proofs do
   def get_proofs_by_address(address, %{page: page, page_size: size}) do
     downcased_addr = String.downcase(address)
 
-    from(proof in Proof,
-      select: proof,
-      where: proof.wallet_address == ^downcased_addr,
-      order_by: [desc: proof.inserted_at],
-      limit: ^size,
-      offset: ^((page - 1) * size)
-    ) |> Repo.all()
+    Proof
+      |> where([p], p.wallet_address == ^downcased_addr)
+      |> order_by([p], desc: p.inserted_at)
+      |> limit(^size)
+      |> offset(^((page - 1) * size))
+      |> select([p], %{
+        id: p.id,
+        verification_data_commitment: fragment("?->>'commitment'", p.verification_data_commitment),
+        batch_hash: fragment("?->>'batch_merkle_root'", p.batch_data),
+        status: p.status,
+        game: p.game,
+        proving_system: p.proving_system,
+        inserted_at: p.inserted_at,
+        updated_at: p.updated_at,
+        wallet_address: p.wallet_address
+      })
+      |> Repo.all()
+      |> Enum.map(fn proof ->
+        hex_batch_hash =
+          case proof.batch_hash do
+            nil -> nil
+
+            string when is_binary(string) ->
+              with {:ok, list} <- Jason.decode(string),
+                  true <- is_list(list) do
+                "0x" <> (:erlang.list_to_binary(list) |> Base.encode16(case: :lower))
+              else
+                _ -> nil
+              end
+
+            _ -> nil
+          end
+
+        Map.put(proof, :batch_hash, hex_batch_hash)
+      end)
+  end
+
+
+  def get_proof_verification_data(proof_id) do
+    Proof
+      |> where([p], p.id == ^proof_id)
+      |> select([p], %{
+        id: p.id,
+        verification_data: p.verification_data,
+        batch_data: p.batch_data
+      })
+    |> Repo.all()
   end
 
   def create_pending_proof(submit_proof_message, address, game, proving_system) do
+    {:ok, verification_data_commitment} = ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(submit_proof_message["verificationData"]["verificationData"])
     proof_params = %{
       wallet_address: address,
       verification_data: submit_proof_message["verificationData"],
+      verification_data_commitment: verification_data_commitment,
       status: "pending",
       batch_data: nil,
       game: game,

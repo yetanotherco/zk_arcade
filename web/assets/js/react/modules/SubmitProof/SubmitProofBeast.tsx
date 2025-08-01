@@ -15,7 +15,6 @@ import {
 } from "../../types/aligned";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useChainId } from "wagmi";
-import { useToast } from "../../state/toast";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 import { ProvingSystem, provingSystemByteToName } from "../../types/aligned";
 
@@ -40,11 +39,10 @@ export default ({
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const [maxFee, setMaxFee] = useState(BigInt(0));
-	const {
-		nonce,
-		isLoading: nonceLoading,
-		error: nonceError,
-	} = useBatcherNonce(batcher_url, user_address);
+	const { nonce, isLoading: nonceLoading } = useBatcherNonce(
+		batcher_url,
+		user_address
+	);
 	useProofSentMessageReader();
 
 	const chainId = useChainId();
@@ -56,7 +54,9 @@ export default ({
 		userAddress: user_address,
 	});
 
-	const handleCombinedProofFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleCombinedProofFile = async (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 

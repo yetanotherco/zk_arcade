@@ -1,5 +1,42 @@
 import { Keccak } from "sha3";
-import { provingSystemNameToByte, VerificationData } from "../types/aligned";
+import {
+	BatchInclusionData,
+	NoncedVerificationdata,
+	provingSystemNameToByte,
+	VerificationData,
+} from "../types/aligned";
+
+export type FetchProofVerificationDataResponse = {
+	id: string;
+	verification_data: NoncedVerificationdata;
+	batch_data: BatchInclusionData | null;
+};
+
+export const fetchProofVerificationData = async (
+	proof_id: string
+): Promise<FetchProofVerificationDataResponse | null> => {
+	try {
+		const response = await fetch(
+			`/proof/verification-data?proof_id=${encodeURIComponent(proof_id)}`,
+			{
+				method: "GET",
+				credentials: "include",
+				headers: {
+					Accept: "application/json",
+				},
+			}
+		);
+
+		if (!response.ok) {
+			return null;
+		}
+
+		const data = await response.json();
+		return data[0];
+	} catch (error) {
+		return null;
+	}
+};
 
 export const computeVerificationDataCommitment = (
 	verificationData: VerificationData

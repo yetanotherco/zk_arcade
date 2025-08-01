@@ -127,7 +127,7 @@ impl Game {
 
         let proving_systems = loop {
             let selection = MultiSelect::new()
-                .with_prompt("What do you choose?")
+                .with_prompt("Choose proving systems to use\n(Press [SPACE] to select, [ENTER] to confirm)")
                 .items(&items)
                 .interact()
                 .unwrap();

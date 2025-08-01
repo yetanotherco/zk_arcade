@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import { timeAgoInHs } from "../../utils/date";
@@ -7,12 +7,21 @@ import {
 	ProofBatchMerkleRoot,
 	ProofStatusWithTooltipDesc,
 } from "../../components/Table/ProofBodyItems";
+import { fetchProofVerificationData } from "../../utils/aligned";
 
 const Proof = ({ proof }: { proof: ProofSubmission }) => {
-	const proofHashShorten = `${proof.verificationDataCommitment.slice(
+	const proofHashShorten = `${proof.verification_data_commitment.slice(
 		0,
 		2
-	)}...${proof.verificationDataCommitment.slice(-4)}`;
+	)}...${proof.verification_data_commitment.slice(-4)}`;
+
+	useEffect(() => {
+		const fetching = async () => {
+			const res = await fetchProofVerificationData(proof.id);
+			console.log(res);
+		};
+		fetching();
+	}, [proof]);
 
 	return (
 		<tr>
@@ -65,7 +74,9 @@ export const ProofSubmissions = ({ proofs = [] }: Props) => {
 									const proof = { ...item };
 
 									if (proof.status === "pending") {
-										if (timeAgoInHs(proof.insertedAt) > 6) {
+										if (
+											timeAgoInHs(proof.inserted_At) > 6
+										) {
 											proof.status = "underpriced";
 										}
 									}

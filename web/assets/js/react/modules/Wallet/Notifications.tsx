@@ -1,14 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-	NoncedVerificationdata,
-	ProofSubmission,
-	SubmitProof,
-	VerificationData,
-} from "../../types/aligned";
+import { ProofSubmission, SubmitProof } from "../../types/aligned";
 import { timeAgoInHs } from "../../utils/date";
 import { Button } from "../../components";
-import { bytesToHex, toHex } from "viem";
-import { computeVerificationDataCommitment } from "../../utils/aligned";
+import { toHex } from "viem";
+import { fetchProofVerificationData } from "../../utils/aligned";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { Address } from "../../types/blockchain";
@@ -72,7 +67,7 @@ const NotificationEntry = ({
 
 	const handleClick = async () => {
 		if (proof.status === "submitted") {
-			if (!proof.batchHash) {
+			if (!proof.batch_hash) {
 				alert("Batch data not available for this proof");
 				return;
 			}
@@ -82,8 +77,15 @@ const NotificationEntry = ({
 		}
 
 		if (proof.status === "pending") {
-			// TODO: fetch nonced verification data
-			const noncedVerificationData: NoncedVerificationdata = {};
+			const res = await fetchProofVerificationData(proof.id);
+			if (!res) {
+				alert(
+					"There was a problem while sending the proof, please try again"
+				);
+				return;
+			}
+
+			const noncedVerificationData = res.verification_data;
 			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
 			if (!maxFee) {
 				alert("Could not estimate max fee");
@@ -196,14 +198,14 @@ export const NotificationBell = ({
 
 		const proofsUnderpriced = proofs.filter(
 			proof =>
-				proof.status === "pending" && timeAgoInHs(proof.insertedAt) > 6
+				proof.status === "pending" && timeAgoInHs(proof.inserted_At) > 6
 		);
 
 		const allProofs = proofs.filter(
 			proof =>
 				proof.status === "submitted" ||
 				(proof.status === "pending" &&
-					timeAgoInHs(proof.insertedAt) > 6)
+					timeAgoInHs(proof.inserted_At) > 6)
 		);
 
 		setProofsReady(proofsReady);

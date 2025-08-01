@@ -12,7 +12,10 @@ import {
 	ProofSubmission,
 	VerificationData,
 } from "../types/aligned";
-import { computeVerificationDataCommitment } from "../utils/aligned";
+import {
+	computeVerificationDataCommitment,
+	fetchProofVerificationData,
+} from "../utils/aligned";
 import { bytesToHex, keccak256, encodePacked } from "viem";
 
 import { useToast } from "../state/toast";
@@ -70,21 +73,31 @@ export const useLeaderboardContract = ({
 	const submitBeastSolution = useCallback(
 		async (proof: ProofSubmission) => {
 			// TODO: request nonced verification data to server
+			const res = await fetchProofVerificationData(proof.id);
+			if (!res) {
+				alert(
+					"There was a problem while sending the proof, please try again"
+				);
+				return;
+			}
+
 			const {
-				verificationData,
-				batchData,
-			}: {
-				verificationData: VerificationData;
-				batchData: BatchInclusionData;
-			} = {};
+				verification_data: { verificationData },
+				batch_data,
+			} = res;
+
+			if (!batch_data) {
+				alert("Proof hasn't been verified, try again later");
+				return;
+			}
 
 			const commitment =
 				computeVerificationDataCommitment(verificationData);
 
-			const merkleRoot = bytesToHex(batchData.batch_merkle_root);
+			const merkleRoot = bytesToHex(batch_data.batch_merkle_root);
 
 			const hexPath: string[] =
-				batchData.batch_inclusion_proof.merkle_path.map(
+				batch_data.batch_inclusion_proof.merkle_path.map(
 					p => `${Buffer.from(p).toString("hex")}`
 				);
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
@@ -98,7 +111,7 @@ export const useLeaderboardContract = ({
 				verificationData.proofGeneratorAddress,
 				merkleRoot,
 				encodedMerkleProof,
-				batchData.index_in_batch,
+				batch_data.index_in_batch,
 			];
 
 			await writeContractAsync({

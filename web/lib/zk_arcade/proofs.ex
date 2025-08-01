@@ -90,6 +90,18 @@ defmodule ZkArcade.Proofs do
       |> Repo.all()
   end
 
+
+  def get_proof_verification_data(proof_id) do
+    Proof
+      |> where([p], p.id == ^proof_id)
+      |> select([p], %{
+        id: p.id,
+        verification_data: p.verification_data,
+        batch_data: p.batch_data
+      })
+    |> Repo.all()
+  end
+
   def create_pending_proof(submit_proof_message, address, game, proving_system) do
     {:ok, verification_data_commitment} = ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(submit_proof_message["verificationData"]["verificationData"])
     proof_params = %{

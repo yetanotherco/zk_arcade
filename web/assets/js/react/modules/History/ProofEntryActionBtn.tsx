@@ -9,6 +9,7 @@ import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { Address } from "../../types/blockchain";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { toHex } from "viem";
+import { fetchProofVerificationData } from "../../utils/aligned";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
@@ -74,7 +75,7 @@ export const ProofEntryActionBtn = ({
 		}
 
 		if (proof.status === "submitted") {
-			if (!proof.batchHash) {
+			if (!proof.batch_hash) {
 				alert("Batch data not available for this proof");
 				return;
 			}
@@ -84,10 +85,15 @@ export const ProofEntryActionBtn = ({
 		}
 
 		if (proof.status === "underpriced") {
-			// TODO same logic as notification (fetch nonced verification data)
+			const res = await fetchProofVerificationData(proof.id);
+			if (!res) {
+				alert(
+					"There was a problem while sending the proof, please try again"
+				);
+				return;
+			}
 
-			const noncedVerificationData: NoncedVerificationdata = {};
-
+			const noncedVerificationData = res.verification_data;
 			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
 			if (!maxFee) {
 				alert("Could not estimate max fee");

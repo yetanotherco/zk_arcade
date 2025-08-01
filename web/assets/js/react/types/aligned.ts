@@ -5,9 +5,9 @@ export type ProofSubmission = {
 	game: string;
 	proving_system: ProvingSystem;
 	status: "submitted" | "pending" | "failed" | "claimed" | "underpriced";
-	insertedAt: string;
-	batchHash: string | null;
-	verificationDataCommitment: `0x${string}`;
+	inserted_At: string;
+	batch_hash: string | null;
+	verification_data_commitment: `0x${string}`;
 };
 
 export type SubmitProof = {

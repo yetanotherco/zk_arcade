@@ -23,6 +23,7 @@ use std::{
     thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
+use crate::levels::get_game_levels;
 
 /// the height of the board
 pub const ANSI_BOARD_HEIGHT: usize = BOARD_HEIGHT;
@@ -145,7 +146,10 @@ impl Game {
         let block_number =
             ethereum::get_current_block_number().expect("Could not get block number from rpc");
         println!("Loading game for block number {}...", block_number);
-        let game_match = GameLevels::new(block_number);
+
+        let game_levels = get_game_levels();
+
+        let game_match = GameLevels::new(block_number, game_levels);
         let board_terrain_info = Board::generate_terrain(game_match.get_config(Level::One));
 
         install_raw_mode_signal_handler();

@@ -1,4 +1,4 @@
-use std::{fs::File, io::BufReader, time::Duration};
+use std::{time::Duration};
 
 use serde::{Deserialize, Serialize};
 
@@ -17,30 +17,8 @@ pub struct GameLevels {
     levels: Vec<LevelConfig>,
 }
 
-const GAME_FILE: &str = game_file();
-
-const fn game_file() -> &'static str {
-    #[cfg(feature = "devnet")]
-    return "levels/devnet.json";
-
-    #[cfg(feature = "holesky-stage")]
-    return "levels/holesky-stage.json";
-
-    #[cfg(feature = "holesky")]
-    return "levels/holesky.json";
-
-    #[cfg(feature = "mainnet")]
-    return "levels/mainnet.json";
-
-    ""
-}
-
 impl GameLevels {
-    pub fn new(block_number: u64) -> GameLevels {
-        let file = File::open(GAME_FILE).expect("Cannot open game levels file");
-        let reader = BufReader::new(file);
-        let games: Vec<GameJson> = serde_json::from_reader(reader).expect("Invalid JSON format");
-
+    pub fn new(block_number: u64, games: Vec<GameJson>) -> GameLevels {
         for game in games.into_iter() {
             if game.from_block <= block_number && block_number < game.to_block {
                 return Self::from_levels_json(&game.levels);

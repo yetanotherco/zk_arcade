@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ProofSubmission, SubmitProof } from "../../types/aligned";
+import {
+	NoncedVerificationdata,
+	ProofSubmission,
+	SubmitProof,
+	VerificationData,
+} from "../../types/aligned";
 import { timeAgoInHs } from "../../utils/date";
 import { Button } from "../../components";
 import { bytesToHex, toHex } from "viem";
@@ -58,20 +63,6 @@ const NotificationEntry = ({
 		useAligned();
 
 	useEffect(() => {
-		const commitment = computeVerificationDataCommitment(
-			proof.verificationData.verificationData
-		);
-
-		const proofHash = bytesToHex(commitment.commitmentDigest);
-
-		const proofHashShorten = `${proofHash.slice(0, 2)}...${proofHash.slice(
-			-4
-		)}`;
-
-		setProofCommitment(proofHashShorten);
-	}, [proof, setProofCommitment]);
-
-	useEffect(() => {
 		if (submitSolution.receipt.isSuccess) {
 			window.setTimeout(() => {
 				formSubmittedRef.current?.submit();
@@ -81,35 +72,35 @@ const NotificationEntry = ({
 
 	const handleClick = async () => {
 		if (proof.status === "submitted") {
-			if (!proof.batchData) {
+			if (!proof.batchHash) {
 				alert("Batch data not available for this proof");
 				return;
 			}
 
-			await submitSolution.submitBeastSolution(
-				proof.verificationData.verificationData,
-				proof.batchData
-			);
+			await submitSolution.submitBeastSolution(proof);
 			return;
 		}
 
 		if (proof.status === "pending") {
+			// TODO: fetch nonced verification data
+			const noncedVerificationData: NoncedVerificationdata = {};
 			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
 			if (!maxFee) {
 				alert("Could not estimate max fee");
 				return;
 			}
-			proof.verificationData.maxFee = toHex(maxFee, { size: 32 });
+
+			noncedVerificationData.maxFee = toHex(maxFee, { size: 32 });
 
 			setSubmitProofMessageLoading(true);
 			try {
 				const { r, s, v } = await signVerificationData(
-					proof.verificationData,
+					noncedVerificationData,
 					payment_service_address
 				);
 
 				const submitProofMessage: SubmitProof = {
-					verificationData: proof.verificationData,
+					verificationData: noncedVerificationData,
 					signature: {
 						r,
 						s,

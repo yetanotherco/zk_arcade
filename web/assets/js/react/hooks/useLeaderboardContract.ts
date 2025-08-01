@@ -7,7 +7,11 @@ import {
 	useWriteContract,
 } from "wagmi";
 import { leaderboardAbi } from "../constants/aligned";
-import { BatchInclusionData, VerificationData } from "../types/aligned";
+import {
+	BatchInclusionData,
+	ProofSubmission,
+	VerificationData,
+} from "../types/aligned";
 import { computeVerificationDataCommitment } from "../utils/aligned";
 import { bytesToHex, keccak256, encodePacked } from "viem";
 
@@ -64,10 +68,16 @@ export const useLeaderboardContract = ({
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
 	const submitBeastSolution = useCallback(
-		async (
-			verificationData: VerificationData,
-			batchData: BatchInclusionData
-		) => {
+		async (proof: ProofSubmission) => {
+			// TODO: request nonced verification data to server
+			const {
+				verificationData,
+				batchData,
+			}: {
+				verificationData: VerificationData;
+				batchData: BatchInclusionData;
+			} = {};
+
 			const commitment =
 				computeVerificationDataCommitment(verificationData);
 

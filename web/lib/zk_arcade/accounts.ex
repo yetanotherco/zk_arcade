@@ -9,16 +9,16 @@ defmodule ZkArcade.Accounts do
   alias ZkArcade.Accounts.Wallet
 
   @doc """
-  Returns the list of wallets.
+  Returns the total count of wallet.
 
   ## Examples
 
       iex> list_wallets()
-      [%Wallet{}, ...]
+      42
 
   """
   def list_wallets do
-    Repo.all(Wallet)
+    Repo.aggregate(Wallet, :count, :id)
   end
 
   @doc """

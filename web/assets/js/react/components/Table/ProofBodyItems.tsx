@@ -1,7 +1,6 @@
 import React from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { shortenHash } from "../../utils/crypto";
-import { bytesToHex } from "viem";
 
 type KeysForStatus = ProofSubmission["status"];
 
@@ -75,12 +74,12 @@ export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
 export const ProofBatchMerkleRoot = ({ proof }: Props) => {
 	return (
 		<td>
-			{proof.batchData?.batch_merkle_root ? (
+			{proof.batchHash ? (
 				<a
-					href={`https://explorer.alignedlayer.com/batches/${bytesToHex(proof.batchData.batch_merkle_root)}`}
+					href={`https://explorer.alignedlayer.com/batches/${proof.batchHash}`}
 					className="underline"
 				>
-					{shortenHash(bytesToHex(proof.batchData.batch_merkle_root))}
+					{shortenHash(proof.batchHash)}
 				</a>
 			) : (
 				<p>...</p>

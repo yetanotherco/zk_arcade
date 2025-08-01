@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Address } from "../../types/blockchain";
 import { useBatcherPaymentService, useLeaderboardContract } from "../../hooks";
-import { bytesToHex, formatEther } from "viem";
+import { formatEther } from "viem";
 import { ColumnBody, Table, TableBodyItem } from "../../components/Table";
 import { ProofSubmission } from "../../types/aligned";
 import { timeAgo, timeAgoInHs } from "../../utils/date";
-import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { shortenHash } from "../../utils/crypto";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 import { ProofEntryActionBtn } from "./ProofEntryActionBtn";
@@ -74,20 +73,9 @@ export const ProofHistory = ({
 					<TableBodyItem text={timeAgo(proof.insertedAt)} />,
 					<ProofBatchMerkleRoot proof={proof} />,
 					<TableBodyItem
-						text={shortenHash(
-							bytesToHex(
-								computeVerificationDataCommitment(
-									proof.verificationData.verificationData
-								).commitmentDigest
-							)
-						)}
+						text={shortenHash(proof.verificationDataCommitment)}
 					/>,
-					<TableBodyItem
-						text={
-							proof.verificationData.verificationData
-								.provingSystem
-						}
-					/>,
+					<TableBodyItem text={proof.proving_system} />,
 					<ProofEntryActionBtn
 						leaderboard_address={leaderboard_address}
 						payment_service_address={payment_service_address}

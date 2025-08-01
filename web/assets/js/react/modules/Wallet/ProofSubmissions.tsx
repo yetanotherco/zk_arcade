@@ -1,8 +1,6 @@
 import React from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
-import { bytesToHex } from "viem";
-import { computeVerificationDataCommitment } from "../../utils/aligned";
 import { timeAgoInHs } from "../../utils/date";
 import { TableBodyItem } from "../../components/Table";
 import {
@@ -11,15 +9,10 @@ import {
 } from "../../components/Table/ProofBodyItems";
 
 const Proof = ({ proof }: { proof: ProofSubmission }) => {
-	const commitment = computeVerificationDataCommitment(
-		proof.verificationData.verificationData
-	);
-
-	const proofHash = bytesToHex(commitment.commitmentDigest);
-
-	const proofHashShorten = `${proofHash.slice(0, 2)}...${proofHash.slice(
-		-4
-	)}`;
+	const proofHashShorten = `${proof.verificationDataCommitment.slice(
+		0,
+		2
+	)}...${proof.verificationDataCommitment.slice(-4)}`;
 
 	return (
 		<tr>

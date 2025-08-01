@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ProofSubmission, SubmitProof } from "../../types/aligned";
+import {
+	NoncedVerificationdata,
+	ProofSubmission,
+	SubmitProof,
+} from "../../types/aligned";
 import { Button } from "../../components";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { Address } from "../../types/blockchain";
@@ -61,7 +65,7 @@ export const ProofEntryActionBtn = ({
 				"🟩 I just claimed my proof on zk-arcade!\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,proof,${proof.verificationData.verificationData.provingSystem}`;
+			const hashtags = `\naligned,proof,${proof.proving_system}`;
 			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 			window.open(twitterShareUrl, "_blank");
@@ -70,35 +74,36 @@ export const ProofEntryActionBtn = ({
 		}
 
 		if (proof.status === "submitted") {
-			if (!proof.batchData) {
+			if (!proof.batchHash) {
 				alert("Batch data not available for this proof");
 				return;
 			}
 
-			await submitSolution.submitBeastSolution(
-				proof.verificationData.verificationData,
-				proof.batchData
-			);
+			await submitSolution.submitBeastSolution(proof);
 			return;
 		}
 
 		if (proof.status === "underpriced") {
+			// TODO same logic as notification (fetch nonced verification data)
+
+			const noncedVerificationData: NoncedVerificationdata = {};
+
 			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
 			if (!maxFee) {
 				alert("Could not estimate max fee");
 				return;
 			}
-			proof.verificationData.maxFee = toHex(maxFee, { size: 32 });
+			noncedVerificationData.maxFee = toHex(maxFee, { size: 32 });
 
 			setSubmitProofMessageLoading(true);
 			try {
 				const { r, s, v } = await signVerificationData(
-					proof.verificationData,
+					noncedVerificationData,
 					payment_service_address
 				);
 
 				const submitProofMessage: SubmitProof = {
-					verificationData: proof.verificationData,
+					verificationData: noncedVerificationData,
 					signature: {
 						r,
 						s,

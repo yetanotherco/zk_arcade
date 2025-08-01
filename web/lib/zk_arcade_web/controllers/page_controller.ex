@@ -126,7 +126,7 @@ defmodule ZkArcadeWeb.PageController do
         You can uninstall Beast at any time with the command: <span class="code-block">rm $(which beast)</span>
         """,
         acknowledgments: acknowledgements,
-        tags: [:cli, :risc0]
+        tags: [:cli, :risc0, :sp1]
       })
       |> assign(:username, username)
       |> assign(:user_position, position)

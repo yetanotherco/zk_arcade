@@ -136,7 +136,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function getCurrentBeastGame() public view returns (BeastGame memory) {
         for (uint256 i = 0; i < beastGames.length; i++) {
-            if (block.timestamp >= beastGames[i].startsAtTime && block.timestamp <= beastGames[i].endsAtTime) {
+            if (block.timestamp >= beastGames[i].startsAtTime && block.timestamp < beastGames[i].endsAtTime) {
                 return beastGames[i];
             }
         }

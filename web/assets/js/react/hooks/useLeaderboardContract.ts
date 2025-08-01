@@ -148,6 +148,10 @@ export const useLeaderboardContract = ({
 			},
 		},
 		currentGameLevelCompleted,
-		currentGame,
+		currentGame: {
+			...currentGame,
+			gamesHaveFinished:
+				currentGame.error?.message?.includes("NoActiveBeastGame"),
+		},
 	};
 };

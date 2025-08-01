@@ -77,6 +77,7 @@ export const leaderboardAbi = [
 		],
 		stateMutability: "view",
 	},
+	{ type: "error", name: "NoActiveBeastGame", inputs: [] },
 ];
 
 export const eip712Domain = (

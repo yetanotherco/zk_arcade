@@ -64,43 +64,61 @@ export const CurrentBeastGame = ({
 	return (
 		<div className="w-full">
 			<div className="flex flex-col gap-8 w-full">
-				<p className="text-lg text-text-100">
-					Your progress on current active game:
-				</p>
+				{currentGame.isLoading ? (
+					"Loading..."
+				) : currentGame.gamesHaveFinished ? (
+					<>
+						<p className="text-lg text-text-100">
+							There are no more games avaiable to play...
+						</p>
+					</>
+				) : (
+					<>
+						<p className="text-lg text-text-100">
+							Your progress on current active game:
+						</p>
 
-				<div className="flex items-center w-full overflow-scroll">
-					<div className="w-full relative" style={{ width: 1000 }}>
-						<div className="relative w-full flex gap-2 justify-between">
-							{Array.from({ length: 8 }, (_, i) => i + 1).map(
-								i => (
-									<LevelComponent
-										key={i}
-										level_number={i}
-										claimed={
-											i <=
-											Number(
-												currentGameLevelCompleted.data ||
-													0
-											)
-										}
-										points={1}
-									/>
-								)
-							)}
+						<div className="flex items-center w-full overflow-scroll">
+							<div
+								className="w-full relative"
+								style={{ width: 1000 }}
+							>
+								<div className="relative w-full flex gap-2 justify-between">
+									{Array.from(
+										{ length: 8 },
+										(_, i) => i + 1
+									).map(i => (
+										<LevelComponent
+											key={i}
+											level_number={i}
+											claimed={
+												i <=
+												Number(
+													currentGameLevelCompleted.data ||
+														0
+												)
+											}
+											points={1}
+										/>
+									))}
+								</div>
+							</div>
 						</div>
-					</div>
-				</div>
 
-				<p className="text-lg text-text-200 text-center">
-					Levels renew in{" "}
-					{hoursRemaining !== null ? (
-						<span className="text-accent-100">
-							{Math.floor(hoursRemaining)} hours
-						</span>
-					) : (
-						<span className="text-accent-100">loading...</span>
-					)}
-				</p>
+						<p className="text-lg text-text-200 text-center">
+							Levels renew in{" "}
+							{hoursRemaining !== null ? (
+								<span className="text-accent-100">
+									{Math.floor(hoursRemaining)} hours
+								</span>
+							) : (
+								<span className="text-accent-100">
+									loading...
+								</span>
+							)}
+						</p>
+					</>
+				)}
 			</div>
 		</div>
 	);

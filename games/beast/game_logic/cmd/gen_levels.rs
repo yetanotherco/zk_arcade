@@ -5,8 +5,6 @@ use primitive_types::U256;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-const BLOCK_TIME_SECONDS: u64 = 12;
-
 fn base_template() -> Vec<LevelJson> {
     vec![
         LevelJson {
@@ -173,9 +171,9 @@ fn generate_game_levels(levels_per_game: usize, rng: &mut impl Rng) -> Vec<Level
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct LeaderboardLevel {
-    endsAtBlock: String,
+    endsAtTime: String,
     gameConfig: String,
-    startsAtBlock: String,
+    startsAtTime: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -185,9 +183,9 @@ struct LeaderboardConfig {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 6 {
+    if args.len() != 5 {
         eprintln!(
-            "Usage: {} <number_of_games> <levels_per_game> <start_at_block_number> <total_campaign_in_days> <network>",
+            "Usage: {} <number_of_games> <levels_per_game> <total_campaign_in_days> <network>",
             args[0]
         );
         std::process::exit(1);
@@ -195,24 +193,30 @@ fn main() {
 
     let num_games: usize = args[1].parse().expect("Invalid number of games");
     let levels_per_game: usize = args[2].parse().expect("Invalid number of levels");
-    let mut current_block = args[3].parse().expect("Invalid current block");
-    let time_days: u64 = args[4].parse().expect("Invalid total campaign in days");
-    let network: String = args[5].parse().expect("Invalid network");
+    let time_days: u64 = args[3].parse().expect("Invalid total campaign in days");
+    let network: String = args[4].parse().expect("Invalid network");
 
-    let total_blocks = (time_days * 24 * 3600) / BLOCK_TIME_SECONDS;
-    let blocks_per_game = total_blocks / num_games as u64;
+    // Get the current time in seconds from the OS
+    let current_time = std::time::SystemTime::now();
+    let mut current_timestamp = current_time
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_secs();
+
+    let time_in_seconds = time_days * 24 * 3600;
+    let seconds_per_game = time_in_seconds / num_games as u64;
 
     let mut rng = rand::rng();
     let games: Vec<GameJson> = (0..num_games)
         .map(|_| {
             let levels = generate_game_levels(levels_per_game, &mut rng);
-            let from_block = current_block;
-            let to_block = current_block + blocks_per_game;
-            current_block = to_block;
+            let from_time = current_timestamp;
+            let to_time = current_timestamp + seconds_per_game;
+            current_timestamp = to_time;
 
             GameJson {
-                from_block,
-                to_block,
+                from_time: from_time,
+                to_time: to_time,
                 game_config: hex::encode(encode_game_config(&levels)),
                 levels,
             }
@@ -235,12 +239,12 @@ fn main() {
                 let mut start_buf = [0u8; 32];
                 let mut end_buf = [0u8; 32];
 
-                U256::from(game.from_block).to_big_endian(&mut start_buf);
-                U256::from(game.to_block).to_big_endian(&mut end_buf);
+                U256::from(game.from_time).to_big_endian(&mut start_buf);
+                U256::from(game.to_time).to_big_endian(&mut end_buf);
 
                 LeaderboardLevel {
-                    startsAtBlock: format!("0x{}", hex::encode(start_buf)),
-                    endsAtBlock: format!("0x{}", hex::encode(end_buf)),
+                    startsAtTime: format!("0x{}", hex::encode(start_buf)),
+                    endsAtTime: format!("0x{}", hex::encode(end_buf)),
                     gameConfig: format!("0x{}", game.game_config.clone()),
                 }
             })

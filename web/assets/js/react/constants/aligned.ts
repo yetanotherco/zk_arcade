@@ -58,7 +58,7 @@ export const leaderboardAbi = [
 				internalType: "struct Leaderboard.BeastGame",
 				components: [
 					{
-						name: "endsAtBlock",
+						name: "endsAtTime",
 						type: "uint256",
 						internalType: "uint256",
 					},
@@ -68,7 +68,7 @@ export const leaderboardAbi = [
 						internalType: "uint256",
 					},
 					{
-						name: "startsAtBlock",
+						name: "startsAtTime",
 						type: "uint256",
 						internalType: "uint256",
 					},

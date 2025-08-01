@@ -183,9 +183,9 @@ struct LeaderboardConfig {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 6 {
+    if args.len() != 5 {
         eprintln!(
-            "Usage: {} <number_of_games> <levels_per_game> <start_at_block_timestamp> <total_campaign_in_days> <network>",
+            "Usage: {} <number_of_games> <levels_per_game> <total_campaign_in_days> <network>",
             args[0]
         );
         std::process::exit(1);
@@ -193,9 +193,15 @@ fn main() {
 
     let num_games: usize = args[1].parse().expect("Invalid number of games");
     let levels_per_game: usize = args[2].parse().expect("Invalid number of levels");
-    let mut current_timestamp = args[3].parse().expect("Invalid current block timestamp");
-    let time_days: u64 = args[4].parse().expect("Invalid total campaign in days");
-    let network: String = args[5].parse().expect("Invalid network");
+    let time_days: u64 = args[3].parse().expect("Invalid total campaign in days");
+    let network: String = args[4].parse().expect("Invalid network");
+
+    // Get the current time in seconds from the OS
+    let current_time = std::time::SystemTime::now();
+    let mut current_timestamp = current_time
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_secs();
 
     let time_in_seconds = time_days * 24 * 3600;
     let seconds_per_game = time_in_seconds / num_games as u64;

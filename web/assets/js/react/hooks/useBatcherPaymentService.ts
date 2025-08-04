@@ -4,6 +4,7 @@ import {
 	useReadContract,
 	useSendTransaction,
 	useWaitForTransactionReceipt,
+	useWriteContract,
 } from "wagmi";
 import { batcherPaymentServiceAbi } from "../constants/aligned";
 import { useCallback, useEffect } from "react";
@@ -20,13 +21,23 @@ export const useBatcherPaymentService = ({
 	const chainId = useChainId();
 
 	const {
-		data: hash,
+		data: depositHash,
 		sendTransactionAsync,
-		...transactionData
+		...depositTransactionData
 	} = useSendTransaction();
 
-	const receiptData = useWaitForTransactionReceipt({
-		hash,
+	const depositReceiptData = useWaitForTransactionReceipt({
+		hash: depositHash,
+	});
+
+	const {
+		data: withdrawHash,
+		writeContractAsync,
+		...withdrawTransactionData
+	} = useWriteContract();
+
+	const withdrawReceiptData = useWaitForTransactionReceipt({
+		hash: withdrawHash,
 	});
 
 	const { ...balanceFetchData } = useReadContract({
@@ -37,7 +48,6 @@ export const useBatcherPaymentService = ({
 		chainId,
 	});
 
-	// TODO: get nonce from batcher
 	const { ...nonceFetchData } = useReadContract({
 		address: contractAddress,
 		abi: batcherPaymentServiceAbi,
@@ -54,12 +64,33 @@ export const useBatcherPaymentService = ({
 				value,
 			});
 		},
-		[sendTransactionAsync]
+		[sendTransactionAsync, contractAddress]
+	);
+
+	const withdrawFunds = useCallback(
+		async (amountToWithdrawInEther: string) => {
+			const value = parseEther(amountToWithdrawInEther);
+			await writeContractAsync({
+				address: contractAddress,
+				abi: batcherPaymentServiceAbi,
+				functionName: "withdraw",
+				args: [value],
+			});
+		},
+		[writeContractAsync, contractAddress]
 	);
 
 	useEffect(() => {
-		balanceFetchData.refetch();
-	}, [receiptData.isSuccess]);
+		if (depositReceiptData.isSuccess) {
+			balanceFetchData.refetch();
+		}
+	}, [depositReceiptData.isSuccess, balanceFetchData]);
+
+	useEffect(() => {
+		if (withdrawReceiptData.isSuccess) {
+			balanceFetchData.refetch();
+		}
+	}, [withdrawReceiptData.isSuccess, balanceFetchData]);
 
 	return {
 		balance: {
@@ -72,8 +103,13 @@ export const useBatcherPaymentService = ({
 		},
 		sendFunds: {
 			send: sendFunds,
-			transaction: transactionData,
-			receipt: receiptData,
+			transaction: depositTransactionData,
+			receipt: depositReceiptData,
+		},
+		withdrawFunds: {
+			send: withdrawFunds,
+			transaction: withdrawTransactionData,
+			receipt: withdrawReceiptData,
 		},
 	};
 };

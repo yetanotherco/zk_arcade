@@ -32,10 +32,10 @@ export const WithdrawFromAlignedModal = ({
 	const maxWithdrawAmount = Number(availableBalance);
 	
 	const unlockBlockTime = unlockTime.data ? Number(unlockTime.data) : 0;
-	const currentTime = Math.floor(Date.now() / 1000);
-	const isUnlocked = unlockBlockTime > 0 && currentTime >= unlockBlockTime;
-	const isUnlocking = unlockBlockTime > 0 && currentTime < unlockBlockTime;
-	const timeRemaining = isUnlocking ? unlockBlockTime - currentTime : 0;
+	const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+	const isUnlocked = unlockBlockTime > 0 && currentTimeInSeconds >= unlockBlockTime;
+	const isUnlocking = unlockBlockTime > 0 && currentTimeInSeconds < unlockBlockTime;
+	const timeRemaining = isUnlocking ? unlockBlockTime - currentTimeInSeconds : 0;
 
 	const formatTimeRemaining = (seconds: number) => {
 		const hours = Math.floor(seconds / 3600);
@@ -146,11 +146,11 @@ export const WithdrawFromAlignedModal = ({
 				
 				<div className="w-full">
 					<div className="flex justify-between items-center mb-2">
-						<span className="text-sm text-gray-600">
+						<span className="text-sm">
 							Available balance: {Number(availableBalance).toFixed(6)} ETH
 						</span>
 						<Button
-							variant="text"
+							variant="contrast"
 							className="text-sm px-2 py-1"
 							onClick={handleMaxClick}
 						>
@@ -160,7 +160,7 @@ export const WithdrawFromAlignedModal = ({
 					<div className="mb-4 p-3 rounded">
 						{unlockBlockTime === 0 && (
 							<div className="text-sm">
-								<p className="text-gray-600 mb-2">
+								<p className="mb-2">
 									Funds are locked. You need to unlock them first and wait 1 hour before withdrawing.
 								</p>
 								<Button
@@ -170,7 +170,7 @@ export const WithdrawFromAlignedModal = ({
 									disabled={maxWithdrawAmount === 0}
 									className="w-full"
 								>
-									Unlock Funds
+									{(Number(availableBalance) === 0) ? "No funds available" : "Unlock Funds"}
 								</Button>
 							</div>
 						)}
@@ -193,14 +193,14 @@ export const WithdrawFromAlignedModal = ({
 						
 						{isUnlocked && (
 							<div className="text-sm">
-								<p className="text-green-600 mb-2">
+								<p className="mb-2">
 									Funds are ready for withdrawal
 								</p>
 								<Button
 									variant="text"
 									onClick={handleLock}
 									isLoading={lockFunds.receipt.isLoading}
-									className="w-full"
+									className="w-full text-sm border border-white-100 px-2 py-1"
 								>
 									Lock Funds Again
 								</Button>

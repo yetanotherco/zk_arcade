@@ -27,7 +27,13 @@ defmodule ZkArcade.EthPrice do
         end
 
       {:ok, %HTTPoison.Response{status_code: status_code}} ->
-        {:error, "Request failed with status code: #{status_code}"}
+        Logger.error("Failed to fetch ETH price: #{status_code}")
+        Cachex.get(:eth_price_cache, :eth_price)
+        |> case do
+          {:ok, nil} -> {:error, "Failed to fetch ETH price and no cached value available"}
+          {:ok, price} -> {:ok, price}
+          {:error, reason} -> {:error, reason}
+        end
 
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, "HTTP request failed: #{reason}"}

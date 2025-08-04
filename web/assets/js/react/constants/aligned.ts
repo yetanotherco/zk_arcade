@@ -24,6 +24,27 @@ export const batcherPaymentServiceAbi = [
 		],
 		outputs: [],
 	},
+	{
+		name: "user_unlock_block",
+		type: "function",
+		stateMutability: "view",
+		inputs: [{ name: "account", type: "address", internalType: "address" }],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+	},
+	{
+		name: "unlock",
+		type: "function",
+		stateMutability: "nonpayable",
+		inputs: [],
+		outputs: [],
+	},
+	{
+		name: "lock",
+		type: "function",
+		stateMutability: "nonpayable",
+		inputs: [],
+		outputs: [],
+	},
 ];
 
 export const leaderboardAbi = [

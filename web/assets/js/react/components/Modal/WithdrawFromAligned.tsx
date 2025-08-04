@@ -21,7 +21,7 @@ export const WithdrawFromAlignedModal = ({
 	user_address,
 }: Props) => {
 	const { price } = useEthPrice();
-	const { balance, withdrawFunds } = useBatcherPaymentService({
+	const { balance, unlockTime, unlockFunds, withdrawFunds, lockFunds } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
 	});
@@ -30,12 +30,45 @@ export const WithdrawFromAlignedModal = ({
 
 	const availableBalance = balance.data ? formatEther(balance.data) : "0";
 	const maxWithdrawAmount = Number(availableBalance);
+	
+	const unlockBlockTime = unlockTime.data ? Number(unlockTime.data) : 0;
+	const currentTime = Math.floor(Date.now() / 1000);
+	const isUnlocked = unlockBlockTime > 0 && currentTime >= unlockBlockTime;
+	const isUnlocking = unlockBlockTime > 0 && currentTime < unlockBlockTime;
+	const timeRemaining = isUnlocking ? unlockBlockTime - currentTime : 0;
+
+	const formatTimeRemaining = (seconds: number) => {
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		const secs = seconds % 60;
+		return `${hours}h ${minutes}m ${secs}s`;
+	};
+
+	useEffect(() => {
+		if (unlockFunds.receipt.isLoading) {
+			addToast({
+				title: "Unlock transaction sent",
+				desc: "Unlock transaction was sent successfully, waiting for confirmation...",
+				type: "success",
+			});
+		}
+	}, [unlockFunds.receipt.isLoading]);
+
+	useEffect(() => {
+		if (unlockFunds.receipt.isSuccess) {
+			addToast({
+				title: "Funds unlock initiated",
+				desc: "Your funds will be available for withdrawal in 1 hour",
+				type: "success",
+			});
+		}
+	}, [unlockFunds.receipt.isSuccess]);
 
 	useEffect(() => {
 		if (withdrawFunds.receipt.isLoading) {
 			window.setTimeout(() => setOpen(false), 250);
 			addToast({
-				title: "Transaction sent",
+				title: "Withdrawal transaction sent",
 				desc: "Withdrawal transaction was sent successfully, waiting for receipt...",
 				type: "success",
 			});
@@ -49,36 +82,39 @@ export const WithdrawFromAlignedModal = ({
 				desc: "The withdrawal transaction was included, your balance has been updated",
 				type: "success",
 			});
+			
+			// Here we refresh the page to show the updated balance and the lock time
+			setTimeout(() => {
+				window.location.reload();
+			}, 1000);
 		}
 	}, [withdrawFunds.receipt.isSuccess, withdrawFunds.receipt.data]);
+
+	useEffect(() => {
+		if (unlockFunds.transaction.isError) {
+			const errorMessage =
+				unlockFunds.transaction.error?.message ||
+				"Something went wrong with the unlock transaction.";
+			addToast({
+				title: "Unlock failed",
+				desc: errorMessage,
+				type: "error",
+			});
+		}
+	}, [unlockFunds.transaction.isError]);
 
 	useEffect(() => {
 		if (withdrawFunds.transaction.isError) {
 			const errorMessage =
 				withdrawFunds.transaction.error?.message ||
 				"Something went wrong with the withdrawal transaction.";
-
 			addToast({
 				title: "Withdrawal failed",
 				desc: errorMessage,
 				type: "error",
 			});
 		}
-	}, [withdrawFunds.transaction.isError, withdrawFunds.transaction.error]);
-
-	useEffect(() => {
-		if (withdrawFunds.receipt.isError) {
-			const errorMessage =
-				withdrawFunds.receipt.error?.message ||
-				"Something went wrong with the withdrawal transaction.";
-
-			addToast({
-				title: "Withdrawal failed",
-				desc: errorMessage,
-				type: "error",
-			});
-		}
-	}, [withdrawFunds.receipt.isError, withdrawFunds.receipt.error]);
+	}, [withdrawFunds.transaction.isError]);
 
 	const handleMaxClick = () => {
 		setWithdrawValue(availableBalance);
@@ -89,9 +125,21 @@ export const WithdrawFromAlignedModal = ({
 		return amount > 0 && amount <= maxWithdrawAmount;
 	};
 
+	const handleUnlock = async () => {
+		await unlockFunds.send();
+	};
+
+	const handleWithdraw = async () => {
+		await withdrawFunds.send(withdrawValue);
+	};
+
+	const handleLock = async () => {
+		await lockFunds.send();
+	};
+
 	return (
 		<Modal maxWidth={500} open={open} setOpen={setOpen}>
-			<div className="bg-contrast-100 w-full p-10 rounded flex flex-col items-center gap-8">
+			<div className="bg-contrast-100 w-full p-10 rounded flex flex-col items-center gap-6">
 				<h3 className="text-md font-bold mb-2">
 					Withdraw from Aligned Batcher
 				</h3>
@@ -109,6 +157,56 @@ export const WithdrawFromAlignedModal = ({
 							Max
 						</Button>
 					</div>
+					<div className="mb-4 p-3 rounded">
+						{unlockBlockTime === 0 && (
+							<div className="text-sm">
+								<p className="text-gray-600 mb-2">
+									Funds are locked. You need to unlock them first and wait 1 hour before withdrawing.
+								</p>
+								<Button
+									variant="text-accent"
+									onClick={handleUnlock}
+									isLoading={unlockFunds.receipt.isLoading}
+									disabled={maxWithdrawAmount === 0}
+									className="w-full"
+								>
+									Unlock Funds
+								</Button>
+							</div>
+						)}
+						
+						{isUnlocking && (
+							<div className="text-sm">
+								<p className="text-black-600 mb-2">
+									Funds are unlocking in: {formatTimeRemaining(timeRemaining)}
+								</p>
+								<Button
+									variant="text-accent"
+									onClick={handleLock}
+									isLoading={lockFunds.receipt.isLoading}
+									className="w-full"
+								>
+									Cancel Unlock
+								</Button>
+							</div>
+						)}
+						
+						{isUnlocked && (
+							<div className="text-sm">
+								<p className="text-green-600 mb-2">
+									Funds are ready for withdrawal
+								</p>
+								<Button
+									variant="text"
+									onClick={handleLock}
+									isLoading={lockFunds.receipt.isLoading}
+									className="w-full"
+								>
+									Lock Funds Again
+								</Button>
+							</div>
+						)}
+					</div>
 					
 					<FormInput
 						label="Amount to withdraw in ETH:"
@@ -119,6 +217,7 @@ export const WithdrawFromAlignedModal = ({
 						min="0"
 						max={availableBalance}
 						step="0.0001"
+						disabled={!isUnlocked}
 					/>
 					
 					<p className="mt-1">
@@ -149,13 +248,11 @@ export const WithdrawFromAlignedModal = ({
 					</Button>
 					<Button
 						variant="accent-fill"
-						onClick={async () => {
-							await withdrawFunds.send(withdrawValue);
-						}}
+						onClick={handleWithdraw}
 						isLoading={withdrawFunds.receipt.isLoading}
-						disabled={!isValidAmount() || balance.isLoading}
+						disabled={!isValidAmount() || !isUnlocked || balance.isLoading}
 					>
-						Confirm Withdrawal
+						{!isUnlocked ? "Unlock Required" : "Confirm Withdrawal"}
 					</Button>
 				</div>
 			</div>

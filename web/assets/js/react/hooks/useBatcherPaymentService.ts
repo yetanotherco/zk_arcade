@@ -31,8 +31,28 @@ export const useBatcherPaymentService = ({
 	});
 
 	const {
+		data: unlockHash,
+		writeContractAsync: unlockWriteContract,
+		...unlockTransactionData
+	} = useWriteContract();
+
+	const unlockReceiptData = useWaitForTransactionReceipt({
+		hash: unlockHash,
+	});
+
+	const {
+		data: lockHash,
+		writeContractAsync: lockWriteContract,
+		...lockTransactionData
+	} = useWriteContract();
+
+	const lockReceiptData = useWaitForTransactionReceipt({
+		hash: lockHash,
+	});
+
+	const {
 		data: withdrawHash,
-		writeContractAsync,
+		writeContractAsync: withdrawWriteContract,
 		...withdrawTransactionData
 	} = useWriteContract();
 
@@ -56,41 +76,89 @@ export const useBatcherPaymentService = ({
 		chainId,
 	});
 
+	const { ...unlockTimeFetchData } = useReadContract({
+		address: contractAddress,
+		abi: batcherPaymentServiceAbi,
+		functionName: "user_unlock_block",
+		args: [userAddress],
+		chainId,
+	});
+
 	const sendFunds = useCallback(
 		async (amountToDepositInEther: string) => {
 			const value = parseEther(amountToDepositInEther);
 			await sendTransactionAsync({
 				to: contractAddress,
 				value,
+				chainId,
 			});
 		},
-		[sendTransactionAsync, contractAddress]
+		[sendTransactionAsync, contractAddress, chainId]
+	);
+
+	const unlockFunds = useCallback(
+		async () => {
+			await unlockWriteContract({
+				address: contractAddress,
+				abi: batcherPaymentServiceAbi,
+				functionName: "unlock",
+				args: [],
+				chainId,
+			});
+		},
+		[unlockWriteContract, contractAddress, chainId]
+	);
+
+	const lockFunds = useCallback(
+		async () => {
+			await lockWriteContract({
+				address: contractAddress,
+				abi: batcherPaymentServiceAbi,
+				functionName: "lock",
+				args: [],
+				chainId,
+			});
+		},
+		[lockWriteContract, contractAddress, chainId]
 	);
 
 	const withdrawFunds = useCallback(
 		async (amountToWithdrawInEther: string) => {
 			const value = parseEther(amountToWithdrawInEther);
-			await writeContractAsync({
+			await withdrawWriteContract({
 				address: contractAddress,
 				abi: batcherPaymentServiceAbi,
 				functionName: "withdraw",
 				args: [value],
+				chainId,
 			});
 		},
-		[writeContractAsync, contractAddress]
+		[withdrawWriteContract, contractAddress, chainId]
 	);
 
 	useEffect(() => {
 		if (depositReceiptData.isSuccess) {
 			balanceFetchData.refetch();
 		}
-	}, [depositReceiptData.isSuccess, balanceFetchData]);
+	}, [depositReceiptData.isSuccess]);
 
 	useEffect(() => {
 		if (withdrawReceiptData.isSuccess) {
 			balanceFetchData.refetch();
 		}
-	}, [withdrawReceiptData.isSuccess, balanceFetchData]);
+	}, [withdrawReceiptData.isSuccess]);
+
+	useEffect(() => {
+		if (unlockReceiptData.isSuccess) {
+			unlockTimeFetchData.refetch();
+		}
+	}, [unlockReceiptData.isSuccess]);
+
+	useEffect(() => {
+		if (lockReceiptData.isSuccess) {
+			unlockTimeFetchData.refetch();
+		}
+	}, [lockReceiptData.isSuccess]);
 
 	return {
 		balance: {
@@ -101,10 +169,24 @@ export const useBatcherPaymentService = ({
 			...nonceFetchData,
 			data: nonceFetchData.data as bigint | undefined,
 		},
+		unlockTime: {
+			...unlockTimeFetchData,
+			data: unlockTimeFetchData.data as bigint | undefined,
+		},
 		sendFunds: {
 			send: sendFunds,
 			transaction: depositTransactionData,
 			receipt: depositReceiptData,
+		},
+		unlockFunds: {
+			send: unlockFunds,
+			transaction: unlockTransactionData,
+			receipt: unlockReceiptData,
+		},
+		lockFunds: {
+			send: lockFunds,
+			transaction: lockTransactionData,
+			receipt: lockReceiptData,
 		},
 		withdrawFunds: {
 			send: withdrawFunds,

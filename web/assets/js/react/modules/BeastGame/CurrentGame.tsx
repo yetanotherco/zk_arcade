@@ -62,11 +62,10 @@ export const CurrentBeastGame = ({
 
 	useEffect(() => {
 		if (endsAtTime > 0 && currentBlockTimestamp) {
-			const blocksRemaining =
+			const timeRemaining =
 				Number(endsAtTime) - Number(currentBlockTimestamp);
-			const secondsRemaining = blocksRemaining * 12;
-			const hours = secondsRemaining / 3600;
-			const minutes = Math.floor(secondsRemaining / 60);
+			const hours = timeRemaining / 3600;
+			const minutes = Math.floor(timeRemaining / 60);
 
 			setTimeRemaining({
 				hours: Math.floor(hours),

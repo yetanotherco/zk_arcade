@@ -256,17 +256,6 @@ impl Game {
                     self.handle_win_state();
                 }
                 GameState::Quit => {
-                    let file_names: Vec<&str> = self
-                        .proving_systems
-                        .iter()
-                        .map(|system| match system.as_str() {
-                            SP1 => "sp1_solution.bin",
-                            RISC0 => "risc0_solution.bin",
-                            _ => "",
-                        })
-                        .collect();
-                    println!("Proof saved to {}", file_names.join(", "));
-                    println!("Submit it to https://test.zkarcade.com and earn points!");
                     println!("Bye...");
                     break;
                 }

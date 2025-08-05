@@ -1004,23 +1004,28 @@ impl Game {
     }
 
     fn render_confirmation_prompt(message: &str, input_listener: &mpsc::Receiver<u8>) -> bool {
+        let confirm_text = "[Y] Yes    [N] No";
+        let box_width = message.len().max(confirm_text.len()) + 4;
+
         let top_pos = ((ANSI_BOARD_HEIGHT + ANSI_FRAME_SIZE) / 2) + ANSI_FOOTER_HEIGHT + 4;
         let bottom_pos = top_pos - 4;
+
         let left_pad = format!(
             "\x1b[{:.0}C",
-            (((BOARD_WIDTH * 2 + ANSI_FRAME_SIZE + ANSI_FRAME_SIZE) / 2)
-                - ((message.len() + 4) / 2))
+            ((BOARD_WIDTH * 2 + ANSI_FRAME_SIZE * 2) / 2).saturating_sub(box_width / 2)
+        );
+
+        let border = "─".repeat(box_width);
+        let message_line = format!("{left_pad}│ {:^width$} │", message, width = box_width - 2);
+        let options_line = format!(
+            "{left_pad}│ {:^width$} │",
+            confirm_text,
+            width = box_width - 2
         );
 
         print!(
-        "\x1b[{top_pos}F{left_pad}┌{border:─<width$}┐\n{left_pad}│ {msg} │\n{left_pad}│          [Y] Yes           [N] No          │\n{left_pad}└{border:─<width$}┘\n\x1b[{bottom_pos:.0}E",
-        border = "",
-        width = message.len() + 2,
-        msg = message
-        );
-
-        let stdin = io::stdin();
-        let mut buffer = [0u8; 1];
+        "\x1b[{top_pos}F{left_pad}┌{border}┐\n{message_line}\n{options_line}\n{left_pad}└{border}┘\n\x1b[{bottom_pos:.0}E"
+    );
 
         while let Ok(byte) = input_listener.recv() {
             match byte as char {

@@ -524,6 +524,7 @@ impl Game {
                             break;
                         } else {
                             println!("{}", self.render_death_screen());
+                            break;
                         }
                     }
                     '\n' => {
@@ -535,8 +536,16 @@ impl Game {
                         break;
                     }
                     'q' | 'Q' => {
-                        self.state = GameState::Quit;
-                        break;
+                        if Self::render_confirmation_prompt(
+                            "Are you sure you want to quit?",
+                            &self.input_listener,
+                        ) {
+                            self.state = GameState::Quit;
+                            break;
+                        } else {
+                            println!("{}", self.render_death_screen());
+                            break;
+                        }
                     }
                     _ => {}
                 }

@@ -11,10 +11,10 @@ import { fetchProofVerificationData } from "../../utils/aligned";
 
 type ProofProps = {
 	proof: ProofSubmission;
-	batcher_base_url: string;
+	explorer_url: string;
 };
 
-const Proof = ({ proof, batcher_base_url }: ProofProps) => {
+const Proof = ({ proof, explorer_url }: ProofProps) => {
 	const proofHashShorten = `${proof.verification_data_commitment.slice(
 		0,
 		2
@@ -31,8 +31,8 @@ const Proof = ({ proof, batcher_base_url }: ProofProps) => {
 	return (
 		<tr>
 			<TableBodyItem text={proof.game} />
-			<ProofStatusWithTooltipDesc proof={proof} batcher_base_url={batcher_base_url} />
-			<ProofBatchMerkleRoot proof={proof} batcher_base_url={batcher_base_url} />
+			<ProofStatusWithTooltipDesc proof={proof} explorer_url={explorer_url} />
+			<ProofBatchMerkleRoot proof={proof} explorer_url={explorer_url} />
 			<TableBodyItem text={proofHashShorten} />
 		</tr>
 	);
@@ -42,10 +42,10 @@ type Props = {
 	proofs: ProofSubmission[];
 	leaderboard_address: Address;
 	payment_service_address: Address;
-	batcher_base_url: string;
+	explorer_url: string;
 };
 
-export const ProofSubmissions = ({ proofs = [], batcher_base_url }: Props) => {
+export const ProofSubmissions = ({ proofs = [], explorer_url }: Props) => {
 	return (
 		<div>
 			<div className="flex justify-between mb-6">
@@ -88,7 +88,7 @@ export const ProofSubmissions = ({ proofs = [], batcher_base_url }: Props) => {
 									}
 
 									return (
-										<Proof key={proof.id} proof={proof} batcher_base_url={batcher_base_url} />
+										<Proof key={proof.id} proof={proof} explorer_url={explorer_url} />
 									);
 								})}
 							</tbody>

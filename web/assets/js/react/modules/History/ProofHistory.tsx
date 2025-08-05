@@ -18,7 +18,7 @@ type Props = {
 	user_address: Address;
 	payment_service_address: Address;
 	proofs: ProofSubmission[];
-	batcher_base_url: string;
+	explorer_url: string;
 };
 
 export const ProofHistory = ({
@@ -26,7 +26,7 @@ export const ProofHistory = ({
 	leaderboard_address,
 	user_address,
 	payment_service_address,
-	batcher_base_url,
+	explorer_url,
 }: Props) => {
 	const [proofsTableRows, setProofsTableRows] = useState<ColumnBody[]>([]);
 	useProofSentMessageReader();
@@ -71,9 +71,9 @@ export const ProofHistory = ({
 			return {
 				rows: [
 					<TableBodyItem text={proof.game} />,
-					<ProofStatusWithTooltipDesc proof={proof} batcher_base_url={batcher_base_url} />,
+					<ProofStatusWithTooltipDesc proof={proof} explorer_url={explorer_url} />,
 					<TableBodyItem text={timeAgo(proof.inserted_at)} />,
-					<ProofBatchMerkleRoot proof={proof} batcher_base_url={batcher_base_url} />,
+					<ProofBatchMerkleRoot proof={proof} explorer_url={explorer_url} />,
 					<TableBodyItem
 						text={shortenHash(proof.verification_data_commitment)}
 					/>,

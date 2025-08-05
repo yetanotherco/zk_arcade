@@ -43,7 +43,7 @@ const statusText: { [key in KeysForStatus]: string } = {
 
 type Props = {
 	proof: ProofSubmission;
-	batcher_base_url: string;
+	explorer_url: string;
 };
 
 export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
@@ -72,12 +72,12 @@ export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
 	);
 };
 
-export const ProofBatchMerkleRoot = ({ proof, batcher_base_url }: Props) => {
+export const ProofBatchMerkleRoot = ({ proof, explorer_url }: Props) => {
 	return (
 		<td>
 			{proof.batch_hash ? (
 				<a
-					href={`${batcher_base_url}/batches/${proof.batch_hash}`}
+					href={`${explorer_url}/batches/${proof.batch_hash}`}
 					className="underline"
 				>
 					{shortenHash(proof.batch_hash)}

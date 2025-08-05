@@ -17,7 +17,7 @@ define(
 			"proofs",
 			"username",
 			"user_position",
-			"batcher_base_url",
+			"explorer_url",
 		],
 	}
 );
@@ -43,7 +43,7 @@ define(
 			"leaderboard_address",
 			"payment_service_address",
 			"user_address",
-			"batcher_base_url",
+			"explorer_url",
 		],
 	}
 );

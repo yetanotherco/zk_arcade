@@ -89,7 +89,7 @@ config :ethereumex,
   url: "http://localhost:8545"
 
 config :zk_arcade, :network, "anvil"
-config :zk_arcade, :batcher_base_url, "https://localhost:4000"
+config :zk_arcade, :explorer_url, "https://localhost:4000"
 config :zk_arcade, :campaign_started_at, 1753031818
 
 config :zk_arcade, :batcher_host, "localhost"

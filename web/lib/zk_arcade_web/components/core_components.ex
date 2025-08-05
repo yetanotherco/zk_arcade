@@ -58,6 +58,7 @@ defmodule ZkArcadeWeb.CoreComponents do
             leaderboard_address={@leaderboard_address}
             username={@username}
             user_position={@user_position}
+            batcher_base_url={@batcher_base_url}
           />
         </div>
       </nav>

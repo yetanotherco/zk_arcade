@@ -14,6 +14,7 @@ type Props = {
 	proofs: ProofSubmission[];
 	username: string;
 	user_position: number;
+	batcher_base_url: string;
 };
 
 export const WalletInfo = ({
@@ -23,6 +24,7 @@ export const WalletInfo = ({
 	proofs,
 	username,
 	user_position,
+	batcher_base_url
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const { disconnect } = useDisconnect();
@@ -69,6 +71,7 @@ export const WalletInfo = ({
 						proofs={proofs}
 						leaderboard_address={leaderboard_address}
 						payment_service_address={payment_service_address}
+						batcher_base_url={batcher_base_url}
 					/>
 					<div>
 						<form

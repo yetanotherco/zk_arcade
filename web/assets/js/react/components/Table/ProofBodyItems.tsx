@@ -43,6 +43,7 @@ const statusText: { [key in KeysForStatus]: string } = {
 
 type Props = {
 	proof: ProofSubmission;
+	batcher_base_url: string;
 };
 
 export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
@@ -71,12 +72,12 @@ export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
 	);
 };
 
-export const ProofBatchMerkleRoot = ({ proof }: Props) => {
+export const ProofBatchMerkleRoot = ({ proof, batcher_base_url }: Props) => {
 	return (
 		<td>
 			{proof.batch_hash ? (
 				<a
-					href={`https://explorer.alignedlayer.com/batches/${proof.batch_hash}`}
+					href={`${batcher_base_url}${proof.batch_hash}`}
 					className="underline"
 				>
 					{shortenHash(proof.batch_hash)}

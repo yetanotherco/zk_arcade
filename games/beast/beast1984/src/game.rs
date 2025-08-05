@@ -1,5 +1,6 @@
 //! this module contains the main struct that orchestrates the game
 
+use crate::levels::get_game_levels;
 use crate::{
     ethereum,
     help::Help,
@@ -23,7 +24,6 @@ use std::{
     thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
-use crate::levels::get_game_levels;
 
 /// the height of the board
 pub const ANSI_BOARD_HEIGHT: usize = BOARD_HEIGHT;
@@ -128,7 +128,9 @@ impl Game {
 
         let proving_systems = loop {
             let selection = MultiSelect::new()
-                .with_prompt("Choose proving systems to use\n(Press [SPACE] to select, [ENTER] to confirm)")
+                .with_prompt(
+                    "Choose proving systems to use\n(Press [SPACE] to select, [ENTER] to confirm)",
+                )
                 .items(&items)
                 .interact()
                 .unwrap();
@@ -254,7 +256,9 @@ impl Game {
                     self.handle_win_state();
                 }
                 GameState::Quit => {
-                    let file_names: Vec<&str> = self.proving_systems.iter()
+                    let file_names: Vec<&str> = self
+                        .proving_systems
+                        .iter()
                         .map(|system| match system.as_str() {
                             SP1 => "sp1_solution.bin",
                             RISC0 => "risc0_solution.bin",
@@ -512,8 +516,15 @@ impl Game {
             if let Ok(byte) = self.input_listener.try_recv() {
                 match byte as char {
                     ' ' => {
-                        self.start_new_game();
-                        break;
+                        if Self::render_confirmation_prompt(
+                            "Are you sure you want to restart the game?",
+                            &self.input_listener,
+                        ) {
+                            self.start_new_game();
+                            break;
+                        } else {
+                            println!("{}", self.render_death_screen());
+                        }
                     }
                     '\n' => {
                         self.state = GameState::ProveExecution;
@@ -700,7 +711,9 @@ impl Game {
             println!("{}", self.render_death_screen());
         }
 
-        let file_names: Vec<&str> = self.proving_systems.iter()
+        let file_names: Vec<&str> = self
+            .proving_systems
+            .iter()
             .map(|system| match system.as_str() {
                 SP1 => "sp1_solution.bin",
                 RISC0 => "risc0_solution.bin",
@@ -708,8 +721,10 @@ impl Game {
             })
             .collect();
         let msg = if sp1_res.is_ok() && risc0_res.is_ok() {
-
-            format!("Proof saved to {}. Submit it to https://test.zkarcade.com and earn points!", file_names.join(", "))
+            format!(
+                "Proof saved to {}. Submit it to https://test.zkarcade.com and earn points!",
+                file_names.join(", ")
+            )
         } else {
             "Could not prove program, try again...".to_string()
         };
@@ -977,6 +992,36 @@ impl Game {
                 }
             }
         })
+    }
+
+    fn render_confirmation_prompt(message: &str, input_listener: &mpsc::Receiver<u8>) -> bool {
+        let top_pos = ((ANSI_BOARD_HEIGHT + ANSI_FRAME_SIZE) / 2) + ANSI_FOOTER_HEIGHT + 4;
+        let bottom_pos = top_pos - 4;
+        let left_pad = format!(
+            "\x1b[{:.0}C",
+            (((BOARD_WIDTH * 2 + ANSI_FRAME_SIZE + ANSI_FRAME_SIZE) / 2)
+                - ((message.len() + 4) / 2))
+        );
+
+        print!(
+        "\x1b[{top_pos}F{left_pad}┌{border:─<width$}┐\n{left_pad}│ {msg} │\n{left_pad}│          [Y] Yes           [N] No          │\n{left_pad}└{border:─<width$}┘\n\x1b[{bottom_pos:.0}E",
+        border = "",
+        width = message.len() + 2,
+        msg = message
+        );
+
+        let stdin = io::stdin();
+        let mut buffer = [0u8; 1];
+
+        while let Ok(byte) = input_listener.recv() {
+            match byte as char {
+                'y' | 'Y' => return true,
+                'n' | 'N' => return false,
+                _ => {}
+            }
+        }
+
+        false
     }
 
     fn alert(msg: &str, progress: usize) -> String {

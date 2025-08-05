@@ -77,7 +77,7 @@ export const ProofBatchMerkleRoot = ({ proof, batcher_base_url }: Props) => {
 		<td>
 			{proof.batch_hash ? (
 				<a
-					href={`${batcher_base_url}${proof.batch_hash}`}
+					href={`${batcher_base_url}/batches/${proof.batch_hash}`}
 					className="underline"
 				>
 					{shortenHash(proof.batch_hash)}

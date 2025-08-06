@@ -5,15 +5,45 @@ export const batcherPaymentServiceAbi = [
 		name: "user_balances",
 		type: "function",
 		stateMutability: "view",
-		inputs: [{ name: "account", type: "address" }],
-		outputs: [{ name: "", type: "uint256" }],
+		inputs: [{ name: "account", type: "address", internalType: "address" }],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
 	},
 	{
 		name: "user_nonces",
 		type: "function",
 		stateMutability: "view",
-		inputs: [{ name: "account", type: "address" }],
-		outputs: [{ name: "", type: "uint256" }],
+		inputs: [{ name: "account", type: "address", internalType: "address" }],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+	},
+	{
+		name: "withdraw",
+		type: "function",
+		stateMutability: "nonpayable",
+		inputs: [
+			{ name: "amount", type: "uint256", internalType: "uint256" }
+		],
+		outputs: [],
+	},
+	{
+		name: "user_unlock_block",
+		type: "function",
+		stateMutability: "view",
+		inputs: [{ name: "account", type: "address", internalType: "address" }],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+	},
+	{
+		name: "unlock",
+		type: "function",
+		stateMutability: "nonpayable",
+		inputs: [],
+		outputs: [],
+	},
+	{
+		name: "lock",
+		type: "function",
+		stateMutability: "nonpayable",
+		inputs: [],
+		outputs: [],
 	},
 ];
 
@@ -58,7 +88,7 @@ export const leaderboardAbi = [
 				internalType: "struct Leaderboard.BeastGame",
 				components: [
 					{
-						name: "endsAtBlock",
+						name: "endsAtTime",
 						type: "uint256",
 						internalType: "uint256",
 					},
@@ -68,7 +98,7 @@ export const leaderboardAbi = [
 						internalType: "uint256",
 					},
 					{
-						name: "startsAtBlock",
+						name: "startsAtTime",
 						type: "uint256",
 						internalType: "uint256",
 					},

@@ -5,6 +5,7 @@ import History from "./modules/History/";
 import DepositOnAlignedBtn from "./modules/History/DepositOnAlignedBtn";
 import UpdateUsernameBtn from "./modules/History/UpdateUsernameBtn";
 import CurrentBeastGame from "./modules/BeastGame/";
+import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -17,6 +18,7 @@ define(
 			"proofs",
 			"username",
 			"user_position",
+			"explorer_url",
 		],
 	}
 );
@@ -42,12 +44,18 @@ define(
 			"leaderboard_address",
 			"payment_service_address",
 			"user_address",
+			"explorer_url",
 		],
 	}
 );
 
 define(
 	{ "x-app-history-deposit-on-aligned-btn": DepositOnAlignedBtn },
+	{ attributes: ["network", "payment_service_address", "user_address"] }
+);
+
+define(
+	{ "x-app-history-withdraw-from-aligned-btn": WithdrawFromAlignedBtn },
 	{ attributes: ["network", "payment_service_address", "user_address"] }
 );
 

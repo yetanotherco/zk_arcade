@@ -4,6 +4,7 @@ import {
 	useReadContract,
 	useSendTransaction,
 	useWaitForTransactionReceipt,
+	useWriteContract,
 } from "wagmi";
 import { batcherPaymentServiceAbi } from "../constants/aligned";
 import { useCallback, useEffect } from "react";
@@ -20,13 +21,43 @@ export const useBatcherPaymentService = ({
 	const chainId = useChainId();
 
 	const {
-		data: hash,
+		data: depositHash,
 		sendTransactionAsync,
-		...transactionData
+		...depositTransactionData
 	} = useSendTransaction();
 
-	const receiptData = useWaitForTransactionReceipt({
-		hash,
+	const depositReceiptData = useWaitForTransactionReceipt({
+		hash: depositHash,
+	});
+
+	const {
+		data: unlockHash,
+		writeContractAsync: unlockWriteContract,
+		...unlockTransactionData
+	} = useWriteContract();
+
+	const unlockReceiptData = useWaitForTransactionReceipt({
+		hash: unlockHash,
+	});
+
+	const {
+		data: lockHash,
+		writeContractAsync: lockWriteContract,
+		...lockTransactionData
+	} = useWriteContract();
+
+	const lockReceiptData = useWaitForTransactionReceipt({
+		hash: lockHash,
+	});
+
+	const {
+		data: withdrawHash,
+		writeContractAsync: withdrawWriteContract,
+		...withdrawTransactionData
+	} = useWriteContract();
+
+	const withdrawReceiptData = useWaitForTransactionReceipt({
+		hash: withdrawHash,
 	});
 
 	const { ...balanceFetchData } = useReadContract({
@@ -37,11 +68,18 @@ export const useBatcherPaymentService = ({
 		chainId,
 	});
 
-	// TODO: get nonce from batcher
 	const { ...nonceFetchData } = useReadContract({
 		address: contractAddress,
 		abi: batcherPaymentServiceAbi,
 		functionName: "user_nonces",
+		args: [userAddress],
+		chainId,
+	});
+
+	const { ...unlockTimeFetchData } = useReadContract({
+		address: contractAddress,
+		abi: batcherPaymentServiceAbi,
+		functionName: "user_unlock_block",
 		args: [userAddress],
 		chainId,
 	});
@@ -52,14 +90,75 @@ export const useBatcherPaymentService = ({
 			await sendTransactionAsync({
 				to: contractAddress,
 				value,
+				chainId,
 			});
 		},
-		[sendTransactionAsync]
+		[sendTransactionAsync, contractAddress, chainId]
+	);
+
+	const unlockFunds = useCallback(
+		async () => {
+			await unlockWriteContract({
+				address: contractAddress,
+				abi: batcherPaymentServiceAbi,
+				functionName: "unlock",
+				args: [],
+				chainId,
+			});
+		},
+		[unlockWriteContract, contractAddress, chainId]
+	);
+
+	const lockFunds = useCallback(
+		async () => {
+			await lockWriteContract({
+				address: contractAddress,
+				abi: batcherPaymentServiceAbi,
+				functionName: "lock",
+				args: [],
+				chainId,
+			});
+		},
+		[lockWriteContract, contractAddress, chainId]
+	);
+
+	const withdrawFunds = useCallback(
+		async (amountToWithdrawInEther: string) => {
+			const value = parseEther(amountToWithdrawInEther);
+			await withdrawWriteContract({
+				address: contractAddress,
+				abi: batcherPaymentServiceAbi,
+				functionName: "withdraw",
+				args: [value],
+				chainId,
+			});
+		},
+		[withdrawWriteContract, contractAddress, chainId]
 	);
 
 	useEffect(() => {
-		balanceFetchData.refetch();
-	}, [receiptData.isSuccess]);
+		if (depositReceiptData.isSuccess) {
+			balanceFetchData.refetch();
+		}
+	}, [depositReceiptData.isSuccess]);
+
+	useEffect(() => {
+		if (withdrawReceiptData.isSuccess) {
+			balanceFetchData.refetch();
+		}
+	}, [withdrawReceiptData.isSuccess]);
+
+	useEffect(() => {
+		if (unlockReceiptData.isSuccess) {
+			unlockTimeFetchData.refetch();
+		}
+	}, [unlockReceiptData.isSuccess]);
+
+	useEffect(() => {
+		if (lockReceiptData.isSuccess) {
+			unlockTimeFetchData.refetch();
+		}
+	}, [lockReceiptData.isSuccess]);
 
 	return {
 		balance: {
@@ -70,10 +169,29 @@ export const useBatcherPaymentService = ({
 			...nonceFetchData,
 			data: nonceFetchData.data as bigint | undefined,
 		},
+		unlockTime: {
+			...unlockTimeFetchData,
+			data: unlockTimeFetchData.data as bigint | undefined,
+		},
 		sendFunds: {
 			send: sendFunds,
-			transaction: transactionData,
-			receipt: receiptData,
+			transaction: depositTransactionData,
+			receipt: depositReceiptData,
+		},
+		unlockFunds: {
+			send: unlockFunds,
+			transaction: unlockTransactionData,
+			receipt: unlockReceiptData,
+		},
+		lockFunds: {
+			send: lockFunds,
+			transaction: lockTransactionData,
+			receipt: lockReceiptData,
+		},
+		withdrawFunds: {
+			send: withdrawFunds,
+			transaction: withdrawTransactionData,
+			receipt: withdrawReceiptData,
 		},
 	};
 };

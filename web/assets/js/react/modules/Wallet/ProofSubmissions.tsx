@@ -9,7 +9,12 @@ import {
 } from "../../components/Table/ProofBodyItems";
 import { fetchProofVerificationData } from "../../utils/aligned";
 
-const Proof = ({ proof }: { proof: ProofSubmission }) => {
+type ProofProps = {
+	proof: ProofSubmission;
+	explorer_url: string;
+};
+
+const Proof = ({ proof, explorer_url }: ProofProps) => {
 	const proofHashShorten = `${proof.verification_data_commitment.slice(
 		0,
 		2
@@ -26,8 +31,8 @@ const Proof = ({ proof }: { proof: ProofSubmission }) => {
 	return (
 		<tr>
 			<TableBodyItem text={proof.game} />
-			<ProofStatusWithTooltipDesc proof={proof} />
-			<ProofBatchMerkleRoot proof={proof} />
+			<ProofStatusWithTooltipDesc proof={proof} explorer_url={explorer_url} />
+			<ProofBatchMerkleRoot proof={proof} explorer_url={explorer_url} />
 			<TableBodyItem text={proofHashShorten} />
 		</tr>
 	);
@@ -37,9 +42,10 @@ type Props = {
 	proofs: ProofSubmission[];
 	leaderboard_address: Address;
 	payment_service_address: Address;
+	explorer_url: string;
 };
 
-export const ProofSubmissions = ({ proofs = [] }: Props) => {
+export const ProofSubmissions = ({ proofs = [], explorer_url }: Props) => {
 	return (
 		<div>
 			<div className="flex justify-between mb-6">
@@ -82,7 +88,7 @@ export const ProofSubmissions = ({ proofs = [] }: Props) => {
 									}
 
 									return (
-										<Proof key={proof.id} proof={proof} />
+										<Proof key={proof.id} proof={proof} explorer_url={explorer_url} />
 									);
 								})}
 							</tbody>

@@ -48,10 +48,9 @@ submit_beast_solution:
 
 NUM_GAMES ?= 10
 LEVELS_PER_GAME ?= 8
-STARTS_AT_BLOCK_NUMBER ?= 0
 CAMPAIGN_DAYS ?= 1
 beast_gen_levels:
-	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(STARTS_AT_BLOCK_NUMBER) $(CAMPAIGN_DAYS) $(NETWORK)
+	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(NETWORK)
 	
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
@@ -125,6 +124,7 @@ create_env_mainnet:
 	@echo "KEYFILE_PATH=/home/app/.ssl/key.pem" >> /home/app/config/.env.zk_arcade
 	@echo "CERTFILE_PATH=/home/app/.ssl/cert.pem" >> /home/app/config/.env.zk_arcade
 	@echo "ZK_ARCADE_NETWORK=mainnet" >> /home/app/config/.env.zk_arcade
+	@echo "EXPLORER_URL=https://explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 
 create_env_stage:
 	@truncate -s0 /home/app/config/.env.zk_arcade
@@ -143,6 +143,7 @@ create_env_stage:
 	@echo "BATCHER_HOST=stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_PORT=443" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_URL=wss://stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "EXPLORER_URL=https://stage.explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 
 
 ## Deploy

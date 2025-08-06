@@ -89,7 +89,7 @@ pub enum GameState {
 
 /// this is our main game struct that orchestrates the game and its bits
 pub struct Game {
-    pub block_number: u64,
+    pub block_timestamp: u64, // Currently unused
     /// our board
     pub board: Board,
     /// the current level we're in
@@ -145,13 +145,14 @@ impl Game {
             eprintln!("You must select at least one proving system. Please try again.");
         };
 
-        let block_number =
-            ethereum::get_current_block_number().expect("Could not get block number from rpc");
-        println!("Loading game for block number {}...", block_number);
+        let block_timestamp = ethereum::get_current_block_timestamp()
+            .expect("Could not get block timestamp from rpc");
+        println!("Loading game for block timestamp {}...", block_timestamp);
 
         let game_levels = get_game_levels();
 
-        let game_match = GameLevels::new(block_number, game_levels);
+        let game_match = GameLevels::new(block_timestamp, game_levels);
+
         let board_terrain_info = Board::generate_terrain(game_match.get_config(Level::One));
 
         install_raw_mode_signal_handler();
@@ -183,7 +184,7 @@ impl Game {
 
         Self {
             levels_completion_log: vec![fist_level_log],
-            block_number: 0,
+            block_timestamp,
             board: Board::new(board_terrain_info.buffer),
             level: Level::One,
             game_match,

@@ -14,9 +14,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     // == Beast storages ==
     struct BeastGame {
-        uint256 endsAtBlock;
+        uint256 endsAtTime;
         uint256 gameConfig;
-        uint256 startsAtBlock;
+        uint256 startsAtTime;
     }
 
     BeastGame[] public beastGames;
@@ -136,7 +136,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function getCurrentBeastGame() public view returns (BeastGame memory) {
         for (uint256 i = 0; i < beastGames.length; i++) {
-            if (block.number >= beastGames[i].startsAtBlock && block.number <= beastGames[i].endsAtBlock) {
+            if (block.timestamp >= beastGames[i].startsAtTime && block.timestamp < beastGames[i].endsAtTime) {
                 return beastGames[i];
             }
         }

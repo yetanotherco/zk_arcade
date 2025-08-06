@@ -5,6 +5,7 @@ import { Button } from "../../components";
 import { useModal, useBatcherPaymentService } from "../../hooks";
 import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
 import { DepositOnAlignedModal } from "../../components/Modal/DepositOnAligned";
+import { WithdrawFromAlignedModal } from "../../components/Modal/WithdrawFromAligned";
 
 type Props = {
 	payment_service_address: Address;
@@ -17,7 +18,18 @@ export const BalanceScoreInAligned = ({
 	leaderboard_address,
 	user_address,
 }: Props) => {
-	const { open, setOpen, toggleOpen } = useModal();
+	const {
+		open: openDeposit,
+		setOpen: setOpenDeposit,
+		toggleOpen: toggleOpenDeposit,
+	} = useModal();
+
+	const {
+		open: openWithdraw,
+		setOpen: setOpenWithdraw,
+		toggleOpen: toggleOpenWithdraw,
+	} = useModal();
+
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
@@ -45,9 +57,16 @@ export const BalanceScoreInAligned = ({
 					<Button
 						variant="text-accent"
 						className="mt-2"
-						onClick={toggleOpen}
+						onClick={toggleOpenDeposit}
 					>
 						Deposit
+					</Button>
+					<Button
+						variant="text-accent"
+						className="mt-2 ml-3"
+						onClick={toggleOpenWithdraw}
+					>
+						Withdraw
 					</Button>
 				</div>
 				<div>
@@ -61,8 +80,15 @@ export const BalanceScoreInAligned = ({
 			</div>
 
 			<DepositOnAlignedModal
-				open={open}
-				setOpen={setOpen}
+				open={openDeposit}
+				setOpen={setOpenDeposit}
+				payment_service_address={payment_service_address}
+				user_address={user_address}
+			/>
+
+			<WithdrawFromAlignedModal
+				open={openWithdraw}
+				setOpen={setOpenWithdraw}
 				payment_service_address={payment_service_address}
 				user_address={user_address}
 			/>

@@ -42,13 +42,13 @@ fn match_network_rpc_url() -> Option<&'static str> {
     None
 }
 
-pub fn get_current_block_number() -> Result<u64, String> {
+pub fn get_current_block_timestamp() -> Result<u64, String> {
     let rpc_url = match_network_rpc_url().ok_or("No network feature enabled")?;
 
     let body = serde_json::json!({
         "jsonrpc": "2.0",
-        "method": "eth_blockNumber",
-        "params": [],
+        "method": "eth_getBlockByNumber",
+        "params": ["latest", false],
         "id": 1
     })
     .to_string();
@@ -62,11 +62,12 @@ pub fn get_current_block_number() -> Result<u64, String> {
         serde_json::from_str(&response.into_string().map_err(|e| e.to_string())?)
             .map_err(|e| format!("Invalid JSON response: {}", e))?;
 
-    let hex_result = json
+    let hex_timestamp = json
         .get("result")
-        .and_then(|r| r.as_str())
-        .ok_or("Missing 'result' field in JSON")?;
+        .and_then(|r| r.get("timestamp"))
+        .and_then(|t| t.as_str())
+        .ok_or("Missing 'timestamp' field in block JSON")?;
 
-    u64::from_str_radix(hex_result.trim_start_matches("0x"), 16)
-        .map_err(|e| format!("Invalid hex value for block number: {}", e))
+    u64::from_str_radix(hex_timestamp.trim_start_matches("0x"), 16)
+        .map_err(|e| format!("Invalid hex value for block timestamp: {}", e))
 }

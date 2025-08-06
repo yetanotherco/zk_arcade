@@ -37,11 +37,29 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
+  def parse_public_input(public_input) when is_list(public_input) and length(public_input) >= 96 do
+    <<level_bytes::binary-size(32), game_bytes::binary-size(32), address_bytes::binary-size(32)>> =
+      :binary.list_to_bin(public_input)
+
+    level =
+      case level_bytes do
+        <<_::binary-size(30), high, low>> -> high * 256 + low
+        _ -> raise "Invalid level format"
+      end
+
+    %{
+      level: level,
+      game: Base.encode16(game_bytes, case: :lower),
+      address: "0x" <> Base.encode16(binary_part(address_bytes, 12, 20), case: :lower)
+    }
+  end
+
   def submit(conn, %{
         "submit_proof_message" => submit_proof_message_json,
         "game" => game
       }) do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
+      Logger.info("Received submit_proof_message: #{inspect(submit_proof_message)}")
       address = get_session(conn, :wallet_address)
 
       if is_nil(address) do
@@ -63,8 +81,12 @@ defmodule ZkArcadeWeb.ProofController do
           proving_system =
               submit_proof_message["verificationData"]["verificationData"]["provingSystem"]
 
+          %{level: level, game: gameConfig, address: _address} =
+            submit_proof_message["verificationData"]["verificationData"]["publicInput"]
+            |> parse_public_input()
+
           with {:ok, pending_proof} <-
-                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system) do
+                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level) do
             task =
               Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
                 Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)

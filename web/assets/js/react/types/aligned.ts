@@ -8,6 +8,7 @@ export type ProofSubmission = {
 	inserted_at: string;
 	batch_hash: string | null;
 	verification_data_commitment: `0x${string}`;
+	level_reached: number;
 };
 
 export type SubmitProof = {

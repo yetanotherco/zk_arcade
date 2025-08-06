@@ -11,6 +11,7 @@ type Props = {
 	payment_service_address: Address;
 	user_address: Address;
 	proofs: string;
+	explorer_url: string;
 };
 
 export default ({
@@ -19,6 +20,7 @@ export default ({
 	payment_service_address,
 	user_address,
 	proofs,
+	explorer_url,
 }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -29,6 +31,7 @@ export default ({
 					leaderboard_address={leaderboard_address}
 					payment_service_address={payment_service_address}
 					user_address={user_address}
+					explorer_url={explorer_url}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

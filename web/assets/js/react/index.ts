@@ -18,6 +18,7 @@ define(
 			"proofs",
 			"username",
 			"user_position",
+			"explorer_url",
 		],
 	}
 );
@@ -43,6 +44,7 @@ define(
 			"leaderboard_address",
 			"payment_service_address",
 			"user_address",
+			"explorer_url",
 		],
 	}
 );

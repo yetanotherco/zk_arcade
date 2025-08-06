@@ -124,6 +124,7 @@ create_env_mainnet:
 	@echo "KEYFILE_PATH=/home/app/.ssl/key.pem" >> /home/app/config/.env.zk_arcade
 	@echo "CERTFILE_PATH=/home/app/.ssl/cert.pem" >> /home/app/config/.env.zk_arcade
 	@echo "ZK_ARCADE_NETWORK=mainnet" >> /home/app/config/.env.zk_arcade
+	@echo "EXPLORER_URL=https://explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 
 create_env_stage:
 	@truncate -s0 /home/app/config/.env.zk_arcade
@@ -142,6 +143,7 @@ create_env_stage:
 	@echo "BATCHER_HOST=stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_PORT=443" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_URL=wss://stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "EXPLORER_URL=https://stage.explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 
 
 ## Deploy

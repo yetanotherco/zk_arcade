@@ -70,6 +70,7 @@ defmodule ZkArcadeWeb.PageController do
         nil
       end
 
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -80,6 +81,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
       |> assign(:username, username)
       |> assign(:user_position, position)
+      |> assign(:explorer_url, explorer_url)
       |> render(:home)
   end
 
@@ -92,6 +94,8 @@ defmodule ZkArcadeWeb.PageController do
     ]
 
     {username, position} = get_username_and_position(wallet)
+
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -122,6 +126,7 @@ defmodule ZkArcadeWeb.PageController do
       })
       |> assign(:username, username)
       |> assign(:user_position, position)
+      |> assign(:explorer_url, explorer_url)
       |> render(:game)
   end
 
@@ -130,6 +135,8 @@ defmodule ZkArcadeWeb.PageController do
     proofs = get_proofs(wallet, 1, 10)
 
     {username, position} = get_username_and_position(wallet)
+
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
 
     conn
     |> assign(:wallet, wallet)
@@ -140,6 +147,7 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
     |> assign(:username, username)
     |> assign(:user_position, position)
+    |> assign(:explorer_url, explorer_url)
     |> render(:history)
   end
 
@@ -175,6 +183,8 @@ defmodule ZkArcadeWeb.PageController do
         nil
       end
 
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+
     conn
     |> assign(:wallet, wallet)
     |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -183,6 +193,7 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:user_in_current_page, user_in_current_page?)
     |> assign(:username, username)
     |> assign(:user_position, position)
+    |> assign(:explorer_url, explorer_url)
     |> assign(:pagination, %{
       current_page: page,
       total_pages: total_pages,

@@ -71,35 +71,29 @@ export const ProofHistory = ({
 			return {
 				rows: [
 					<div>
-						{proof.status === "claimed" ? (
-							<div>
-								<TableBodyItem text={proof.game} />
-								<div className="group/tooltip flex flex-row gap-0.5 items-center" style={{ maxWidth: 50 }}>
-									{[...Array(8)].map((_, index) => {
-										return (
-										<div
-											key={index}
-											className={`
-											w-full h-[10px] mb-2
-											${index < proof.level_reached ? 'bg-accent-100' : 'bg-contrast-100'}
-											${index === 0 ? 'rounded-l-[3px]' : ''}
-											${index === 7 ? 'rounded-r-[3px]' : ''}
-											`}
-										></div>
-										);
-									})}
+						<TableBodyItem text={proof.game} />
+						<div className="group/tooltip flex flex-row gap-0.5 items-center" style={{ maxWidth: 50 }}>
+							{[...Array(8)].map((_, index) => {
+								return (
+								<div
+									key={index}
+									className={`
+									w-full h-[10px] mb-2
+									${index < proof.level_reached ? 'bg-accent-100' : 'bg-contrast-100'}
+									${index === 0 ? 'rounded-l-[3px]' : ''}
+									${index === 7 ? 'rounded-r-[3px]' : ''}
+									`}
+								></div>
+								);
+							})}
 
-									<div
-										className="absolute translate-x-1/4 mt-2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover/tooltip:opacity-100 transition pointer-events-none z-50"
-										style={{ width: 200 }}
-									>
-										<p className="text-center">Reached level {proof.level_reached} in your last run</p>
-									</div>
-								</div>								
+							<div
+								className="absolute translate-x-1/4 mt-2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover/tooltip:opacity-100 transition pointer-events-none z-50"
+								style={{ width: 200 }}
+							>
+								<p className="text-center">Reached level {proof.level_reached} in your last run</p>
 							</div>
-						) : (
-							<TableBodyItem text={proof.game} className={`flex items-center pt-4`} />
-						)}
+						</div>
 					</div>,
 					<ProofStatusWithTooltipDesc proof={proof} explorer_url={explorer_url} />,
 					<TableBodyItem text={timeAgo(proof.inserted_at)} />,

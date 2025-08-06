@@ -23,6 +23,11 @@
                         payment_service_address={@payment_service_address} 
                         user_address={@wallet} 
                     />
+                    <x-app-history-withdraw-from-aligned-btn 
+                        network={@network} 
+                        payment_service_address={@payment_service_address} 
+                        user_address={@wallet} 
+                    />
                 </div>
                 <p class="text-lg text-text-200">Score: <span class="text-text-100" id="history-score">...</span></p>
                 <p class="text-lg text-text-200">Proofs sent: <span class="text-text-100"><%= @proofs_sent_total %></span></p>

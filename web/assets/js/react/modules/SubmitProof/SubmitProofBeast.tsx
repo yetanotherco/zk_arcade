@@ -22,12 +22,26 @@ type Props = {
 	payment_service_address: Address;
 	user_address?: Address;
 	batcher_url: string;
+	user_proofs_json: string;
 };
+
+function parsePublicInputs(inputs: Uint8Array) {
+	if (inputs.length < 96) return null;
+
+	const levelBytes = inputs.slice(0, 32);
+	const gameBytes = inputs.slice(32, 64);
+
+	const level = (levelBytes[30] << 8) + levelBytes[31];
+	const game_config = Buffer.from(gameBytes).toString("hex");
+
+	return { level, game_config };
+}
 
 export default ({
 	payment_service_address,
 	user_address,
 	batcher_url,
+	user_proofs_json,
 }: Props) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { csrfToken } = useCSRFToken();
@@ -44,6 +58,8 @@ export default ({
 		user_address
 	);
 	useProofSentMessageReader();
+
+	const userProofs = JSON.parse(user_proofs_json) as { level: number; game_config: string }[];
 
 	const chainId = useChainId();
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
@@ -91,6 +107,21 @@ export default ({
 	const handleSubmission = useCallback(async () => {
 		if (!proof || !proofId || !publicInputs || !user_address) {
 			alert("You need to provide proof, proofid, public inputs");
+			return;
+		}
+
+		const parsed = parsePublicInputs(publicInputs);
+		if (!parsed) {
+			alert("Invalid public inputs");
+			return;
+		}
+
+		const alreadySubmitted = userProofs.some((p) =>
+			p.game_config.toLowerCase() === parsed.game_config.toLowerCase() && p.level >= parsed.level
+		);
+
+		if (alreadySubmitted) {
+			alert("You have already submitted a proof with this game config and a higher or equal level.");
 			return;
 		}
 

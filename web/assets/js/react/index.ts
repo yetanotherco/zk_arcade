@@ -31,6 +31,7 @@ define(
 			"payment_service_address",
 			"user_address",
 			"batcher_url",
+			"user_proofs_json",
 		],
 	}
 );

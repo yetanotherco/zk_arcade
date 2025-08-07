@@ -5,6 +5,7 @@ import {
 	useBatcherPaymentService,
 	useModal,
 	useBatcherNonce,
+	useLeaderboardContract,
 } from "../../hooks";
 import { Address } from "../../types/blockchain";
 import { formatEther, toHex } from "viem";
@@ -23,6 +24,7 @@ type Props = {
 	user_address?: Address;
 	batcher_url: string;
 	user_proofs_json: string;
+	leaderboard_address: Address;
 };
 
 function parsePublicInputs(inputs: Uint8Array) {
@@ -42,6 +44,7 @@ export default ({
 	user_address,
 	batcher_url,
 	user_proofs_json,
+	leaderboard_address,
 }: Props) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { csrfToken } = useCSRFToken();
@@ -68,6 +71,11 @@ export default ({
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
+	});
+
+	const { currentGame } = useLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address ? user_address : "0x",
 	});
 
 	const handleCombinedProofFile = async (
@@ -113,6 +121,19 @@ export default ({
 		const parsed = parsePublicInputs(publicInputs);
 		if (!parsed) {
 			alert("Invalid public inputs");
+			return;
+		}
+
+		// This conversions are done because the game_config is a hex string in the proof and a bigint in the contract
+		const parsedGameConfigBigInt = BigInt('0x' + parsed.game_config);
+		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
+
+		if (parsedGameConfigBigInt !== currentGameConfigBigInt) {
+			alert(
+				"Current game has changed since the proof was created."
+			);
+			console.log("Parsed game config:", parsed.game_config);
+			console.log("Current game config:", currentGame.data?.gameConfig);
 			return;
 		}
 

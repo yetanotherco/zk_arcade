@@ -61,10 +61,15 @@ export const ProofEntryActionBtn = ({
 	}, [submitSolution.receipt]);
 
 	const handleBtnClick = async () => {
-		if (proof.game_config !== currentGame.data?.gameConfig) {
+		const submittedGameConfigBigInt = BigInt('0x' + proof.game_config);
+		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
+
+		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
 			alert(
 				"Current game has changed since the proof was created."
 			);
+			console.log("Proof game config:", proof.game_config);
+			console.log("Current game config:", currentGame.data?.gameConfig);
 			return;
 		}
 

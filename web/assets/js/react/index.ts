@@ -32,6 +32,7 @@ define(
 			"user_address",
 			"batcher_url",
 			"user_proofs_json",
+			"leaderboard_address",
 		],
 	}
 );

@@ -138,7 +138,10 @@ export default ({
 		}
 
 		const alreadySubmitted = userProofs.some((p) =>
-			p.game_config.toLowerCase() === parsed.game_config.toLowerCase() && p.level >= parsed.level
+			typeof p.game_config === 'string' &&
+			typeof parsed.game_config === 'string' &&
+			p.game_config.toLowerCase() === parsed.game_config.toLowerCase() &&
+			p.level >= parsed.level
 		);
 
 		if (alreadySubmitted) {

@@ -25,7 +25,7 @@ const tooltipStyleBasedOnStatus: {
 };
 
 const tooltipText: { [key in KeysForStatus]: string } = {
-	submitted: "Solution verified and ready to be submitted",
+	submitted: "Solution verified and ready to be claimed",
 	claimed: "Already submitted to leaderboard",
 	pending:
 		"You need to wait until its verified before submitting the solution",

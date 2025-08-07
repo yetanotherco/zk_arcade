@@ -25,7 +25,7 @@ const textBasedOnNotEntry = {
 	submitted: (commitment: string) => (
 		<>
 			The proof <span className="font-bold">{commitment}</span> is ready
-			to be submitted`
+			to be claimed
 		</>
 	),
 };
@@ -145,7 +145,7 @@ const NotificationEntry = ({
 					submitSolution.submitSolutionFetchingVDataIsLoading
 				}
 			>
-				{proof.status === "submitted" ? "Submit" : "Bump fee"}
+				{proof.status === "submitted" ? "Claim" : "Bump fee"}
 			</Button>
 
 			{proof.status === "pending" && (

@@ -47,7 +47,14 @@ defmodule ZkArcadeWeb.PageController do
 
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
     # In the future, we'd have to sum the savings of all the proofs for each proving system
-    {:ok, eth_price} = ZkArcade.EthPrice.get_eth_price_usd()
+    eth_price = case ZkArcade.EthPrice.get_eth_price_usd() do
+      {:ok, price} ->
+        price
+      {:error, reason} ->
+        Logger.error("Failed to get ETH price: #{reason}")
+        # Use a fallback price if ETH price fetch fails
+        3000.0
+    end
     cost_saved = ZkArcade.Utils.calc_aligned_savings(proofs_verified, "risc0", eth_price, 20)
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
     days = ZkArcade.Utils.date_diff_days(campaign_started_at_unix_timestamp)

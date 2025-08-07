@@ -5,6 +5,7 @@ import {
 	useBatcherPaymentService,
 	useModal,
 	useBatcherNonce,
+	useEthPrice,
 } from "../../hooks";
 import { Address } from "../../types/blockchain";
 import { formatEther, toHex } from "viem";
@@ -17,6 +18,7 @@ import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useChainId } from "wagmi";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 import { ProvingSystem, provingSystemByteToName } from "../../types/aligned";
+import { useToast } from "../../state/toast";
 
 type Props = {
 	payment_service_address: Address;
@@ -39,6 +41,8 @@ export default ({
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const [maxFee, setMaxFee] = useState(BigInt(0));
+	const [depositAmount, setDepositAmount] = useState("");
+	const [showDepositSection, setShowDepositSection] = useState(false);
 	const { nonce, isLoading: nonceLoading } = useBatcherNonce(
 		batcher_url,
 		user_address
@@ -48,8 +52,10 @@ export default ({
 	const chainId = useChainId();
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
+	const { price } = useEthPrice();
+	const { addToast } = useToast();
 
-	const { balance } = useBatcherPaymentService({
+	const { balance, sendFunds } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
 	});
@@ -87,6 +93,25 @@ export default ({
 		setProofId(proofId);
 		setPublicInputs(publicInputs);
 	};
+
+	const handleDeposit = useCallback(async () => {
+			if (!depositAmount || Number(depositAmount) <= 0) {
+			addToast({
+				title: "Invalid amount",
+				desc: "Please enter a valid deposit amount",
+				type: "error",
+			});
+			return;
+		}
+
+		try {
+			await sendFunds.send(depositAmount);
+			setDepositAmount("");
+			setShowDepositSection(false);
+		} catch (error) {
+			console.error("Deposit failed:", error);
+		}
+	}, [depositAmount, sendFunds, addToast]);
 
 	const handleSubmission = useCallback(async () => {
 		if (!proof || !proofId || !publicInputs || !user_address) {
@@ -163,6 +188,54 @@ export default ({
 		fn();
 	}, [estimateMaxFeeForBatchOfProofs]);
 
+	useEffect(() => {
+		if (sendFunds.receipt.isLoading) {
+			addToast({
+				title: "Transaction sent",
+				desc: "Transaction was sent successfully, waiting for receipt...",
+				type: "success",
+			});
+		}
+	}, [sendFunds.receipt.isLoading]);
+
+	useEffect(() => {
+		if (sendFunds.receipt.isSuccess && sendFunds.receipt.data) {
+			addToast({
+				title: "Balance deposit confirmed",
+				desc: "The transaction was included, your balance has been updated",
+				type: "success",
+			});
+		}
+	}, [sendFunds.receipt.isSuccess, sendFunds.receipt.data]);
+
+	useEffect(() => {
+		if (sendFunds.transaction.isError) {
+			const errorMessage =
+				sendFunds.transaction.error?.message ||
+				"Something went wrong with the transaction.";
+
+			addToast({
+				title: "Transaction failed",
+				desc: errorMessage,
+				type: "error",
+			});
+		}
+	}, [sendFunds.transaction.isError, sendFunds.transaction.error]);
+
+	useEffect(() => {
+		if (sendFunds.receipt.isError) {
+			const errorMessage =
+				sendFunds.receipt.error?.message ||
+				"Something went wrong with the transaction.";
+
+			addToast({
+				title: "Transaction failed",
+				desc: errorMessage,
+				type: "error",
+			});
+		}
+	}, [sendFunds.receipt.isError, sendFunds.receipt.error]);
+
 	return (
 		<>
 			<div className="w-full flex justify-center items-center cursor-pointer">
@@ -233,7 +306,54 @@ export default ({
 								)}{" "}
 								ETH in your aligned balance
 							</p>
+							{(balance.data || 0) < maxFee && (
+								<div className="mt-4">
+									<Button
+										variant="text-accent"
+										onClick={() => setShowDepositSection(!showDepositSection)}
+									>
+										{showDepositSection ? "Hide deposit" : "Deposit"}
+									</Button>
+								</div>
+							)}
 						</div>
+
+						{showDepositSection && (
+							<div className="w-full border-t pt-6">
+								<h4 className="text-sm font-semibold mb-4">Deposit to Aligned</h4>
+								<div className="mb-4">
+									<FormInput
+										label="Amount to deposit in ETH:"
+										placeholder="0.0001"
+										type="number"
+										value={depositAmount}
+										onChange={e => setDepositAmount(e.target.value)}
+										min="0"
+										step="0.0001"
+									/>
+									<p className="mt-1 text-sm text-gray-600">
+										~
+										{((price || 0) * Number(depositAmount || "0")).toLocaleString(
+											undefined,
+											{
+												maximumFractionDigits: 3,
+											}
+										)}{" "}
+										USD
+									</p>
+								</div>
+								<div className="flex justify-end">
+									<Button
+										variant="accent-fill"
+										onClick={handleDeposit}
+										isLoading={sendFunds.receipt.isLoading}
+										disabled={Number(depositAmount || "0") <= 0}
+									>
+										Deposit
+									</Button>
+								</div>
+							</div>
+						)}
 
 						<div>
 							<Button

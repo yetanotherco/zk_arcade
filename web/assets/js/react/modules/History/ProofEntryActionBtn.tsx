@@ -13,7 +13,7 @@ import { fetchProofVerificationData } from "../../utils/aligned";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
-	submitted: "Submit solution",
+	submitted: "Claim points",
 	pending: "None",
 	failed: "None",
 	underpriced: "Bump fee",

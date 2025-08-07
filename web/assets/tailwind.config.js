@@ -84,6 +84,9 @@ module.exports = {
 			maxWidth: {
 				280: "280px",
 			},
+			animation: {
+				'spin-slow': 'spin 1.5s linear infinite',
+			},
 		},
 	},
 	plugins: [

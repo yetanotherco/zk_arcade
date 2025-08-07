@@ -97,14 +97,6 @@ defmodule ZkArcade.SubmissionPoller do
     current_score = ZkArcade.LeaderboardContract.get_user_score(user)
     Logger.info("New score for #{user}: #{current_score}")
 
-    case ZkArcade.Proofs.update_level_reached(user, level) do
-      {:ok, _proof} ->
-        Logger.info("Proof updated successfully for user #{user} at level #{level}")
-
-      {:error, changeset} ->
-        Logger.error("Failed to update proof for user #{user}: #{inspect(changeset)}")
-    end
-
     case ZkArcade.Leaderboard.insert_or_update_entry(%{
            "user_address" => user,
            "score" => current_score

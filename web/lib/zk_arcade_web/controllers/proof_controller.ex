@@ -59,7 +59,6 @@ defmodule ZkArcadeWeb.ProofController do
         "game" => game
       }) do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
-      Logger.info("Received submit_proof_message: #{inspect(submit_proof_message)}")
       address = get_session(conn, :wallet_address)
 
       if is_nil(address) do

@@ -95,7 +95,7 @@ export default ({
 	};
 
 	const handleDeposit = useCallback(async () => {
-			if (!depositAmount || Number(depositAmount) <= 0) {
+		if (!depositAmount || Number(depositAmount) <= 0) {
 			addToast({
 				title: "Invalid amount",
 				desc: "Please enter a valid deposit amount",

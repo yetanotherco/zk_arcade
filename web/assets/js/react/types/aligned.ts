@@ -9,6 +9,7 @@ export type ProofSubmission = {
 	batch_hash: string | null;
 	verification_data_commitment: `0x${string}`;
 	level_reached: number;
+	game_config: string;
 };
 
 export type SubmitProof = {

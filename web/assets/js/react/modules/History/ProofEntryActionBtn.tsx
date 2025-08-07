@@ -44,6 +44,11 @@ export const ProofEntryActionBtn = ({
 		contractAddress: leaderboard_address,
 	});
 
+	const { currentGame } = useLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address,
+	});
+
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
 
@@ -56,6 +61,13 @@ export const ProofEntryActionBtn = ({
 	}, [submitSolution.receipt]);
 
 	const handleBtnClick = async () => {
+		if (proof.game_config !== currentGame.data?.gameConfig) {
+			alert(
+				"Current game has changed since the proof was created."
+			);
+			return;
+		}
+
 		if (proof.status === "failed") {
 			// nothing to do
 			return;

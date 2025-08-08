@@ -10,7 +10,7 @@ import { Address } from "../../types/blockchain";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { toHex } from "viem";
 import { fetchProofVerificationData } from "../../utils/aligned";
-import { Modal } from "../../components/Modal";
+import { BumpFeeModal } from "../../components/Modal/BumpFeeModal";
 import { useToast } from "../../state/toast";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
@@ -43,7 +43,7 @@ export const ProofEntryActionBtn = ({
 	const [submitProofMessageLoading, setSubmitProofMessageLoading] =
 		useState(false);
 
-  const { addToast } = useToast();
+	const { addToast } = useToast();
 	const { submitSolution } = useLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
@@ -109,7 +109,7 @@ export const ProofEntryActionBtn = ({
 			return;
 		}
 
-    	if (proof.status === "underpriced") {
+		if (proof.status === "underpriced") {
 			try {
 				setBumpLoading(true);
 				const est = await estimateMaxFeeForBatchOfProofs(16);
@@ -139,43 +139,43 @@ export const ProofEntryActionBtn = ({
 			}
 		};
 
-  	const handleConfirmBump = async () => {
-    	try {
-      		setSubmitProofMessageLoading(true);
+		const handleConfirmBump = async () => {
+			try {
+				setSubmitProofMessageLoading(true);
 
-			const res = await fetchProofVerificationData(proof.id);
-			if (!res) {
-				addToast({
-					title: "There was a problem while sending the proof",
-					desc: "Please try again.",
+				const res = await fetchProofVerificationData(proof.id);
+				if (!res) {
+					addToast({
+						title: "There was a problem while sending the proof",
+						desc: "Please try again.",
+						type: "error",
+					});
+					setSubmitProofMessageLoading(false);
+					return;
+				}
+				const noncedVerificationData: NoncedVerificationdata = res.verification_data;
+
+				let chosenWei: bigint | null = null;
+				if (choice === "default") chosenWei = defaultFeeWei;
+				else if (choice === "instant") chosenWei = instantFeeWei;
+				else if (choice === "custom") chosenWei = toWeiFromGwei(customGwei);
+
+				if (!chosenWei || chosenWei <= 0n) {
+					addToast({
+					title: "Invalid fee",
+					desc: "Please enter a value greater than 0 Gwei.",
 					type: "error",
-				});
-				setSubmitProofMessageLoading(false);
-				return;
-			}
-      		const noncedVerificationData: NoncedVerificationdata = res.verification_data;
+					});
+					setSubmitProofMessageLoading(false);
+					return;
+				}
 
-			let chosenWei: bigint | null = null;
-			if (choice === "default") chosenWei = defaultFeeWei;
-			else if (choice === "instant") chosenWei = instantFeeWei;
-			else if (choice === "custom") chosenWei = toWeiFromGwei(customGwei);
+				noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
 
-			if (!chosenWei || chosenWei <= 0n) {
-				addToast({
-				title: "Invalid fee",
-				desc: "Please enter a value greater than 0 Gwei.",
-				type: "error",
-				});
-				setSubmitProofMessageLoading(false);
-				return;
-			}
-
-      		noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
-
-			const { r, s, v } = await signVerificationData(
-				noncedVerificationData,
-				payment_service_address
-			);
+				const { r, s, v } = await signVerificationData(
+					noncedVerificationData,
+					payment_service_address
+				);
 
 				const submitProofMessage: SubmitProof = {
 					verificationData: noncedVerificationData,
@@ -209,20 +209,20 @@ export const ProofEntryActionBtn = ({
 	};
 
 	return (
-    	<td>
-    		<div className="relative group/proof-history-item w-full">
-        	<Button
-				variant="contrast"
-				className="text-nowrap text-sm w-full"
-				disabled={proof.status === "failed" || proof.status === "pending"}
-          		style={{ paddingLeft: 0, paddingRight: 0, paddingTop: 8, paddingBottom: 8 }}
-				onClick={handleBtnClick}
-				isLoading={
-					submitSolution.submitSolutionFetchingVDataIsLoading ||
-					submitSolution.receipt.isLoading ||
-					submitProofMessageLoading ||
-					bumpLoading
-				}
+		<td>
+			<div className="relative group/proof-history-item w-full">
+				<Button
+					variant="contrast"
+					className="text-nowrap text-sm w-full"
+					disabled={proof.status === "failed" || proof.status === "pending"}
+					style={{ paddingLeft: 0, paddingRight: 0, paddingTop: 8, paddingBottom: 8 }}
+					onClick={handleBtnClick}
+					isLoading={
+						submitSolution.submitSolutionFetchingVDataIsLoading ||
+						submitSolution.receipt.isLoading ||
+						submitProofMessageLoading ||
+						bumpLoading
+					}
 				>
 					{actionBtn[proof.status]}
 				</Button>
@@ -256,106 +256,20 @@ export const ProofEntryActionBtn = ({
 				</form>
 			)}
 
-			<Modal
+			<BumpFeeModal
 				open={bumpOpen}
 				setOpen={setBumpOpen}
-				maxWidth={520}
-				shouldCloseOnEsc
-				shouldCloseOnOutsideClick
-			>
-				<div className="rounded-2xl bg-background p-6 text-white">
-				<h3 className="text-xl font-semibold mb-4">Bump Fee</h3>
-				<p className="text-sm opacity-80 mb-4">
-					Elegí cuánto querés aumentar la comisión para reintentar tu proof.
-				</p>
-
-				<div className="flex flex-col gap-3">
-					<label className={`cursor-pointer rounded-xl border p-3 ${choice === "instant" ? "border-accent-100" : "border-contrast-100/40"}`}>
-					<div className="flex items-center justify-between gap-3">
-						<div className="flex items-center gap-2">
-						<input
-							type="radio"
-							name="bump"
-							className="cursor-pointer"
-							checked={choice === "instant"}
-							onChange={() => setChoice("instant")}
-						/>
-						<span className="font-medium">Instant</span>
-						</div>
-						<span className="text-sm opacity-80">
-						{instantFeeWei ? `${toGwei(instantFeeWei).toFixed(2)} Gwei` : "…"}
-						</span>
-					</div>
-					<p className="mt-1 text-xs opacity-70">Fee más alta (confirmación más rápida).</p>
-					</label>
-
-					<label className={`cursor-pointer rounded-xl border p-3 ${choice === "default" ? "border-accent-100" : "border-contrast-100/40"}`}>
-					<div className="flex items-center justify-between gap-3">
-						<div className="flex items-center gap-2">
-						<input
-							type="radio"
-							name="bump"
-							className="cursor-pointer"
-							checked={choice === "default"}
-							onChange={() => setChoice("default")}
-						/>
-						<span className="font-medium">Default</span>
-						</div>
-						<span className="text-sm opacity-80">
-						{defaultFeeWei ? `${toGwei(defaultFeeWei).toFixed(2)} Gwei` : "…"}
-						</span>
-					</div>
-					<p className="mt-1 text-xs opacity-70">Fee recomendada.</p>
-					</label>
-
-					<div className={`rounded-xl border p-3 ${choice === "custom" ? "border-accent-100" : "border-contrast-100/40"}`}>
-					<label className="flex items-center gap-2 cursor-pointer">
-						<input
-						type="radio"
-						name="bump"
-						className="cursor-pointer"
-						checked={choice === "custom"}
-						onChange={() => setChoice("custom")}
-						/>
-						<span className="font-medium">Custom</span>
-					</label>
-					<div className="mt-2 flex items-center gap-2">
-						<input
-						type="number"
-						min={0}
-						step="0.01"
-						placeholder="Ingresá la fee en Gwei"
-						className="w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none"
-						value={customGwei}
-						onChange={(e) => {
-							setChoice("custom");
-							setCustomGwei(e.target.value);
-						}}
-						/>
-						<span className="text-sm opacity-80">Gwei</span>
-					</div>
-					<p className="mt-1 text-xs opacity-70">Definí tu propia max fee.</p>
-					</div>
-				</div>
-
-				<div className="mt-6 flex justify-end gap-3">
-					<Button variant="contrast" onClick={() => setBumpOpen(false)}>
-					Cancel
-					</Button>
-					<Button
-					variant="accent-fill"
-					onClick={handleConfirmBump}
-					isLoading={submitProofMessageLoading}
-					disabled={
-						submitProofMessageLoading ||
-						(choice === "custom" && !toWeiFromGwei(customGwei))
-					}
-					>
-					Confirm
-					</Button>
-				</div>
-				</div>
-			</Modal>
+				defaultFeeWei={defaultFeeWei}
+				instantFeeWei={instantFeeWei}
+				choice={choice}
+				setChoice={setChoice}
+				customGwei={customGwei}
+				setCustomGwei={setCustomGwei}
+				toWeiFromGwei={toWeiFromGwei}
+				toGwei={toGwei}
+				onConfirm={handleConfirmBump}
+				isConfirmLoading={submitProofMessageLoading}
+			/>
 		</td>
 	);
 };

@@ -141,38 +141,53 @@ export default ({
 
 	const handleSubmission = useCallback(async () => {
 		if (!proof || !proofId || !publicInputs || !user_address) {
-			alert("You need to provide proof, proofid, public inputs");
+			addToast({
+				title: "Missing data",
+				desc: "You need to provide proof, proofId, and public inputs",
+				type: "error",
+			});
 			return;
 		}
 
 		const parsed = parsePublicInputs(publicInputs);
 		if (!parsed) {
-			alert("Invalid public inputs");
+			addToast({
+				title: "Invalid inputs",
+				desc: "The provided public inputs are invalid",
+				type: "error",
+			});
 			return;
 		}
 
 		// This conversions are done because the game_config is a hex string in the proof and a bigint in the contract
-		const parsedGameConfigBigInt = BigInt('0x' + parsed.game_config);
+		const parsedGameConfigBigInt = BigInt("0x" + parsed.game_config);
 		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
 
 		if (parsedGameConfigBigInt !== currentGameConfigBigInt) {
-			alert(
-				"Current game has changed since the proof was created."
-			);
+			addToast({
+				title: "Game mismatch",
+				desc: "Current game has changed since the proof was created",
+				type: "error",
+			});
 			console.log("Parsed game config:", parsed.game_config);
 			console.log("Current game config:", currentGame.data?.gameConfig);
 			return;
 		}
 
-		const alreadySubmitted = userProofs.some((p) =>
-			typeof p.game_config === 'string' &&
-			typeof parsed.game_config === 'string' &&
-			p.game_config.toLowerCase() === parsed.game_config.toLowerCase() &&
-			p.level >= parsed.level
+		const alreadySubmitted = userProofs.some(
+			(p) =>
+				typeof p.game_config === "string" &&
+				typeof parsed.game_config === "string" &&
+				p.game_config.toLowerCase() === parsed.game_config.toLowerCase() &&
+				p.level >= parsed.level
 		);
 
 		if (alreadySubmitted) {
-			alert("You have already submitted a proof with this game config and a higher or equal level.");
+			addToast({
+				title: "Level already reached",
+				desc: "You have already submitted a proof with this game config and a higher or equal level",
+				type: "error",
+			});
 			return;
 		}
 

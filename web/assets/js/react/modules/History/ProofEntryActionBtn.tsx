@@ -10,6 +10,7 @@ import { Address } from "../../types/blockchain";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { toHex } from "viem";
 import { fetchProofVerificationData } from "../../utils/aligned";
+import { useToast } from "../../state/toast";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
@@ -33,6 +34,7 @@ export const ProofEntryActionBtn = ({
 	payment_service_address,
 }: Props) => {
 	const { csrfToken } = useCSRFToken();
+	const { addToast } = useToast();
 	const formRetryRef = useRef<HTMLFormElement>(null);
 	const formSubmittedRef = useRef<HTMLFormElement>(null);
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
@@ -61,13 +63,15 @@ export const ProofEntryActionBtn = ({
 	}, [submitSolution.receipt]);
 
 	const handleBtnClick = async () => {
-		const submittedGameConfigBigInt = BigInt('0x' + proof.game_config);
+		const submittedGameConfigBigInt = BigInt("0x" + proof.game_config);
 		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
 
 		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
-			alert(
-				"Current game has changed since the proof was created."
-			);
+			addToast({
+				title: "Game mismatch",
+				desc: "Current game has changed since the proof was created",
+				type: "error",
+			});
 			console.log("Proof game config:", proof.game_config);
 			console.log("Current game config:", currentGame.data?.gameConfig);
 			return;

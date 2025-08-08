@@ -1,21 +1,18 @@
-import * as Sentry from "@sentry/react";
-
-Sentry.init({
-	dsn: "https://650406f4e17ddceda64e4368937fba4c@o4508502393880576.ingest.de.sentry.io/4508518331449424",
-	integrations: [
-		Sentry.browserTracingIntegration(),
-		Sentry.replayIntegration(),
-	],
-	// Tracing
-	tracesSampleRate: 1.0, //  Capture 100% of the transactions
-	// Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-	tracePropagationTargets: [
-		"localhost",
-		/^https:\/\/genesis\.alignedfoundation\.org\/api/,
-	],
-	// Session Replay
-	replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-	replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+// This fetches the links in the document and adds target="_blank" and rel="noopener noreferrer" to external
+// links. It works for external links that are not part of the current origin. It does not works for links
+// that are dynamically added after the page load, such as those created by React components.
+document.addEventListener("DOMContentLoaded", () => {
+  	document.querySelectorAll('a[href]').forEach(link => {
+		try {
+			const url = new URL(link.href, window.location.origin);
+			if (url.origin !== window.location.origin) {
+				link.setAttribute("target", "_blank");
+				link.setAttribute("rel", "noopener noreferrer");
+			}
+		} catch (e) {
+			console.warn("Invalid URL in link:", link.href);
+		}
+	});
 });
 
 import "phoenix_html";

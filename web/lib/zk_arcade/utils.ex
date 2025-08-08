@@ -1,4 +1,6 @@
 defmodule ZkArcade.Utils do
+  require Logger
+
   @url_regex ~r{(https?://[^\s\)]+)}
 
   def autolink_and_linebreak(text) do

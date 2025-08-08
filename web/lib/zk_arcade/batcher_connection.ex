@@ -8,12 +8,12 @@ defmodule ZkArcade.BatcherConnection do
 
     connect_opts = %{protocols: [:http]} # Force HTTP/1.1
 
-    conn_pid =
+    conn_result =
       case :gun.open(batcher_host, batcher_port, connect_opts) do
         {:ok, conn_pid} ->
           case :gun.await_up(conn_pid) do
             {:ok, _protocol} ->
-              conn_pid
+              {:ok, conn_pid}
 
             {:error, :timeout} ->
               Logger.info("Initial connection timed out")
@@ -29,28 +29,32 @@ defmodule ZkArcade.BatcherConnection do
           try_ipv6(batcher_host, batcher_port, connect_opts)
       end
 
-    stream_ref = :gun.ws_upgrade(conn_pid, "/")
+    case conn_result do
+      {:ok, conn_pid} when is_pid(conn_pid) ->
+        stream_ref = :gun.ws_upgrade(conn_pid, "/")
 
-    receive do
-      {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
-        Logger.info("WebSocket upgrade successful!")
-        message = build_submit_proof_message(submit_proof_message, address)
-        binary = CBOR.encode(message)
-        Logger.debug("Sending binary message of size: #{byte_size(binary)} bytes")
+        receive do
+          {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
+            Logger.info("WebSocket upgrade successful!")
+            message = build_submit_proof_message(submit_proof_message, address)
+            binary = CBOR.encode(message)
+            :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
+            handle_websocket_messages(conn_pid, stream_ref)
 
-        :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
+          {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
+            Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
+            close_connection(conn_pid, stream_ref)
+            {:error, :upgrade_failed}
+        after
+          25_000 ->
+            Logger.error("Timeout during WebSocket upgrade")
+            :gun.close(conn_pid)
+            {:error, :upgrade_timeout}
+        end
 
-        handle_websocket_messages(conn_pid, stream_ref)
-
-      {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
-        Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
-        close_connection(conn_pid, stream_ref)
-        {:error, :upgrade_failed}
-    after
-      25_000 ->
-        Logger.error("Timeout during WebSocket upgrade")
-        :gun.close(conn_pid)
-        {:error, "Failed to upgrade socket connection due to timeout"}
+      {:error, reason} ->
+        Logger.error("Unable to connect via IPv4 or IPv6: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 
@@ -62,21 +66,18 @@ defmodule ZkArcade.BatcherConnection do
           {:ok, pid} ->
             case :gun.await_up(pid) do
               {:ok, _protocol} ->
-                pid
-
+                {:ok, pid}
               {:error, reason} ->
                 Logger.error("IPv6 connection failed: #{inspect(reason)}")
-                {:error, "Unable to connect via IPv4 or IPv6"}
+                {:error, reason}
             end
-
           {:error, reason} ->
             Logger.error("IPv6 open failed: #{inspect(reason)}")
-            {:error, "Unable to connect via IPv4 or IPv6"}
+            {:error, reason}
         end
-
       {:error, reason} ->
         Logger.error("Failed to resolve IPv6 address: #{inspect(reason)}")
-        {:error, "Unable to connect via IPv4 or IPv6"}
+        {:error, reason}
     end
   end
 

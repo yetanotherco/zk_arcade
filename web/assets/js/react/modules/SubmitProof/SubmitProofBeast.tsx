@@ -79,6 +79,8 @@ export default ({
 		userAddress: user_address,
 	});
 
+	// Note: This means we are calling the leaderboard contract on each submission try. 
+	// We should consider obtaining it in the backend and passing it as a prop.
 	const { currentGame } = useLeaderboardContract({
 		contractAddress: leaderboard_address,
 		userAddress: user_address ? user_address : "0x",

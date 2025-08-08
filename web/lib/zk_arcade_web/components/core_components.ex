@@ -256,7 +256,7 @@ defmodule ZkArcadeWeb.CoreComponents do
               <div class="flex flex-col items-start gap-2">
                 <h3 class="text-text-100 font-bold text-lg"><%= title %></h3>
                 <%= for {value, link} <- links do %>
-                  <.link class="text-sm text-text-200 hover:underline" href={link}>
+                  <.link class="text-sm text-text-200 hover:underline" href={link} target="_blank" rel="noopener noreferrer">
                     <%= value %>
                   </.link>
                 <% end %>

@@ -43,7 +43,7 @@ export default ({
 	const [maxFee, setMaxFee] = useState(BigInt(0));
 	const [depositAmount, setDepositAmount] = useState("");
 	const [showDepositSection, setShowDepositSection] = useState(false);
-	const { nonce, isLoading: nonceLoading } = useBatcherNonce(
+	const { nonce, isLoading: nonceLoading, error: nonceError } = useBatcherNonce(
 		batcher_url,
 		user_address
 	);
@@ -355,6 +355,15 @@ export default ({
 							</div>
 						)}
 
+						{nonceError && (
+							<p className="text-red text-sm text-center">
+								{nonceError.message == "WebSocket connection error" ? (
+									<span>Connection with Aligned failed, try to connect later.</span>
+								) : (
+									<span>Error connecting with Aligned: {nonceError.message}</span>
+								)}
+							</p>
+						)}
 						<div>
 							<Button
 								variant="text"

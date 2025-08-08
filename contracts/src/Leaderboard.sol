@@ -62,6 +62,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+    /// @notice Sets the beast games configuration
+    /// @param _beastGames The new beast games configuration
     function setBeastGames(BeastGame[] calldata _beastGames) public onlyOwner {
         beastGames = _beastGames;
     }

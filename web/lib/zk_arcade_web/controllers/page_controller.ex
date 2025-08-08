@@ -52,8 +52,6 @@ defmodule ZkArcadeWeb.PageController do
         price
       {:error, reason} ->
         Logger.error("Failed to get ETH price: #{reason}")
-        # Use a fallback price if ETH price fetch fails
-        3000.0
     end
     cost_saved = ZkArcade.Utils.calc_aligned_savings(proofs_verified, "risc0", eth_price, 20)
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)

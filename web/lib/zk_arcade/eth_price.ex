@@ -1,10 +1,55 @@
 defmodule ZkArcade.EthPrice do
   use HTTPoison.Base
+  use Agent
   require Logger
 
   @coingecko_url "https://api.coingecko.com/api/v3"
   @cryptoprices_url "https://cryptoprices.cc/ETH/"
   @cache_ttl :timer.minutes(5)
+
+  def start_link(_opts) do
+    case init_fallback_price() do
+      {:ok, fallback_price} ->
+        Agent.start_link(fn -> fallback_price end, name: __MODULE__)
+      {:error, reason} ->
+        Logger.error("Failed to initialize ETH price fallback: #{reason}")
+        {:error, "Cannot start application without valid ETH price"}
+    end
+  end
+
+  defp init_fallback_price do
+    Logger.info("Fetching initial ETH price for fallback...")
+
+    case fetch_initial_price() do
+      {:ok, price} ->
+        # Set the cache with initial price
+        Cachex.put(:eth_price_cache, :eth_price, price, ttl: @cache_ttl)
+        Logger.info("Successfully initialized ETH price fallback: #{price}")
+        {:ok, price}
+
+      {:error, reason} ->
+        Logger.error("Failed to fetch initial ETH price from all sources: #{reason}")
+        {:error, reason}
+    end
+  end
+
+  defp fetch_initial_price do
+    case fetch_from_coingecko() do
+      {:ok, price} ->
+        {:ok, price}
+      {:error, _reason} ->
+        case fetch_from_cryptoprices() do
+          {:ok, price} ->
+            {:ok, price}
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  defp get_fallback_price do
+    Agent.get(__MODULE__, &(&1))
+  end
 
   def get_eth_price_usd do
     case Cachex.get(:eth_price_cache, :eth_price) do
@@ -25,8 +70,10 @@ defmodule ZkArcade.EthPrice do
                 {:ok, price}
 
               {:error, reason} ->
-                # Both APIs failed
-                {:error, "Failed to fetch ETH price from both sources: #{reason}"}
+                # Both APIs failed, return fallback price from Agent
+                fallback_price = get_fallback_price()
+                Logger.warn("Both API sources failed, using fallback price: #{fallback_price}")
+                {:ok, fallback_price}
             end
         end
 

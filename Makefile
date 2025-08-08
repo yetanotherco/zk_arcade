@@ -59,6 +59,12 @@ __CONTRACTS__:
 deploy_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh
 
+upgrade_contract: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_contract.sh
+
+set_beast_games: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
+
 __INFRA__: ## ____
 ## Initial Setup
 debian_create_dirs:

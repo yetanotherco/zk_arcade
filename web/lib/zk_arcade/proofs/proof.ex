@@ -13,6 +13,9 @@ defmodule ZkArcade.Proofs.Proof do
     field :status, :string, default: "pending"
     field :game, :string, default: "Beast"
     field :proving_system, :string
+    field :game_config, :string
+
+    field :level_reached, :integer, default: 0
 
     field :times_retried, :integer, default: 0
 
@@ -24,7 +27,7 @@ defmodule ZkArcade.Proofs.Proof do
   @doc false
   def changeset(proof, attrs) do
     proof
-    |> cast(attrs, [:verification_data, :verification_data_commitment, :wallet_address, :batch_data, :status, :game, :proving_system, :inserted_at, :updated_at, :times_retried])
+    |> cast(attrs, [:verification_data, :verification_data_commitment, :wallet_address, :batch_data, :status, :game, :proving_system, :inserted_at, :updated_at, :times_retried, :level_reached, :game_config])
     |> validate_required([:verification_data, :verification_data_commitment, :wallet_address, :status, :game, :proving_system])
     |> validate_inclusion(:status, ["pending", "submitted", "failed", "claimed"])
     |> validate_inclusion(:game, ["Beast", "Sudoku", "Parity"])

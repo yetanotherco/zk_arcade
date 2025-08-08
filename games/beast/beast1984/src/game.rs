@@ -257,17 +257,6 @@ impl Game {
                     self.handle_win_state();
                 }
                 GameState::Quit => {
-                    let file_names: Vec<&str> = self
-                        .proving_systems
-                        .iter()
-                        .map(|system| match system.as_str() {
-                            SP1 => "sp1_solution.bin",
-                            RISC0 => "risc0_solution.bin",
-                            _ => "",
-                        })
-                        .collect();
-                    println!("Proof saved to {}", file_names.join(", "));
-                    println!("Submit it to https://test.zkarcade.com and earn points!");
                     println!("Bye...");
                     break;
                 }
@@ -517,8 +506,16 @@ impl Game {
             if let Ok(byte) = self.input_listener.try_recv() {
                 match byte as char {
                     ' ' => {
-                        self.start_new_game();
-                        break;
+                        if Self::render_confirmation_prompt(
+                            "Are you sure you want to restart the game?",
+                            &self.input_listener,
+                        ) {
+                            self.start_new_game();
+                            break;
+                        } else {
+                            println!("{}", self.render_death_screen());
+                            break;
+                        }
                     }
                     '\n' => {
                         self.state = GameState::ProveExecution;
@@ -529,8 +526,16 @@ impl Game {
                         break;
                     }
                     'q' | 'Q' => {
-                        self.state = GameState::Quit;
-                        break;
+                        if Self::render_confirmation_prompt(
+                            "Are you sure you want to quit?",
+                            &self.input_listener,
+                        ) {
+                            self.state = GameState::Quit;
+                            break;
+                        } else {
+                            println!("{}", self.render_death_screen());
+                            break;
+                        }
                     }
                     _ => {}
                 }
@@ -986,6 +991,41 @@ impl Game {
                 }
             }
         })
+    }
+
+    fn render_confirmation_prompt(message: &str, input_listener: &mpsc::Receiver<u8>) -> bool {
+        let confirm_text = "[Y] Yes    [N] No";
+        let box_width = message.len().max(confirm_text.len()) + 4;
+
+        let top_pos = ((ANSI_BOARD_HEIGHT + ANSI_FRAME_SIZE) / 2) + ANSI_FOOTER_HEIGHT + 4;
+        let bottom_pos = top_pos - 4;
+
+        let left_pad = format!(
+            "\x1b[{:.0}C",
+            ((BOARD_WIDTH * 2 + ANSI_FRAME_SIZE * 2) / 2).saturating_sub(box_width / 2)
+        );
+
+        let border = "─".repeat(box_width);
+        let message_line = format!("{left_pad}│ {:^width$} │", message, width = box_width - 2);
+        let options_line = format!(
+            "{left_pad}│ {:^width$} │",
+            confirm_text,
+            width = box_width - 2
+        );
+
+        print!(
+        "\x1b[{top_pos}F{left_pad}┌{border}┐\n{message_line}\n{options_line}\n{left_pad}└{border}┘\n\x1b[{bottom_pos:.0}E"
+    );
+
+        while let Ok(byte) = input_listener.recv() {
+            match byte as char {
+                'y' | 'Y' => return true,
+                'n' | 'N' => return false,
+                _ => {}
+            }
+        }
+
+        false
     }
 
     fn alert(msg: &str, progress: usize) -> String {

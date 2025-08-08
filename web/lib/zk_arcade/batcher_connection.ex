@@ -6,22 +6,27 @@ defmodule ZkArcade.BatcherConnection do
     batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
     batcher_port = Application.get_env(:zk_arcade, :batcher_port)
 
-    connect_opts = %{
-      protocols: [:http], # Force HTTP/1.1
-    }
-    {:ok, conn_pid} = :gun.open(batcher_host, batcher_port, connect_opts)
+    connect_opts = %{protocols: [:http]} # Force HTTP/1.1
 
     conn_pid =
-      case :gun.await_up(conn_pid) do
-        {:ok, _protocol} ->
-          conn_pid
+      case :gun.open(batcher_host, batcher_port, connect_opts) do
+        {:ok, conn_pid} ->
+          case :gun.await_up(conn_pid) do
+            {:ok, _protocol} ->
+              conn_pid
 
-        {:error, :timeout} ->
-          Logger.info("Connection timed out, trying to connect with IPv6.")
-          {:ok, ipv6_address} = :inet.getaddr(batcher_host, :inet6)
-          {:ok, new_conn_pid} = :gun.open(ipv6_address, batcher_port)
-          {:ok, _protocol} = :gun.await_up(new_conn_pid)
-          new_conn_pid
+            {:error, :timeout} ->
+              Logger.info("Initial connection timed out")
+              try_ipv6(batcher_host, batcher_port, connect_opts)
+
+            {:error, reason} ->
+              Logger.info("Initial connection failed: #{inspect(reason)}")
+              try_ipv6(batcher_host, batcher_port, connect_opts)
+          end
+
+        {:error, reason} ->
+          Logger.error("Initial connection failed immediately: #{inspect(reason)}")
+          try_ipv6(batcher_host, batcher_port, connect_opts)
       end
 
     stream_ref = :gun.ws_upgrade(conn_pid, "/")
@@ -46,6 +51,32 @@ defmodule ZkArcade.BatcherConnection do
         Logger.error("Timeout during WebSocket upgrade")
         :gun.close(conn_pid)
         {:error, "Failed to upgrade socket connection due to timeout"}
+    end
+  end
+
+  defp try_ipv6(host, port, connect_opts) do
+    Logger.info("Trying to connect with IPv6...")
+    case :inet.getaddr(host, :inet6) do
+      {:ok, ipv6_address} ->
+        case :gun.open(ipv6_address, port, connect_opts) do
+          {:ok, pid} ->
+            case :gun.await_up(pid) do
+              {:ok, _protocol} ->
+                pid
+
+              {:error, reason} ->
+                Logger.error("IPv6 connection failed: #{inspect(reason)}")
+                {:error, "Unable to connect via IPv4 or IPv6"}
+            end
+
+          {:error, reason} ->
+            Logger.error("IPv6 open failed: #{inspect(reason)}")
+            {:error, "Unable to connect via IPv4 or IPv6"}
+        end
+
+      {:error, reason} ->
+        Logger.error("Failed to resolve IPv6 address: #{inspect(reason)}")
+        {:error, "Unable to connect via IPv4 or IPv6"}
     end
   end
 

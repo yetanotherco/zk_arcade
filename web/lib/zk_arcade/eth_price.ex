@@ -41,7 +41,7 @@ defmodule ZkArcade.EthPrice do
   end
 
   defp fetch_from_coingecko do
-    case get("/simple/price?ids=ethereum&vs_currencies=usd") do
+    case HTTPoison.get(@coingecko_url <> "/simple/price?ids=ethereum&vs_currencies=usd") do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         case parse_coingecko_response(body) do
           {:ok, price} ->
@@ -106,10 +106,6 @@ defmodule ZkArcade.EthPrice do
       _ ->
         {:error, "Invalid price format from cryptoprices API"}
     end
-  end
-
-  def process_url(url) do
-    @coingecko_url <> url
   end
 
   def process_response_body(body) do

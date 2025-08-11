@@ -79,6 +79,8 @@ export const ProofBatchMerkleRoot = ({ proof, explorer_url }: Props) => {
 				<a
 					href={`${explorer_url}/batches/${proof.batch_hash}`}
 					className="underline"
+					target="_blank"
+					rel="noopener noreferrer"
 				>
 					{shortenHash(proof.batch_hash)}
 				</a>

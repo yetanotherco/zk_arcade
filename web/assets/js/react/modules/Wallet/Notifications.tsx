@@ -7,6 +7,7 @@ import { fetchProofVerificationData } from "../../utils/aligned";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { Address } from "../../types/blockchain";
+import { useToast } from "../../state/toast";
 
 type Props = {
 	proofs: ProofSubmission[];
@@ -24,7 +25,7 @@ const textBasedOnNotEntry = {
 	submitted: (commitment: string) => (
 		<>
 			The proof <span className="font-bold">{commitment}</span> is ready
-			to be submitted`
+			to be claimed
 		</>
 	),
 };
@@ -47,8 +48,9 @@ const NotificationEntry = ({
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submitProofMessageLoading, setSubmitProofMessageLoading] =
 		useState(false);
+	const { addToast } = useToast();
 
-	const { submitSolution } = useLeaderboardContract({
+	const { submitSolution, currentGame } = useLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});
@@ -66,6 +68,18 @@ const NotificationEntry = ({
 
 	const handleClick = async () => {
 		if (proof.status === "submitted") {
+			const submittedGameConfigBigInt = BigInt("0x" + proof.game_config);
+			const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
+
+			if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
+				addToast({
+					title: "Game mismatch",
+					desc: "Current game has changed since the proof was created",
+					type: "error",
+				});
+				return;
+			}
+
 			if (!proof.batch_hash) {
 				alert("Batch data not available for this proof");
 				return;
@@ -144,7 +158,7 @@ const NotificationEntry = ({
 					submitSolution.submitSolutionFetchingVDataIsLoading
 				}
 			>
-				{proof.status === "submitted" ? "Submit" : "Bump fee"}
+				{proof.status === "submitted" ? "Claim" : "Bump fee"}
 			</Button>
 
 			{proof.status === "pending" && (

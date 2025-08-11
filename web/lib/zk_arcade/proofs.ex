@@ -85,7 +85,9 @@ defmodule ZkArcade.Proofs do
         proving_system: p.proving_system,
         inserted_at: p.inserted_at,
         updated_at: p.updated_at,
-        wallet_address: p.wallet_address
+        wallet_address: p.wallet_address,
+        level_reached: p.level_reached,
+        game_config: p.game_config
       })
       |> Repo.all()
       |> Enum.map(fn proof ->
@@ -120,7 +122,7 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
-  def create_pending_proof(submit_proof_message, address, game, proving_system, max_fee) do
+  def create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee) do
     {:ok, verification_data_commitment} = ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(submit_proof_message["verificationData"]["verificationData"])
     proof_params = %{
       wallet_address: address,
@@ -130,6 +132,8 @@ defmodule ZkArcade.Proofs do
       batch_data: nil,
       game: game,
       proving_system: proving_system,
+      game_config: gameConfig,
+      level_reached: level,
       submitted_max_fee: max_fee
     }
 
@@ -189,6 +193,7 @@ defmodule ZkArcade.Proofs do
   end
 
   def update_proof_status_claimed(address, proof_id) do
+    Logger.info("Updating proof #{proof_id} status to claimed")
     proof = get_proof!(proof_id)
     downcased_addr = String.downcase(address)
 

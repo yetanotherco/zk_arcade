@@ -23,7 +23,7 @@
              <%= for %{text: text, link: link} <- @game.acknowledgments do %>
              <div class="flex flex-row flex-wrap">
                 <p class="text-md mr-1 text-text-200"><%= text %>:</p>
-                <a href={link} class="text-md mb-1 text-blue hover:underline"><%= link %></a>
+                <a href={link} class="text-md mb-1 text-blue hover:underline" target="_blank" rel="noopener noreferrer"><%= link %></a>
             </div>
             <% end %>
         </section>
@@ -53,6 +53,8 @@
             payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
             user_address={@wallet}
             batcher_url={Application.get_env(:zk_arcade, :batcher_url)}
+            user_proofs_json={@user_proofs_json}
+            leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
         />
     </div>
 

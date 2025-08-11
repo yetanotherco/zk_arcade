@@ -44,6 +44,13 @@ body {
 	border-radius: 8px;
 }
 
+.code-block a {
+	pointer-events: none;
+	text-decoration: none;
+	color: inherit;
+	cursor: text;
+}
+
 a {
 	word-break: keep-all;
 }

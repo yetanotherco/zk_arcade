@@ -15,7 +15,7 @@ import { useToast } from "../../state/toast";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
-	submitted: "Submit solution",
+	submitted: "Claim points",
 	pending: "Bump fee",
 	failed: "None",
 };
@@ -36,16 +36,21 @@ export const ProofEntryActionBtn = ({
 	payment_service_address,
 }: Props) => {
 	const { csrfToken } = useCSRFToken();
+	const { addToast } = useToast();
 	const formRetryRef = useRef<HTMLFormElement>(null);
 	const formSubmittedRef = useRef<HTMLFormElement>(null);
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const [submitProofMessageLoading, setSubmitProofMessageLoading] =
 		useState(false);
 
-	const { addToast } = useToast();
 	const { submitSolution } = useLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
+	});
+
+	const { currentGame } = useLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address,
 	});
 
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
@@ -76,6 +81,18 @@ export const ProofEntryActionBtn = ({
 	}, [submitSolution.receipt]);
 
 	const handleBtnClick = async () => {
+		const submittedGameConfigBigInt = BigInt("0x" + proof.game_config);
+		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
+
+		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
+			addToast({
+				title: "Game mismatch",
+				desc: "Current game has changed since the proof was created",
+				type: "error",
+			});
+			return;
+		}
+
 		if (proof.status === "failed") {
 			// nothing to do
 			return;

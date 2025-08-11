@@ -23,7 +23,7 @@ const tooltipStyleBasedOnStatus: {
 };
 
 const tooltipText: { [key in KeysForStatus]: string } = {
-	submitted: "Solution verified and ready to be submitted",
+	submitted: "Solution verified and ready to be claimed",
 	claimed: "Already submitted to leaderboard",
 	pending: "You need to wait until its verified before submitting the solution",
 	failed: "The proof failed to be verified, you have to re-send it",
@@ -74,6 +74,8 @@ export const ProofBatchMerkleRoot = ({ proof, explorer_url }: Props) => {
 				<a
 					href={`${explorer_url}/batches/${proof.batch_hash}`}
 					className="underline"
+					target="_blank"
+					rel="noopener noreferrer"
 				>
 					{shortenHash(proof.batch_hash)}
 				</a>

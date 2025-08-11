@@ -32,7 +32,7 @@ export const DepositOnAlignedModal = ({
 			window.setTimeout(() => setOpen(false), 250);
 			addToast({
 				title: "Transaction sent",
-				desc: "Transaction was sent successfully, waiting for receipt...",
+				desc: "Transaction was sent, waiting for receipt...",
 				type: "success",
 			});
 		}
@@ -42,7 +42,7 @@ export const DepositOnAlignedModal = ({
 		if (sendFunds.receipt.isSuccess && sendFunds.receipt.data) {
 			addToast({
 				title: "Balance deposit confirmed",
-				desc: "The transaction was included, your balance has been updated",
+				desc: "The transaction was successful, your balance has been updated",
 				type: "success",
 			});
 		}

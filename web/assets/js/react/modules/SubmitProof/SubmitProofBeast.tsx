@@ -132,8 +132,6 @@ export default ({
 
 		if (parsedGameConfigBigInt !== currentGameConfigBigInt) {
 			setInvalidGameConfig(true);
-			console.log("Parsed game config:", parsed.game_config);
-			console.log("Current game config:", currentGame.data?.gameConfig);
 			return;
 		} else {
 			setInvalidGameConfig(false);

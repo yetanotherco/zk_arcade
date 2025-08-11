@@ -85,11 +85,12 @@ module.exports = {
 				280: "280px",
 			},
 			animation: {
-				'spin-slow': 'spin 1.5s linear infinite',
+				"spin-slow": "spin 1.5s linear infinite",
 			},
 		},
 	},
 	plugins: [
+		require("tailwindcss-animate"),
 		require("@tailwindcss/forms"),
 		// Allows prefixing tailwind classes with LiveView classes to add rules
 		// only when LiveView classes are applied, for example:

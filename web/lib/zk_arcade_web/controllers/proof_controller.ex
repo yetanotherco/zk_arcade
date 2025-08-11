@@ -63,8 +63,11 @@ defmodule ZkArcadeWeb.ProofController do
           proving_system =
               submit_proof_message["verificationData"]["verificationData"]["provingSystem"]
 
+          max_fee =
+            submit_proof_message["verificationData"]["maxFee"]
+
           with {:ok, pending_proof} <-
-                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system) do
+                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, max_fee) do
             task =
               Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
                 Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)
@@ -215,7 +218,10 @@ defmodule ZkArcadeWeb.ProofController do
                     Logger.error("No running task found for proof #{proof.id}")
                 end
 
-                case Proofs.update_proof_retry(proof.id) do
+                max_fee =
+                  submit_proof_message["verificationData"]["maxFee"]
+
+                case Proofs.update_proof_retry(proof.id, max_fee) do
                   {:ok, _} ->
                     Logger.info("Proof #{proof.id} updated before retrying")
 

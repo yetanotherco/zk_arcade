@@ -120,7 +120,7 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
-  def create_pending_proof(submit_proof_message, address, game, proving_system) do
+  def create_pending_proof(submit_proof_message, address, game, proving_system, max_fee) do
     {:ok, verification_data_commitment} = ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(submit_proof_message["verificationData"]["verificationData"])
     proof_params = %{
       wallet_address: address,
@@ -129,7 +129,8 @@ defmodule ZkArcade.Proofs do
       status: "pending",
       batch_data: nil,
       game: game,
-      proving_system: proving_system
+      proving_system: proving_system,
+      submitted_max_fee: max_fee
     }
 
     create_proof(proof_params)
@@ -225,14 +226,15 @@ defmodule ZkArcade.Proofs do
     end
   end
 
-  def update_proof_retry(proof_id) do
+  def update_proof_retry(proof_id, max_fee) do
     proof = get_proof!(proof_id)
 
     changeset = change_proof(proof, %{
       status: "pending",
       inserted_at: DateTime.utc_now(),
       updated_at: DateTime.utc_now(),
-      times_retried: proof.times_retried + 1
+      times_retried: proof.times_retried + 1,
+      submitted_max_fee: max_fee
     })
 
     case Repo.update(changeset) do

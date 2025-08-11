@@ -103,6 +103,7 @@ defmodule ZkArcadeWeb.PageController do
         proofs ->
           proofs
           |> Enum.filter(fn proof -> proof.game == "Beast" end)
+          |> Enum.filter(fn proof -> proof.status != "failed" end)
           |> Enum.map(fn proof ->
             %{
               level: proof.level_reached,

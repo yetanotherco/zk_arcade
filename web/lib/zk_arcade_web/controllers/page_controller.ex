@@ -97,6 +97,25 @@ defmodule ZkArcadeWeb.PageController do
 
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
 
+    user_proofs =
+      case proofs do
+        [] -> []
+        proofs ->
+          # TODO: Pass the levels for the current game only, not all of them. This will be easier when we
+          # monitor the current game in the backend, logic not developed yet
+          proofs
+          |> Enum.filter(fn proof -> proof.game == "Beast" end)
+          |> Enum.filter(fn proof -> proof.status != "failed" end)
+          |> Enum.map(fn proof ->
+            %{
+              level: proof.level_reached,
+              game_config: proof.game_config
+            }
+          end)
+      end
+
+    user_proofs_json = Jason.encode!(user_proofs)
+
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
@@ -127,6 +146,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:username, username)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
+      |> assign(:user_proofs_json, user_proofs_json)
       |> render(:game)
   end
 

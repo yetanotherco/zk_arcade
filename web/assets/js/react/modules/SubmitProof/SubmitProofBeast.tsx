@@ -5,6 +5,7 @@ import {
 	useBatcherPaymentService,
 	useModal,
 	useBatcherNonce,
+	useLeaderboardContract,
 	useEthPrice,
 } from "../../hooks";
 import { Address } from "../../types/blockchain";
@@ -24,12 +25,28 @@ type Props = {
 	payment_service_address: Address;
 	user_address?: Address;
 	batcher_url: string;
+	user_proofs_json: string;
+	leaderboard_address: Address;
 };
+
+function parsePublicInputs(inputs: Uint8Array) {
+	if (inputs.length < 96) return null;
+
+	const levelBytes = inputs.slice(0, 32);
+	const gameBytes = inputs.slice(32, 64);
+
+	const level = (levelBytes[30] << 8) + levelBytes[31];
+	const game_config = Buffer.from(gameBytes).toString("hex");
+
+	return { level, game_config };
+}
 
 export default ({
 	payment_service_address,
 	user_address,
 	batcher_url,
+	user_proofs_json,
+	leaderboard_address,
 }: Props) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { csrfToken } = useCSRFToken();
@@ -49,6 +66,11 @@ export default ({
 	);
 	useProofSentMessageReader();
 
+	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
+	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
+
+	const userProofs = JSON.parse(user_proofs_json) as { level: number; game_config: string }[];
+
 	const chainId = useChainId();
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
@@ -58,6 +80,13 @@ export default ({
 	const { balance, sendFunds } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
+	});
+
+	// Note: This means we are calling the leaderboard contract on each submission try. 
+	// We should consider obtaining it in the backend and passing it as a prop.
+	const { currentGame } = useLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address ? user_address : "0x",
 	});
 
 	const handleCombinedProofFile = async (
@@ -88,6 +117,39 @@ export default ({
 		const proofId = readChunk();
 		const publicInputs = readChunk();
 
+		const parsed = parsePublicInputs(publicInputs);
+		if (!parsed) {
+			addToast({
+				title: "Invalid inputs",
+				desc: "The provided public inputs are invalid",
+				type: "error",
+			});
+			return;
+		}
+
+		const parsedGameConfigBigInt = BigInt("0x" + parsed.game_config);
+		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
+
+		if (parsedGameConfigBigInt !== currentGameConfigBigInt) {
+			setInvalidGameConfig(true);
+			return;
+		} else {
+			setInvalidGameConfig(false);
+		}
+
+		const alreadySubmitted = userProofs.some(
+			(p) =>
+				typeof p.game_config === "string" &&
+				typeof parsed.game_config === "string" &&
+				p.game_config.toLowerCase() === parsed.game_config.toLowerCase() &&
+				p.level >= parsed.level
+		);
+
+		if (alreadySubmitted) {
+			setLevelAlreadyReached(true);
+			return;
+		}
+
 		setProvingSystem(provingSystem);
 		setProof(proof);
 		setProofId(proofId);
@@ -115,7 +177,21 @@ export default ({
 
 	const handleSubmission = useCallback(async () => {
 		if (!proof || !proofId || !publicInputs || !user_address) {
-			alert("You need to provide proof, proofid, public inputs");
+			addToast({
+				title: "Missing data",
+				desc: "You need to provide proof, proofId, and public inputs",
+				type: "error",
+			});
+			return;
+		}
+
+		const parsed = parsePublicInputs(publicInputs);
+		if (!parsed) {
+			addToast({
+				title: "Invalid inputs",
+				desc: "The provided public inputs are invalid",
+				type: "error",
+			});
 			return;
 		}
 
@@ -192,7 +268,7 @@ export default ({
 		if (sendFunds.receipt.isLoading) {
 			addToast({
 				title: "Transaction sent",
-				desc: "Transaction was sent successfully, waiting for receipt...",
+				desc: "Transaction was sent, waiting for receipt...",
 				type: "success",
 			});
 		}
@@ -202,7 +278,7 @@ export default ({
 		if (sendFunds.receipt.isSuccess && sendFunds.receipt.data) {
 			addToast({
 				title: "Balance deposit confirmed",
-				desc: "The transaction was included, your balance has been updated",
+				desc: "The transaction was successful, your balance has been updated",
 				type: "success",
 			});
 		}
@@ -364,6 +440,23 @@ export default ({
 								)}
 							</p>
 						)}
+
+						{
+							invalidGameConfig && (
+								<p className="text-red text-sm">
+									Current game has changed since the proof was created.
+								</p>
+							)
+						}
+
+						{
+							levelAlreadyReached && (
+								<p className="text-red text-sm">
+									You have already submitted a proof with a higher or equal level for this game.
+								</p>
+							)
+						}
+
 						<div>
 							<Button
 								variant="text"
@@ -391,6 +484,26 @@ export default ({
 					</div>
 				</Modal>
 			</div>
+
+			{submissionIsLoading && (
+				<div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-70 text-white gap-8">
+					<svg
+						className="w-16 h-16 animate-spin-slow text-accent-100"
+						viewBox="0 0 50 50"
+					>
+						<circle
+							cx="25"
+							cy="25"
+							r="20"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="6"
+							strokeLinecap="round"
+							strokeDasharray="45 195"
+						/>
+					</svg>
+				</div>
+			)}
 		</>
 	);
 };

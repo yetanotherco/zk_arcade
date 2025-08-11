@@ -48,7 +48,7 @@ export const WithdrawFromAlignedModal = ({
 		if (unlockFunds.receipt.isLoading) {
 			addToast({
 				title: "Unlock transaction sent",
-				desc: "Unlock transaction was sent successfully, waiting for confirmation...",
+				desc: "Unlock transaction was sent, waiting for confirmation...",
 				type: "success",
 			});
 		}
@@ -69,7 +69,7 @@ export const WithdrawFromAlignedModal = ({
 			window.setTimeout(() => setOpen(false), 250);
 			addToast({
 				title: "Withdrawal transaction sent",
-				desc: "Withdrawal transaction was sent successfully, waiting for receipt...",
+				desc: "Withdrawal transaction was sent, waiting for receipt...",
 				type: "success",
 			});
 		}

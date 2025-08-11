@@ -131,7 +131,7 @@ export const useLeaderboardContract = ({
 	useEffect(() => {
 		if (txRest.isSuccess) {
 			addToast({
-				title: "Solution verified",
+				title: "Claiming points",
 				desc: "Your proof was submitted and verified successfully, waiting for receipt....",
 				type: "success",
 			});
@@ -139,8 +139,8 @@ export const useLeaderboardContract = ({
 
 		if (txRest.isError) {
 			addToast({
-				title: "Solution failed",
-				desc: "The transaction was sent but the verification failed.",
+				title: "Claim failed",
+				desc: "The transaction failed.",
 				type: "error",
 			});
 		}
@@ -157,7 +157,7 @@ export const useLeaderboardContract = ({
 
 		if (receipt.isSuccess) {
 			addToast({
-				title: "Receipt received",
+				title: "Points claimed",
 				desc: "Your solution receipt has been received, your score has been updated.",
 				type: "success",
 			});

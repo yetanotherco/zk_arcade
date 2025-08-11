@@ -358,9 +358,9 @@ export default ({
 						{nonceError && (
 							<p className="text-red text-sm text-center">
 								{nonceError.message == "WebSocket connection error" ? (
-									<span>Connection with Aligned failed, try to connect later.</span>
+									"Connection with Aligned failed, try to connect later."
 								) : (
-									<span>Error connecting with Aligned: {nonceError.message}</span>
+									"Error connecting with Aligned: {nonceError.message}"
 								)}
 							</p>
 						)}

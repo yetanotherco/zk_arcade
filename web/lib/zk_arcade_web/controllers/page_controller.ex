@@ -101,6 +101,8 @@ defmodule ZkArcadeWeb.PageController do
       case proofs do
         [] -> []
         proofs ->
+          # TODO: Pass the levels for the current game only, not all of them. This will be easier when we
+          # monitor the current game in the backend, logic not developed yet
           proofs
           |> Enum.filter(fn proof -> proof.game == "Beast" end)
           |> Enum.filter(fn proof -> proof.status != "failed" end)

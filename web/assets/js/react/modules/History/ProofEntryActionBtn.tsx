@@ -112,8 +112,9 @@ export const ProofEntryActionBtn = ({
 		if (proof.status === "underpriced") {
 			try {
 				setBumpLoading(true);
-				const est = await estimateMaxFeeForBatchOfProofs(16);
-				if (!est) {
+				const estimatedDefault = await estimateMaxFeeForBatchOfProofs(16); // The default is the max fee passed first
+				const estimatedInstant = await estimateMaxFeeForBatchOfProofs(1);
+				if (!estimatedDefault) {
 					addToast({
 						title: "Could not estimate the fee",
 						desc: "Please try again in a few seconds.",
@@ -122,8 +123,8 @@ export const ProofEntryActionBtn = ({
 					setBumpLoading(false);
 					return;
 				}
-				setDefaultFeeWei(est);
-				setInstantFeeWei((est * 125n) / 100n); // 1.25x
+				setDefaultFeeWei(estimatedDefault);
+				setInstantFeeWei(estimatedInstant);
 				setChoice("default");
 				setCustomGwei("");
 				setBumpOpen(true);

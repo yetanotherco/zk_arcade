@@ -52,7 +52,7 @@ export const BumpFeeModal: React.FC<Props> = ({
         <div className="rounded-2xl bg-background p-6 text-white">
             <h3 className="text-xl font-semibold mb-4">Bump Fee</h3>
             <p className="text-sm opacity-80 mb-4">
-            Elegí cuánto querés aumentar la comisión para reintentar tu proof.
+            Choose how much you want to increase the fee to retry your proof.
             </p>
 
             <div className="flex flex-col gap-3">
@@ -77,7 +77,7 @@ export const BumpFeeModal: React.FC<Props> = ({
                 </span>
                 </div>
                 <p className="mt-1 text-xs opacity-70">
-                Fee más alta (confirmación más rápida).
+                Highest fee (fastest confirmation).
                 </p>
             </label>
 
@@ -101,7 +101,7 @@ export const BumpFeeModal: React.FC<Props> = ({
                     {defaultFeeWei ? `${toGwei(defaultFeeWei).toFixed(2)} Gwei` : "…"}
                 </span>
                 </div>
-                <p className="mt-1 text-xs opacity-70">Fee recomendada.</p>
+                <p className="mt-1 text-xs opacity-70">Recommended fee.</p>
             </label>
 
             <div
@@ -124,7 +124,7 @@ export const BumpFeeModal: React.FC<Props> = ({
                     type="number"
                     min={0}
                     step="0.01"
-                    placeholder="Ingresá la fee en Gwei"
+                    placeholder="Enter the fee in Gwei"
                     className="w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none"
                     value={customGwei}
                     onChange={(e) => {
@@ -134,7 +134,7 @@ export const BumpFeeModal: React.FC<Props> = ({
                 />
                 <span className="text-sm opacity-80">Gwei</span>
                 </div>
-                <p className="mt-1 text-xs opacity-70">Definí tu propia max fee.</p>
+                <p className="mt-1 text-xs opacity-70">Define your own max fee.</p>
             </div>
             </div>
 

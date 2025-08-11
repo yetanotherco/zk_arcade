@@ -78,8 +78,6 @@ const NotificationEntry = ({
 					desc: "Current game has changed since the proof was created",
 					type: "error",
 				});
-				console.log("Proof game config:", proof.game_config);
-				console.log("Current game config:", currentGame.data?.gameConfig);
 				return;
 			}
 

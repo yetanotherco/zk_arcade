@@ -1,5 +1,6 @@
 use aligned_sdk::common::types::ProvingSystemId;
 use alloy::hex;
+use chrono::Utc;
 use game_logic::{
     common::levels::LevelJson,
     proving::{LevelLog, ProgramInput},
@@ -81,8 +82,10 @@ pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
     write_chunk(&mut buffer, &proof_id);
     write_chunk(&mut buffer, &public_inputs);
 
-    std::fs::write("risc0_solution.bin", &buffer)
-        .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+    let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
+    let filename = format!("sp1_solution_{}.bin", timestamp);
+
+    std::fs::write(filename, &buffer).map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
     Ok(())
 }

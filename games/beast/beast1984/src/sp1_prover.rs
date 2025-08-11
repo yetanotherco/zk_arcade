@@ -1,12 +1,12 @@
 use aligned_sdk::common::types::ProvingSystemId;
-use std::sync::LazyLock;
-
 use alloy::hex;
+use chrono::Utc;
 use game_logic::{
     common::levels::LevelJson,
     proving::{LevelLog, ProgramInput},
 };
 use sp1_sdk::{EnvProver, ProverClient, SP1ProofWithPublicValues, SP1Stdin};
+use std::sync::LazyLock;
 
 const BEAST_1984_PROGRAM_ELF: &[u8] = include_bytes!("../sp1_program/elf/beast_1984_program");
 static SP1_PROVER_CLIENT: LazyLock<EnvProver> = LazyLock::new(ProverClient::from_env);
@@ -72,15 +72,16 @@ pub fn save_proof(proof: SP1ProofWithPublicValues) -> Result<(), ProvingError> {
 
     let mut buffer = Vec::new();
 
-    // We use the first byte of the generated file to indicate the proving system used
     buffer.extend_from_slice(&proving_system_id);
 
     write_chunk(&mut buffer, &proof_data);
     write_chunk(&mut buffer, &proof_id);
     write_chunk(&mut buffer, &public_inputs);
 
-    std::fs::write("sp1_solution.bin", buffer)
-        .map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+    let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
+    let filename = format!("sp1_solution_{}.bin", timestamp);
+
+    std::fs::write(&filename, buffer).map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
     Ok(())
 }

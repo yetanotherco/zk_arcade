@@ -88,7 +88,7 @@ defmodule ZkArcadeWeb.ProofController do
             submit_proof_message["verificationData"]["maxFee"]
 
           with {:ok, pending_proof} <-
-                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level) do
+                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee) do
             task =
               Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
                 Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)

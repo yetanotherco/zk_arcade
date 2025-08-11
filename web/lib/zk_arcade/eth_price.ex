@@ -1,6 +1,8 @@
 defmodule ZkArcade.EthPrice do
   use HTTPoison.Base
 
+  require Logger
+
   @base_url "https://api.coingecko.com/api/v3"
   @cache_ttl :timer.minutes(5)
 

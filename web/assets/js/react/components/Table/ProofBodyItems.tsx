@@ -11,7 +11,6 @@ const colorBasedOnStatus: {
 	pending: "bg-yellow/20 text-yellow",
 	claimed: "bg-blue/20 text-blue",
 	failed: "bg-red/20 text-red",
-	underpriced: "bg-orange/20 text-orange",
 };
 
 const tooltipStyleBasedOnStatus: {
@@ -21,16 +20,13 @@ const tooltipStyleBasedOnStatus: {
 	pending: "bg-yellow text-black",
 	claimed: "bg-blue text-white",
 	failed: "bg-red text-white",
-	underpriced: "bg-orange text-black",
 };
 
 const tooltipText: { [key in KeysForStatus]: string } = {
 	submitted: "Solution verified and ready to be submitted",
 	claimed: "Already submitted to leaderboard",
-	pending:
-		"You need to wait until its verified before submitting the solution",
+	pending: "You need to wait until its verified before submitting the solution",
 	failed: "The proof failed to be verified, you have to re-send it",
-	underpriced: "The proof is underpriced, we suggest you bump the fee",
 };
 
 const statusText: { [key in KeysForStatus]: string } = {
@@ -38,7 +34,6 @@ const statusText: { [key in KeysForStatus]: string } = {
 	submitted: "Ready",
 	pending: "Pending",
 	failed: "Failed",
-	underpriced: "Pending",
 };
 
 type Props = {

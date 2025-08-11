@@ -4,7 +4,7 @@ import { useBatcherPaymentService, useLeaderboardContract } from "../../hooks";
 import { formatEther } from "viem";
 import { ColumnBody, Table, TableBodyItem } from "../../components/Table";
 import { ProofSubmission } from "../../types/aligned";
-import { timeAgo, timeAgoInHs } from "../../utils/date";
+import { timeAgo } from "../../utils/date";
 import { shortenHash } from "../../utils/crypto";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 import { ProofEntryActionBtn } from "./ProofEntryActionBtn";
@@ -59,14 +59,6 @@ export const ProofHistory = ({
 	useEffect(() => {
 		const rows: ColumnBody[] = proofs.map(item => {
 			const proof = { ...item };
-
-			// if the proof is pending and it has passed more than 6 hours
-			// mark it as underpriced
-			if (proof.status === "pending") {
-				if (timeAgoInHs(proof.inserted_at) > 6) {
-					proof.status = "underpriced";
-				}
-			}
 
 			return {
 				rows: [

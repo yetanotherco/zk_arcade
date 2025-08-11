@@ -16,9 +16,8 @@ import { useToast } from "../../state/toast";
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
 	submitted: "Submit solution",
-	pending: "None",
+	pending: "Bump fee",
 	failed: "None",
-	underpriced: "Bump fee",
 };
 
 type Props = {
@@ -109,7 +108,7 @@ export const ProofEntryActionBtn = ({
 			return;
 		}
 
-		if (proof.status === "underpriced") {
+		if (proof.status === "pending") {
 			try {
 				setBumpLoading(true);
 				const estimatedDefault = await estimateMaxFeeForBatchOfProofs(16); // The default is the max fee passed first
@@ -137,75 +136,75 @@ export const ProofEntryActionBtn = ({
 			} finally {
 				setBumpLoading(false);
 			}
-			}
-		};
+		}
+	};
 
-		const handleConfirmBump = async () => {
-			try {
-				setSubmitProofMessageLoading(true);
+	const handleConfirmBump = async () => {
+		try {
+			setSubmitProofMessageLoading(true);
 
-				const res = await fetchProofVerificationData(proof.id);
-				if (!res) {
-					addToast({
-						title: "There was a problem while sending the proof",
-						desc: "Please try again.",
-						type: "error",
-					});
-					setSubmitProofMessageLoading(false);
-					return;
-				}
-				const noncedVerificationData: NoncedVerificationdata = res.verification_data;
-
-				let chosenWei: bigint | null = null;
-				if (choice === "default") chosenWei = defaultFeeWei;
-				else if (choice === "instant") chosenWei = instantFeeWei;
-				else if (choice === "custom") chosenWei = toWeiFromGwei(customGwei);
-
-				if (!chosenWei || chosenWei <= 0n) {
-					addToast({
-					title: "Invalid fee",
-					desc: "Please enter a value greater than 0 Gwei.",
-					type: "error",
-					});
-					setSubmitProofMessageLoading(false);
-					return;
-				}
-
-				noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
-
-				const { r, s, v } = await signVerificationData(
-					noncedVerificationData,
-					payment_service_address
-				);
-
-				const submitProofMessage: SubmitProof = {
-					verificationData: noncedVerificationData,
-					signature: {
-						r,
-						s,
-						v: Number(v),
-					},
-				};
-
-				setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
+			const res = await fetchProofVerificationData(proof.id);
+			if (!res) {
 				addToast({
-					title: "Retrying submission",
-					desc: "Using the newly selected fee...",
-					type: "success",
-				});
-
-				setBumpOpen(false);
-				window.setTimeout(() => {
-					formRetryRef.current?.submit();
-				}, 1000);
-			} catch {
-				addToast({
-					title: "Could not apply the bump",
-					desc: "Please try again in a few seconds.",
+					title: "There was a problem while sending the proof",
+					desc: "Please try again.",
 					type: "error",
 				});
 				setSubmitProofMessageLoading(false);
+				return;
+			}
+			const noncedVerificationData: NoncedVerificationdata = res.verification_data;
+
+			let chosenWei: bigint | null = null;
+			if (choice === "default") chosenWei = defaultFeeWei;
+			else if (choice === "instant") chosenWei = instantFeeWei;
+			else if (choice === "custom") chosenWei = toWeiFromGwei(customGwei);
+
+			if (!chosenWei || chosenWei <= 0n) {
+				addToast({
+				title: "Invalid fee",
+				desc: "Please enter a value greater than 0 Gwei.",
+				type: "error",
+				});
+				setSubmitProofMessageLoading(false);
+				return;
+			}
+
+			noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
+
+			const { r, s, v } = await signVerificationData(
+				noncedVerificationData,
+				payment_service_address
+			);
+
+			const submitProofMessage: SubmitProof = {
+				verificationData: noncedVerificationData,
+				signature: {
+					r,
+					s,
+					v: Number(v),
+				},
+			};
+
+			setSubmitProofMessage(JSON.stringify(submitProofMessage));
+
+			addToast({
+				title: "Retrying submission",
+				desc: "Using the newly selected fee...",
+				type: "success",
+			});
+
+			setBumpOpen(false);
+			window.setTimeout(() => {
+				formRetryRef.current?.submit();
+			}, 1000);
+		} catch {
+			addToast({
+				title: "Could not apply the bump",
+				desc: "Please try again in a few seconds.",
+				type: "error",
+			});
+			setSubmitProofMessageLoading(false);
 		}
 	};
 
@@ -215,7 +214,7 @@ export const ProofEntryActionBtn = ({
 				<Button
 					variant="contrast"
 					className="text-nowrap text-sm w-full"
-					disabled={proof.status === "failed" || proof.status === "pending"}
+					disabled={proof.status === "failed"}
 					style={{ paddingLeft: 0, paddingRight: 0, paddingTop: 8, paddingBottom: 8 }}
 					onClick={handleBtnClick}
 					isLoading={
@@ -229,7 +228,7 @@ export const ProofEntryActionBtn = ({
 				</Button>
 			</div>
 
-			{proof.status === "underpriced" && (
+			{proof.status === "pending" && (
 				<form
 					ref={formRetryRef}
 					action="/proof/status/retry"

@@ -53,6 +53,7 @@ defmodule ZkArcadeWeb.CoreComponents do
               <.link href="/game/beast" class="transition hover:text-accent-100 hover:underline">Games</.link>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
+              <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">How It Works</p>
           </div>
         </div>
 
@@ -87,6 +88,7 @@ defmodule ZkArcadeWeb.CoreComponents do
                 <.link href="/game/beast" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link>
                 <.link href="/leaderboard" class="text-text-100 transition hover:text-accent-100 hover:underline">Leaderboard</.link>
                 <.link href="/history" class="text-text-100 transition hover:text-accent-100 hover:underline">Profile</.link>
+                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">How It Works</p>
             </div>
           </div>
         </div>

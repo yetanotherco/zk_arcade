@@ -6,6 +6,7 @@ import DepositOnAlignedBtn from "./modules/History/DepositOnAlignedBtn";
 import UpdateUsernameBtn from "./modules/History/UpdateUsernameBtn";
 import CurrentBeastGame from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
+import { HowItWorksModal } from "./modules/HowItWorksModal";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -68,3 +69,5 @@ define(
 	{ "x-app-current-game-beast": CurrentBeastGame },
 	{ attributes: ["network", "leaderboard_address", "user_address"] }
 );
+
+define({ "x-app-how-it-works-modal": HowItWorksModal });

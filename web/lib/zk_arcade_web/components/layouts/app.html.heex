@@ -1,5 +1,6 @@
 <main class="min-h-screen flex flex-col">
-  <div class="nav-container fixed pt-10 w-full flex justify-center z-[1000] transition-all duration-300">
+
+  <div class="nav-container fixed pt-10 w-full flex justify-center z-[10] transition-all duration-300">
     <div class="w-full" style="max-width: 1000px">
       <.nav 
         network={Application.get_env(:zk_arcade, :network)}
@@ -13,6 +14,9 @@
       />
     </div>
   </div>
+
+
+  <x-app-how-it-works-modal />
 
   <div class="w-full flex-1 flex flex-col">
     {@inner_content}

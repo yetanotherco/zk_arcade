@@ -109,7 +109,6 @@ export default ({
 	user_position,
 	explorer_url,
 }: Omit<Props, "needs_agreement">) => {
-	console.log(proofs);
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>

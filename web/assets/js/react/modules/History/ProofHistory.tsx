@@ -70,8 +70,8 @@ export const ProofHistory = ({
 
 			return {
 				rows: [
-					<div>
-						<TableBodyItem text={proof.game} />
+					<td>
+						<p>{proof.game} </p>
 						<div className="group/tooltip flex flex-row gap-0.5 items-center" style={{ maxWidth: 50 }}>
 							{[...Array(8)].map((_, index) => {
 								return (
@@ -94,7 +94,7 @@ export const ProofHistory = ({
 								<p className="text-center">Reached level {proof.level_reached} in your last run</p>
 							</div>
 						</div>
-					</div>,
+					</td>,
 					<ProofStatusWithTooltipDesc proof={proof} explorer_url={explorer_url} />,
 					<TableBodyItem text={timeAgo(proof.inserted_at)} />,
 					<ProofBatchMerkleRoot proof={proof} explorer_url={explorer_url} />,

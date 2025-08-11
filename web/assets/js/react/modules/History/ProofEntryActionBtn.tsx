@@ -10,7 +10,7 @@ import { Address } from "../../types/blockchain";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { toHex } from "viem";
 import { fetchProofVerificationData } from "../../utils/aligned";
-import { BumpFeeModal } from "../../components/Modal/BumpFeeModal";
+import { BumpFeeModal } from "../../components/Modal/BumpFee";
 import { useToast } from "../../state/toast";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {

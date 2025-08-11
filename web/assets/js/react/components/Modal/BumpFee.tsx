@@ -1,6 +1,6 @@
 import React from "react";
-import { Modal } from "../../components/Modal";
-import { Button } from "../../components";
+import { Modal } from ".";
+import { Button } from "..";
 
 type BumpChoice = "instant" | "default" | "custom";
 

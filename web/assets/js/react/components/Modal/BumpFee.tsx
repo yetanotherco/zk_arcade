@@ -12,6 +12,7 @@ type Props = {
     onError: (message: string) => void;
     isConfirmLoading?: boolean;
     maxWidth?: number;
+    previousMaxFee: string;
 };
 
 export const BumpFeeModal = ({
@@ -21,6 +22,7 @@ export const BumpFeeModal = ({
     onError,
     isConfirmLoading = false,
     maxWidth = 520,
+    previousMaxFee,
 }: Props) => {
     const [choice, setChoice] = useState<BumpChoice>("default");
     const [customGwei, setCustomGwei] = useState<string>("");
@@ -31,6 +33,8 @@ export const BumpFeeModal = ({
 
     const { estimateMaxFeeForBatchOfProofs } = useAligned();
 
+    const previousMaxFeeWei = BigInt(previousMaxFee);
+
     const toWeiFromGwei = (gweiStr: string): bigint | null => {
         if (!gweiStr.trim()) return null;
         const n = Number(gweiStr);
@@ -39,6 +43,12 @@ export const BumpFeeModal = ({
     };
 
     const toGwei = (wei: bigint) => Number(wei) / 1e9;
+
+    const isCustomFeeValid = (customGweiValue: string): boolean => {
+        const customWei = toWeiFromGwei(customGweiValue);
+        if (!customWei) return false;
+        return customWei > previousMaxFeeWei;
+    };
 
     useEffect(() => {
         if (!open) return;
@@ -83,6 +93,11 @@ export const BumpFeeModal = ({
             chosenWei = instantFeeWei;
         } else if (choice === "custom") {
             chosenWei = toWeiFromGwei(customGwei);
+            
+            if (!chosenWei || chosenWei <= previousMaxFeeWei) {
+                onError(`The fee must be greater than the current fee of ${toGwei(previousMaxFeeWei).toFixed(2)} Gwei.`);
+                return;
+            }
         }
 
         if (!chosenWei || chosenWei <= 0n) {
@@ -96,14 +111,22 @@ export const BumpFeeModal = ({
     const renderContent = () => {
         if (estimating) {
             return (
-                <div className="flex items-center justify-center py-8">
-                    <div className="text-sm opacity-80">Estimating fees...</div>
+                <div className="flex items-center justify-center">
+                    <div className="text-sm">Estimating fees...</div>
                 </div>
             );
         }
 
+        const currentFeeGwei = toGwei(previousMaxFeeWei);
+        const isCustomFeeInputValid = choice === "custom" ? isCustomFeeValid(customGwei) : true;
+
         return (
             <div className="flex flex-col gap-3">
+                <div className="mb-3 p-3 bg-contrast-100/10 rounded-lg">
+                    <div className="text-sm opacity-80">Previous submitted max fee:</div>
+                    <div className="font-medium">{currentFeeGwei} Gwei</div>
+                </div>
+
                 <label
                     className={`cursor-pointer rounded-xl border p-3 transition-colors ${
                         choice === "instant" ? "border-accent-100" : "border-contrast-100/40"
@@ -157,7 +180,8 @@ export const BumpFeeModal = ({
                 <div
                     className={`rounded-xl border p-3 transition-colors ${
                         choice === "custom" ? "border-accent-100" : "border-contrast-100/40"
-                    } ${isConfirmLoading ? "opacity-50 pointer-events-none" : ""}`}
+                    } ${isConfirmLoading ? "opacity-50 pointer-events-none" : ""}
+                    ${choice === "custom" && customGwei && !isCustomFeeInputValid ? "border-red-400" : ""}`}
                 >
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -173,10 +197,11 @@ export const BumpFeeModal = ({
                     <div className="mt-2 flex items-center gap-2">
                         <input
                             type="number"
-                            min={0}
-                            step="0.01"
-                            placeholder="Enter the fee in Gwei"
-                            className="w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none disabled:opacity-50"
+                            min={currentFeeGwei}
+                            step="0.000000001"
+                            placeholder={`Enter fee > ${currentFeeGwei.toFixed(2)} Gwei`}
+                            className={`w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none disabled:opacity-50
+                                ${choice === "custom" && customGwei && !isCustomFeeInputValid ? "border border-red-400" : ""}`}
                             value={customGwei}
                             onChange={(e) => {
                                 if (!isConfirmLoading) {
@@ -188,7 +213,14 @@ export const BumpFeeModal = ({
                         />
                         <span className="text-sm opacity-80">Gwei</span>
                     </div>
-                    <p className="mt-1 text-xs opacity-70">Define your own max fee.</p>
+                    <p className="mt-1 text-xs opacity-70">
+                        Define your own max fee (must be greater than the one submitted before).
+                    </p>
+                    {choice === "custom" && customGwei && !isCustomFeeInputValid && (
+                        <p className="mt-1 text-xs text-red-400">
+                            Fee must be greater than {currentFeeGwei.toFixed(2)} Gwei
+                        </p>
+                    )}
                 </div>
             </div>
         );
@@ -227,7 +259,7 @@ export const BumpFeeModal = ({
                         disabled={
                             isConfirmLoading || 
                             estimating || 
-                            (choice === "custom" && !toWeiFromGwei(customGwei))
+                            (choice === "custom" && (!toWeiFromGwei(customGwei) || !isCustomFeeValid(customGwei)))
                         }
                     >
                         Confirm

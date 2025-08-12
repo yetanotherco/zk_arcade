@@ -122,6 +122,11 @@ export const DepositOnAlignedModal = ({
 						USD
 					</p>
 				</div>
+				{Number(balanceValue) >= ALIGNED_DEPOSIT_LIMIT && (
+					<p className="text-sm -mt-2 opacity-70">
+						Note: the maximum deposit value is {ALIGNED_DEPOSIT_LIMIT} ETH
+					</p>
+				)}
 				<div>
 					<Button
 						variant="text"

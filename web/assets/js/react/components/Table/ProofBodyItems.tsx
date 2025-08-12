@@ -47,7 +47,7 @@ type Props = {
 };
 
 export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
-	const isUnderpriced = proof.status === "pending" && timeAgoInHs(proof.inserted_at) < 6;
+	const isUnderpriced = proof.status === "pending" && timeAgoInHs(proof.inserted_at) > 6;
 	if (isUnderpriced) proof.status = "underpriced";
 	return (
 		<td>

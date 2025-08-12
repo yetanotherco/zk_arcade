@@ -234,7 +234,7 @@ export const BumpFeeModal = ({
             shouldCloseOnEsc={!isConfirmLoading}
             shouldCloseOnOutsideClick={!isConfirmLoading}
         >
-            <div className="rounded-2xl bg-background p-6 text-white">
+             <div className="bg-contrast-100 rounded-2xl p-6 text-white">
                 <h3 className="text-xl font-semibold mb-4">Bump Fee</h3>
                 <p className="text-sm opacity-80 mb-4">
                     Choose how much you want to increase the fee to retry your proof.

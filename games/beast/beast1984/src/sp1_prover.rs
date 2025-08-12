@@ -64,7 +64,7 @@ fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
     buf.extend_from_slice(chunk);
 }
 
-pub fn save_proof(proof: SP1ProofWithPublicValues) -> Result<(), ProvingError> {
+pub fn save_proof(proof: SP1ProofWithPublicValues) -> Result<String, ProvingError> {
     let proving_system_id = SP1_PROVING_SYSTEM;
     let proof_data = bincode::serialize(&proof).expect("Failed to serialize the proof");
     let proof_id = BEAST_1984_PROGRAM_ELF.to_vec();
@@ -83,5 +83,5 @@ pub fn save_proof(proof: SP1ProofWithPublicValues) -> Result<(), ProvingError> {
 
     std::fs::write(&filename, buffer).map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
-    Ok(())
+    Ok(filename)
 }

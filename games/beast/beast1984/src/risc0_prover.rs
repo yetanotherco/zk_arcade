@@ -67,7 +67,7 @@ fn write_chunk(buf: &mut Vec<u8>, chunk: &[u8]) {
     buf.extend_from_slice(chunk);
 }
 
-pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
+pub fn save_proof(receipt: Receipt) -> Result<String, ProvingError> {
     let proving_system_id = RISC0_PROVING_SYSTEM;
     let proof = bincode::serialize(&receipt.inner).expect("Failed to serialize receipt");
     let proof_id = image_id_words_to_bytes(BEAST_1984_PROGRAM_ID);
@@ -83,11 +83,11 @@ pub fn save_proof(receipt: Receipt) -> Result<(), ProvingError> {
     write_chunk(&mut buffer, &public_inputs);
 
     let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
-    let filename = format!("sp1_solution_{}.bin", timestamp);
+    let filename = format!("risc0_solution_{}.bin", timestamp);
 
-    std::fs::write(filename, &buffer).map_err(|e| ProvingError::SavingProof(e.to_string()))?;
+    std::fs::write(&filename, &buffer).map_err(|e| ProvingError::SavingProof(e.to_string()))?;
 
-    Ok(())
+    Ok(filename)
 }
 
 fn image_id_words_to_bytes(image_id: [u32; 8]) -> [u8; 32] {

@@ -87,7 +87,8 @@ defmodule ZkArcade.Proofs do
         updated_at: p.updated_at,
         wallet_address: p.wallet_address,
         level_reached: p.level_reached,
-        game_config: p.game_config
+        game_config: p.game_config,
+        submitted_max_fee: p.submitted_max_fee,
       })
       |> Repo.all()
       |> Enum.map(fn proof ->

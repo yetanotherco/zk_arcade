@@ -19,6 +19,7 @@ define(
 			"username",
 			"user_position",
 			"explorer_url",
+			"batcher_url",
 		],
 	}
 );
@@ -31,7 +32,6 @@ define(
 			"payment_service_address",
 			"user_address",
 			"batcher_url",
-			"user_proofs_json",
 			"leaderboard_address",
 		],
 	}

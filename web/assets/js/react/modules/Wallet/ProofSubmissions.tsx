@@ -7,33 +7,52 @@ import {
 	ProofBatchMerkleRoot,
 	ProofStatusWithTooltipDesc,
 } from "../../components/Table/ProofBodyItems";
-import { fetchProofVerificationData } from "../../utils/aligned";
+import { useModal } from "../../hooks/useModal";
+import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 
 type ProofProps = {
 	proof: ProofSubmission;
+	batcher_url: string;
+	leaderboard_address: Address;
+	payment_service_address: Address;
+	user_address: Address;
 	explorer_url: string;
 };
 
-const Proof = ({ proof, explorer_url }: ProofProps) => {
+const Proof = ({
+	proof,
+	explorer_url,
+	batcher_url,
+	leaderboard_address,
+	payment_service_address,
+	user_address,
+}: ProofProps) => {
+	const { open, setOpen, toggleOpen } = useModal();
 	const proofHashShorten = `${proof.verification_data_commitment.slice(
 		0,
 		2
 	)}...${proof.verification_data_commitment.slice(-4)}`;
 
-	useEffect(() => {
-		const fetching = async () => {
-			const res = await fetchProofVerificationData(proof.id);
-			console.log(res);
-		};
-		fetching();
-	}, [proof]);
-
 	return (
-		<tr>
+		<tr
+			className="cursor-pointer hover:bg-contrast-200 transition-colors"
+			onClick={toggleOpen}
+		>
 			<TableBodyItem text={proof.game} />
-			<ProofStatusWithTooltipDesc proof={proof} explorer_url={explorer_url} />
+			<ProofStatusWithTooltipDesc
+				proof={proof}
+				explorer_url={explorer_url}
+			/>
 			<ProofBatchMerkleRoot proof={proof} explorer_url={explorer_url} />
 			<TableBodyItem text={proofHashShorten} />
+			<SubmitProofModal
+				modal={{ open, setOpen }}
+				proof={proof}
+				batcher_url={batcher_url}
+				leaderboard_address={leaderboard_address}
+				payment_service_address={payment_service_address}
+				user_address={user_address}
+			/>
 		</tr>
 	);
 };
@@ -41,11 +60,20 @@ const Proof = ({ proof, explorer_url }: ProofProps) => {
 type Props = {
 	proofs: ProofSubmission[];
 	leaderboard_address: Address;
+	user_address: Address;
 	payment_service_address: Address;
 	explorer_url: string;
+	batcher_url: string;
 };
 
-export const ProofSubmissions = ({ proofs = [], explorer_url }: Props) => {
+export const ProofSubmissions = ({
+	proofs = [],
+	batcher_url,
+	explorer_url,
+	leaderboard_address,
+	user_address,
+	payment_service_address,
+}: Props) => {
 	return (
 		<div>
 			<div className="flex justify-between mb-6">
@@ -81,14 +109,26 @@ export const ProofSubmissions = ({ proofs = [], explorer_url }: Props) => {
 
 									if (proof.status === "pending") {
 										if (
-											timeAgoInHs(proof.inserted_At) > 6
+											timeAgoInHs(proof.inserted_at) > 6
 										) {
 											proof.status = "underpriced";
 										}
 									}
 
 									return (
-										<Proof key={proof.id} proof={proof} explorer_url={explorer_url} />
+										<Proof
+											key={proof.id}
+											proof={proof}
+											explorer_url={explorer_url}
+											batcher_url={batcher_url}
+											leaderboard_address={
+												leaderboard_address
+											}
+											payment_service_address={
+												payment_service_address
+											}
+											user_address={user_address}
+										/>
 									);
 								})}
 							</tbody>

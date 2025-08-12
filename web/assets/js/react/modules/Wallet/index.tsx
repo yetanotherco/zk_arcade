@@ -20,6 +20,7 @@ type Props = {
 	username: string;
 	user_position: number;
 	explorer_url: string;
+	batcher_url: string;
 };
 
 const WalletContent = ({
@@ -31,6 +32,7 @@ const WalletContent = ({
 	username,
 	user_position,
 	explorer_url,
+	batcher_url,
 }: Omit<Props, "needs_agreement">) => {
 	const { address, isConnected } = useAccount();
 	const [needsAgreement, setNeedsAgreement] = useState(false);
@@ -83,6 +85,7 @@ const WalletContent = ({
 					username={username}
 					user_position={user_position}
 					explorer_url={explorer_url}
+					batcher_url={batcher_url}
 				/>
 			</div>
 		);
@@ -106,6 +109,7 @@ export default ({
 	username,
 	user_position,
 	explorer_url,
+	batcher_url,
 }: Omit<Props, "needs_agreement">) => {
 	console.log(proofs);
 	return (
@@ -121,6 +125,7 @@ export default ({
 					username={username}
 					user_position={user_position}
 					explorer_url={explorer_url}
+					batcher_url={batcher_url}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

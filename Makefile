@@ -55,6 +55,12 @@ beast_gen_levels:
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
 
+gen_and_deploy_devnet: beast_gen_levels
+	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
+		contracts/script/deploy/config/devnet/leaderboard.json \
+		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
+	@$(MAKE) deploy_contract NETWORK=devnet
+
 __CONTRACTS__:
 deploy_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh

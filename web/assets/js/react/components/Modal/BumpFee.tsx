@@ -164,7 +164,7 @@ export const BumpFeeModal = ({
                         </span>
                     </div>
                     <p className="mt-1 text-xs opacity-70">
-                        Highest fee (fastest confirmation).
+                        Guarantee inclusion by paying the full price of submitting the batch
                     </p>
                 </label>
 
@@ -189,7 +189,7 @@ export const BumpFeeModal = ({
                             {defaultFeeWei ? `${weiToEthNumber(defaultFeeWei)} ETH` : "…"}
                         </span>
                     </div>
-                    <p className="mt-1 text-xs opacity-70">Recommended fee.</p>
+                    <p className="mt-1 text-xs opacity-70">Recommended fee, estimated for a batch of 16 proofs.</p>
                 </label>
 
                 <div

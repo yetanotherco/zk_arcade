@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from ".";
 import { Button } from "..";
-import { useAligned } from "../../hooks";
+import { useAligned, useEthPrice } from "../../hooks";
 import { useToast } from "../../state/toast";
 
 type BumpChoice = "instant" | "default" | "custom";
@@ -23,6 +23,7 @@ export const BumpFeeModal = ({
     maxWidth = 520,
     previousMaxFee,
 }: Props) => {
+    const { price } = useEthPrice();
     const [choice, setChoice] = useState<BumpChoice>("default");
     const [customEth, setCustomEth] = useState<string>("");
     const [defaultFeeWei, setDefaultFeeWei] = useState<bigint | null>(null);
@@ -164,6 +165,15 @@ export const BumpFeeModal = ({
                         </span>
                     </div>
                     <p className="mt-1 text-xs opacity-70">
+						~{((price || 0) * Number(instantFeeWei) / 1e18).toLocaleString(
+							undefined,
+							{
+								maximumFractionDigits: 3,
+							}
+                        )}{" "}
+                        USD
+                    </p>
+                    <p className="mt-1 text-xs opacity-70">
                         Guarantee inclusion by paying the full price of submitting the batch
                     </p>
                 </label>
@@ -189,6 +199,15 @@ export const BumpFeeModal = ({
                             {defaultFeeWei ? `${weiToEthNumber(defaultFeeWei)} ETH` : "…"}
                         </span>
                     </div>
+                    <p className="mt-1 text-xs opacity-70">
+						~{((price || 0) * Number(defaultFeeWei) / 1e18).toLocaleString(
+						    undefined,
+						    {
+						    	maximumFractionDigits: 3,
+						    }
+                        )}{" "}
+                        USD
+                    </p>
                     <p className="mt-1 text-xs opacity-70">Recommended fee, estimated for a batch of 16 proofs.</p>
                 </label>
 
@@ -230,6 +249,15 @@ export const BumpFeeModal = ({
                         />
                         <span className="text-sm opacity-80">ETH</span>
                     </div>
+                    <p className="mt-1 text-xs opacity-70">
+						~{((price || 0) * Number(customEth)).toLocaleString(
+							undefined,
+							{
+								maximumFractionDigits: 3,
+							}
+                        )}{" "}
+                        USD
+                    </p>
                     <p className="mt-1 text-xs opacity-70">
                         Define your own max fee (must be greater than the one submitted before).
                     </p>

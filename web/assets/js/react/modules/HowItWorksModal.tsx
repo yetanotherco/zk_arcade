@@ -32,7 +32,7 @@ export const HowItWorksModal = () => {
 		{
 			title: "Deposit money on Aligned",
 			description:
-				"Add funds to the Aligned so you can submit and verify your proofs.",
+				"Add funds to Aligned so you can submit and verify your proofs.",
 		},
 		{
 			title: "Play a game & generate zk proof",

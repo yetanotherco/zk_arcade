@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from ".";
 import { Button } from "..";
+import { useAligned } from "../../hooks";
 
 type BumpChoice = "instant" | "default" | "custom";
 
 type Props = {
     open: boolean;
     setOpen: (open: boolean) => void;
-    estimateMaxFeeForBatchOfProofs: (blocks: number) => Promise<bigint | null>;
     onConfirm: (chosenWei: bigint) => Promise<void> | void;
     onError: (message: string) => void;
     isConfirmLoading?: boolean;
@@ -17,7 +17,6 @@ type Props = {
 export const BumpFeeModal: React.FC<Props> = ({
     open,
     setOpen,
-    estimateMaxFeeForBatchOfProofs,
     onConfirm,
     onError,
     isConfirmLoading = false,
@@ -30,6 +29,8 @@ export const BumpFeeModal: React.FC<Props> = ({
     const [estimating, setEstimating] = useState(false);
     const [hasEstimatedOnce, setHasEstimatedOnce] = useState(false);
 
+    const { estimateMaxFeeForBatchOfProofs } = useAligned();
+
     const toWeiFromGwei = (gweiStr: string): bigint | null => {
         if (!gweiStr.trim()) return null;
         const n = Number(gweiStr);
@@ -39,7 +40,6 @@ export const BumpFeeModal: React.FC<Props> = ({
 
     const toGwei = (wei: bigint) => Number(wei) / 1e9;
 
-    // Estimate fees when modal opens
     useEffect(() => {
         if (!open) return;
         
@@ -58,7 +58,6 @@ export const BumpFeeModal: React.FC<Props> = ({
                 setDefaultFeeWei(estimatedDefault);
                 setInstantFeeWei(estimatedInstant);
                 
-                // Solo resetear a default la primera vez que se estiman las fees
                 if (!hasEstimatedOnce) {
                     setChoice("default");
                     setCustomGwei("");

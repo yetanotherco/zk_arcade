@@ -51,8 +51,7 @@ export const ProofEntryActionBtn = ({
 		userAddress: user_address,
 	});
 
-	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
-		useAligned();
+	const { signVerificationData } = useAligned();
 
 	const [bumpOpen, setBumpOpen] = useState(false);
 	const [bumpLoading, setBumpLoading] = useState(false);
@@ -240,7 +239,6 @@ export const ProofEntryActionBtn = ({
 			<BumpFeeModal
 				open={bumpOpen}
 				setOpen={setBumpOpen}
-				estimateMaxFeeForBatchOfProofs={estimateMaxFeeForBatchOfProofs}
 				onConfirm={handleConfirmBump}
 				onError={handleBumpError}
 				isConfirmLoading={submitProofMessageLoading}

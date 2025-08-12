@@ -276,7 +276,7 @@ defmodule ZkArcadeWeb.CoreComponents do
           <p class="text-md">
             Powered By
             <span class="text-accent-100 block mt-1">
-              Aligned Layer
+              Aligned
             </span>
           </p>
         </div>

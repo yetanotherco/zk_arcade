@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal } from ".";
 import { Button } from "..";
 import { useAligned } from "../../hooks";
+import { useToast } from "../../state/toast";
 
 type BumpChoice = "instant" | "default" | "custom";
 
@@ -9,7 +10,6 @@ type Props = {
     open: boolean;
     setOpen: (open: boolean) => void;
     onConfirm: (chosenWei: bigint) => Promise<void> | void;
-    onError: (message: string) => void;
     isConfirmLoading?: boolean;
     maxWidth?: number;
     previousMaxFee: string;
@@ -19,7 +19,6 @@ export const BumpFeeModal = ({
     open,
     setOpen,
     onConfirm,
-    onError,
     isConfirmLoading = false,
     maxWidth = 520,
     previousMaxFee,
@@ -30,6 +29,8 @@ export const BumpFeeModal = ({
     const [instantFeeWei, setInstantFeeWei] = useState<bigint | null>(null);
     const [estimating, setEstimating] = useState(false);
     const [hasEstimatedOnce, setHasEstimatedOnce] = useState(false);
+
+    const { addToast } = useToast();
 
     const { estimateMaxFeeForBatchOfProofs } = useAligned();
 
@@ -50,9 +51,14 @@ export const BumpFeeModal = ({
         return customWei > previousMaxFeeWei;
     };
 
-    useEffect(() => {
-        if (!open) return;
-        
+    const handleBumpError = (message: string) => {
+        addToast({
+            title: "Error",
+            desc: message,
+            type: "error",
+        });
+    };
+
         const estimateFees = async () => {
             try {
                 setEstimating(true);
@@ -60,7 +66,7 @@ export const BumpFeeModal = ({
                 const estimatedInstant = await estimateMaxFeeForBatchOfProofs(1);
                 
                 if (!estimatedDefault) {
-                    onError("Could not estimate the fee. Please try again in a few seconds.");
+                    handleBumpError("Could not estimate the fee. Please try again in a few seconds.");
                     setOpen(false);
                     return;
                 }
@@ -74,15 +80,21 @@ export const BumpFeeModal = ({
                     setHasEstimatedOnce(true);
                 }
             } catch {
-                onError("Could not estimate the fee. Please try again in a few seconds.");
+                handleBumpError("Could not estimate the fee. Please try again in a few seconds.");
                 setOpen(false);
             } finally {
                 setEstimating(false);
-            }
+            } 
         };
 
+    useEffect(() => {
+        if (!open) return;
+        if (hasEstimatedOnce) {
+            setChoice("default");
+            setCustomGwei("");
+        }        
         estimateFees();
-    }, [open, estimateMaxFeeForBatchOfProofs, onError, setOpen, hasEstimatedOnce]);
+    }, [open, estimateMaxFeeForBatchOfProofs, hasEstimatedOnce]);
 
     const handleConfirm = async () => {
         let chosenWei: bigint | null = null;
@@ -95,13 +107,13 @@ export const BumpFeeModal = ({
             chosenWei = toWeiFromGwei(customGwei);
             
             if (!chosenWei || chosenWei <= previousMaxFeeWei) {
-                onError(`The fee must be greater than the current fee of ${toGwei(previousMaxFeeWei).toFixed(2)} Gwei.`);
+                handleBumpError(`The fee must be greater than the current fee of ${toGwei(previousMaxFeeWei).toFixed(2)} Gwei.`);
                 return;
             }
         }
 
         if (!chosenWei || chosenWei <= 0n) {
-            onError("Please enter a value greater than 0 Gwei.");
+            handleBumpError("Please enter a value greater than 0 Gwei.");
             return;
         }
 

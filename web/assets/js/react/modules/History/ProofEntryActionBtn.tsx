@@ -180,14 +180,6 @@ export const ProofEntryActionBtn = ({
 		}
 	};
 
-	const handleBumpError = (message: string) => {
-		addToast({
-			title: "Error",
-			desc: message,
-			type: "error",
-		});
-	};
-
 	return (
 		<td>
 			<div className="relative group/proof-history-item w-full">
@@ -240,7 +232,6 @@ export const ProofEntryActionBtn = ({
 				open={bumpOpen}
 				setOpen={setBumpOpen}
 				onConfirm={handleConfirmBump}
-				onError={handleBumpError}
 				isConfirmLoading={submitProofMessageLoading}
 				previousMaxFee={proof.submitted_max_fee}
 			/>

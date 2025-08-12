@@ -261,6 +261,10 @@ export const BumpFeeModal = ({
                     {renderContent()}
                 </div>
 
+                <p className="text-xs opacity-70">
+                    Note: Bumping the fee is not recommended if the proof was submitted within the last 6 hours.
+                </p>
+
                 <div className="mt-6 flex justify-end gap-3">
                     <Button 
                         variant="contrast" 

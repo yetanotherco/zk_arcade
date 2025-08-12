@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ProofSubmission, SubmitProof } from "../../types/aligned";
+import { NoncedVerificationdata, ProofSubmission, SubmitProof } from "../../types/aligned";
 import { timeAgoInHs } from "../../utils/date";
 import { Button } from "../../components";
 import { toHex } from "viem";
@@ -8,6 +8,7 @@ import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { Address } from "../../types/blockchain";
 import { useToast } from "../../state/toast";
+import { BumpFeeModal } from "../../components/Modal/BumpFee";
 
 type Props = {
 	proofs: ProofSubmission[];
@@ -48,12 +49,14 @@ const NotificationEntry = ({
 		useState(false);
 	const { addToast } = useToast();
 
+	const [bumpOpen, setBumpOpen] = useState(false);
+
 	const { submitSolution, currentGame } = useLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});
 
-	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
+	const { signVerificationData } =
 		useAligned();
 
 	useEffect(() => {
@@ -63,6 +66,61 @@ const NotificationEntry = ({
 			}, 1000);
 		}
 	}, [submitSolution.receipt]);
+
+	const handleConfirmBump = async (chosenWei: bigint) => {
+		try {
+			setSubmitProofMessageLoading(true);
+
+			const res = await fetchProofVerificationData(proof.id);
+			if (!res) {
+				addToast({
+					title: "There was a problem while sending the proof",
+					desc: "Please try again.",
+					type: "error",
+				});
+				setSubmitProofMessageLoading(false);
+				return;
+			}
+			const noncedVerificationData: NoncedVerificationdata = res.verification_data;
+
+			noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
+
+			const { r, s, v } = await signVerificationData(
+				noncedVerificationData,
+				payment_service_address
+			);
+
+			const submitProofMessage: SubmitProof = {
+				verificationData: noncedVerificationData,
+				signature: {
+					r,
+					s,
+					v: Number(v),
+				},
+			};
+
+			setSubmitProofMessage(JSON.stringify(submitProofMessage));
+
+			addToast({
+				title: "Retrying submission",
+				desc: "Retrying proof submission using the newly selected fee.",
+				type: "success",
+			});
+
+			setBumpOpen(false);
+			window.setTimeout(() => {
+				formRetryRef.current?.submit();
+			}, 1000);
+		} catch (error) {
+			addToast({
+				title: "Could not apply the bump",
+				desc: "Please try again in a few seconds.",
+				type: "error",
+			});
+		} finally {
+			setSubmitProofMessageLoading(false);
+		}
+	};
 
 	const handleClick = async () => {
 		if (proof.status === "submitted") {
@@ -88,46 +146,14 @@ const NotificationEntry = ({
 		}
 
 		if (proof.status === "pending") {
-			const res = await fetchProofVerificationData(proof.id);
-			if (!res) {
-				alert(
-					"There was a problem while sending the proof, please try again"
-				);
-				return;
-			}
-
-			const noncedVerificationData = res.verification_data;
-			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-			if (!maxFee) {
-				alert("Could not estimate max fee");
-				return;
-			}
-
-			noncedVerificationData.maxFee = toHex(maxFee, { size: 32 });
-
-			setSubmitProofMessageLoading(true);
 			try {
-				const { r, s, v } = await signVerificationData(
-					noncedVerificationData,
-					payment_service_address
-				);
-
-				const submitProofMessage: SubmitProof = {
-					verificationData: noncedVerificationData,
-					signature: {
-						r,
-						s,
-						v: Number(v),
-					},
-				};
-
-				setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
-				window.setTimeout(() => {
-					formRetryRef.current?.submit();
-				}, 1000);
+				setBumpOpen(true);
 			} catch {
-				setSubmitProofMessageLoading(false);
+				addToast({
+					title: "Could not estimate the fee",
+					desc: "Please try again in a few seconds.",
+					type: "error",
+				});
 			}
 		}
 	};
@@ -186,6 +212,13 @@ const NotificationEntry = ({
 					<input type="hidden" name="proof_id" value={proof.id} />
 				</form>
 			)}
+			<BumpFeeModal
+				open={bumpOpen}
+				setOpen={setBumpOpen}
+				onConfirm={handleConfirmBump}
+				isConfirmLoading={submitProofMessageLoading}
+				previousMaxFee={proof.submitted_max_fee}
+			/>
 		</div>
 	);
 };
@@ -205,7 +238,10 @@ export const NotificationBell = ({
 		);
 
 		const allProofs = proofs.filter(
-			proof => proof.status === "submitted" || proof.status === "pending"
+			proof =>
+				proof.status === "submitted" ||
+				(proof.status === "pending" &&
+					timeAgoInHs(proof.inserted_at) > 6)
 		);
 
 		setProofsReady(proofsReady);

@@ -14,14 +14,14 @@ type Props = {
     maxWidth?: number;
 };
 
-export const BumpFeeModal: React.FC<Props> = ({
+export const BumpFeeModal = ({
     open,
     setOpen,
     onConfirm,
     onError,
     isConfirmLoading = false,
     maxWidth = 520,
-}) => {
+}: Props) => {
     const [choice, setChoice] = useState<BumpChoice>("default");
     const [customGwei, setCustomGwei] = useState<string>("");
     const [defaultFeeWei, setDefaultFeeWei] = useState<bigint | null>(null);
@@ -93,13 +93,114 @@ export const BumpFeeModal: React.FC<Props> = ({
         await onConfirm(chosenWei);
     };
 
+    const renderContent = () => {
+        if (estimating) {
+            return (
+                <div className="flex items-center justify-center py-8">
+                    <div className="text-sm opacity-80">Estimating fees...</div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="flex flex-col gap-3">
+                <label
+                    className={`cursor-pointer rounded-xl border p-3 transition-colors ${
+                        choice === "instant" ? "border-accent-100" : "border-contrast-100/40"
+                    } ${isConfirmLoading ? "opacity-50 pointer-events-none" : ""}`}
+                >
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                name="bump"
+                                className="cursor-pointer"
+                                checked={choice === "instant"}
+                                onChange={() => !isConfirmLoading && setChoice("instant")}
+                                disabled={isConfirmLoading}
+                            />
+                            <span className="font-medium">Instant</span>
+                        </div>
+                        <span className="text-sm opacity-80">
+                            {instantFeeWei ? `${toGwei(instantFeeWei).toFixed(2)} Gwei` : "…"}
+                        </span>
+                    </div>
+                    <p className="mt-1 text-xs opacity-70">
+                        Highest fee (fastest confirmation).
+                    </p>
+                </label>
+
+                <label
+                    className={`cursor-pointer rounded-xl border p-3 transition-colors ${
+                        choice === "default" ? "border-accent-100" : "border-contrast-100/40"
+                    } ${isConfirmLoading ? "opacity-50 pointer-events-none" : ""}`}
+                >
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                name="bump"
+                                className="cursor-pointer"
+                                checked={choice === "default"}
+                                onChange={() => !isConfirmLoading && setChoice("default")}
+                                disabled={isConfirmLoading}
+                            />
+                            <span className="font-medium">Default</span>
+                        </div>
+                        <span className="text-sm opacity-80">
+                            {defaultFeeWei ? `${toGwei(defaultFeeWei).toFixed(2)} Gwei` : "…"}
+                        </span>
+                    </div>
+                    <p className="mt-1 text-xs opacity-70">Recommended fee.</p>
+                </label>
+
+                <div
+                    className={`rounded-xl border p-3 transition-colors ${
+                        choice === "custom" ? "border-accent-100" : "border-contrast-100/40"
+                    } ${isConfirmLoading ? "opacity-50 pointer-events-none" : ""}`}
+                >
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="bump"
+                            className="cursor-pointer"
+                            checked={choice === "custom"}
+                            onChange={() => !isConfirmLoading && setChoice("custom")}
+                            disabled={isConfirmLoading}
+                        />
+                        <span className="font-medium">Custom</span>
+                    </label>
+                    <div className="mt-2 flex items-center gap-2">
+                        <input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            placeholder="Enter the fee in Gwei"
+                            className="w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none disabled:opacity-50"
+                            value={customGwei}
+                            onChange={(e) => {
+                                if (!isConfirmLoading) {
+                                    setChoice("custom");
+                                    setCustomGwei(e.target.value);
+                                }
+                            }}
+                            disabled={isConfirmLoading}
+                        />
+                        <span className="text-sm opacity-80">Gwei</span>
+                    </div>
+                    <p className="mt-1 text-xs opacity-70">Define your own max fee.</p>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <Modal
             open={open}
             setOpen={setOpen}
             maxWidth={maxWidth}
-            shouldCloseOnEsc
-            shouldCloseOnOutsideClick
+            shouldCloseOnEsc={!isConfirmLoading}
+            shouldCloseOnOutsideClick={!isConfirmLoading}
         >
             <div className="rounded-2xl bg-background p-6 text-white">
                 <h3 className="text-xl font-semibold mb-4">Bump Fee</h3>
@@ -107,97 +208,16 @@ export const BumpFeeModal: React.FC<Props> = ({
                     Choose how much you want to increase the fee to retry your proof.
                 </p>
 
-                {estimating ? (
-                    <div className="flex items-center justify-center py-8">
-                        <div className="text-sm opacity-80">Estimating fees...</div>
-                    </div>
-                ) : (
-                    <div className="flex flex-col gap-3">
-                        <label
-                            className={`cursor-pointer rounded-xl border p-3 ${
-                                choice === "instant" ? "border-accent-100" : "border-contrast-100/40"
-                            }`}
-                        >
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="radio"
-                                        name="bump"
-                                        className="cursor-pointer"
-                                        checked={choice === "instant"}
-                                        onChange={() => setChoice("instant")}
-                                    />
-                                    <span className="font-medium">Instant</span>
-                                </div>
-                                <span className="text-sm opacity-80">
-                                    {instantFeeWei ? `${toGwei(instantFeeWei).toFixed(2)} Gwei` : "…"}
-                                </span>
-                            </div>
-                            <p className="mt-1 text-xs opacity-70">
-                                Highest fee (fastest confirmation).
-                            </p>
-                        </label>
-
-                        <label
-                            className={`cursor-pointer rounded-xl border p-3 ${
-                                choice === "default" ? "border-accent-100" : "border-contrast-100/40"
-                            }`}
-                        >
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="radio"
-                                        name="bump"
-                                        className="cursor-pointer"
-                                        checked={choice === "default"}
-                                        onChange={() => setChoice("default")}
-                                    />
-                                    <span className="font-medium">Default</span>
-                                </div>
-                                <span className="text-sm opacity-80">
-                                    {defaultFeeWei ? `${toGwei(defaultFeeWei).toFixed(2)} Gwei` : "…"}
-                                </span>
-                            </div>
-                            <p className="mt-1 text-xs opacity-70">Recommended fee.</p>
-                        </label>
-
-                        <div
-                            className={`rounded-xl border p-3 ${
-                                choice === "custom" ? "border-accent-100" : "border-contrast-100/40"
-                            }`}
-                        >
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="bump"
-                                    className="cursor-pointer"
-                                    checked={choice === "custom"}
-                                    onChange={() => setChoice("custom")}
-                                />
-                                <span className="font-medium">Custom</span>
-                            </label>
-                            <div className="mt-2 flex items-center gap-2">
-                                <input
-                                    type="number"
-                                    min={0}
-                                    step="0.01"
-                                    placeholder="Enter the fee in Gwei"
-                                    className="w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none"
-                                    value={customGwei}
-                                    onChange={(e) => {
-                                        setChoice("custom");
-                                        setCustomGwei(e.target.value);
-                                    }}
-                                />
-                                <span className="text-sm opacity-80">Gwei</span>
-                            </div>
-                            <p className="mt-1 text-xs opacity-70">Define your own max fee.</p>
-                        </div>
-                    </div>
-                )}
+                <div className="min-h-[280px]">
+                    {renderContent()}
+                </div>
 
                 <div className="mt-6 flex justify-end gap-3">
-                    <Button variant="contrast" onClick={() => setOpen(false)}>
+                    <Button 
+                        variant="contrast" 
+                        onClick={() => setOpen(false)}
+                        disabled={isConfirmLoading}
+                    >
                         Cancel
                     </Button>
                     <Button

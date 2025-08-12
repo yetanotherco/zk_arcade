@@ -161,7 +161,7 @@ export const ProofEntryActionBtn = ({
 
 			addToast({
 				title: "Retrying submission",
-				desc: "Using the newly selected fee...",
+				desc: "Retrying proof submission using the newly selected fee.",
 				type: "success",
 			});
 
@@ -169,7 +169,7 @@ export const ProofEntryActionBtn = ({
 			window.setTimeout(() => {
 				formRetryRef.current?.submit();
 			}, 1000);
-		} catch {
+		} catch (error) {
 			addToast({
 				title: "Could not apply the bump",
 				desc: "Please try again in a few seconds.",

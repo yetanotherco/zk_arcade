@@ -69,7 +69,10 @@ export default ({
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
 
-	const userProofs = JSON.parse(user_proofs_json) as { level: number; game_config: string }[];
+	const userProofs = JSON.parse(user_proofs_json) as {
+		level: number;
+		game_config: string;
+	}[];
 
 	const chainId = useChainId();
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
@@ -82,7 +85,7 @@ export default ({
 		userAddress: user_address,
 	});
 
-	// Note: This means we are calling the leaderboard contract on each submission try. 
+	// Note: This means we are calling the leaderboard contract on each submission try.
 	// We should consider obtaining it in the backend and passing it as a prop.
 	const { currentGame } = useLeaderboardContract({
 		contractAddress: leaderboard_address,
@@ -128,7 +131,9 @@ export default ({
 		}
 
 		const parsedGameConfigBigInt = BigInt("0x" + parsed.game_config);
-		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
+		const currentGameConfigBigInt = BigInt(
+			currentGame.data?.gameConfig || 0n
+		);
 
 		if (parsedGameConfigBigInt !== currentGameConfigBigInt) {
 			setInvalidGameConfig(true);
@@ -138,10 +143,11 @@ export default ({
 		}
 
 		const alreadySubmitted = userProofs.some(
-			(p) =>
+			p =>
 				typeof p.game_config === "string" &&
 				typeof parsed.game_config === "string" &&
-				p.game_config.toLowerCase() === parsed.game_config.toLowerCase() &&
+				p.game_config.toLowerCase() ===
+					parsed.game_config.toLowerCase() &&
 				p.level >= parsed.level
 		);
 
@@ -386,9 +392,15 @@ export default ({
 								<div className="mt-4">
 									<Button
 										variant="text-accent"
-										onClick={() => setShowDepositSection(!showDepositSection)}
+										onClick={() =>
+											setShowDepositSection(
+												!showDepositSection
+											)
+										}
 									>
-										{showDepositSection ? "Hide deposit" : "Deposit"}
+										{showDepositSection
+											? "Hide deposit"
+											: "Deposit"}
 									</Button>
 								</div>
 							)}
@@ -396,25 +408,29 @@ export default ({
 
 						{showDepositSection && (
 							<div className="w-full border-t pt-6">
-								<h4 className="text-sm font-semibold mb-4">Deposit to Aligned</h4>
+								<h4 className="text-sm font-semibold mb-4">
+									Deposit to Aligned
+								</h4>
 								<div className="mb-4">
 									<FormInput
 										label="Amount to deposit in ETH:"
 										placeholder="0.0001"
 										type="number"
 										value={depositAmount}
-										onChange={e => setDepositAmount(e.target.value)}
+										onChange={e =>
+											setDepositAmount(e.target.value)
+										}
 										min="0"
 										step="0.0001"
 									/>
 									<p className="mt-1 text-sm text-gray-600">
 										~
-										{((price || 0) * Number(depositAmount || "0")).toLocaleString(
-											undefined,
-											{
-												maximumFractionDigits: 3,
-											}
-										)}{" "}
+										{(
+											(price || 0) *
+											Number(depositAmount || "0")
+										).toLocaleString(undefined, {
+											maximumFractionDigits: 3,
+										})}{" "}
 										USD
 									</p>
 								</div>
@@ -423,7 +439,9 @@ export default ({
 										variant="accent-fill"
 										onClick={handleDeposit}
 										isLoading={sendFunds.receipt.isLoading}
-										disabled={Number(depositAmount || "0") <= 0}
+										disabled={
+											Number(depositAmount || "0") <= 0
+										}
 									>
 										Deposit
 									</Button>
@@ -431,21 +449,19 @@ export default ({
 							</div>
 						)}
 
-						{
-							invalidGameConfig && (
-								<p className="text-red text-sm">
-									Current game has changed since the proof was created.
-								</p>
-							)
-						}
+						{invalidGameConfig && (
+							<p className="text-red text-sm">
+								Current game has changed since the proof was
+								created.
+							</p>
+						)}
 
-						{
-							levelAlreadyReached && (
-								<p className="text-red text-sm">
-									You have already submitted a proof with a higher or equal level for this game.
-								</p>
-							)
-						}
+						{levelAlreadyReached && (
+							<p className="text-red text-sm">
+								You have already submitted a proof with a higher
+								or equal level for this game.
+							</p>
+						)}
 
 						<div>
 							<Button

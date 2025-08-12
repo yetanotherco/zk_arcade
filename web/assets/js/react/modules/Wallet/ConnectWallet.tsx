@@ -6,7 +6,7 @@ export const ConnectWallet = () => {
 		<ConnectKitButton.Custom>
 			{({ isConnected, show, truncatedAddress, ensName }) => {
 				return (
-					<div className="cursor-pointer" onClick={show}>
+					<div className="cursor-pointer text-nowrap" onClick={show}>
 						Connect Wallet
 					</div>
 				);

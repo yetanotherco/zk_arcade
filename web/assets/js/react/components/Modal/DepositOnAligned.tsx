@@ -102,7 +102,7 @@ export const DepositOnAlignedModal = ({
 				</h3>
 				<div className="w-full">
 					<FormInput
-						label="Amount to deposit in eth:"
+						label="Amount to deposit in ETH:"
 						placeholder="0.0001"
 						type="number"
 						value={balanceValue}

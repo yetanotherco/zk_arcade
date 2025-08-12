@@ -27,8 +27,6 @@ type Props = {
 	leaderboard_address: Address;
 };
 
-type BumpChoice = "instant" | "default" | "custom";
-
 export const ProofEntryActionBtn = ({
 	proof,
 	user_address,
@@ -58,19 +56,6 @@ export const ProofEntryActionBtn = ({
 
 	const [bumpOpen, setBumpOpen] = useState(false);
 	const [bumpLoading, setBumpLoading] = useState(false);
-	const [choice, setChoice] = useState<BumpChoice>("default");
-	const [customGwei, setCustomGwei] = useState<string>("");
-
-	const [defaultFeeWei, setDefaultFeeWei] = useState<bigint | null>(null);
-	const [instantFeeWei, setInstantFeeWei] = useState<bigint | null>(null);
-
-	const toWeiFromGwei = (gweiStr: string): bigint | null => {
-		if (!gweiStr.trim()) return null;
-		const n = Number(gweiStr);
-		if (!isFinite(n) || n <= 0) return null;
-		return BigInt(Math.floor(n * 1e9));
-	};
-	const toGwei = (wei: bigint) => Number(wei) / 1e9;
 
 	useEffect(() => {
 		if (submitSolution.receipt.isSuccess) {
@@ -128,21 +113,6 @@ export const ProofEntryActionBtn = ({
 		if (proof.status === "pending") {
 			try {
 				setBumpLoading(true);
-				const estimatedDefault = await estimateMaxFeeForBatchOfProofs(16); // The default is the max fee passed first
-				const estimatedInstant = await estimateMaxFeeForBatchOfProofs(1);
-				if (!estimatedDefault) {
-					addToast({
-						title: "Could not estimate the fee",
-						desc: "Please try again in a few seconds.",
-						type: "error",
-					});
-					setBumpLoading(false);
-					return;
-				}
-				setDefaultFeeWei(estimatedDefault);
-				setInstantFeeWei(estimatedInstant);
-				setChoice("default");
-				setCustomGwei("");
 				setBumpOpen(true);
 			} catch {
 				addToast({
@@ -156,7 +126,7 @@ export const ProofEntryActionBtn = ({
 		}
 	};
 
-	const handleConfirmBump = async () => {
+	const handleConfirmBump = async (chosenWei: bigint) => {
 		try {
 			setSubmitProofMessageLoading(true);
 
@@ -171,21 +141,6 @@ export const ProofEntryActionBtn = ({
 				return;
 			}
 			const noncedVerificationData: NoncedVerificationdata = res.verification_data;
-
-			let chosenWei: bigint | null = null;
-			if (choice === "default") chosenWei = defaultFeeWei;
-			else if (choice === "instant") chosenWei = instantFeeWei;
-			else if (choice === "custom") chosenWei = toWeiFromGwei(customGwei);
-
-			if (!chosenWei || chosenWei <= 0n) {
-				addToast({
-				title: "Invalid fee",
-				desc: "Please enter a value greater than 0 Gwei.",
-				type: "error",
-				});
-				setSubmitProofMessageLoading(false);
-				return;
-			}
 
 			noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
 
@@ -221,8 +176,17 @@ export const ProofEntryActionBtn = ({
 				desc: "Please try again in a few seconds.",
 				type: "error",
 			});
+		} finally {
 			setSubmitProofMessageLoading(false);
 		}
+	};
+
+	const handleBumpError = (message: string) => {
+		addToast({
+			title: "Error",
+			desc: message,
+			type: "error",
+		});
 	};
 
 	return (
@@ -276,15 +240,9 @@ export const ProofEntryActionBtn = ({
 			<BumpFeeModal
 				open={bumpOpen}
 				setOpen={setBumpOpen}
-				defaultFeeWei={defaultFeeWei}
-				instantFeeWei={instantFeeWei}
-				choice={choice}
-				setChoice={setChoice}
-				customGwei={customGwei}
-				setCustomGwei={setCustomGwei}
-				toWeiFromGwei={toWeiFromGwei}
-				toGwei={toGwei}
+				estimateMaxFeeForBatchOfProofs={estimateMaxFeeForBatchOfProofs}
 				onConfirm={handleConfirmBump}
+				onError={handleBumpError}
 				isConfirmLoading={submitProofMessageLoading}
 			/>
 		</td>

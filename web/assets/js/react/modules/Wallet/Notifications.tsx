@@ -17,15 +17,14 @@ type Props = {
 };
 
 const textBasedOnNotEntry = {
-	pending: (commitment: string) => (
+	pending: () => (
 		<>
-			The proof <span className="font-bold">{commitment}</span> is pending; you can retry the submission by bumping the fee
+			The proof is underpriced, we suggest bumping the fee.
 		</>
 	),
-	submitted: (commitment: string) => (
+	submitted: () => (
 		<>
-			The proof <span className="font-bold">{commitment}</span> is ready
-			to be claimed
+			The proof is ready to be claimed.
 		</>
 	),
 };
@@ -41,7 +40,6 @@ const NotificationEntry = ({
 	payment_service_address: Address;
 	user_address: Address;
 }) => {
-	const [proofCommitment, setProofCommitment] = useState("");
 	const { csrfToken } = useCSRFToken();
 	const formRetryRef = useRef<HTMLFormElement>(null);
 	const formSubmittedRef = useRef<HTMLFormElement>(null);
@@ -145,7 +143,7 @@ const NotificationEntry = ({
 					} shrink-0`}
 				></div>
 				<p className="text-sm text-text-100">
-					{textBasedOnNotEntry[proof.status](proofCommitment)}
+					{textBasedOnNotEntry[proof.status]()}
 				</p>
 			</div>
 			<Button

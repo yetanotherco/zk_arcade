@@ -18,6 +18,7 @@ const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	submitted: "Claim points",
 	pending: "Bump fee",
 	failed: "None",
+	underpriced: "Bump fee",
 };
 
 type Props = {
@@ -109,7 +110,7 @@ export const ProofEntryActionBtn = ({
 			return;
 		}
 
-		if (proof.status === "pending") {
+		if (proof.status === "pending" || proof.status === "underpriced") {
 			try {
 				setBumpLoading(true);
 				setBumpOpen(true);
@@ -200,7 +201,7 @@ export const ProofEntryActionBtn = ({
 				</Button>
 			</div>
 
-			{proof.status === "pending" && (
+			{(proof.status === "pending" || proof.status === "underpriced") && (
 				<form
 					ref={formRetryRef}
 					action="/proof/status/retry"

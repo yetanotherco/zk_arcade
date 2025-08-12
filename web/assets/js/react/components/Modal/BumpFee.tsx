@@ -24,29 +24,33 @@ export const BumpFeeModal = ({
     previousMaxFee,
 }: Props) => {
     const [choice, setChoice] = useState<BumpChoice>("default");
-    const [customGwei, setCustomGwei] = useState<string>("");
+    const [customEth, setCustomEth] = useState<string>("");
     const [defaultFeeWei, setDefaultFeeWei] = useState<bigint | null>(null);
     const [instantFeeWei, setInstantFeeWei] = useState<bigint | null>(null);
     const [estimating, setEstimating] = useState(false);
     const [hasEstimatedOnce, setHasEstimatedOnce] = useState(false);
 
     const { addToast } = useToast();
-
     const { estimateMaxFeeForBatchOfProofs } = useAligned();
 
     const previousMaxFeeWei = BigInt(previousMaxFee);
 
-    const toWeiFromGwei = (gweiStr: string): bigint | null => {
-        if (!gweiStr.trim()) return null;
-        const n = Number(gweiStr);
-        if (!isFinite(n) || n <= 0) return null;
-        return BigInt(Math.floor(n * 1e9));
+    const ethStrToWei = (ethStr: string): bigint | null => {
+        const s = ethStr.trim();
+        if (!s) return null;
+        const [intPart, fracPart = ""] = s.split(".");
+        const fracPadded = (fracPart + "0".repeat(18)).slice(0, 18);
+        try {
+        return BigInt(intPart) * 10n ** 18n + BigInt(fracPadded);
+        } catch {
+        return null;
+        }
     };
 
-    const toGwei = (wei: bigint) => Number(wei) / 1e9;
+    const weiToEthNumber = (wei: bigint) => Number(wei) / 1e18;
 
-    const isCustomFeeValid = (customGweiValue: string): boolean => {
-        const customWei = toWeiFromGwei(customGweiValue);
+    const isCustomFeeValid = (customEthValue: string): boolean => {
+        const customWei = ethStrToWei(customEthValue);
         if (!customWei) return false;
         return customWei > previousMaxFeeWei;
     };
@@ -59,61 +63,60 @@ export const BumpFeeModal = ({
         });
     };
 
-        const estimateFees = async () => {
-            try {
-                setEstimating(true);
-                const estimatedDefault = await estimateMaxFeeForBatchOfProofs(16);
-                const estimatedInstant = await estimateMaxFeeForBatchOfProofs(1);
-                
-                if (!estimatedDefault) {
-                    handleBumpError("Could not estimate the fee. Please try again in a few seconds.");
-                    setOpen(false);
-                    return;
-                }
-                
-                setDefaultFeeWei(estimatedDefault);
-                setInstantFeeWei(estimatedInstant);
-                
-                if (!hasEstimatedOnce) {
-                    setChoice("default");
-                    setCustomGwei("");
-                    setHasEstimatedOnce(true);
-                }
-            } catch {
+    const estimateFees = async () => {
+        try {
+            setEstimating(true);
+            const estimatedDefault = await estimateMaxFeeForBatchOfProofs(16);
+            const estimatedInstant = await estimateMaxFeeForBatchOfProofs(1);
+
+            if (!estimatedDefault) {
                 handleBumpError("Could not estimate the fee. Please try again in a few seconds.");
                 setOpen(false);
-            } finally {
-                setEstimating(false);
-            } 
-        };
+                return;
+            }
+
+            setDefaultFeeWei(estimatedDefault);
+            setInstantFeeWei(estimatedInstant);
+
+            if (!hasEstimatedOnce) {
+                setChoice("default");
+                setCustomEth("");
+                setHasEstimatedOnce(true);
+            }
+        } catch {
+            handleBumpError("Could not estimate the fee. Please try again in a few seconds.");
+            setOpen(false);
+        } finally {
+            setEstimating(false);
+        }
+    };
 
     useEffect(() => {
         if (!open) return;
         if (hasEstimatedOnce) {
             setChoice("default");
-            setCustomGwei("");
-        }        
+            setCustomEth("");
+        }
         estimateFees();
     }, [open, estimateMaxFeeForBatchOfProofs, hasEstimatedOnce]);
 
     const handleConfirm = async () => {
         let chosenWei: bigint | null = null;
-        
+
         if (choice === "default") {
             chosenWei = defaultFeeWei;
         } else if (choice === "instant") {
             chosenWei = instantFeeWei;
         } else if (choice === "custom") {
-            chosenWei = toWeiFromGwei(customGwei);
-            
-            if (!chosenWei || chosenWei <= previousMaxFeeWei) {
-                handleBumpError(`The fee must be greater than the current fee of ${toGwei(previousMaxFeeWei).toFixed(2)} Gwei.`);
-                return;
-            }
+            chosenWei = ethStrToWei(customEth);
+        if (!chosenWei || chosenWei <= previousMaxFeeWei) {
+            handleBumpError(`The fee must be greater than the current fee of ${weiToEthNumber(previousMaxFeeWei)} ETH.`);
+            return;
+        }
         }
 
         if (!chosenWei || chosenWei <= 0n) {
-            handleBumpError("Please enter a value greater than 0 Gwei.");
+            handleBumpError("Please enter a value greater than 0 ETH.");
             return;
         }
 
@@ -129,14 +132,14 @@ export const BumpFeeModal = ({
             );
         }
 
-        const currentFeeGwei = toGwei(previousMaxFeeWei);
-        const isCustomFeeInputValid = choice === "custom" ? isCustomFeeValid(customGwei) : true;
+        const currentFeeEth = weiToEthNumber(previousMaxFeeWei);
+        const isCustomFeeInputValid = choice === "custom" ? isCustomFeeValid(customEth) : true;
 
         return (
             <div className="flex flex-col gap-3">
                 <div className="mb-3 p-3 bg-contrast-100/10 rounded-lg">
                     <div className="text-sm opacity-80">Previous submitted max fee:</div>
-                    <div className="font-medium">{currentFeeGwei} Gwei</div>
+                    <div className="font-medium">{currentFeeEth} ETH</div>
                 </div>
 
                 <label
@@ -157,7 +160,7 @@ export const BumpFeeModal = ({
                             <span className="font-medium">Instant</span>
                         </div>
                         <span className="text-sm opacity-80">
-                            {instantFeeWei ? `${toGwei(instantFeeWei).toFixed(2)} Gwei` : "…"}
+                            {instantFeeWei ? `${weiToEthNumber(instantFeeWei)} ETH` : "…"}
                         </span>
                     </div>
                     <p className="mt-1 text-xs opacity-70">
@@ -183,7 +186,7 @@ export const BumpFeeModal = ({
                             <span className="font-medium">Default</span>
                         </div>
                         <span className="text-sm opacity-80">
-                            {defaultFeeWei ? `${toGwei(defaultFeeWei).toFixed(2)} Gwei` : "…"}
+                            {defaultFeeWei ? `${weiToEthNumber(defaultFeeWei)} ETH` : "…"}
                         </span>
                     </div>
                     <p className="mt-1 text-xs opacity-70">Recommended fee.</p>
@@ -192,8 +195,9 @@ export const BumpFeeModal = ({
                 <div
                     className={`rounded-xl border p-3 transition-colors ${
                         choice === "custom" ? "border-accent-100" : "border-contrast-100/40"
-                    } ${isConfirmLoading ? "opacity-50 pointer-events-none" : ""}
-                    ${choice === "custom" && customGwei && !isCustomFeeInputValid ? "border-red-400" : ""}`}
+                    } ${isConfirmLoading ? "opacity-50 pointer-events-none" : ""} ${
+                        choice === "custom" && customEth && !isCustomFeeInputValid ? "border-red-400" : ""
+                    }`}
                 >
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -209,28 +213,29 @@ export const BumpFeeModal = ({
                     <div className="mt-2 flex items-center gap-2">
                         <input
                             type="number"
-                            min={currentFeeGwei}
-                            step="0.000000001"
-                            placeholder={`Enter fee > ${currentFeeGwei.toFixed(2)} Gwei`}
-                            className={`w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none disabled:opacity-50
-                                ${choice === "custom" && customGwei && !isCustomFeeInputValid ? "border border-red-400" : ""}`}
-                            value={customGwei}
+                            min={currentFeeEth}
+                            step="0.000000000000000001"
+                            placeholder={`Enter fee > ${currentFeeEth} ETH`}
+                            className={`w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none disabled:opacity-50 ${
+                                choice === "custom" && customEth && !isCustomFeeInputValid ? "border border-red-400" : ""
+                            }`}
+                            value={customEth}
                             onChange={(e) => {
                                 if (!isConfirmLoading) {
                                     setChoice("custom");
-                                    setCustomGwei(e.target.value);
+                                    setCustomEth(e.target.value);
                                 }
                             }}
                             disabled={isConfirmLoading}
                         />
-                        <span className="text-sm opacity-80">Gwei</span>
+                        <span className="text-sm opacity-80">ETH</span>
                     </div>
                     <p className="mt-1 text-xs opacity-70">
                         Define your own max fee (must be greater than the one submitted before).
                     </p>
-                    {choice === "custom" && customGwei && !isCustomFeeInputValid && (
+                    {choice === "custom" && customEth && !isCustomFeeInputValid && (
                         <p className="mt-1 text-xs text-red-400">
-                            Fee must be greater than {currentFeeGwei.toFixed(2)} Gwei
+                        Fee must be greater than {currentFeeEth} ETH
                         </p>
                     )}
                 </div>
@@ -246,7 +251,7 @@ export const BumpFeeModal = ({
             shouldCloseOnEsc={!isConfirmLoading}
             shouldCloseOnOutsideClick={!isConfirmLoading}
         >
-             <div className="bg-contrast-100 rounded-2xl p-6 text-white">
+            <div className="bg-contrast-100 rounded-2xl p-6 text-white">
                 <h3 className="text-xl font-semibold mb-4">Bump Fee</h3>
                 <p className="text-sm opacity-80 mb-4">
                     Choose how much you want to increase the fee to retry your proof.
@@ -269,9 +274,9 @@ export const BumpFeeModal = ({
                         onClick={handleConfirm}
                         isLoading={isConfirmLoading}
                         disabled={
-                            isConfirmLoading || 
-                            estimating || 
-                            (choice === "custom" && (!toWeiFromGwei(customGwei) || !isCustomFeeValid(customGwei)))
+                        isConfirmLoading ||
+                        estimating ||
+                        (choice === "custom" && (!ethStrToWei(customEth) || !isCustomFeeValid(customEth)))
                         }
                     >
                         Confirm

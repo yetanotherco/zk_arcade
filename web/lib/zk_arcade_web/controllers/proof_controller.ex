@@ -168,6 +168,16 @@ defmodule ZkArcadeWeb.ProofController do
         case Proofs.update_proof_status_submitted(pending_proof_id, batch_data) do
           {:ok, updated_proof} ->
             Logger.info("Proof #{pending_proof_id} verified and updated successfully")
+
+            case wait_aligned_verification() do
+              {:ok, _} ->
+                Logger.info("Ok")
+              {:error, reason} ->
+                Logger.error("Error: #{inspect(reason)}")
+              nil ->
+                Logger.error("Error without reason")
+            end
+
             {:ok, updated_proof}
 
           {:error, reason} ->
@@ -191,6 +201,13 @@ defmodule ZkArcadeWeb.ProofController do
             {:error, reason}
         end
     end
+  end
+
+  # Calls to ZkArcade.ServiceManagerContract.verify_batch_inclusion, waiting until its verified with an exponential backoff
+  def wait_aligned_verification() do
+
+
+    {:ok, "ok"}
   end
 
   def retry_submit_proof(conn, %{

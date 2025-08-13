@@ -70,6 +70,22 @@ export const BumpFeeModal = ({
 
     const weiToEthNumber = (wei: bigint) => Number(wei) / 1e18;
 
+    const calculateUsdFromEthString = (ethStr: string, ethPrice: number | null): string => {
+        if (!ethStr || !ethPrice) return "0";
+        
+        const wei = ethStrToWei(ethStr);
+        if (!wei) return "0";
+        
+        const priceInWei = BigInt(Math.round(ethPrice * 1e18));
+        const usdInWei = (wei * priceInWei) / (10n ** 18n);
+        const usdValue = Number(usdInWei) / 1e18;
+        
+        return usdValue.toLocaleString(undefined, { 
+            maximumFractionDigits: 18,
+            minimumFractionDigits: 0 
+        });
+    };
+
     const isCustomFeeValid = (customEthValue: string): boolean => {
         const customWei = ethStrToWei(customEthValue);
         if (!customWei) return false;
@@ -255,13 +271,7 @@ export const BumpFeeModal = ({
                     </div>
                     {customEth && (
                         <p className="mt-1 text-xs opacity-70">
-                            ~{((price || 0) * Number(customEth)).toLocaleString(
-                                undefined,
-                                {
-                                    maximumFractionDigits: 3,
-                                }
-                            )}{" "}
-                            USD
+                            ~${calculateUsdFromEthString(customEth, price)} USD
                         </p>
                     )}
                     <p className="mt-1 text-xs opacity-70">

@@ -22,7 +22,7 @@ module.exports = {
 				transparent: "transparent",
 				background: "rgb(5 6 5 / <alpha-value>)",
 				"modal-overlay": "rgba(0, 0, 0, 0.5)",
-				black: "rgb(0 0 0 / <alpha-value>)",
+				black: "rgb(26 26 26 / <alpha-value>)",
 				orange: "rgb(255 160 24 / <alpha-value>)",
 				red: "rgb(253 77 77 / <alpha-value>)",
 				yellow: "rgb(241 254 64 / <alpha-value>)",
@@ -32,7 +32,7 @@ module.exports = {
 				blue: "rgb(64 165 254 / <alpha-value>)",
 				accent: {
 					100: "rgb(24 255 127 / <alpha-value>)",
-					200: "rgb(102 255 168 / <alpha-value>)",
+					200: "rgb(187 242 219 / <alpha-value>)",
 				},
 				text: {
 					100: "rgb(255 255 255 / <alpha-value>)",
@@ -85,11 +85,12 @@ module.exports = {
 				280: "280px",
 			},
 			animation: {
-				'spin-slow': 'spin 1.5s linear infinite',
+				"spin-slow": "spin 1.5s linear infinite",
 			},
 		},
 	},
 	plugins: [
+		require("tailwindcss-animate"),
 		require("@tailwindcss/forms"),
 		// Allows prefixing tailwind classes with LiveView classes to add rules
 		// only when LiveView classes are applied, for example:

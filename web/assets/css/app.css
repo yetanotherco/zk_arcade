@@ -42,13 +42,13 @@ body {
 	background-color: rgb(54 54 55);
 	padding-inline: 10px;
 	border-radius: 8px;
+	cursor: text;
 }
 
 .code-block a {
 	pointer-events: none;
 	text-decoration: none;
 	color: inherit;
-	cursor: text;
 }
 
 a {

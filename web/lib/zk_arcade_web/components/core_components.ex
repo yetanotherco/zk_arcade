@@ -40,16 +40,24 @@ defmodule ZkArcadeWeb.CoreComponents do
   def nav(assigns) do
     ~H"""
       <nav class="w-full flex justify-between items-center">
+        <div class="w-full flex gap-20 items-center">
           <.link href="/">
             <h1 class="text-xl">
               ZK Arcade
             </h1>
-            <p class="tex-md text-accent-100">
+            <p class="tex-md text-accent-100 sm:text-nowrap">
               Powered by ALIGNED
             </p>
           </.link>
+          <div class="lg:flex hidden w-full gap-12">
+              <.link href="/game/beast" class="transition hover:text-accent-100 hover:underline">Games</.link>
+              <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
+              <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
+              <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">How It Works</p>
+          </div>
+        </div>
 
-        <div>
+        <div class="flex gap-8">
           <x-app-user-wallet
             network={@network}
             payment_service_address={@payment_service_address}
@@ -60,6 +68,29 @@ defmodule ZkArcadeWeb.CoreComponents do
             user_position={@user_position}
             explorer_url={@explorer_url}
           />
+
+          <button
+            class="lg:hidden z-50"
+            id="menu-toggle"
+            aria-label="Toggle hamburger menu"
+            onclick="toggleMenu()"
+          >
+            <.icon name="hero-bars-3" class="toggle-open" />
+            <.icon name="hero-x-mark" class="toggle-close hidden" />
+          </button>
+          <div
+            id="menu-overlay"
+            class="fixed inset-0 bg-background/90 z-40 min-h-dvh w-screen animate-in fade-in hidden"
+            onclick="toggleMenu()"
+          >
+            <div class="h-dvh flex flex-col gap-y-10 text-2xl justify-end items-center p-12">
+                <.link href="/" class="text-text-100 transition hover:text-accent-100 hover:underline">Home</.link>
+                <.link href="/game/beast" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link>
+                <.link href="/leaderboard" class="text-text-100 transition hover:text-accent-100 hover:underline">Leaderboard</.link>
+                <.link href="/history" class="text-text-100 transition hover:text-accent-100 hover:underline">Profile</.link>
+                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">How It Works</p>
+            </div>
+          </div>
         </div>
       </nav>
     """
@@ -245,7 +276,7 @@ defmodule ZkArcadeWeb.CoreComponents do
           <p class="text-md">
             Powered By
             <span class="text-accent-100 block mt-1">
-              Aligned Layer
+              Aligned
             </span>
           </p>
         </div>

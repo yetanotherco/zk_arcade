@@ -29,6 +29,8 @@ type Props = {
 	leaderboard_address: Address;
 };
 
+const ALIGNED_DEPOSIT_LIMIT = 0.01;
+
 function parsePublicInputs(inputs: Uint8Array) {
 	if (inputs.length < 96) return null;
 
@@ -60,10 +62,11 @@ export default ({
 	const [maxFee, setMaxFee] = useState(BigInt(0));
 	const [depositAmount, setDepositAmount] = useState("");
 	const [showDepositSection, setShowDepositSection] = useState(false);
-	const { nonce, isLoading: nonceLoading } = useBatcherNonce(
-		batcher_url,
-		user_address
-	);
+	const {
+		nonce,
+		isLoading: nonceLoading,
+		error: nonceError,
+	} = useBatcherNonce(batcher_url, user_address);
 	useProofSentMessageReader();
 
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
@@ -318,6 +321,24 @@ export default ({
 		}
 	}, [sendFunds.receipt.isError, sendFunds.receipt.error]);
 
+	const handleDepositValueChange = (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const value = e.target.value;
+		const numValue = Number(value);
+
+		if (numValue > ALIGNED_DEPOSIT_LIMIT) {
+			setDepositAmount(ALIGNED_DEPOSIT_LIMIT.toString());
+		} else {
+			setDepositAmount(value);
+		}
+	};
+
+	const isValidAmount = () => {
+		const numValue = Number(depositAmount);
+		return numValue > 0 && numValue <= ALIGNED_DEPOSIT_LIMIT;
+	};
+
 	return (
 		<>
 			<div className="w-full flex justify-center items-center cursor-pointer">
@@ -417,11 +438,10 @@ export default ({
 										placeholder="0.0001"
 										type="number"
 										value={depositAmount}
-										onChange={e =>
-											setDepositAmount(e.target.value)
-										}
+										onChange={handleDepositValueChange}
 										min="0"
 										step="0.0001"
+										max={ALIGNED_DEPOSIT_LIMIT.toString()}
 									/>
 									<p className="mt-1 text-sm text-gray-600">
 										~
@@ -434,19 +454,33 @@ export default ({
 										USD
 									</p>
 								</div>
+								{Number(depositAmount) >=
+									ALIGNED_DEPOSIT_LIMIT && (
+									<p className="text-sm -mt-2 opacity-50 mb-2">
+										Note: the maximum deposit value is{" "}
+										{ALIGNED_DEPOSIT_LIMIT} ETH
+									</p>
+								)}
 								<div className="flex justify-end">
 									<Button
 										variant="accent-fill"
 										onClick={handleDeposit}
 										isLoading={sendFunds.receipt.isLoading}
-										disabled={
-											Number(depositAmount || "0") <= 0
-										}
+										disabled={!isValidAmount()}
 									>
 										Deposit
 									</Button>
 								</div>
 							</div>
+						)}
+
+						{nonceError && (
+							<p className="text-red text-sm text-center">
+								{nonceError.message ==
+								"WebSocket connection error"
+									? "Connection with Aligned failed, try to connect later."
+									: "Error connecting with Aligned: {nonceError.message}"}
+							</p>
 						)}
 
 						{invalidGameConfig && (

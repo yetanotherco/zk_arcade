@@ -70,12 +70,14 @@ const WalletContent = ({
 		const decodedProofs = JSON.parse(proofs);
 		return (
 			<div className="flex flex-row items-center gap-8">
-				<NotificationBell
-					proofs={decodedProofs}
-					leaderboard_address={leaderboard_address}
-					payment_service_address={payment_service_address}
-					user_address={user_address}
-				/>
+				<div className="md:block hidden">
+					<NotificationBell
+						proofs={decodedProofs}
+						leaderboard_address={leaderboard_address}
+						payment_service_address={payment_service_address}
+						user_address={user_address}
+					/>
+				</div>
 				<WalletInfo
 					network={network}
 					leaderboard_address={leaderboard_address}
@@ -111,7 +113,6 @@ export default ({
 	explorer_url,
 	batcher_url,
 }: Omit<Props, "needs_agreement">) => {
-	console.log(proofs);
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>

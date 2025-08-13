@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { Modal, ModalProps } from "../Modal";
 import { Address, formatEther } from "viem";
 import { ProofSubmission } from "../../../types/aligned";
@@ -6,6 +6,7 @@ import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentServic
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
+import { Button } from "../../Button";
 
 type Props = {
 	modal: Omit<ModalProps, "maxWidth">;
@@ -40,16 +41,21 @@ const BreadCumb = ({
 	);
 };
 
+type SubmitProofModalSteps = "deposit" | "submit" | "claim";
+
 export const SubmitProofModal = ({
 	modal,
 	proof,
 	payment_service_address,
 	user_address,
 }: Props) => {
+	const [step, setStep] = useState<SubmitProofModalSteps>("deposit");
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
 	});
+
+	const updateState = useCallback(() => {}, [setStep]);
 
 	const submissionStatus: {
 		[key in ProofSubmission["status"]]: BreadCumbStatus;
@@ -64,42 +70,62 @@ export const SubmitProofModal = ({
 	const availableBalance = balance.data ? formatEther(balance.data) : "0";
 	const shouldDeposit = !proof && Number(availableBalance) > 0.0001;
 
-	const getCurrentStep: () => "deposit" | "submit" | "claim" = () => {
-		return "deposit";
-	};
-
 	const modalBasedOnStep = {
-		deposit: () => <DepositStep />,
+		deposit: () => (
+			<DepositStep
+				payment_service_address={payment_service_address}
+				user_address={user_address}
+				setOpen={modal.setOpen}
+				updateState={updateState}
+			/>
+		),
 		submit: () => <SubmitProofStep />,
 		claim: () => <ClaimStep />,
 	};
 
 	return (
-		<Modal maxWidth={1000} {...modal}>
-			<div className="rounded w-full bg-contrast-100 p-10 flex flex-col items-center gap-10">
-				<h1 className="text-lg font-normal">Proof submission</h1>
-				<div className="flex gap-8 justify-center w-full">
-					<BreadCumb
-						step="Deposit"
-						status={shouldDeposit ? "done" : "pending"}
-					/>
-					<BreadCumb
-						step="Submission"
-						status={proof ? submissionStatus[proof.status] : "none"}
-					/>
-					<BreadCumb
-						step="Claim"
-						// Check if the game is outdated and not claimed and mark as failed
-						status={
-							proof?.status === "submitted"
-								? "pending"
-								: proof?.status === "claimed"
-								? "done"
-								: "none"
-						}
-					/>
+		<Modal
+			maxWidth={800}
+			shouldCloseOnEsc={false}
+			shouldCloseOnOutsideClick={false}
+			{...modal}
+		>
+			<div className="rounded w-full bg-contrast-100 p-10 flex flex-col items-center gap-10 h-[600px]">
+				<div>
+					<h1 className="text-center mb-2 text-lg font-normal">
+						Deposit into Aligned Batcher
+					</h1>
+					<p className="text-text-200">
+						You need to deposit money into aligned batcher in order
+						to verify your proof on Aligned.
+					</p>
 				</div>
-				{modalBasedOnStep[getCurrentStep()]()}
+				<div>
+					<div className="flex gap-8 justify-center w-full">
+						<BreadCumb
+							step="Deposit"
+							status={shouldDeposit ? "done" : "pending"}
+						/>
+						<BreadCumb
+							step="Submission"
+							status={
+								proof ? submissionStatus[proof.status] : "none"
+							}
+						/>
+						<BreadCumb
+							step="Claim"
+							// Check if the game is outdated and not claimed and mark as failed
+							status={
+								proof?.status === "submitted"
+									? "pending"
+									: proof?.status === "claimed"
+									? "done"
+									: "none"
+							}
+						/>
+					</div>
+				</div>
+				<div className="w-full h-full">{modalBasedOnStep[step]()}</div>
 			</div>
 		</Modal>
 	);

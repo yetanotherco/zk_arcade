@@ -17,6 +17,23 @@ type Props = {
     lastTimeSubmitted: string;
 };
 
+const EthPriceWithTooltip = ({ wei, ethPrice }: { wei: bigint; ethPrice: number | null }) => {
+    const ethValue = Number(wei) / 1e18;
+    const usdValue = ((ethPrice || 0) * ethValue);
+    
+    return (
+        <div className="relative group">
+            <span className="cursor-pointer">
+                {ethValue} ETH
+            </span>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                ~${usdValue.toLocaleString(undefined, { maximumFractionDigits: 3 })} USD
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black"></div>
+            </div>
+        </div>
+    );
+};
+
 export const BumpFeeModal = ({
     open,
     setOpen,
@@ -143,7 +160,9 @@ export const BumpFeeModal = ({
             <div className="flex flex-col gap-3">
                 <div className="p-3 bg-contrast-100/10 rounded-lg">
                     <div className="text-sm opacity-80">Previous submitted max fee:</div>
-                    <div className="font-medium">{currentFeeEth} ETH</div>
+                    <div className="font-medium">
+                        <EthPriceWithTooltip wei={previousMaxFeeWei} ethPrice={price} />
+                    </div>
                 </div>
 
                 <label
@@ -164,18 +183,9 @@ export const BumpFeeModal = ({
                             <span className="font-medium">Instant</span>
                         </div>
                         <span className="text-sm opacity-80">
-                            {instantFeeWei ? `${weiToEthNumber(instantFeeWei)} ETH` : "…"}
+                            {instantFeeWei ? <EthPriceWithTooltip wei={instantFeeWei} ethPrice={price} /> : "…"}
                         </span>
                     </div>
-                    <p className="mt-1 text-xs opacity-70">
-                        ~{((price || 0) * Number(instantFeeWei) / 1e18).toLocaleString(
-                            undefined,
-                            {
-                                maximumFractionDigits: 3,
-                            }
-                        )}{" "}
-                        USD
-                    </p>
                     <p className="mt-1 text-xs opacity-70">
                         Guarantee inclusion by paying the full price of submitting the batch
                     </p>
@@ -199,18 +209,9 @@ export const BumpFeeModal = ({
                             <span className="font-medium">Default</span>
                         </div>
                         <span className="text-sm opacity-80">
-                            {defaultFeeWei ? `${weiToEthNumber(defaultFeeWei)} ETH` : "…"}
+                            {defaultFeeWei ? <EthPriceWithTooltip wei={defaultFeeWei} ethPrice={price} /> : "…"}
                         </span>
                     </div>
-                    <p className="mt-1 text-xs opacity-70">
-                        ~{((price || 0) * Number(defaultFeeWei) / 1e18).toLocaleString(
-                            undefined,
-                            {
-                                maximumFractionDigits: 3,
-                            }
-                        )}{" "}
-                        USD
-                    </p>
                     <p className="mt-1 text-xs opacity-70">Recommended fee, estimated for a batch of 16 proofs.</p>
                 </label>
 
@@ -252,15 +253,17 @@ export const BumpFeeModal = ({
                         />
                         <span className="text-sm opacity-80">ETH</span>
                     </div>
-                    <p className="mt-1 text-xs opacity-70">
-                        ~{((price || 0) * Number(customEth)).toLocaleString(
-                            undefined,
-                            {
-                                maximumFractionDigits: 3,
-                            }
-                        )}{" "}
-                        USD
-                    </p>
+                    {customEth && (
+                        <p className="mt-1 text-xs opacity-70">
+                            ~{((price || 0) * Number(customEth)).toLocaleString(
+                                undefined,
+                                {
+                                    maximumFractionDigits: 3,
+                                }
+                            )}{" "}
+                            USD
+                        </p>
+                    )}
                     <p className="mt-1 text-xs opacity-70">
                         Define your own max fee, that must be greater than the current max fee of {currentFeeEth} ETH.
                     </p>

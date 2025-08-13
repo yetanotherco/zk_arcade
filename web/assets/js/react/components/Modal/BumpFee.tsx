@@ -45,9 +45,9 @@ export const BumpFeeModal = ({
         const [intPart, fracPart = ""] = s.split(".");
         const fracPadded = (fracPart + "0".repeat(18)).slice(0, 18);
         try {
-        return BigInt(intPart) * 10n ** 18n + BigInt(fracPadded);
+            return BigInt(intPart) * 10n ** 18n + BigInt(fracPadded);
         } catch {
-        return null;
+            return null;
         }
     };
 
@@ -113,10 +113,10 @@ export const BumpFeeModal = ({
             chosenWei = instantFeeWei;
         } else if (choice === "custom") {
             chosenWei = ethStrToWei(customEth);
-        if (!chosenWei || chosenWei <= previousMaxFeeWei) {
-            handleBumpError(`The fee must be greater than the current fee of ${weiToEthNumber(previousMaxFeeWei)} ETH.`);
-            return;
-        }
+            if (!chosenWei || chosenWei <= previousMaxFeeWei) {
+                handleBumpError(`The fee must be greater than the current fee of ${weiToEthNumber(previousMaxFeeWei)} ETH.`);
+                return;
+            }
         }
 
         if (!chosenWei || chosenWei <= 0n) {
@@ -175,11 +175,11 @@ export const BumpFeeModal = ({
                         </span>
                     </div>
                     <p className="mt-1 text-xs opacity-70">
-						~{((price || 0) * Number(instantFeeWei) / 1e18).toLocaleString(
-							undefined,
-							{
-								maximumFractionDigits: 3,
-							}
+                        ~{((price || 0) * Number(instantFeeWei) / 1e18).toLocaleString(
+                            undefined,
+                            {
+                                maximumFractionDigits: 3,
+                            }
                         )}{" "}
                         USD
                     </p>
@@ -210,11 +210,11 @@ export const BumpFeeModal = ({
                         </span>
                     </div>
                     <p className="mt-1 text-xs opacity-70">
-						~{((price || 0) * Number(defaultFeeWei) / 1e18).toLocaleString(
-						    undefined,
-						    {
-						    	maximumFractionDigits: 3,
-						    }
+                        ~{((price || 0) * Number(defaultFeeWei) / 1e18).toLocaleString(
+                            undefined,
+                            {
+                                maximumFractionDigits: 3,
+                            }
                         )}{" "}
                         USD
                     </p>
@@ -260,11 +260,11 @@ export const BumpFeeModal = ({
                         <span className="text-sm opacity-80">ETH</span>
                     </div>
                     <p className="mt-1 text-xs opacity-70">
-						~{((price || 0) * Number(customEth)).toLocaleString(
-							undefined,
-							{
-								maximumFractionDigits: 3,
-							}
+                        ~{((price || 0) * Number(customEth)).toLocaleString(
+                            undefined,
+                            {
+                                maximumFractionDigits: 3,
+                            }
                         )}{" "}
                         USD
                     </p>
@@ -273,7 +273,7 @@ export const BumpFeeModal = ({
                     </p>
                     {choice === "custom" && customEth && !isCustomFeeInputValid && (
                         <p className="mt-1 text-xs text-red-400">
-                        Fee must be greater than {currentFeeEth} ETH
+                            Fee must be greater than {currentFeeEth} ETH
                         </p>
                     )}
                 </div>
@@ -312,9 +312,9 @@ export const BumpFeeModal = ({
                         onClick={handleConfirm}
                         isLoading={isConfirmLoading}
                         disabled={
-                        isConfirmLoading ||
-                        estimating ||
-                        (choice === "custom" && (!ethStrToWei(customEth) || !isCustomFeeValid(customEth)))
+                            isConfirmLoading ||
+                            estimating ||
+                            (choice === "custom" && (!ethStrToWei(customEth) || !isCustomFeeValid(customEth)))
                         }
                     >
                         Confirm

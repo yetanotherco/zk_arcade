@@ -169,7 +169,7 @@ defmodule ZkArcadeWeb.ProofController do
           {:ok, updated_proof} ->
             Logger.info("Proof #{pending_proof_id} verified and updated successfully")
 
-            case wait_aligned_verification() do
+            case wait_aligned_verification(submit_proof_message, batch_data) do
               {:ok, _} ->
                 Logger.info("Ok")
               {:error, reason} ->
@@ -203,11 +203,169 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  # Calls to ZkArcade.ServiceManagerContract.verify_batch_inclusion, waiting until its verified with an exponential backoff
-  def wait_aligned_verification() do
+  @zero32 :binary.copy(<<0>>, 32)
 
+  @type verification_data :: %{
+          required(:proof) => binary(),
+          optional(:publicInput) => binary() | nil,
+          optional(:verificationKey) => binary() | nil,
+          optional(:vmProgramCode) => binary() | nil,
+          required(:provingSystem) => atom() | String.t(),
+          required(:proofGeneratorAddress) => String.t() # "0x..."
+        }
 
+  @spec compute_verification_data_commitment(
+          verification_data(),
+          %{optional(atom() | String.t()) => 0..255}
+        ) :: %{
+          commitmentDigest: binary(),
+          proofCommitment: binary(),
+          pubInputCommitment: binary(),
+          provingSystemAuxDataCommitment: binary()
+        }
+  def compute_verification_data_commitment(verification_data, proving_system_name_to_byte) do
+    proof_commitment = keccak256(get_k(verification_data, :proof))
+
+    pub_input_commitment =
+      case get_k(verification_data, :publicInput) do
+        nil -> @zero32
+        bytes -> keccak256(bytes)
+      end
+
+    proving_system_name = get_k(verification_data, :provingSystem)
+    ps_byte_int = Map.fetch!(proving_system_name_to_byte, proving_system_name)
+    proving_system_byte = <<ps_byte_int>>
+
+    proving_system_aux_commitment =
+      cond do
+        vk = get_k(verification_data, :verificationKey) ->
+          keccak256(bin(vk) <> proving_system_byte)
+
+        code = get_k(verification_data, :vmProgramCode) ->
+          keccak256(bin(code) <> proving_system_byte)
+
+        true ->
+          @zero32
+      end
+
+    proof_generator_address =
+      get_k(verification_data, :proofGeneratorAddress)
+      |> hex_to_bytes()
+
+    commitment_digest =
+      keccak256(proof_commitment <>
+                  pub_input_commitment <>
+                  proving_system_aux_commitment <>
+                  proof_generator_address)
+
+    %{
+      commitmentDigest: commitment_digest,
+      proofCommitment: proof_commitment,
+      pubInputCommitment: pub_input_commitment,
+      provingSystemAuxDataCommitment: proving_system_aux_commitment
+    }
+  end
+
+  defp get_k(map, key), do: Map.get(map, key) || Map.get(map, to_string(key))
+
+  defp bin(v) when is_binary(v), do: v
+  defp bin(v) when is_list(v),   do: :erlang.iolist_to_binary(v)
+  defp bin(nil), do: nil
+
+  defp keccak256(data), do: ExKeccak.hash_256(bin(data))
+
+  @spec hex_to_bytes(String.t()) :: binary()
+  defp hex_to_bytes("0x" <> rest), do: hex_to_bytes(rest)
+
+  defp hex_to_bytes(hex) when is_binary(hex) do
+    hex
+    |> even_length_hex()
+    |> String.upcase()
+    |> Base.decode16!(case: :mixed)
+  end
+
+  defp even_length_hex(h) do
+    if rem(byte_size(h), 2) == 1, do: "0" <> h, else: h
+  end
+
+  def wait_aligned_verification(submit_proof_message, batch_inclusion_data) do
+    Logger.info("Waiting for aligned verification...")
+
+    payment_service_addr = Application.get_env(:zk_arcade, :payment_service_address)
+
+    verification_data = submit_proof_message["verificationData"]["verificationData"]
+
+    status = ZkArcade.ServiceManagerContract.batch_status_call_with_sender(
+      batch_inclusion_data["batch_merkle_root"],
+      payment_service_addr
+    )
+    Logger.info("Status for merkle root #{inspect(batch_inclusion_data["batch_merkle_root"])} is #{inspect(status)}")
+
+    proving_system_name_to_byte = %{
+      "GnarkPlonkBls12_381" => 0,
+      "GnarkPlonkBn254" => 1,
+      "GnarkGroth16Bn254" => 2,
+      "SP1" => 3,
+      "Risc0" => 4,
+      "CircomGroth16Bn256" => 5
+    }
+
+    commitment =
+      compute_verification_data_commitment(verification_data, proving_system_name_to_byte)
+
+    batch_merkle_root_bin = bin(batch_inclusion_data["batch_merkle_root"])
+
+    merkle_path_chunks =
+      get_in(batch_inclusion_data, ["batch_inclusion_proof", "merkle_path"]) || []
+
+    encoded_merkle_proof =
+      merkle_path_chunks
+      |> Enum.map(&bin/1)
+      |> Enum.map(fn chunk ->
+        if byte_size(chunk) != 32 do
+          Logger.warning("Merkle proof chunk has size #{byte_size(chunk)}, expected 32")
+        end
+        chunk
+      end)
+      |> :erlang.iolist_to_binary()
+
+    index_in_batch = batch_inclusion_data["index_in_batch"]
+
+    proof_generator_addr20 =
+      verification_data["proofGeneratorAddress"]
+      |> hex_to_bytes()
+
+    :timer.sleep(:timer.seconds(10))
+
+    verify_fn = fn ->
+      ZkArcade.ServiceManagerContract.verify_proof_inclusion(
+        commitment.proofCommitment,
+        commitment.pubInputCommitment,
+        commitment.provingSystemAuxDataCommitment,
+        proof_generator_addr20,
+        batch_merkle_root_bin,
+        encoded_merkle_proof,
+        index_in_batch,
+        payment_service_addr
+      )
+    end
+
+    result = retry_with_backoff(verify_fn, [30, 60, 120, 240])
+
+    Logger.info("Final result: #{inspect(result)}")
     {:ok, "ok"}
+  end
+
+  defp retry_with_backoff(fun, []), do: false
+  defp retry_with_backoff(fun, [delay | rest]) do
+    :timer.sleep(:timer.seconds(delay))
+    case fun.() do
+      true ->
+        true
+      false ->
+        Logger.info("Verification failed, retrying in #{delay} seconds...")
+        retry_with_backoff(fun, rest)
+    end
   end
 
   def retry_submit_proof(conn, %{

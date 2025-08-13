@@ -26,6 +26,7 @@ const SubmitModal = ({
 }: Omit<Props, "network">) => {
 	const { open, setOpen, toggleOpen } = useModal();
 
+	if (!user_address) return null;
 	return (
 		<>
 			<Button variant="icon" onClick={toggleOpen}>

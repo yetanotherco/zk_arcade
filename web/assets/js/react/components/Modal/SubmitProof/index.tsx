@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Modal, ModalProps } from "../Modal";
 import { Address, formatEther } from "viem";
 import { ProofSubmission } from "../../../types/aligned";
@@ -49,13 +49,39 @@ export const SubmitProofModal = ({
 	payment_service_address,
 	user_address,
 }: Props) => {
-	const [step, setStep] = useState<SubmitProofModalSteps>("deposit");
+	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
 	});
 
-	const updateState = useCallback(() => {}, [setStep]);
+	const updateState = useCallback(() => {
+		if (proof) {
+			if (proof.status === "pending") {
+				setStep("submit");
+			}
+			if (proof.status === "claimed") {
+				setStep("claim");
+			}
+		} else {
+			if (Number(formatEther(balance.data || BigInt(0))) >= 0.001) {
+				setStep("submit");
+			} else {
+				setStep("deposit");
+			}
+		}
+	}, [balance.data, setStep]);
+
+	const goToNextStep = useCallback(() => {
+		if (step === "deposit") setStep("submit");
+		if (step === "submit") setStep("claim");
+	}, [setStep]);
+
+	useEffect(() => {
+		if (!step && balance.data != undefined) {
+			updateState();
+		}
+	}, [balance.data, setStep]);
 
 	const submissionStatus: {
 		[key in ProofSubmission["status"]]: BreadCumbStatus;
@@ -76,7 +102,7 @@ export const SubmitProofModal = ({
 				payment_service_address={payment_service_address}
 				user_address={user_address}
 				setOpen={modal.setOpen}
-				updateState={updateState}
+				updateState={goToNextStep}
 			/>
 		),
 		submit: () => <SubmitProofStep />,
@@ -125,7 +151,13 @@ export const SubmitProofModal = ({
 						/>
 					</div>
 				</div>
-				<div className="w-full h-full">{modalBasedOnStep[step]()}</div>
+				<div className="w-full h-full">
+					{step ? (
+						modalBasedOnStep[step]()
+					) : (
+						<p className="text-center">Loading...</p>
+					)}
+				</div>
 			</div>
 		</Modal>
 	);

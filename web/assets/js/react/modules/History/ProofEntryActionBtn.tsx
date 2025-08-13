@@ -235,6 +235,7 @@ export const ProofEntryActionBtn = ({
 				onConfirm={handleConfirmBump}
 				isConfirmLoading={submitProofMessageLoading}
 				previousMaxFee={proof.submitted_max_fee}
+				lastTimeSubmitted={proof.inserted_at}
 			/>
 		</td>
 	);

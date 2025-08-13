@@ -3,6 +3,7 @@ import { Modal } from ".";
 import { Button } from "..";
 import { useAligned, useEthPrice } from "../../hooks";
 import { useToast } from "../../state/toast";
+import { timeAgoInHs } from "../../utils/date";
 
 type BumpChoice = "instant" | "default" | "custom";
 
@@ -13,6 +14,7 @@ type Props = {
     isConfirmLoading?: boolean;
     maxWidth?: number;
     previousMaxFee: string;
+    lastTimeSubmitted: string;
 };
 
 export const BumpFeeModal = ({
@@ -22,6 +24,7 @@ export const BumpFeeModal = ({
     isConfirmLoading = false,
     maxWidth = 520,
     previousMaxFee,
+    lastTimeSubmitted,
 }: Props) => {
     const { price } = useEthPrice();
     const [choice, setChoice] = useState<BumpChoice>("default");
@@ -138,7 +141,14 @@ export const BumpFeeModal = ({
 
         return (
             <div className="flex flex-col gap-3">
-                <div className="mb-3 p-3 bg-contrast-100/10 rounded-lg">
+                <p className="text-xs bg-yellow gap-2 rounded w-fit p-1 px-2" style={{ color: "black" }}>
+                    {timeAgoInHs(lastTimeSubmitted) > 6
+                        ? (<>We suggest bumping the fee, since the proof was submitted more than 6 hours ago.</>)
+                        : (<>We recommend waiting before bumping the fee, the proof was submitted within the last 6 hours.</>)
+                    }
+                </p>
+
+                <div className="p-3 bg-contrast-100/10 rounded-lg">
                     <div className="text-sm opacity-80">Previous submitted max fee:</div>
                     <div className="font-medium">{currentFeeEth} ETH</div>
                 </div>
@@ -288,10 +298,6 @@ export const BumpFeeModal = ({
                 <div className="min-h-[280px]">
                     {renderContent()}
                 </div>
-
-                <p className="text-xs opacity-70">
-                    Note: Bumping the fee is not recommended if the proof was submitted within the last 6 hours.
-                </p>
 
                 <div className="mt-6 flex justify-end gap-3">
                     <Button 

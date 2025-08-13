@@ -1,1 +1,3 @@
-export const ClaimStep = () => {};
+export const ClaimStep = () => {
+	return <div>Claim</div>;
+};

@@ -1,3 +1,5 @@
 import React from "react";
 
-export const DepositStep = () => {};
+export const DepositStep = () => {
+	return <div>Deposit</div>;
+};

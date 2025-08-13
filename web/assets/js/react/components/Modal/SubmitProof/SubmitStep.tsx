@@ -1,3 +1,5 @@
 import React from "react";
 
-export const SubmitProofStep = () => {};
+export const SubmitProofStep = () => {
+	return <div>Sumbmit proof</div>;
+};

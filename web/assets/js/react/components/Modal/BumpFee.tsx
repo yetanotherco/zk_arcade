@@ -141,13 +141,6 @@ export const BumpFeeModal = ({
 
         return (
             <div className="flex flex-col gap-3">
-                <p className="text-xs bg-yellow gap-2 rounded w-fit p-1 px-2" style={{ color: "black" }}>
-                    {timeAgoInHs(lastTimeSubmitted) > 6
-                        ? (<>We suggest bumping the fee, since the proof was submitted more than 6 hours ago.</>)
-                        : (<>We recommend waiting before bumping the fee, the proof was submitted within the last 6 hours.</>)
-                    }
-                </p>
-
                 <div className="p-3 bg-contrast-100/10 rounded-lg">
                     <div className="text-sm opacity-80">Previous submitted max fee:</div>
                     <div className="font-medium">{currentFeeEth} ETH</div>
@@ -269,13 +262,8 @@ export const BumpFeeModal = ({
                         USD
                     </p>
                     <p className="mt-1 text-xs opacity-70">
-                        Define your own max fee (must be greater than the one submitted before).
+                        Define your own max fee, that must be greater than the current max fee of {currentFeeEth} ETH.
                     </p>
-                    {choice === "custom" && customEth && !isCustomFeeInputValid && (
-                        <p className="mt-1 text-xs text-red-400">
-                            Fee must be greater than {currentFeeEth} ETH
-                        </p>
-                    )}
                 </div>
             </div>
         );
@@ -290,12 +278,20 @@ export const BumpFeeModal = ({
             shouldCloseOnOutsideClick={!isConfirmLoading}
         >
             <div className="bg-contrast-100 rounded-2xl p-6 text-white">
-                <h3 className="text-xl font-semibold mb-4">Bump Fee</h3>
-                <p className="text-sm opacity-80 mb-4">
+                <h3 className="text-xl font-semibold mb-3">Bump Fee</h3>
+
+                <p className="text-xs bg-yellow gap-2 rounded w-fit p-1 px-2 mb-2" style={{ color: "black" }}>
+                    {timeAgoInHs(lastTimeSubmitted) > 6
+                        ? (<>We suggest bumping the fee, since the proof was submitted more than 6 hours ago.</>)
+                        : (<>We recommend waiting before bumping the fee, the proof was submitted within the last 6 hours.</>)
+                    }
+                </p>
+
+                <p className="text-sm opacity-80">
                     Choose how much you want to increase the fee to retry your proof.
                 </p>
 
-                <div className="min-h-[280px]">
+                <div className="">
                     {renderContent()}
                 </div>
 

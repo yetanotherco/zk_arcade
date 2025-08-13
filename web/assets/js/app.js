@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const copy = async () => {
             const text = el.textContent.trim();
             await navigator.clipboard.writeText(text);
-            btn.innerHTML = `<span class="hero-check w-5 h-5"></span>`;
+            btn.innerHTML = `<span class="hero-check w-5 h-5" style="color: #18FF7F;"></span>`;
             setTimeout(() => (btn.innerHTML = `<span class="hero-document-duplicate w-5 h-5"></span>`), 1200);
         };
 

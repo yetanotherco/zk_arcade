@@ -13,6 +13,8 @@ type Props = {
 	user_address: Address;
 };
 
+const ALIGNED_DEPOSIT_LIMIT = 0.01;
+
 export const DepositOnAlignedModal = ({
 	open,
 	setOpen,
@@ -76,6 +78,22 @@ export const DepositOnAlignedModal = ({
 		}
 	}, [sendFunds.receipt.isError, sendFunds.receipt.error]);
 
+	const handleBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		const numValue = Number(value);
+		
+		if (numValue > ALIGNED_DEPOSIT_LIMIT) {
+			setBalanceValue(ALIGNED_DEPOSIT_LIMIT.toString());
+		} else {
+			setBalanceValue(value);
+		}
+	};
+
+	const isValidAmount = () => {
+		const numValue = Number(balanceValue);
+		return numValue > 0 && numValue <= ALIGNED_DEPOSIT_LIMIT;
+	};
+
 	return (
 		<Modal maxWidth={500} open={open} setOpen={setOpen}>
 			<div className="bg-contrast-100 w-full p-10 rounded flex flex-col items-center gap-8">
@@ -84,12 +102,13 @@ export const DepositOnAlignedModal = ({
 				</h3>
 				<div className="w-full">
 					<FormInput
-						label="Amount to deposit in eth:"
+						label="Amount to deposit in ETH:"
 						placeholder="0.0001"
 						type="number"
 						value={balanceValue}
-						onChange={e => setBalanceValue(e.target.value)}
+						onChange={handleBalanceChange}
 						min="0"
+						max={ALIGNED_DEPOSIT_LIMIT.toString()}
 						step="0.0001"
 					/>
 					<p className="mt-1">
@@ -103,6 +122,11 @@ export const DepositOnAlignedModal = ({
 						USD
 					</p>
 				</div>
+				{Number(balanceValue) >= ALIGNED_DEPOSIT_LIMIT && (
+					<p className="text-sm -mt-2 opacity-70">
+						The maximum deposit value is {ALIGNED_DEPOSIT_LIMIT} ETH
+					</p>
+				)}
 				<div>
 					<Button
 						variant="text"
@@ -117,7 +141,7 @@ export const DepositOnAlignedModal = ({
 							await sendFunds.send(balanceValue);
 						}}
 						isLoading={sendFunds.receipt.isLoading}
-						disabled={Number(balanceValue) == 0}
+						disabled={!isValidAmount()}
 					>
 						Confirm
 					</Button>

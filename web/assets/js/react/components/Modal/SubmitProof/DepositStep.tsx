@@ -6,6 +6,8 @@ import { Button } from "../../Button";
 import { formatEther } from "viem";
 import { useToast } from "../../../state/toast";
 
+const ALIGNED_DEPOSIT_LIMIT = 0.01;
+
 export const DepositStep = ({
 	payment_service_address,
 	user_address,
@@ -79,6 +81,22 @@ export const DepositStep = ({
 		}
 	}, [sendFunds.receipt.isError, sendFunds.receipt.error]);
 
+	const handleBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		const numValue = Number(value);
+
+		if (numValue > ALIGNED_DEPOSIT_LIMIT) {
+			setBalanceValue(ALIGNED_DEPOSIT_LIMIT.toString());
+		} else {
+			setBalanceValue(value);
+		}
+	};
+
+	const isValidAmount = () => {
+		const numValue = Number(balanceValue);
+		return numValue > 0 && numValue <= ALIGNED_DEPOSIT_LIMIT;
+	};
+
 	return (
 		<div className="w-full h-full flex flex-col justify-between">
 			<div className="w-full">
@@ -87,7 +105,7 @@ export const DepositStep = ({
 					placeholder="0.0001"
 					type="number"
 					value={balanceValue}
-					onChange={e => setBalanceValue(e.target.value)}
+					onChange={handleBalanceChange}
 					min="0"
 					step="0.0001"
 				/>
@@ -114,6 +132,11 @@ export const DepositStep = ({
 						we suggest you deposit at least {recommendedBalance} ETH
 					</p>
 				)}
+				{Number(balanceValue) >= ALIGNED_DEPOSIT_LIMIT && (
+					<p className="bg-red/20 rounded p-2 text-red">
+						The maximum deposit value is {ALIGNED_DEPOSIT_LIMIT} ETH
+					</p>
+				)}
 				<p>
 					Your current balance:{" "}
 					{Number(formatEther(balance.data || BigInt(0))).toFixed(4)}{" "}
@@ -134,7 +157,7 @@ export const DepositStep = ({
 						await sendFunds.send(balanceValue);
 					}}
 					isLoading={sendFunds.receipt.isLoading}
-					disabled={Number(balanceValue) == 0}
+					disabled={Number(balanceValue) == 0 || !isValidAmount()}
 				>
 					Deposit
 				</Button>

@@ -9,7 +9,8 @@ type ButtonVariant =
 	| "contrast";
 
 const buttonVariantStyles: { [key in ButtonVariant]: string } = {
-	"accent-fill": "px-10 text-black py-2 bg-accent-100",
+	"accent-fill":
+		"px-10 text-black py-2 bg-accent-100 hover:bg-accent-200 transition-colors",
 	disabled: "px-10 py-2 bg-disabled",
 	"disabled-text": "font-normal",
 	text: "font-bold hover:underline",

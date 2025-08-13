@@ -654,8 +654,8 @@ impl Game {
             true,
         );
 
-        let mut sp1_res = Ok(());
-        let mut risc0_res = Ok(());
+        let mut sp1_res: Result<String, _> = Err("SP1 not used".to_string());
+        let mut risc0_res: Result<String, _> = Err("RISC0 not used".to_string());
 
         if self.proving_systems.contains(&SP1.to_string()) {
             // If it hasn't won, then don't include the last level as it wasn't completed
@@ -672,12 +672,12 @@ impl Game {
             let sp1_handle = thread::spawn(move || {
                 let res = sp1_prove(sp1_levels_completion_log, levels, sp1_address);
                 if let Ok(receipt) = res {
-                    sp1_save_proof(receipt).expect("To be able to write proof");
+                    sp1_save_proof(receipt).expect("To be able to write proof")
                 } else {
                     panic!("Could prove program")
                 }
             });
-            sp1_res = sp1_handle.join();
+            sp1_res = sp1_handle.join().map_err(|_| "SP1 proving failed".to_string());
         }
 
         if self.proving_systems.contains(&RISC0.to_string()) {
@@ -694,12 +694,12 @@ impl Game {
             let risc0_handle = thread::spawn(move || {
                 let res = risc0_prove(risc0_levels_completion_log, levels, risc0_address);
                 if let Ok(receipt) = res {
-                    risc0_save_proof(receipt).expect("To be able to write proof");
+                    risc0_save_proof(receipt).expect("To be able to write proof")
                 } else {
                     panic!("Could prove program")
                 }
             });
-            risc0_res = risc0_handle.join();
+            risc0_res = risc0_handle.join().map_err(|_| "RISC0 proving failed".to_string());
         }
 
         let _ = proving_alert_handle.join();
@@ -710,19 +710,18 @@ impl Game {
             println!("{}", self.render_death_screen());
         }
 
-        let file_names: Vec<&str> = self
-            .proving_systems
-            .iter()
-            .map(|system| match system.as_str() {
-                SP1 => "sp1_solution.bin",
-                RISC0 => "risc0_solution.bin",
-                _ => "",
-            })
-            .collect();
-        let msg = if sp1_res.is_ok() && risc0_res.is_ok() {
+        let mut successful_files = Vec::new();
+        if let Ok(filename) = &sp1_res {
+            successful_files.push(filename.as_str());
+        }
+        if let Ok(filename) = &risc0_res {
+            successful_files.push(filename.as_str());
+        }
+
+        let msg = if !successful_files.is_empty() {
             format!(
                 "Proof saved to {}. Submit it to https://test.zkarcade.com and earn points!",
-                file_names.join(", ")
+                successful_files.join(", ")
             )
         } else {
             "Could not prove program, try again...".to_string()

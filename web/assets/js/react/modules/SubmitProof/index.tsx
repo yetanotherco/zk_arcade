@@ -5,7 +5,6 @@ import { useModal } from "../../hooks/useModal";
 import { Address } from "../../types/blockchain";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
-import { ProofSubmission } from "../../types/aligned";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 
 type Props = {
@@ -14,14 +13,12 @@ type Props = {
 	user_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
-	proof?: ProofSubmission;
 };
 
 const SubmitModal = ({
 	user_address,
 	leaderboard_address,
 	payment_service_address,
-	proof,
 	batcher_url,
 }: Omit<Props, "network">) => {
 	const { open, setOpen, toggleOpen } = useModal();
@@ -35,7 +32,6 @@ const SubmitModal = ({
 			<SubmitProofModal
 				modal={{ open, setOpen }}
 				batcher_url={batcher_url}
-				proof={proof}
 				leaderboard_address={leaderboard_address}
 				payment_service_address={payment_service_address}
 				user_address={user_address}

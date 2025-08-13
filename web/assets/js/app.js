@@ -14,15 +14,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "text-xs opacity-70 hover:opacity-100 focus:outline-none";
-        btn.innerHTML = `<span class="hero-document-duplicate w-5 h-5 opacity-70 hover:opacity-100"></span>`;
+        btn.className = "text-xs focus:outline-none";
+        btn.innerHTML = `<span class="hero-document-duplicate w-5 h-5"></span>`;
         wrap.appendChild(btn);
 
         const copy = async () => {
             const text = el.textContent.trim();
             await navigator.clipboard.writeText(text);
-            btn.innerHTML = `<span class="hero-check w-5 h-5 opacity-70 hover:opacity-100"></span>`;
-            setTimeout(() => (btn.innerHTML = `<span class="hero-document-duplicate w-5 h-5 opacity-70 hover:opacity-100"></span>`), 1200);
+            btn.innerHTML = `<span class="hero-check w-5 h-5"></span>`;
+            setTimeout(() => (btn.innerHTML = `<span class="hero-document-duplicate w-5 h-5"></span>`), 1200);
         };
 
         btn.addEventListener("click", copy);

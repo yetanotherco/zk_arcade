@@ -48,6 +48,8 @@ export const SubmitProofModal = ({
 	proof,
 	payment_service_address,
 	user_address,
+	batcher_url,
+	leaderboard_address,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
 	const { balance } = useBatcherPaymentService({
@@ -96,6 +98,23 @@ export const SubmitProofModal = ({
 	const availableBalance = balance.data ? formatEther(balance.data) : "0";
 	const shouldDeposit = !proof && Number(availableBalance) > 0.0001;
 
+	const headerBasedOnStep = {
+		deposit: {
+			header: "Deposit into Aligned Batcher",
+			subtitle:
+				"You need to deposit money into aligned batcher in order to verify your proof on Aligned.",
+		},
+		submit: {
+			header: "Submit your proof",
+			subtitle:
+				"Submit your game solution proof to Aligned to be verified.",
+		},
+		claim: {
+			header: "Claim your points",
+			subtitle: "Claim your points into the leaderboard contract.",
+		},
+	};
+
 	const modalBasedOnStep = {
 		deposit: () => (
 			<DepositStep
@@ -105,7 +124,16 @@ export const SubmitProofModal = ({
 				updateState={goToNextStep}
 			/>
 		),
-		submit: () => <SubmitProofStep />,
+		submit: () => (
+			<SubmitProofStep
+				batcher_url={batcher_url}
+				leaderboard_address={leaderboard_address}
+				payment_service_addr={payment_service_address}
+				setOpen={modal.setOpen}
+				userProofs={[]}
+				user_address={user_address}
+			/>
+		),
 		claim: () => <ClaimStep />,
 	};
 
@@ -116,14 +144,13 @@ export const SubmitProofModal = ({
 			shouldCloseOnOutsideClick={false}
 			{...modal}
 		>
-			<div className="rounded w-full bg-contrast-100 p-10 flex flex-col items-center gap-10 h-[600px]">
+			<div className="rounded w-full bg-contrast-100 p-10 flex flex-col items-center gap-10">
 				<div>
 					<h1 className="text-center mb-2 text-lg font-normal">
-						Deposit into Aligned Batcher
+						{step ? headerBasedOnStep[step]["header"] : ""}
 					</h1>
 					<p className="text-text-200">
-						You need to deposit money into aligned batcher in order
-						to verify your proof on Aligned.
+						{step ? headerBasedOnStep[step]["subtitle"] : ""}
 					</p>
 				</div>
 				<div>
@@ -151,7 +178,7 @@ export const SubmitProofModal = ({
 						/>
 					</div>
 				</div>
-				<div className="w-full h-full">
+				<div className="w-full h-full max-h-[500px] overflow-scroll">
 					{step ? (
 						modalBasedOnStep[step]()
 					) : (

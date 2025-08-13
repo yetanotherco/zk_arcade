@@ -1,17 +1,9 @@
 import "phoenix_html";
 import "./react/index";
 import "./navbar";
-import {LiveSocket} from "phoenix_live_view";
-import {Socket} from "phoenix";
 
-export const Hooks = {};
-
-Hooks.CopyableCode = {
-    mounted() { this.decorate(); },
-    updated() { this.decorate(); },
-
-    decorate() {
-        this.el.querySelectorAll(".code-block").forEach((el) => {
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".code-block").forEach((el) => {
         if (el.dataset.copyDecorated) return;
         el.dataset.copyDecorated = "1";
 
@@ -34,9 +26,5 @@ Hooks.CopyableCode = {
         };
 
         btn.addEventListener("click", copy);
-        });
-    },
-};
-
-let liveSocket = new LiveSocket("/live", Socket, { hooks: Hooks });
-liveSocket.connect();
+    });
+});

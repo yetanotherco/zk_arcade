@@ -132,7 +132,7 @@ export const useLeaderboardContract = ({
 		if (txRest.isSuccess) {
 			addToast({
 				title: "Claiming points",
-				desc: "Your proof was submitted and verified successfully, waiting for receipt....",
+				desc: "Your proof was submitted successfully, waiting for receipt....",
 				type: "success",
 			});
 		}

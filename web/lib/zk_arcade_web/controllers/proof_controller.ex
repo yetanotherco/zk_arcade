@@ -170,7 +170,29 @@ defmodule ZkArcadeWeb.ProofController do
       {:ok, {:batch_inclusion, batch_data}} ->
         case Proofs.update_proof_status_submitted(pending_proof_id, batch_data) do
           {:ok, updated_proof} ->
-            Logger.info("Proof #{pending_proof_id} verified and updated successfully")
+            Logger.info("Proof #{pending_proof_id} submitted and updated successfully")
+
+            case ZkArcade.AlignedVerificationWatcher.wait_aligned_verification(submit_proof_message, batch_data) do
+              {:ok, _result} ->
+                Logger.info("Verification succeeded")
+                case Proofs.update_proof_status_verified(updated_proof.id) do
+                  {:ok, _} ->
+                    Logger.info("Proof #{updated_proof.id} status updated to verified")
+                  {:error, reason} ->
+                    Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
+                end
+              {:error, reason} ->
+                Logger.error("Error: #{inspect(reason)}")
+                case Proofs.update_proof_status_failed(updated_proof.id) do
+                  {:ok, _} ->
+                    Logger.info("Proof #{updated_proof.id} status updated to failed")
+                  {:error, reason} ->
+                    Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
+                end
+              nil ->
+                Logger.error("Error without reason")
+            end
+
             {:ok, updated_proof}
 
           {:error, reason} ->

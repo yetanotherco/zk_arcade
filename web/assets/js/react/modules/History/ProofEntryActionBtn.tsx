@@ -188,7 +188,7 @@ export const ProofEntryActionBtn = ({
 				<Button
 					variant="contrast"
 					className={`text-nowrap text-sm w-full ${(proof.status === "failed" || proof.status === "submitted") ? "opacity-50 cursor-default" : ""}`}
-					disabled={ proof.status === "failed" || proof.status === "pending" }
+					disabled={ proof.status === "failed"}
 					style={{ paddingLeft: 0, paddingRight: 0, paddingTop: 8, paddingBottom: 8 }}
 					onClick={handleBtnClick}
 					isLoading={

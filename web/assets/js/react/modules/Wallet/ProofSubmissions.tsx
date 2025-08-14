@@ -34,17 +34,22 @@ const Proof = ({
 	)}...${proof.verification_data_commitment.slice(-4)}`;
 
 	return (
-		<tr
-			className="cursor-pointer hover:bg-contrast-200 transition-colors"
-			onClick={toggleOpen}
-		>
-			<TableBodyItem text={proof.game} />
-			<ProofStatusWithTooltipDesc
-				proof={proof}
-				explorer_url={explorer_url}
-			/>
-			<ProofBatchMerkleRoot proof={proof} explorer_url={explorer_url} />
-			<TableBodyItem text={proofHashShorten} />
+		<>
+			<tr
+				className="cursor-pointer hover:bg-contrast-200 transition-colors"
+				onClick={toggleOpen}
+			>
+				<TableBodyItem text={proof.game} />
+				<ProofStatusWithTooltipDesc
+					proof={proof}
+					explorer_url={explorer_url}
+				/>
+				<ProofBatchMerkleRoot
+					proof={proof}
+					explorer_url={explorer_url}
+				/>
+				<TableBodyItem text={proofHashShorten} />
+			</tr>
 			<SubmitProofModal
 				modal={{ open, setOpen }}
 				proof={proof}
@@ -53,7 +58,7 @@ const Proof = ({
 				payment_service_address={payment_service_address}
 				user_address={user_address}
 			/>
-		</tr>
+		</>
 	);
 };
 

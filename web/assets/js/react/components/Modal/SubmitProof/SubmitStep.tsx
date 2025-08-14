@@ -3,6 +3,7 @@ import { FormInput } from "../../Form";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
 import {
 	NoncedVerificationdata,
+	ProofSubmission,
 	ProvingSystem,
 	provingSystemByteToName,
 	SubmitProof,
@@ -55,6 +56,7 @@ export const SubmitProofStep = ({
 	payment_service_addr,
 	userProofs,
 	setOpen,
+	proofSubmission,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -62,6 +64,7 @@ export const SubmitProofStep = ({
 	payment_service_addr: Address;
 	userProofs: { level: number; game_config: string }[];
 	setOpen: (open: boolean) => void;
+	proofSubmission?: ProofSubmission;
 }) => {
 	const chainId = useChainId();
 	const [game, setGame] = useState<GameId>("beast");
@@ -263,6 +266,50 @@ export const SubmitProofStep = ({
 		chainId,
 		nonce,
 	]);
+
+	if (
+		proofSubmission?.status === "pending" ||
+		proofSubmission?.status === "underpriced"
+	) {
+		return (
+			<div className="flex flex-col gap-4 justify-between h-full">
+				{proofSubmission.status === "pending" ? (
+					<p className="bg-yellow/20 rounded p-2 text-yellow">
+						The proof has been submitted to Aligned, and it will be
+						verified soon so you can claim your points.
+					</p>
+				) : (
+					<p className="bg-orange/20 rounded p-2 text-orange">
+						The proof seems is underpriced, we suggest you to bump
+						the fee.
+					</p>
+				)}
+
+				<div className="flex flex-col gap-2">
+					<p>Prover: {proofSubmission.proving_system}</p>
+					<p>Game: {proofSubmission.game}</p>
+					<p>Level reached: {proofSubmission.level_reached}</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (proofSubmission?.status === "failed") {
+		return (
+			<div className="flex flex-col gap-4 justify-between h-full">
+				<p className="bg-red/20 rounded p-2 text-red">
+					The proof failed to be verified, this can happen because the
+					proofs was invalid, or there was a problem in the batcher
+					that rejected the proof, please submit it again.
+				</p>
+				<div className="flex flex-col gap-2">
+					<p>Prover: {proofSubmission.proving_system}</p>
+					<p>Game: {proofSubmission.game}</p>
+					<p>Level reached: {proofSubmission.level_reached}</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex flex-col gap-4 justify-between h-full">

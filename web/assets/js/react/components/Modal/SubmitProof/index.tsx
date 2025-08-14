@@ -59,7 +59,7 @@ export const SubmitProofModal = ({
 
 	const updateState = useCallback(() => {
 		if (proof) {
-			if (proof.status === "pending") {
+			if (proof.status === "pending" || proof.status === "underpriced") {
 				setStep("submit");
 			}
 			if (proof.status === "claimed") {
@@ -96,7 +96,7 @@ export const SubmitProofModal = ({
 	};
 
 	const availableBalance = balance.data ? formatEther(balance.data) : "0";
-	const shouldDeposit = !proof && Number(availableBalance) > 0.0001;
+	const shouldDeposit = !proof ? Number(availableBalance) < 0.0001 : false;
 
 	const headerBasedOnStep = {
 		deposit: {
@@ -132,6 +132,7 @@ export const SubmitProofModal = ({
 				setOpen={modal.setOpen}
 				userProofs={[]}
 				user_address={user_address}
+				proofSubmission={proof}
 			/>
 		),
 		claim: () => <ClaimStep />,
@@ -157,7 +158,7 @@ export const SubmitProofModal = ({
 					<div className="flex gap-8 justify-center w-full">
 						<BreadCumb
 							step="Deposit"
-							status={shouldDeposit ? "done" : "pending"}
+							status={shouldDeposit ? "pending" : "done"}
 						/>
 						<BreadCumb
 							step="Submission"

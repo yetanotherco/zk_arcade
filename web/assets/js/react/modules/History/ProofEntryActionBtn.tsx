@@ -67,17 +67,17 @@ export const ProofEntryActionBtn = ({
 		const submittedGameConfigBigInt = BigInt("0x" + proof.game_config);
 		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
 
+		if (proof.status === "failed" || proof.status === "submitted") {
+			// nothing to do
+			return;
+		}
+
 		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
 			addToast({
 				title: "Game mismatch",
 				desc: "Current game has changed since the proof was created",
 				type: "error",
 			});
-			return;
-		}
-
-		if (proof.status === "failed") {
-			// nothing to do
 			return;
 		}
 
@@ -153,7 +153,7 @@ export const ProofEntryActionBtn = ({
 			<div className="relative group/proof-history-item w-full">
 				<Button
 					variant="contrast"
-					className="text-nowrap text-sm w-full"
+					className={`text-nowrap text-sm w-full ${(proof.status === "failed" || proof.status === "submitted") ? "opacity-50 cursor-default" : ""}`}
 					disabled={
 						proof.status === "failed" || proof.status === "pending"
 					}

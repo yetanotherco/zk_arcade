@@ -79,7 +79,7 @@ export const SubmitProofModal = ({
 	const goToNextStep = useCallback(() => {
 		if (step === "deposit") setStep("submit");
 		if (step === "submit") setStep("claim");
-	}, [setStep]);
+	}, [step, setStep]);
 
 	useEffect(() => {
 		if (!step && balance.data != undefined) {

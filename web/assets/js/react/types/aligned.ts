@@ -1,5 +1,7 @@
 import { Address, Hex } from "viem";
 
+export type BeastProofClaimed = { level: number; game_config: string };
+
 export type ProofSubmission = {
 	id: string;
 	game: string;

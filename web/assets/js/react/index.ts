@@ -34,6 +34,7 @@ define(
 			"user_address",
 			"batcher_url",
 			"leaderboard_address",
+			"beast_submissions",
 		],
 	}
 );

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FormInput } from "../../Form";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
 import {
+	BeastProofClaimed,
 	NoncedVerificationdata,
 	ProofSubmission,
 	ProvingSystem,
@@ -62,7 +63,7 @@ export const SubmitProofStep = ({
 	user_address: Address;
 	leaderboard_address: Address;
 	payment_service_addr: Address;
-	userProofs: { level: number; game_config: string }[];
+	userProofs: BeastProofClaimed[];
 	setOpen: (open: boolean) => void;
 	proofSubmission?: ProofSubmission;
 }) => {

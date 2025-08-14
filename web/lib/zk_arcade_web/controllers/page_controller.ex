@@ -32,16 +32,35 @@ defmodule ZkArcadeWeb.PageController do
 
   defp get_proofs(nil, page, size), do: []
 
-  defp get_proofs(address, page, size) do
+  defp get_proofs_and_submissions(address, page, size) do
     proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})
 
-    proofs
+    beast_submissions =
+      case proofs do
+        [] -> []
+        proofs ->
+          # TODO: Pass the levels for the current game only, not all of them. This will be easier when we
+          # monitor the current game in the backend, logic not developed yet
+          proofs
+          |> Enum.filter(fn proof -> proof.game == "Beast" end)
+          |> Enum.filter(fn proof -> proof.status != "failed" end)
+          |> Enum.map(fn proof ->
+            %{
+              level: proof.level_reached,
+              game_config: proof.game_config
+            }
+          end)
+      end
+
+    beast_submissions_json = Jason.encode!(beast_submissions)
+
+    {proofs, beast_submissions_json}
   end
 
   def home(conn, _params) do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet, 1, 5)
+    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.list_proofs()
     total_players = ZkArcade.Accounts.list_wallets()
 
@@ -77,8 +96,11 @@ defmodule ZkArcadeWeb.PageController do
 
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
 
+
+
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
+      |> assign(:beast_submissions, beast_submissions_json)
       |> assign(:wallet, wallet)
       |> assign(:leaderboard, leaderboard)
       |> assign(:top_users, top_users)
@@ -92,7 +114,7 @@ defmodule ZkArcadeWeb.PageController do
 
   def game(conn, %{"name" => _game_name}) do
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet, 1, 5)
+    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
     acknowledgements = [
       %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
       %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
@@ -101,25 +123,6 @@ defmodule ZkArcadeWeb.PageController do
     {username, position} = get_username_and_position(wallet)
 
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
-
-    user_proofs =
-      case proofs do
-        [] -> []
-        proofs ->
-          # TODO: Pass the levels for the current game only, not all of them. This will be easier when we
-          # monitor the current game in the backend, logic not developed yet
-          proofs
-          |> Enum.filter(fn proof -> proof.game == "Beast" end)
-          |> Enum.filter(fn proof -> proof.status != "failed" end)
-          |> Enum.map(fn proof ->
-            %{
-              level: proof.level_reached,
-              game_config: proof.game_config
-            }
-          end)
-      end
-
-    user_proofs_json = Jason.encode!(user_proofs)
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -151,13 +154,13 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:username, username)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
-      |> assign(:user_proofs_json, user_proofs_json)
+      |> assign(:beast_submissions, beast_submissions_json)
       |> render(:game)
   end
 
   def history(conn, _params) do
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet, 1, 10)
+    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 10)
 
     {username, position} = get_username_and_position(wallet)
 
@@ -168,6 +171,7 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:network, Application.get_env(:zk_arcade, :network))
     |> assign(:proofs_sent_total, length(proofs))
     |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:beast_submissions, beast_submissions_json)
     |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
     |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
     |> assign(:username, username)
@@ -178,7 +182,7 @@ defmodule ZkArcadeWeb.PageController do
 
   def leaderboard(conn, params) do
     wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet, 1, 5)
+    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 10)
 
     entries_per_page = 10
 
@@ -213,6 +217,7 @@ defmodule ZkArcadeWeb.PageController do
     conn
     |> assign(:wallet, wallet)
     |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:beast_submissions, beast_submissions_json)
     |> assign(:top_users, top_users)
     |> assign(:user_data, user_data)
     |> assign(:user_in_current_page, user_in_current_page?)

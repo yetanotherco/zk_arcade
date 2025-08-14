@@ -57,6 +57,7 @@ const Proof = ({
 				leaderboard_address={leaderboard_address}
 				payment_service_address={payment_service_address}
 				user_address={user_address}
+				userBeastSubmissions={[]}
 			/>
 		</>
 	);

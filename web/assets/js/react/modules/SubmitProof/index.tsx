@@ -13,6 +13,7 @@ type Props = {
 	user_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
+	beast_submissions: string;
 };
 
 const SubmitModal = ({
@@ -20,6 +21,7 @@ const SubmitModal = ({
 	leaderboard_address,
 	payment_service_address,
 	batcher_url,
+	beast_submissions,
 }: Omit<Props, "network">) => {
 	const { open, setOpen, toggleOpen } = useModal();
 
@@ -35,6 +37,7 @@ const SubmitModal = ({
 				leaderboard_address={leaderboard_address}
 				payment_service_address={payment_service_address}
 				user_address={user_address}
+				userBeastSubmissions={JSON.parse(beast_submissions)}
 			/>
 		</>
 	);
@@ -46,6 +49,7 @@ export default ({
 	user_address,
 	batcher_url,
 	leaderboard_address,
+	beast_submissions,
 }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -56,6 +60,7 @@ export default ({
 					user_address={user_address}
 					batcher_url={batcher_url}
 					leaderboard_address={leaderboard_address}
+					beast_submissions={beast_submissions}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Modal, ModalProps } from "../Modal";
 import { Address, formatEther } from "viem";
-import { ProofSubmission } from "../../../types/aligned";
+import { BeastProofClaimed, ProofSubmission } from "../../../types/aligned";
 import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentService";
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
@@ -15,6 +15,7 @@ type Props = {
 	batcher_url: string;
 	leaderboard_address: Address;
 	proof?: ProofSubmission;
+	userBeastSubmissions: BeastProofClaimed[];
 };
 
 type BreadCumbStatus = "done" | "pending" | "failed" | "none";
@@ -50,6 +51,7 @@ export const SubmitProofModal = ({
 	user_address,
 	batcher_url,
 	leaderboard_address,
+	userBeastSubmissions,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
 	const { balance } = useBatcherPaymentService({
@@ -130,7 +132,7 @@ export const SubmitProofModal = ({
 				leaderboard_address={leaderboard_address}
 				payment_service_addr={payment_service_address}
 				setOpen={modal.setOpen}
-				userProofs={[]}
+				userProofs={userBeastSubmissions}
 				user_address={user_address}
 				proofSubmission={proof}
 			/>

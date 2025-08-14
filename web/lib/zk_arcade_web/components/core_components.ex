@@ -64,6 +64,7 @@ defmodule ZkArcadeWeb.CoreComponents do
               user_address={@wallet}
               batcher_url={@batcher_url}
               leaderboard_address={@leaderboard_address}
+              beast_submissions={@beast_submissions}
           />
 
           <x-app-user-wallet

@@ -307,12 +307,6 @@ defmodule ZkArcadeWeb.ProofController do
 
     verification_data = submit_proof_message["verificationData"]["verificationData"]
 
-    status = ZkArcade.ServiceManagerContract.batch_status_call_with_sender(
-      batch_inclusion_data["batch_merkle_root"],
-      payment_service_addr
-    )
-    Logger.info("Status for merkle root #{inspect(batch_inclusion_data["batch_merkle_root"])} is #{inspect(status)}")
-
     proving_system_name_to_byte = %{
       "GnarkPlonkBls12_381" => 0,
       "GnarkPlonkBn254" => 1,

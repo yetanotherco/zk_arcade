@@ -198,7 +198,10 @@ export const BumpFeeModal = ({
                             />
                             <span className="font-medium relative group">
                                 Instant
-                                <div className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+                                <div
+                                    className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words whitespace-normal max-w-sm min-w-[200px] z-10 pointer-events-none"
+                                    style={{minWidth:"400px"}}
+                                >
                                     Guarantee inclusion by paying the full price of submitting the batch
                                 </div>
                             </span>
@@ -226,7 +229,10 @@ export const BumpFeeModal = ({
                             />
                             <span className="font-medium relative group">
                                 Default
-                                <div className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+                                <div
+                                    className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words whitespace-normal max-w-sm min-w-[200px] z-10 pointer-events-none"
+                                    style={{minWidth:"400px"}}
+                                >
                                     Recommended fee, estimated for a batch of 16 proofs
                                 </div>
                             </span>
@@ -255,7 +261,10 @@ export const BumpFeeModal = ({
                         />
                         <span className="font-medium relative group">
                             Custom
-                            <div className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+                            <div
+                                className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words whitespace-normal max-w-sm min-w-[200px] z-10 pointer-events-none"
+                                style={{minWidth:"400px"}}
+                            >
                                 Define your own max fee, that must be greater than the current max fee of {currentFeeEth} ETH
                             </div>
                         </span>
@@ -324,9 +333,12 @@ export const BumpFeeModal = ({
                             />
                         </svg>
 
-                        <span className="absolute left-1/2 -translate-x-1/4 mt-2 w-max opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10">
+                        <span
+                            className="absolute left-1/2 -translate-x-1/4 mt-2 max-w-sm break-words whitespace-normal opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10"
+                            style={{ minWidth: "400px" }}
+                        >
                             <p
-                                className="text-xs bg-yellow gap-2 rounded w-fit p-1 px-2 mb-2"
+                                className="text-xs bg-yellow gap-2 rounded p-1 px-2 mb-2"
                                 style={{ color: "black" }}
                             >
                                 {timeAgoInHs(lastTimeSubmitted) > 6

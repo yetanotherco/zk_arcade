@@ -4,7 +4,7 @@ import SubmitProof from "./modules/SubmitProof/";
 import History from "./modules/History/";
 import DepositOnAlignedBtn from "./modules/History/DepositOnAlignedBtn";
 import UpdateUsernameBtn from "./modules/History/UpdateUsernameBtn";
-import CurrentBeastGame from "./modules/BeastGame/";
+import { CurrentBeastGame, SubmitBeastGameBtn } from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
 
@@ -67,6 +67,20 @@ define(
 define(
 	{ "x-app-history-update-username-btn": UpdateUsernameBtn },
 	{ attributes: ["network", "username"] }
+);
+
+define(
+	{ "x-app-submit-beast-solution-btn": SubmitBeastGameBtn },
+	{
+		attributes: [
+			"network",
+			"payment_service_address",
+			"user_address",
+			"batcher_url",
+			"leaderboard_address",
+			"beast_submissions",
+		],
+	}
 );
 
 define(

@@ -40,7 +40,7 @@ const BreadCumb = ({
 	return (
 		<div
 			onClick={isClickable ? onClick : undefined}
-			className={`w-[220px] ${
+			className={`w-full max-w-[220px] ${
 				isClickable ? "cursor-pointer hover:opacity-70" : ""
 			}`}
 		>
@@ -163,7 +163,7 @@ export const SubmitProofModal = ({
 			shouldCloseOnOutsideClick={false}
 			{...modal}
 		>
-			<div className="rounded w-full bg-contrast-100 p-10 flex flex-col items-center gap-10">
+			<div className="rounded w-full bg-contrast-100 p-10 flex flex-col items-center gap-10 max-h-[90vh]">
 				<div>
 					<h1 className="text-center mb-2 text-lg font-normal">
 						{step ? headerBasedOnStep[step]["header"] : ""}
@@ -172,7 +172,7 @@ export const SubmitProofModal = ({
 						{step ? headerBasedOnStep[step]["subtitle"] : ""}
 					</p>
 				</div>
-				<div>
+				<div className="w-full">
 					<div className="flex gap-8 justify-center w-full">
 						<BreadCumb
 							step="Deposit"

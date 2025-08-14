@@ -143,6 +143,14 @@ export const DepositStep = ({
 					ETH
 				</p>
 			</div>
+			<Button
+				variant="text"
+				className="font-normal self-end flex items-center gap-2"
+				onClick={() => updateState()}
+			>
+				Next
+				<span className="hero-chevron-right"></span>
+			</Button>
 			<div className="flex items-center justify-end">
 				<Button
 					variant="text"

@@ -17,35 +17,15 @@ type Props = {
 	userBeastSubmissions: BeastProofClaimed[];
 };
 
-type BreadCumbStatus = "done" | "pending" | "failed" | "none";
-
-const BreadCumb = ({
-	status,
-	step,
-	onClick,
-}: {
-	status: BreadCumbStatus;
-	step: string;
-	onClick?: () => void;
-}) => {
-	const bg = {
-		done: "bg-accent-100",
-		pending: "bg-yellow",
-		failed: "bg-red",
-		none: "bg-contrast-200",
-	};
-
-	const isClickable = Boolean(onClick);
-
+const BreadCumb = ({ active, step }: { active: boolean; step: string }) => {
 	return (
-		<div
-			onClick={isClickable ? onClick : undefined}
-			className={`w-full max-w-[220px] ${
-				isClickable ? "cursor-pointer hover:opacity-70" : ""
-			}`}
-		>
+		<div className="w-full max-w-[220px]">
 			<p className="text-center mb-1">{step}</p>
-			<div className={`h-[5px] rounded w-full ${bg[status]}`}></div>
+			<div
+				className={`h-[5px] rounded w-full ${
+					active ? "bg-accent-100" : "bg-contrast-200"
+				}`}
+			></div>
 		</div>
 	);
 };
@@ -95,19 +75,6 @@ export const SubmitProofModal = ({
 		}
 	}, [balance.data, setStep]);
 
-	const submissionStatus: {
-		[key in ProofSubmission["status"]]: BreadCumbStatus;
-	} = {
-		pending: "pending",
-		claimed: "done",
-		failed: "failed",
-		submitted: "done",
-		underpriced: "pending",
-	};
-
-	const availableBalance = balance.data ? formatEther(balance.data) : "0";
-	const shouldDeposit = !proof ? Number(availableBalance) < 0.0001 : false;
-
 	const headerBasedOnStep = {
 		deposit: {
 			header: "Deposit into Aligned Batcher",
@@ -140,6 +107,7 @@ export const SubmitProofModal = ({
 				leaderboard_address={leaderboard_address}
 				payment_service_addr={payment_service_address}
 				setOpen={modal.setOpen}
+				setStep={setStep}
 				userProofs={userBeastSubmissions}
 				user_address={user_address}
 				proofSubmission={proof}
@@ -174,36 +142,15 @@ export const SubmitProofModal = ({
 				</div>
 				<div className="w-full">
 					<div className="flex gap-8 justify-center w-full">
-						<BreadCumb
-							step="Deposit"
-							status={shouldDeposit ? "pending" : "done"}
-							onClick={
-								step === "submit" && !proof
-									? () => setStep("deposit")
-									: undefined
-							}
-						/>
+						<BreadCumb step="Deposit" active={true} />
 						<BreadCumb
 							step="Submission"
-							status={
-								proof ? submissionStatus[proof.status] : "none"
-							}
-							onClick={
-								step === "deposit" && !proof
-									? () => setStep("submit")
-									: undefined
-							}
+							active={step === "submit" || step === "claim"}
 						/>
 						<BreadCumb
 							step="Claim"
 							// Check if the game is outdated and not claimed and mark as failed
-							status={
-								proof?.status === "submitted"
-									? "pending"
-									: proof?.status === "claimed"
-									? "done"
-									: "none"
-							}
+							active={step === "claim"}
 						/>
 					</div>
 				</div>

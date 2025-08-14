@@ -57,6 +57,7 @@ export const SubmitProofStep = ({
 	payment_service_addr,
 	userProofs,
 	setOpen,
+	setStep,
 	proofSubmission,
 }: {
 	batcher_url: string;
@@ -65,6 +66,7 @@ export const SubmitProofStep = ({
 	payment_service_addr: Address;
 	userProofs: BeastProofClaimed[];
 	setOpen: (open: boolean) => void;
+	setStep: (step: string) => void;
 	proofSubmission?: ProofSubmission;
 }) => {
 	const chainId = useChainId();
@@ -313,7 +315,7 @@ export const SubmitProofStep = ({
 	}
 
 	return (
-		<div className="flex flex-col gap-4 justify-between h-full">
+		<div className="flex flex-col gap-6 justify-between h-full">
 			<div className="w-full flex flex-col gap-8">
 				<div>
 					<p className="mb-2">What game have you proved?</p>
@@ -415,12 +417,20 @@ export const SubmitProofStep = ({
 					)}
 					{(balance.data || 0) < maxFee && (
 						<p className="text-red">
-							You have already submitted a proof with a higher or
-							equal level for this game.
+							You don't have enough balance to pay for the proof
+							verification
 						</p>
 					)}
 				</div>
 			</div>
+			<Button
+				variant="text"
+				className="font-normal text-start flex items-center gap-2"
+				onClick={() => setStep("deposit")}
+			>
+				<span className="hero-chevron-left"></span>
+				Go Back
+			</Button>
 			<div className="self-end">
 				<Button
 					variant="text"

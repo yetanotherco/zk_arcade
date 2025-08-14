@@ -324,7 +324,7 @@ export const BumpFeeModal = ({
                             />
                         </svg>
 
-                        <span className="absolute left-1/2 -translate-x-1/2 mt-2 w-max opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10">
+                        <span className="absolute left-1/2 -translate-x-1/4 mt-2 w-max opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10">
                             <p
                                 className="text-xs bg-yellow gap-2 rounded w-fit p-1 px-2 mb-2"
                                 style={{ color: "black" }}

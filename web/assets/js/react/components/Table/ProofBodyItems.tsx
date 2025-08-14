@@ -1,6 +1,7 @@
 import React from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { shortenHash } from "../../utils/crypto";
+import { timeAgoInHs } from "../../utils/date";
 
 type KeysForStatus = ProofSubmission["status"];
 
@@ -27,10 +28,9 @@ const tooltipStyleBasedOnStatus: {
 const tooltipText: { [key in KeysForStatus]: string } = {
 	submitted: "Solution verified and ready to be claimed",
 	claimed: "Already submitted to leaderboard",
-	pending:
-		"You need to wait until its verified before submitting the solution",
+	pending: "You need to wait until its verified before submitting the solution",
 	failed: "The proof failed to be verified, you have to re-send it",
-	underpriced: "The proof is underpriced, we suggest you bump the fee",
+	underpriced: "The proof is underpriced, we suggest bumping the fee",
 };
 
 const statusText: { [key in KeysForStatus]: string } = {
@@ -47,6 +47,8 @@ type Props = {
 };
 
 export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
+	const isUnderpriced = proof.status === "pending" && timeAgoInHs(proof.inserted_at) > 6;
+	if (isUnderpriced) proof.status = "underpriced";
 	return (
 		<td>
 			<div

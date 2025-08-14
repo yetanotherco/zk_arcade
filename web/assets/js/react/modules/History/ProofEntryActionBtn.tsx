@@ -10,12 +10,13 @@ import { Address } from "../../types/blockchain";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { toHex } from "viem";
 import { fetchProofVerificationData } from "../../utils/aligned";
+import { BumpFeeModal } from "../../components/Modal/BumpFee";
 import { useToast } from "../../state/toast";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
 	submitted: "Claim points",
-	pending: "None",
+	pending: "Bump fee",
 	failed: "None",
 	underpriced: "Bump fee",
 };
@@ -51,8 +52,10 @@ export const ProofEntryActionBtn = ({
 		userAddress: user_address,
 	});
 
-	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
-		useAligned();
+	const { signVerificationData } = useAligned();
+
+	const [bumpOpen, setBumpOpen] = useState(false);
+	const [bumpLoading, setBumpLoading] = useState(false);
 
 	useEffect(() => {
 		if (submitSolution.receipt.isSuccess) {
@@ -95,7 +98,11 @@ export const ProofEntryActionBtn = ({
 
 		if (proof.status === "submitted") {
 			if (!proof.batch_hash) {
-				alert("Batch data not available for this proof");
+				addToast({
+				title: "Batch not available",
+				desc: "Batch data not available for this proof",
+				type: "error",
+				});
 				return;
 			}
 
@@ -103,47 +110,74 @@ export const ProofEntryActionBtn = ({
 			return;
 		}
 
-		if (proof.status === "underpriced") {
+		if (proof.status === "pending" || proof.status === "underpriced") {
+			try {
+				setBumpLoading(true);
+				setBumpOpen(true);
+			} catch {
+				addToast({
+					title: "Could not estimate the fee",
+					desc: "Please try again in a few seconds.",
+					type: "error",
+				});
+			} finally {
+				setBumpLoading(false);
+			}
+		}
+	};
+
+	const handleConfirmBump = async (chosenWei: bigint) => {
+		try {
+			setSubmitProofMessageLoading(true);
+
 			const res = await fetchProofVerificationData(proof.id);
 			if (!res) {
-				alert(
-					"There was a problem while sending the proof, please try again"
-				);
-				return;
-			}
-
-			const noncedVerificationData = res.verification_data;
-			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-			if (!maxFee) {
-				alert("Could not estimate max fee");
-				return;
-			}
-			noncedVerificationData.maxFee = toHex(maxFee, { size: 32 });
-
-			setSubmitProofMessageLoading(true);
-			try {
-				const { r, s, v } = await signVerificationData(
-					noncedVerificationData,
-					payment_service_address
-				);
-
-				const submitProofMessage: SubmitProof = {
-					verificationData: noncedVerificationData,
-					signature: {
-						r,
-						s,
-						v: Number(v),
-					},
-				};
-
-				setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
-				window.setTimeout(() => {
-					formRetryRef.current?.submit();
-				}, 1000);
-			} catch {
+				addToast({
+					title: "There was a problem while sending the proof",
+					desc: "Please try again.",
+					type: "error",
+				});
 				setSubmitProofMessageLoading(false);
+				return;
 			}
+			const noncedVerificationData: NoncedVerificationdata = res.verification_data;
+
+			noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
+
+			const { r, s, v } = await signVerificationData(
+				noncedVerificationData,
+				payment_service_address
+			);
+
+			const submitProofMessage: SubmitProof = {
+				verificationData: noncedVerificationData,
+				signature: {
+					r,
+					s,
+					v: Number(v),
+				},
+			};
+
+			setSubmitProofMessage(JSON.stringify(submitProofMessage));
+
+			addToast({
+				title: "Retrying submission",
+				desc: "Retrying proof submission using the newly selected fee.",
+				type: "success",
+			});
+
+			setBumpOpen(false);
+			window.setTimeout(() => {
+				formRetryRef.current?.submit();
+			}, 1000);
+		} catch (error) {
+			addToast({
+				title: "Could not apply the bump",
+				desc: "Please try again in a few seconds.",
+				type: "error",
+			});
+		} finally {
+			setSubmitProofMessageLoading(false);
 		}
 	};
 
@@ -153,27 +187,21 @@ export const ProofEntryActionBtn = ({
 				<Button
 					variant="contrast"
 					className="text-nowrap text-sm w-full"
-					disabled={
-						proof.status === "failed" || proof.status === "pending"
-					}
-					style={{
-						paddingLeft: 0,
-						paddingRight: 0,
-						paddingTop: 8,
-						paddingBottom: 8,
-					}}
+					disabled={proof.status === "failed"}
+					style={{ paddingLeft: 0, paddingRight: 0, paddingTop: 8, paddingBottom: 8 }}
 					onClick={handleBtnClick}
 					isLoading={
 						submitSolution.submitSolutionFetchingVDataIsLoading ||
 						submitSolution.receipt.isLoading ||
-						submitProofMessageLoading
+						submitProofMessageLoading ||
+						bumpLoading
 					}
 				>
 					{actionBtn[proof.status]}
 				</Button>
 			</div>
 
-			{proof.status === "underpriced" && (
+			{(proof.status === "pending" || proof.status === "underpriced") && (
 				<form
 					ref={formRetryRef}
 					action="/proof/status/retry"
@@ -189,7 +217,7 @@ export const ProofEntryActionBtn = ({
 					<input type="hidden" name="proof_id" value={proof.id} />
 				</form>
 			)}
-			{proof.status == "submitted" && (
+			{proof.status === "submitted" && (
 				<form
 					className="hidden"
 					ref={formSubmittedRef}
@@ -200,6 +228,15 @@ export const ProofEntryActionBtn = ({
 					<input type="hidden" name="proof_id" value={proof.id} />
 				</form>
 			)}
+
+			<BumpFeeModal
+				open={bumpOpen}
+				setOpen={setBumpOpen}
+				onConfirm={handleConfirmBump}
+				isConfirmLoading={submitProofMessageLoading}
+				previousMaxFee={proof.submitted_max_fee}
+				lastTimeSubmitted={proof.inserted_at}
+			/>
 		</td>
 	);
 };

@@ -6,7 +6,6 @@ import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentServic
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
-import { Button } from "../../Button";
 
 type Props = {
 	modal: Omit<ModalProps, "maxWidth">;
@@ -23,9 +22,11 @@ type BreadCumbStatus = "done" | "pending" | "failed" | "none";
 const BreadCumb = ({
 	status,
 	step,
+	onClick,
 }: {
 	status: BreadCumbStatus;
 	step: string;
+	onClick?: () => void;
 }) => {
 	const bg = {
 		done: "bg-accent-100",
@@ -34,8 +35,15 @@ const BreadCumb = ({
 		none: "bg-contrast-200",
 	};
 
+	const isClickable = Boolean(onClick);
+
 	return (
-		<div className="w-[220px]">
+		<div
+			onClick={isClickable ? onClick : undefined}
+			className={`w-[220px] ${
+				isClickable ? "cursor-pointer hover:opacity-70" : ""
+			}`}
+		>
 			<p className="text-center mb-1">{step}</p>
 			<div className={`h-[5px] rounded w-full ${bg[status]}`}></div>
 		</div>
@@ -169,11 +177,21 @@ export const SubmitProofModal = ({
 						<BreadCumb
 							step="Deposit"
 							status={shouldDeposit ? "pending" : "done"}
+							onClick={
+								step === "submit" && !proof
+									? () => setStep("deposit")
+									: undefined
+							}
 						/>
 						<BreadCumb
 							step="Submission"
 							status={
 								proof ? submissionStatus[proof.status] : "none"
+							}
+							onClick={
+								step === "deposit" && !proof
+									? () => setStep("submit")
+									: undefined
 							}
 						/>
 						<BreadCumb

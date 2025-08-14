@@ -138,7 +138,7 @@ export const DepositStep = ({
 					</p>
 				)}
 				<p>
-					Your current balance:{" "}
+					Your current balance in Aligned:{" "}
 					{Number(formatEther(balance.data || BigInt(0))).toFixed(4)}{" "}
 					ETH
 				</p>

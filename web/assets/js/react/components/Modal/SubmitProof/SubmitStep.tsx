@@ -14,6 +14,7 @@ import {
 	useAligned,
 	useBatcherNonce,
 	useBatcherPaymentService,
+	useEthPrice,
 	useLeaderboardContract,
 } from "../../../hooks";
 import { Address } from "../../../types/blockchain";
@@ -89,6 +90,7 @@ export const SubmitProofStep = ({
 	);
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
+	const { price: ethPrice } = useEthPrice();
 
 	const [parsedPublicInputs, setParsedPublicInputs] = useState<
 		| {
@@ -393,13 +395,22 @@ export const SubmitProofStep = ({
 					{!!maxFee && (
 						<p>
 							Cost:{" "}
-							{Number(formatEther(maxFee)).toLocaleString(
-								undefined,
-								{
-									maximumFractionDigits: 10,
-								}
-							)}{" "}
-							ETH
+							{(
+								Number(formatEther(maxFee)) * (ethPrice || 0)
+							).toLocaleString(undefined, {
+								maximumFractionDigits: 4,
+							})}{" "}
+							USD{" "}
+							<span className="text-sm text-text-200">
+								~={" "}
+								{Number(formatEther(maxFee)).toLocaleString(
+									undefined,
+									{
+										maximumFractionDigits: 10,
+									}
+								)}{" "}
+								ETH
+							</span>
 						</p>
 					)}
 					{invalidGameConfig && (

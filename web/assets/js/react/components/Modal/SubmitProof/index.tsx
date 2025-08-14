@@ -62,7 +62,7 @@ export const SubmitProofModal = ({
 			if (proof.status === "pending" || proof.status === "underpriced") {
 				setStep("submit");
 			}
-			if (proof.status === "claimed") {
+			if (proof.status === "claimed" || proof.status === "submitted") {
 				setStep("claim");
 			}
 		} else {
@@ -135,7 +135,15 @@ export const SubmitProofModal = ({
 				proofSubmission={proof}
 			/>
 		),
-		claim: () => <ClaimStep />,
+		claim: () =>
+			proof && (
+				<ClaimStep
+					setOpen={modal.setOpen}
+					proofSubmission={proof}
+					user_address={user_address}
+					leaderboard_address={leaderboard_address}
+				/>
+			),
 	};
 
 	return (

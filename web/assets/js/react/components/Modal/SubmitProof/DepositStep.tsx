@@ -98,7 +98,7 @@ export const DepositStep = ({
 	};
 
 	return (
-		<div className="w-full h-full flex flex-col justify-between">
+		<div className="w-full h-full flex flex-col gap-8 justify-between">
 			<div className="w-full">
 				<FormInput
 					label="Amount to deposit in eth:"

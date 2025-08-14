@@ -308,10 +308,6 @@ export const BumpFeeModal = ({
                     }
                 </p>
 
-                <p className="text-sm opacity-80">
-                    Choose how much you want to increase the fee to retry your proof.
-                </p>
-
                 <div className="">
                     {renderContent()}
                 </div>

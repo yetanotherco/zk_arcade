@@ -170,10 +170,22 @@ defmodule ZkArcadeWeb.ProofController do
             Logger.info("Proof #{pending_proof_id} verified and updated successfully")
 
             case wait_aligned_verification(submit_proof_message, batch_data) do
-              {:ok, _} ->
-                Logger.info("Ok")
+              {:ok, _result} ->
+                Logger.info("Verification succeeded")
+                case Proofs.update_proof_status_verified(updated_proof.id) do
+                  {:ok, _} ->
+                    Logger.info("Proof #{updated_proof.id} status updated to verified")
+                  {:error, reason} ->
+                    Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
+                end
               {:error, reason} ->
                 Logger.error("Error: #{inspect(reason)}")
+                case Proofs.update_proof_status_failed(updated_proof.id) do
+                  {:ok, _} ->
+                    Logger.info("Proof #{updated_proof.id} status updated to failed")
+                  {:error, reason} ->
+                    Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
+                end
               nil ->
                 Logger.error("Error without reason")
             end
@@ -352,8 +364,19 @@ defmodule ZkArcadeWeb.ProofController do
 
     result = retry_with_backoff(verify_fn, [30, 60, 120, 240])
 
-    Logger.info("Final result: #{inspect(result)}")
-    {:ok, "ok"}
+    case result do
+      true ->
+        Logger.info("Verification succeeded")
+        {:ok, "ok"}
+
+      false ->
+        Logger.error("Verification failed after retries")
+        {:error, "Verification failed after retries"}
+
+      {:error, reason} ->
+        Logger.error("Verification failed after retries: #{inspect(reason)}")
+        {:error, reason}
+    end
   end
 
   defp retry_with_backoff(fun, []), do: false

@@ -9,7 +9,7 @@ defmodule ZkArcade.Proofs.Proof do
     field :verification_data, :map
     field :verification_data_commitment, :map
     field :batch_data, :map
-    # Status can be "pending", "verified", submitted or "failed"
+    # Status can be "pending", "submitted", "verified", "claimed" or "failed"
     field :status, :string, default: "pending"
     field :game, :string, default: "Beast"
     field :proving_system, :string
@@ -29,7 +29,7 @@ defmodule ZkArcade.Proofs.Proof do
     proof
     |> cast(attrs, [:verification_data, :verification_data_commitment, :wallet_address, :batch_data, :status, :game, :proving_system, :inserted_at, :updated_at, :times_retried, :level_reached, :game_config])
     |> validate_required([:verification_data, :verification_data_commitment, :wallet_address, :status, :game, :proving_system])
-    |> validate_inclusion(:status, ["pending", "submitted", "failed", "claimed"])
+    |> validate_inclusion(:status, ["pending", "submitted", "failed", "claimed", "verified"])
     |> validate_inclusion(:game, ["Beast", "Sudoku", "Parity"])
     |> validate_inclusion(:proving_system, ["Risc0", "SP1"]) # TODO add more proving systems
     |> foreign_key_constraint(:wallet_address)

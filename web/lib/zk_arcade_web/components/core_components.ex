@@ -49,24 +49,35 @@ defmodule ZkArcadeWeb.CoreComponents do
               Powered by ALIGNED
             </p>
           </.link>
-          <div class="lg:flex hidden w-full gap-12">
+          <div class="lg:flex hidden w-full gap-10">
               <.link href="/game/beast" class="transition hover:text-accent-100 hover:underline">Games</.link>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
-              <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">How It Works</p>
+              <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">Tutorial</p>
           </div>
         </div>
 
-        <div class="flex gap-8">
+        <div class="flex gap-8 items-center">
+          <x-app-submit-proof
+              network={@network}
+              payment_service_address={@payment_service_address}
+              user_address={@wallet}
+              batcher_url={@batcher_url}
+              leaderboard_address={@leaderboard_address}
+              beast_submissions={@beast_submissions}
+          />
+
           <x-app-user-wallet
-            network={@network}
-            payment_service_address={@payment_service_address}
-            user_address={@wallet}
-            proofs={@submitted_proofs}
-            leaderboard_address={@leaderboard_address}
-            username={@username}
-            user_position={@user_position}
-            explorer_url={@explorer_url}
+              network={@network}
+              payment_service_address={@payment_service_address}
+              user_address={@wallet}
+              proofs={@submitted_proofs}
+              leaderboard_address={@leaderboard_address}
+              username={@username}
+              user_position={@user_position}
+              explorer_url={@explorer_url}
+              batcher_url={@batcher_url}
+              beast_submissions={@beast_submissions}
           />
 
           <button

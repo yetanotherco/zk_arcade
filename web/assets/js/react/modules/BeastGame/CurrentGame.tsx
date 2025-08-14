@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Address } from "../../types/blockchain";
 import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
 import { useBlock } from "wagmi";
+import Web3EthProvider from "../../providers/web3-eth-provider";
 
 type Props = {
 	leaderboard_address: Address;
@@ -37,7 +38,7 @@ const LevelComponent = ({
 	);
 };
 
-export const CurrentBeastGame = ({
+const CurrentBeastGameComponent = ({
 	leaderboard_address,
 	user_address,
 }: Props) => {
@@ -134,5 +135,20 @@ export const CurrentBeastGame = ({
 				)}
 			</div>
 		</div>
+	);
+};
+
+export const CurrentBeastGame = ({
+	network,
+	leaderboard_address,
+	user_address,
+}: Props & { network: string }) => {
+	return (
+		<Web3EthProvider network={network}>
+			<CurrentBeastGameComponent
+				leaderboard_address={leaderboard_address}
+				user_address={user_address}
+			/>
+		</Web3EthProvider>
 	);
 };

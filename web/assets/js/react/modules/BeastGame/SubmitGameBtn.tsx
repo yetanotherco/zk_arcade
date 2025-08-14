@@ -28,8 +28,8 @@ const SubmitModal = ({
 	if (!user_address) return null;
 	return (
 		<>
-			<Button variant="icon" onClick={toggleOpen}>
-				<span className="hero-plus h-[20px] w-[20px]"></span>
+			<Button variant="accent-fill" onClick={toggleOpen}>
+				Submit solution proof
 			</Button>
 			<SubmitProofModal
 				modal={{ open, setOpen }}
@@ -43,7 +43,7 @@ const SubmitModal = ({
 	);
 };
 
-export default ({
+export const SubmitBeastGameBtn = ({
 	network,
 	payment_service_address,
 	user_address,

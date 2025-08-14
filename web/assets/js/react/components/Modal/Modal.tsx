@@ -4,7 +4,7 @@ import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 import { useOnKeyDown } from "../../hooks/useOnKeyDown";
 import { useIsMounted } from "connectkit";
 
-type Props = {
+export type ModalProps = {
 	open: boolean;
 	maxWidth: number;
 	setOpen: (prev: boolean) => void;
@@ -26,7 +26,7 @@ export const Modal = ({
 	showCloseButton = true,
 	children,
 	maxWidth,
-}: Props) => {
+}: ModalProps) => {
 	const mounted = useIsMounted();
 
 	useOnKeyDown(({ key }) => {

@@ -48,13 +48,13 @@
     </div>
 
    <div class="section-width justify-center">
-        <x-app-submit-proof
+        <x-app-submit-beast-solution-btn
             network={Application.get_env(:zk_arcade, :network)}
             payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
-            user_address={@wallet}
+            user_address={@wallet} 
             batcher_url={Application.get_env(:zk_arcade, :batcher_url)}
-            user_proofs_json={@user_proofs_json}
             leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
+            beast_submissions={@beast_submissions}
         />
     </div>
 

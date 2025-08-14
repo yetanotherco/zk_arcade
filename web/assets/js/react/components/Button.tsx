@@ -6,7 +6,8 @@ type ButtonVariant =
 	| "text"
 	| "disabled"
 	| "disabled-text"
-	| "contrast";
+	| "contrast"
+	| "icon";
 
 const buttonVariantStyles: { [key in ButtonVariant]: string } = {
 	"accent-fill":
@@ -16,6 +17,7 @@ const buttonVariantStyles: { [key in ButtonVariant]: string } = {
 	text: "font-bold hover:underline",
 	"text-accent": "font-bold text-accent-100 hover:underline",
 	contrast: "border border-contrast-100 px-2 text-sm py-2",
+	icon: "p-1 bg-accent-100 text-black flex justify-center items-center",
 };
 
 type Props = React.ComponentProps<"button"> & {

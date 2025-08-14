@@ -62,12 +62,14 @@ defmodule ZkArcade.Proofs do
       [%Proof{}, ...]
 
   """
+  def get_proofs_by_address(nil), do: []
   def get_proofs_by_address(address) do
     downcased_addr = String.downcase(address)
     from(p in Proof, where: p.wallet_address == ^downcased_addr, limit: 10)
     |> Repo.all()
   end
 
+  def get_proofs_by_address(nil, _), do: []
   def get_proofs_by_address(address, %{page: page, page_size: size}) do
     downcased_addr = String.downcase(address)
 

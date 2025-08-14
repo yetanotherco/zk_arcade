@@ -15,6 +15,7 @@ type Props = {
 	username: string;
 	user_position: number;
 	explorer_url: string;
+	batcher_url: string;
 };
 
 export const WalletInfo = ({
@@ -24,7 +25,8 @@ export const WalletInfo = ({
 	proofs,
 	username,
 	user_position,
-	explorer_url
+	explorer_url,
+	batcher_url,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const { disconnect } = useDisconnect();
@@ -57,7 +59,8 @@ export const WalletInfo = ({
 					<div className="flex gap-2 items-center">
 						<span className="hero-user"></span>
 						<a href="/history" className="text-lg hover:underline">
-							{username} {user_position === null
+							{username}{" "}
+							{user_position === null
 								? "(#None)"
 								: `(#${user_position})`}
 						</a>
@@ -72,6 +75,8 @@ export const WalletInfo = ({
 						leaderboard_address={leaderboard_address}
 						payment_service_address={payment_service_address}
 						explorer_url={explorer_url}
+						user_address={user_address}
+						batcher_url={batcher_url}
 					/>
 					<div>
 						<form

@@ -80,12 +80,12 @@ defmodule ZkArcade.AlignedVerificationWatcher do
 
   defp retry_with_backoff(fun, []), do: false
   defp retry_with_backoff(fun, [delay | rest]) do
-    :timer.sleep(:timer.seconds(delay))
     case fun.() do
       true ->
         true
       false ->
         Logger.info("Verification failed, retrying in #{delay} seconds...")
+        :timer.sleep(:timer.seconds(delay))
         retry_with_backoff(fun, rest)
     end
   end

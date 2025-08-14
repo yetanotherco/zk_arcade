@@ -23,7 +23,7 @@ const EthPriceWithTooltip = ({ wei, ethPrice }: { wei: bigint; ethPrice: number 
     
     return (
         <div className="relative group">
-            <span className="cursor-pointer">
+            <span>
                 {ethValue} ETH
             </span>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
@@ -196,15 +196,17 @@ export const BumpFeeModal = ({
                                 onChange={() => !isConfirmLoading && setChoice("instant")}
                                 disabled={isConfirmLoading}
                             />
-                            <span className="font-medium">Instant</span>
+                            <span className="font-medium relative group">
+                                Instant
+                                <div className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+                                    Guarantee inclusion by paying the full price of submitting the batch
+                                </div>
+                            </span>
                         </div>
                         <span className="text-sm opacity-80">
                             {instantFeeWei ? <EthPriceWithTooltip wei={instantFeeWei} ethPrice={price} /> : "…"}
                         </span>
                     </div>
-                    <p className="mt-1 text-xs opacity-70">
-                        Guarantee inclusion by paying the full price of submitting the batch
-                    </p>
                 </label>
 
                 <label
@@ -222,13 +224,17 @@ export const BumpFeeModal = ({
                                 onChange={() => !isConfirmLoading && setChoice("default")}
                                 disabled={isConfirmLoading}
                             />
-                            <span className="font-medium">Default</span>
+                            <span className="font-medium relative group">
+                                Default
+                                <div className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+                                    Recommended fee, estimated for a batch of 16 proofs
+                                </div>
+                            </span>
                         </div>
                         <span className="text-sm opacity-80">
                             {defaultFeeWei ? <EthPriceWithTooltip wei={defaultFeeWei} ethPrice={price} /> : "…"}
                         </span>
                     </div>
-                    <p className="mt-1 text-xs opacity-70">Recommended fee, estimated for a batch of 16 proofs.</p>
                 </label>
 
                 <div
@@ -247,7 +253,12 @@ export const BumpFeeModal = ({
                             onChange={() => !isConfirmLoading && setChoice("custom")}
                             disabled={isConfirmLoading}
                         />
-                        <span className="font-medium">Custom</span>
+                        <span className="font-medium relative group">
+                            Custom
+                            <div className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+                                Define your own max fee, that must be greater than the current max fee of {currentFeeEth} ETH
+                            </div>
+                        </span>
                     </label>
                     <div className="mt-2 flex items-center gap-2">
                         <input
@@ -274,9 +285,6 @@ export const BumpFeeModal = ({
                             ~${calculateUsdFromEthString(customEth, price)} USD
                         </p>
                     )}
-                    <p className="mt-1 text-xs opacity-70">
-                        Define your own max fee, that must be greater than the current max fee of {currentFeeEth} ETH.
-                    </p>
                 </div>
             </div>
         );

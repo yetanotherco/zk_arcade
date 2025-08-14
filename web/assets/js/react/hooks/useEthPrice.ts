@@ -8,14 +8,14 @@ export const useEthPrice = () => {
 	const fetchPrice = async () => {
 		try {
 			setLoading(true);
-			const response = await fetch(
-				"https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-			);
+			const response = await fetch("/api/ethprice");
 			if (!response.ok) {
 				return;
 			}
 			const data = await response.json();
-			setPrice(data?.ethereum?.usd ?? null);
+			if (data?.eth_price) {
+				setPrice(data.eth_price);
+			}
 			setError(null);
 		} catch (err) {
 			setError("Failed to fetch ETH price");

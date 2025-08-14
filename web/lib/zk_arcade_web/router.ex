@@ -28,7 +28,8 @@ defmodule ZkArcadeWeb.Router do
     post "/proof/status/retry", ProofController, :retry_submit_proof
 
     # API endpoint for wallet agreement status check
-    get "/api/wallet/:address/agreement-status", WalletApiController, :check_agreement_status
+    get "/api/wallet/:address/agreement-status", ApiController, :check_agreement_status
+    get "/api/ethprice", ApiController, :get_eth_price
   end
 
   # Enable LiveDashboard in development

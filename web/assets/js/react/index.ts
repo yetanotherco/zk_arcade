@@ -21,6 +21,7 @@ define(
 			"user_position",
 			"explorer_url",
 			"batcher_url",
+			"user_beast_submissions",
 		],
 	}
 );

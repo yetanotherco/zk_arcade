@@ -68,14 +68,16 @@ defmodule ZkArcadeWeb.CoreComponents do
           />
 
           <x-app-user-wallet
-            network={@network}
-            payment_service_address={@payment_service_address}
-            user_address={@wallet}
-            proofs={@submitted_proofs}
-            leaderboard_address={@leaderboard_address}
-            username={@username}
-            user_position={@user_position}
-            explorer_url={@explorer_url}
+              network={@network}
+              payment_service_address={@payment_service_address}
+              user_address={@wallet}
+              proofs={@submitted_proofs}
+              leaderboard_address={@leaderboard_address}
+              username={@username}
+              user_position={@user_position}
+              explorer_url={@explorer_url}
+              batcher_url={@batcher_url}
+              beast_submissions={@beast_submissions}
           />
 
           <button

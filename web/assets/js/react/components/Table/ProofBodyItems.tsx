@@ -8,7 +8,7 @@ const colorBasedOnStatus: {
 	[key in KeysForStatus]: string;
 } = {
 	verified: "bg-accent-100/20 text-accent-100",
-	submitted: "bg-accent-20 text-accent-100",
+	submitted: "bg-accent-100/20 text-accent-100",
 	pending: "bg-yellow/20 text-yellow",
 	claimed: "bg-blue/20 text-blue",
 	failed: "bg-red/20 text-red",
@@ -19,7 +19,7 @@ const tooltipStyleBasedOnStatus: {
 	[key in KeysForStatus]: string;
 } = {
 	verified: "bg-accent-100 text-black",
-	submitted: "bg-accent-20 text-black",
+	submitted: "bg-accent-100 text-black",
 	pending: "bg-yellow text-black",
 	claimed: "bg-blue text-white",
 	failed: "bg-red text-white",
@@ -38,7 +38,7 @@ const tooltipText: { [key in KeysForStatus]: string } = {
 
 const statusText: { [key in KeysForStatus]: string } = {
 	claimed: "Claimed",
-	verified: "Ready",
+	verified: "Verified",
 	submitted: "Submitted",
 	pending: "Pending",
 	failed: "Failed",

@@ -41,7 +41,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     /**
      * Events
      */
-    event NewSolutionSubmitted(address user, uint256 level);
+    event NewSolutionSubmitted(address user, uint256 level, uint256 score);
 
     constructor() {
         _disableInitializers();
@@ -125,7 +125,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         verifyAndReplaceInTop10(msg.sender);
 
-        emit NewSolutionSubmitted(msg.sender, levelCompleted);
+        emit NewSolutionSubmitted(msg.sender, levelCompleted, usersScore[msg.sender]);
     }
 
     function getUserScore(address user) public view returns (uint256) {

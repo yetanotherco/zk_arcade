@@ -299,14 +299,44 @@ export const BumpFeeModal = ({
             shouldCloseOnOutsideClick={!isConfirmLoading}
         >
             <div className="bg-contrast-100 rounded-2xl p-6 text-white">
-                <h3 className="text-xl font-semibold mb-3">Bump Fee</h3>
+                <div className="flex items-center gap-3 mb-4">
+                    <h3 className="text-xl font-semibold mb-3">Bump Fee</h3>
 
-                <p className="text-xs bg-yellow gap-2 rounded w-fit p-1 px-2 mb-2" style={{ color: "black" }}>
-                    {timeAgoInHs(lastTimeSubmitted) > 6
-                        ? (<>We suggest bumping the fee, since the proof was submitted more than 6 hours ago.</>)
-                        : (<>We recommend waiting before bumping the fee, the proof was submitted within the last 6 hours.</>)
-                    }
-                </p>
+                    <div
+                        className="-mt-1 rounded p-1 group/tooltip relative"
+                        style={{ backgroundColor: "#525217", color: "#faff60" }}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="size-6"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 
+                                1.948 3.374h14.71c1.73 0 2.813-1.874 
+                                1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 
+                                0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+                            />
+                        </svg>
+
+                        <span className="absolute left-1/2 -translate-x-1/2 mt-2 w-max opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10">
+                            <p
+                                className="text-xs bg-yellow gap-2 rounded w-fit p-1 px-2 mb-2"
+                                style={{ color: "black" }}
+                            >
+                                {timeAgoInHs(lastTimeSubmitted) > 6
+                                    ? <>We suggest bumping the fee, since the proof was submitted more than 6 hours ago.</>
+                                    : <>We recommend waiting before bumping the fee, the proof was submitted within the last 6 hours.</>
+                                }
+                            </p>
+                        </span>
+                    </div>
+                </div>
 
                 <div className="">
                     {renderContent()}

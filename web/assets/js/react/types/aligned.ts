@@ -10,6 +10,7 @@ export type ProofSubmission = {
 	verification_data_commitment: `0x${string}`;
 	level_reached: number;
 	game_config: string;
+	submitted_max_fee: `0x${string}`;
 };
 
 export type SubmitProof = {

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
-import { timeAgoInHs } from "../../utils/date";
 import { TableBodyItem } from "../../components/Table";
 import {
 	ProofBatchMerkleRoot,
@@ -78,14 +77,6 @@ export const ProofSubmissions = ({ proofs = [], explorer_url }: Props) => {
 							<tbody className="text-text-100 text-sm">
 								{proofs.map(item => {
 									const proof = { ...item };
-
-									if (proof.status === "pending") {
-										if (
-											timeAgoInHs(proof.inserted_At) > 6
-										) {
-											proof.status = "underpriced";
-										}
-									}
 
 									return (
 										<Proof key={proof.id} proof={proof} explorer_url={explorer_url} />

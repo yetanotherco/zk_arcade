@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ProofSubmission, SubmitProof } from "../../types/aligned";
+import { NoncedVerificationdata, ProofSubmission, SubmitProof } from "../../types/aligned";
 import { timeAgoInHs } from "../../utils/date";
 import { Button } from "../../components";
 import { toHex } from "viem";
@@ -8,6 +8,7 @@ import { useCSRFToken } from "../../hooks/useCSRFToken";
 import { useAligned, useLeaderboardContract } from "../../hooks";
 import { Address } from "../../types/blockchain";
 import { useToast } from "../../state/toast";
+import { BumpFeeModal } from "../../components/Modal/BumpFee";
 
 type Props = {
 	proofs: ProofSubmission[];
@@ -17,16 +18,14 @@ type Props = {
 };
 
 const textBasedOnNotEntry = {
-	pending: (commitment: string) => (
+	pending: () => (
 		<>
-			The proof <span className="font-bold">{commitment}</span> is
-			underpriced we suggest you bump the fee
+			The proof is underpriced, we suggest bumping the fee.
 		</>
 	),
-	verified: (commitment: string) => (
+	verified: () => (
 		<>
-			The proof <span className="font-bold">{commitment}</span> is ready
-			to be claimed
+			The proof is ready to be claimed.
 		</>
 	),
 };
@@ -42,7 +41,6 @@ const NotificationEntry = ({
 	payment_service_address: Address;
 	user_address: Address;
 }) => {
-	const [proofCommitment, setProofCommitment] = useState("");
 	const { csrfToken } = useCSRFToken();
 	const formRetryRef = useRef<HTMLFormElement>(null);
 	const formSubmittedRef = useRef<HTMLFormElement>(null);
@@ -51,12 +49,14 @@ const NotificationEntry = ({
 		useState(false);
 	const { addToast } = useToast();
 
+	const [bumpOpen, setBumpOpen] = useState(false);
+
 	const { submitSolution, currentGame } = useLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});
 
-	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
+	const { signVerificationData } =
 		useAligned();
 
 	useEffect(() => {
@@ -66,6 +66,61 @@ const NotificationEntry = ({
 			}, 1000);
 		}
 	}, [submitSolution.receipt]);
+
+	const handleConfirmBump = async (chosenWei: bigint) => {
+		try {
+			setSubmitProofMessageLoading(true);
+
+			const res = await fetchProofVerificationData(proof.id);
+			if (!res) {
+				addToast({
+					title: "There was a problem while sending the proof",
+					desc: "Please try again.",
+					type: "error",
+				});
+				setSubmitProofMessageLoading(false);
+				return;
+			}
+			const noncedVerificationData: NoncedVerificationdata = res.verification_data;
+
+			noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
+
+			const { r, s, v } = await signVerificationData(
+				noncedVerificationData,
+				payment_service_address
+			);
+
+			const submitProofMessage: SubmitProof = {
+				verificationData: noncedVerificationData,
+				signature: {
+					r,
+					s,
+					v: Number(v),
+				},
+			};
+
+			setSubmitProofMessage(JSON.stringify(submitProofMessage));
+
+			addToast({
+				title: "Retrying submission",
+				desc: "Retrying proof submission using the newly selected fee.",
+				type: "success",
+			});
+
+			setBumpOpen(false);
+			window.setTimeout(() => {
+				formRetryRef.current?.submit();
+			}, 1000);
+		} catch (error) {
+			addToast({
+				title: "Could not apply the bump",
+				desc: "Please try again in a few seconds.",
+				type: "error",
+			});
+		} finally {
+			setSubmitProofMessageLoading(false);
+		}
+	};
 
 	const handleClick = async () => {
 		if (proof.status === "verified") {
@@ -91,46 +146,14 @@ const NotificationEntry = ({
 		}
 
 		if (proof.status === "pending") {
-			const res = await fetchProofVerificationData(proof.id);
-			if (!res) {
-				alert(
-					"There was a problem while sending the proof, please try again"
-				);
-				return;
-			}
-
-			const noncedVerificationData = res.verification_data;
-			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-			if (!maxFee) {
-				alert("Could not estimate max fee");
-				return;
-			}
-
-			noncedVerificationData.maxFee = toHex(maxFee, { size: 32 });
-
-			setSubmitProofMessageLoading(true);
 			try {
-				const { r, s, v } = await signVerificationData(
-					noncedVerificationData,
-					payment_service_address
-				);
-
-				const submitProofMessage: SubmitProof = {
-					verificationData: noncedVerificationData,
-					signature: {
-						r,
-						s,
-						v: Number(v),
-					},
-				};
-
-				setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
-				window.setTimeout(() => {
-					formRetryRef.current?.submit();
-				}, 1000);
+				setBumpOpen(true);
 			} catch {
-				setSubmitProofMessageLoading(false);
+				addToast({
+					title: "Could not estimate the fee",
+					desc: "Please try again in a few seconds.",
+					type: "error",
+				});
 			}
 		}
 	};
@@ -146,7 +169,7 @@ const NotificationEntry = ({
 					} shrink-0`}
 				></div>
 				<p className="text-sm text-text-100">
-					{textBasedOnNotEntry[proof.status](proofCommitment)}
+					{textBasedOnNotEntry[proof.status]()}
 				</p>
 			</div>
 			<Button
@@ -189,6 +212,14 @@ const NotificationEntry = ({
 					<input type="hidden" name="proof_id" value={proof.id} />
 				</form>
 			)}
+			<BumpFeeModal
+				open={bumpOpen}
+				setOpen={setBumpOpen}
+				onConfirm={handleConfirmBump}
+				isConfirmLoading={submitProofMessageLoading}
+				previousMaxFee={proof.submitted_max_fee}
+				lastTimeSubmitted={proof.inserted_at}
+			/>
 		</div>
 	);
 };
@@ -200,20 +231,11 @@ export const NotificationBell = ({
 	user_address,
 }: Props) => {
 	const [proofsReady, setProofsReady] = useState<ProofSubmission[]>([]);
-	const [proofsUnderpriced, setProofsUnderpriced] = useState<
-		ProofSubmission[]
-	>([]);
-
 	const [allProofs, setAllProofs] = useState<ProofSubmission[]>([]);
 
 	useEffect(() => {
 		const proofsReady = proofs.filter(
 			proof => proof.status === "verified"
-		);
-
-		const proofsUnderpriced = proofs.filter(
-			proof =>
-				proof.status === "pending" && timeAgoInHs(proof.inserted_at) > 6
 		);
 
 		const allProofs = proofs.filter(
@@ -224,9 +246,8 @@ export const NotificationBell = ({
 		);
 
 		setProofsReady(proofsReady);
-		setProofsUnderpriced(proofsUnderpriced);
 		setAllProofs(allProofs);
-	}, [proofs, setProofsReady, setProofsUnderpriced]);
+	}, [proofs, setProofsReady]);
 
 	return (
 		<div className="sm:relative group">
@@ -234,9 +255,6 @@ export const NotificationBell = ({
 				<span className="hero-bell size-7"></span>
 				{proofsReady.length > 0 && (
 					<div className="rounded-full h-[10px] w-[10px] bg-accent-100 absolute top-0 left-0"></div>
-				)}
-				{proofsUnderpriced.length > 0 && (
-					<div className="rounded-full h-[10px] w-[10px] bg-orange absolute top-0 left-[5px]"></div>
 				)}
 			</div>
 

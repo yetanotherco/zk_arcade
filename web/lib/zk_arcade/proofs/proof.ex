@@ -17,6 +17,8 @@ defmodule ZkArcade.Proofs.Proof do
 
     field :level_reached, :integer, default: 0
 
+    field :submitted_max_fee, :string
+
     field :times_retried, :integer, default: 0
 
     belongs_to :wallet, Wallet, foreign_key: :wallet_address, references: :address, type: :string
@@ -27,8 +29,8 @@ defmodule ZkArcade.Proofs.Proof do
   @doc false
   def changeset(proof, attrs) do
     proof
-    |> cast(attrs, [:verification_data, :verification_data_commitment, :wallet_address, :batch_data, :status, :game, :proving_system, :inserted_at, :updated_at, :times_retried, :level_reached, :game_config])
-    |> validate_required([:verification_data, :verification_data_commitment, :wallet_address, :status, :game, :proving_system])
+    |> cast(attrs, [:verification_data, :verification_data_commitment, :wallet_address, :batch_data, :status, :game, :proving_system, :inserted_at, :updated_at, :times_retried, :level_reached, :game_config, :submitted_max_fee])
+    |> validate_required([:verification_data, :verification_data_commitment, :wallet_address, :status, :game, :proving_system, :submitted_max_fee])
     |> validate_inclusion(:status, ["pending", "submitted", "failed", "claimed", "verified"])
     |> validate_inclusion(:game, ["Beast", "Sudoku", "Parity"])
     |> validate_inclusion(:proving_system, ["Risc0", "SP1"]) # TODO add more proving systems

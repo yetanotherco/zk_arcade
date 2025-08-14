@@ -69,12 +69,11 @@ export const useAligned = () => {
 			const estimatedGasPerProof =
 				BigInt(totalGas) / BigInt(numberProofsInBatch);
 
-			const percentageMultiplier =
-				BigInt(GAS_ESTIMATION.GAS_PRICE_PERCENTAGE_MULTIPLIER) /
-				BigInt(GAS_ESTIMATION.PERCENTAGE_DIVIDER);
-
 			const feePerProof =
-				estimatedGasPerProof * gasPrice * percentageMultiplier;
+			(estimatedGasPerProof *
+				gasPrice *
+				BigInt(GAS_ESTIMATION.GAS_PRICE_PERCENTAGE_MULTIPLIER)) /
+			BigInt(GAS_ESTIMATION.PERCENTAGE_DIVIDER);
 
 			return feePerProof;
 		},

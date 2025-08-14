@@ -14,7 +14,8 @@ import { useToast } from "../../state/toast";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
-	submitted: "Claim points",
+	verified: "Claim points",
+	submitted: "None",
 	pending: "None",
 	failed: "None",
 	underpriced: "Bump fee",
@@ -93,7 +94,7 @@ export const ProofEntryActionBtn = ({
 			return;
 		}
 
-		if (proof.status === "submitted") {
+		if (proof.status === "verified") {
 			if (!proof.batch_hash) {
 				alert("Batch data not available for this proof");
 				return;
@@ -189,7 +190,7 @@ export const ProofEntryActionBtn = ({
 					<input type="hidden" name="proof_id" value={proof.id} />
 				</form>
 			)}
-			{proof.status == "submitted" && (
+			{proof.status == "verified" && (
 				<form
 					className="hidden"
 					ref={formSubmittedRef}

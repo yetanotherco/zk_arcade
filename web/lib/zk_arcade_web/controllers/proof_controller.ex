@@ -360,15 +360,12 @@ defmodule ZkArcadeWeb.ProofController do
 
     case result do
       true ->
-        Logger.info("Verification succeeded")
         {:ok, "ok"}
 
       false ->
-        Logger.error("Verification failed after retries")
         {:error, "Verification failed after retries"}
 
       {:error, reason} ->
-        Logger.error("Verification failed after retries: #{inspect(reason)}")
         {:error, reason}
     end
   end

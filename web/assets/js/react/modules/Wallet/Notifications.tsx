@@ -23,7 +23,7 @@ const textBasedOnNotEntry = {
 			The proof is underpriced, we suggest bumping the fee.
 		</>
 	),
-	submitted: () => (
+	verified: () => (
 		<>
 			The proof is ready to be claimed.
 		</>
@@ -123,11 +123,11 @@ const NotificationEntry = ({
 	};
 
 	const handleClick = async () => {
-		if (proof.status === "submitted") {
-			const submittedGameConfigBigInt = BigInt("0x" + proof.game_config);
+		if (proof.status === "verified") {
+			const verifiedGameConfigBigInt = BigInt("0x" + proof.game_config);
 			const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
 
-			if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
+			if (verifiedGameConfigBigInt !== currentGameConfigBigInt) {
 				addToast({
 					title: "Game mismatch",
 					desc: "Current game has changed since the proof was created",
@@ -163,7 +163,7 @@ const NotificationEntry = ({
 			<div className="flex items-center gap-4">
 				<div
 					className={`rounded-full h-[10px] w-[10px] ${
-						proof.status === "submitted"
+						proof.status === "verified"
 							? "bg-accent-100"
 							: "bg-orange"
 					} shrink-0`}
@@ -182,7 +182,7 @@ const NotificationEntry = ({
 					submitSolution.submitSolutionFetchingVDataIsLoading
 				}
 			>
-				{proof.status === "submitted" ? "Claim" : "Bump fee"}
+				{proof.status === "verified" ? "Claim" : "Bump fee"}
 			</Button>
 
 			{proof.status === "pending" && (
@@ -201,7 +201,7 @@ const NotificationEntry = ({
 					<input type="hidden" name="proof_id" value={proof.id} />
 				</form>
 			)}
-			{proof.status == "submitted" && (
+			{proof.status == "verified" && (
 				<form
 					className="hidden"
 					ref={formSubmittedRef}
@@ -235,12 +235,12 @@ export const NotificationBell = ({
 
 	useEffect(() => {
 		const proofsReady = proofs.filter(
-			proof => proof.status === "submitted"
+			proof => proof.status === "verified"
 		);
 
 		const allProofs = proofs.filter(
 			proof =>
-				proof.status === "submitted" ||
+				proof.status === "verified" ||
 				(proof.status === "pending" &&
 					timeAgoInHs(proof.inserted_at) > 6)
 		);

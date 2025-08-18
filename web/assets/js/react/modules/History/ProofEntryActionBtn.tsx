@@ -15,7 +15,8 @@ import { useToast } from "../../state/toast";
 
 const actionBtn: { [key in ProofSubmission["status"]]: string } = {
 	claimed: "Share",
-	submitted: "Claim points",
+	verified: "Claim points",
+	submitted: "None",
 	pending: "Bump fee",
 	failed: "None",
 	underpriced: "Bump fee",
@@ -69,17 +70,17 @@ export const ProofEntryActionBtn = ({
 		const submittedGameConfigBigInt = BigInt("0x" + proof.game_config);
 		const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
 
+		if (proof.status === "failed" || proof.status === "submitted") {
+			// nothing to do
+			return;
+		}
+
 		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
 			addToast({
 				title: "Game mismatch",
 				desc: "Current game has changed since the proof was created",
 				type: "error",
 			});
-			return;
-		}
-
-		if (proof.status === "failed") {
-			// nothing to do
 			return;
 		}
 
@@ -96,7 +97,7 @@ export const ProofEntryActionBtn = ({
 			return;
 		}
 
-		if (proof.status === "submitted") {
+		if (proof.status === "verified") {
 			if (!proof.batch_hash) {
 				addToast({
 				title: "Batch not available",
@@ -186,8 +187,8 @@ export const ProofEntryActionBtn = ({
 			<div className="relative group/proof-history-item w-full">
 				<Button
 					variant="contrast"
-					className="text-nowrap text-sm w-full"
-					disabled={proof.status === "failed"}
+					className={`text-nowrap text-sm w-full ${(proof.status === "failed" || proof.status === "submitted") ? "opacity-50 cursor-default" : ""}`}
+					disabled={ proof.status === "failed"}
 					style={{ paddingLeft: 0, paddingRight: 0, paddingTop: 8, paddingBottom: 8 }}
 					onClick={handleBtnClick}
 					isLoading={
@@ -217,7 +218,7 @@ export const ProofEntryActionBtn = ({
 					<input type="hidden" name="proof_id" value={proof.id} />
 				</form>
 			)}
-			{proof.status === "submitted" && (
+			{proof.status == "verified" && (
 				<form
 					className="hidden"
 					ref={formSubmittedRef}

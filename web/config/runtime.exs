@@ -84,6 +84,7 @@ if config_env() == :prod do
 
   config :zk_arcade, :network, System.get_env("ZK_ARCADE_NETWORK")
   config :zk_arcade, :payment_service_address, System.get_env("ALIGNED_PAYMENT_SERVICE_ADDRESS")
+  config :zk_arcade, :service_manager_address, System.get_env("ALIGNED_SERVICE_MANAGER_ADDRESS")
   # Deploy the contract with `make deploy_contract NETWORK=<network>` and put the address here
   config :zk_arcade, :leaderboard_address, System.get_env("ZK_ARCADE_LEADERBOARD_ADDRESS")
   config :ethereumex, url: System.get_env("RPC_URL")

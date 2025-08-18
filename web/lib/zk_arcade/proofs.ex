@@ -193,6 +193,23 @@ defmodule ZkArcade.Proofs do
     end
   end
 
+  def update_proof_status_verified(proof_id) do
+    Logger.info("Updating proof #{proof_id} status to verified")
+    proof = get_proof!(proof_id)
+
+    changeset = change_proof(proof, %{status: "verified"})
+
+    case Repo.update(changeset) do
+      {:ok, updated_proof} ->
+        Logger.info("Updated proof #{proof_id} status to verified")
+        {:ok, updated_proof}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+        {:error, changeset}
+    end
+  end
+
   def update_proof_status_claimed(address, proof_id) do
     Logger.info("Updating proof #{proof_id} status to claimed")
     proof = get_proof!(proof_id)

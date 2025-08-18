@@ -11,15 +11,16 @@ type Props = {
 };
 
 export const EncourageDepositingModal = ({payment_service_address, user_address}: Props) => {
-    const { open, setOpen } = useModal(true);
-    const { open: depositOpen, setOpen: setDepositOpen, toggleOpen } = useModal();
+    const { open: encourageOpen, setOpen: setEncourageOpen } = useModal(true);
+    const { open: depositOpen, setOpen: setDepositOpen } = useModal();
 
-    console.log("Modal state:", open);
+    console.log("Modal state:", encourageOpen);
 
   return (
+    <div>
         <Modal
-            open={open}
-            setOpen={setOpen}
+            open={encourageOpen}
+            setOpen={setEncourageOpen}
             maxWidth={600}
         >
                 <div className="bg-contrast-100 p-10 rounded flex flex-col gap-8">
@@ -31,30 +32,31 @@ export const EncourageDepositingModal = ({payment_service_address, user_address}
 
                     <div className="text-center justify-between space-x-12">
                         <Button
+                            variant="text"
+                            onClick={() => setEncourageOpen(false)}
+                            className="mt-6"
+                        >
+                            I'll deposit later
+                        </Button>
+
+                        <Button
                             variant="accent-fill"
-                            onClick={toggleOpen}
+                            onClick={() => { setEncourageOpen(false); setDepositOpen(true); }}
                             className="mt-6"
                         >
                             Deposit funds now
                         </Button>
-                        <DepositOnAlignedModal
-                            payment_service_address={payment_service_address}
-                            user_address={user_address}
-                            open={depositOpen}
-                            setOpen={setDepositOpen}
-                        />
-
-
-                        <Button
-                            variant="text-accent"
-                            onClick={() => setOpen(false)}
-                            className="mt-6 border border-accent-100 px-5 py-2 rounded"
-                        >
-                            I'll deposit later
-                        </Button>
                     </div>
                 </div>
         </Modal>
+
+        <DepositOnAlignedModal
+            payment_service_address={payment_service_address}
+            user_address={user_address}
+            open={depositOpen}
+            setOpen={setDepositOpen}
+        />
+    </div>
   );
 };
 

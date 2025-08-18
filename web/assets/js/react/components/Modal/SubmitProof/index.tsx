@@ -71,10 +71,14 @@ export const SubmitProofModal = ({
 
 	const updateState = useCallback(() => {
 		if (proof) {
-			if (proof.status === "pending" || proof.status === "underpriced") {
+			if (
+				proof.status === "pending" ||
+				proof.status === "underpriced" ||
+				proof.status === "submitted"
+			) {
 				setStep("submit");
 			}
-			if (proof.status === "claimed" || proof.status === "submitted") {
+			if (proof.status === "claimed" || proof.status === "verified") {
 				setStep("claim");
 			}
 		} else {

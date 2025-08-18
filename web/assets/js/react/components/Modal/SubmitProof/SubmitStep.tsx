@@ -274,7 +274,8 @@ export const SubmitProofStep = ({
 
 	if (
 		proofSubmission?.status === "pending" ||
-		proofSubmission?.status === "underpriced"
+		proofSubmission?.status === "underpriced" ||
+		proofSubmission?.status === "submitted"
 	) {
 		return (
 			<div className="flex flex-col gap-4 justify-between h-full">
@@ -283,10 +284,15 @@ export const SubmitProofStep = ({
 						The proof has been submitted to Aligned, and it will be
 						verified soon so you can claim your points.
 					</p>
-				) : (
+				) : proofSubmission.status === "underpriced" ? (
 					<p className="bg-orange/20 rounded p-2 text-orange">
-						The proof seems is underpriced, we suggest you to bump
-						the fee.
+						The proof is underpriced, we suggest you to bump the
+						fee.
+					</p>
+				) : (
+					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
+						The proof has been submitted correctly to Aligned and it
+						being verified by the operators
 					</p>
 				)}
 
@@ -315,6 +321,14 @@ export const SubmitProofStep = ({
 			</div>
 		);
 	}
+
+	useEffect(() => {
+		if (proofSubmission?.status === "pending") {
+			setInterval(() => {
+				// TODO: query server to update the proof status
+			}, 12000);
+		}
+	}, []);
 
 	return (
 		<div className="flex flex-col gap-6 justify-between h-full">

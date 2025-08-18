@@ -10,11 +10,13 @@ export const ClaimStep = ({
 	proofSubmission,
 	user_address,
 	leaderboard_address,
+	proofStatus,
 }: {
 	setOpen: (prev: boolean) => void;
 	proofSubmission: ProofSubmission;
 	user_address: Address;
 	leaderboard_address: Address;
+	proofStatus?: ProofSubmission["status"];
 }) => {
 	const { submitSolution, currentGame } = useLeaderboardContract({
 		userAddress: user_address,
@@ -24,7 +26,7 @@ export const ClaimStep = ({
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleClaim = async () => {
-		if (proofSubmission.status === "claimed") {
+		if (proofStatus === "claimed") {
 			const text = encodeURIComponent(
 				"🟩 I just claimed my points on zk-arcade!\n\n"
 			);
@@ -58,19 +60,18 @@ export const ClaimStep = ({
 
 	return (
 		<div className="flex flex-col gap-4 justify-between h-full">
-			{/* TODO: check if the current game matches, otherwise warn expiration */}
-			{gameHasExpired && proofSubmission.status === "submitted" && (
+			{gameHasExpired && proofStatus === "verified" && (
 				<p className="bg-red/20 rounded p-2 text-red">
 					The game has expired. You didn't claim the points in time,
 					try again.
 				</p>
 			)}
-			{!gameHasExpired && proofSubmission.status === "submitted" && (
+			{!gameHasExpired && proofStatus === "verified" && (
 				<p className="bg-accent-100/20 rounded p-2 text-accent-100">
 					The proof was verified and it is ready to claim the points.
 				</p>
 			)}
-			{proofSubmission.status === "claimed" && (
+			{proofStatus === "claimed" && (
 				<p className="bg-blue/20 rounded p-2 text-blue">
 					You have already claimed the points for this proof.
 				</p>
@@ -96,13 +97,9 @@ export const ClaimStep = ({
 						submitSolution.submitSolutionFetchingVDataIsLoading ||
 						submitSolution.receipt.isLoading
 					}
-					disabled={
-						gameHasExpired && proofSubmission.status === "submitted"
-					}
+					disabled={gameHasExpired}
 				>
-					{proofSubmission.status === "submitted"
-						? "Claim"
-						: "Share on Twitter"}
+					{proofStatus === "verified" ? "Claim" : "Share on Twitter"}
 				</Button>
 			</div>
 			<form

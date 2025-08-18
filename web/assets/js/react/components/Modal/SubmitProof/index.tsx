@@ -68,17 +68,24 @@ export const SubmitProofModal = ({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
 	});
+	const [proofStatus, setProofStatus] = useState<
+		ProofSubmission["status"] | undefined
+	>(proof?.status);
+	const [depositStatus, setDepositStatus] =
+		useState<BreadCumbStatus>("neutral");
+	const [submissionStatus, setSubmissionStatus] =
+		useState<BreadCumbStatus>("neutral");
 
 	const updateState = useCallback(() => {
 		if (proof) {
 			if (
-				proof.status === "pending" ||
-				proof.status === "underpriced" ||
-				proof.status === "submitted"
+				proofStatus === "pending" ||
+				proofStatus === "underpriced" ||
+				proofStatus === "submitted"
 			) {
 				setStep("submit");
 			}
-			if (proof.status === "claimed" || proof.status === "verified") {
+			if (proofStatus === "claimed" || proofStatus === "verified") {
 				setStep("claim");
 			}
 		} else {
@@ -88,7 +95,7 @@ export const SubmitProofModal = ({
 				setStep("deposit");
 			}
 		}
-	}, [balance.data, setStep]);
+	}, [balance.data, proofStatus]);
 
 	const goToNextStep = useCallback(() => {
 		if (step === "deposit") setStep("submit");
@@ -100,6 +107,12 @@ export const SubmitProofModal = ({
 			updateState();
 		}
 	}, [balance.data, setStep]);
+
+	useEffect(() => {
+		if (proofStatus) {
+			updateState();
+		}
+	}, [proofStatus]);
 
 	const headerBasedOnStep = {
 		deposit: {
@@ -137,6 +150,8 @@ export const SubmitProofModal = ({
 				userProofs={userBeastSubmissions}
 				user_address={user_address}
 				proofSubmission={proof}
+				proofStatus={proofStatus}
+				setProofStatus={setProofStatus}
 			/>
 		),
 		claim: () =>
@@ -146,39 +161,40 @@ export const SubmitProofModal = ({
 					proofSubmission={proof}
 					user_address={user_address}
 					leaderboard_address={leaderboard_address}
+					proofStatus={proofStatus}
 				/>
 			),
 	};
 
-	const depositStatus = (): BreadCumbStatus => {
+	useEffect(() => {
 		if (step === "deposit" || (step === "submit" && !proof)) {
 			if (Number(formatEther(balance.data || BigInt(0))) < 0.001) {
-				return "warn";
+				setDepositStatus("warn");
 			}
+		} else {
+			setDepositStatus("success");
 		}
 
-		return "success";
-	};
-
-	const submissionStatus = (): BreadCumbStatus => {
 		if ((step === "deposit" || step === "submit") && !proof) {
-			return "neutral";
+			setSubmissionStatus("neutral");
 		}
 
-		if (proof?.status === "pending" || proof?.status === "underpriced") {
-			return "warn";
+		if (
+			proofStatus === "pending" ||
+			proofStatus === "underpriced" ||
+			proofStatus === "submitted"
+		) {
+			setSubmissionStatus("warn");
 		}
 
-		if (proof?.status === "failed") {
-			return "failed";
+		if (proofStatus === "failed") {
+			setSubmissionStatus("failed");
 		}
 
-		if (proof?.status === "submitted" || proof?.status === "claimed") {
-			return "success";
+		if (proofStatus === "verified" || proofStatus === "claimed") {
+			setSubmissionStatus("success");
 		}
-
-		return "neutral";
-	};
+	}, [step, depositStatus, submissionStatus]);
 
 	return (
 		<Modal
@@ -201,19 +217,19 @@ export const SubmitProofModal = ({
 						<BreadCumb
 							step="Deposit"
 							active={true}
-							status={depositStatus()}
+							status={depositStatus}
 						/>
 						<BreadCumb
 							step="Submission"
 							active={step === "submit" || step === "claim"}
-							status={submissionStatus()}
+							status={submissionStatus}
 						/>
 						<BreadCumb
 							step="Claim"
 							// Check if the game is outdated and not claimed and mark as failed
 							active={step === "claim"}
 							status={
-								proof?.status === "claimed"
+								proofStatus === "claimed"
 									? "success"
 									: "neutral"
 							}

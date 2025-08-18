@@ -20,6 +20,15 @@ defmodule ZkArcadeWeb.ProofController do
     |> redirect(to: "/")
   end
 
+  def get_proof_status(conn, %{"proof_id" => proof_id}) do
+    proof_status = Proofs.get_status(proof_id)
+
+    case proof_status do
+      nil -> send_resp(conn, 404, Jason.encode!(%{error: "Proof not found"}))
+      proof_status -> json(conn, %{status: proof_status.status})
+    end
+  end
+
   def get_proof_verification_data(conn, %{"proof_id" => proof_id}) do
     address = get_session(conn, :wallet_address)
 

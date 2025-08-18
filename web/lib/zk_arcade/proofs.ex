@@ -113,6 +113,15 @@ defmodule ZkArcade.Proofs do
       end)
   end
 
+  def get_status(proof_id) do
+    Proof
+      |> where([p], p.id == ^proof_id)
+      |> select([p], %{
+        status: p.status
+      })
+      |> Repo.one()
+  end
+
 
   def get_proof_verification_data(proof_id) do
     Proof

@@ -60,6 +60,8 @@ export const SubmitProofStep = ({
 	setOpen,
 	setStep,
 	proofSubmission,
+	proofStatus,
+	setProofStatus,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -69,6 +71,8 @@ export const SubmitProofStep = ({
 	setOpen: (open: boolean) => void;
 	setStep: (step: string) => void;
 	proofSubmission?: ProofSubmission;
+	proofStatus?: ProofSubmission["status"];
+	setProofStatus: (status: ProofSubmission["status"]) => void;
 }) => {
 	const chainId = useChainId();
 	const [game, setGame] = useState<GameId>("beast");
@@ -78,9 +82,11 @@ export const SubmitProofStep = ({
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
 
-	const [provingSystem, setProvingSystem] = useState<ProvingSystem>("");
+	const [provingSystem, setProvingSystem] = useState<ProvingSystem>(
+		proofSubmission?.proving_system
+	);
 	const [proof, setProof] = useState<Uint8Array>();
-	const [proofId, setProofId] = useState<Uint8Array>();
+	const [proofId, setProofId] = useState<Uint8Array>(proofSubmission?.id);
 	const [publicInputs, setPublicInputs] = useState<Uint8Array>();
 	const [maxFee, setMaxFee] = useState(BigInt(0));
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
@@ -98,7 +104,14 @@ export const SubmitProofStep = ({
 				game_config: string;
 		  }
 		| undefined
-	>();
+	>(
+		proofSubmission
+			? {
+					level: proofSubmission?.level_reached,
+					game_config: proofSubmission?.game_config,
+			  }
+			: undefined
+	);
 
 	const { currentGame, currentGameLevelCompleted } = useLeaderboardContract({
 		contractAddress: leaderboard_address,
@@ -272,34 +285,67 @@ export const SubmitProofStep = ({
 		nonce,
 	]);
 
+	useEffect(() => {
+		if (
+			proofSubmission?.status === "pending" ||
+			proofSubmission?.status === "underpriced" ||
+			proofSubmission?.status === "submitted"
+		) {
+			const interval = setInterval(() => {
+				const checkStatus = async () => {
+					try {
+						const res = await fetch(
+							`/proof/status/${proofSubmission.id}`
+						);
+						if (!res.ok) return;
+
+						const data = await res.json();
+						setProofStatus(data.status);
+
+						if (data.status === "verified") {
+							setStep("claim");
+							clearInterval(interval);
+						}
+					} catch (err) {
+						console.error("Error checking proof status:", err);
+					}
+				};
+
+				checkStatus();
+			}, 12000);
+
+			return () => clearInterval(interval);
+		}
+	}, [proofSubmission]);
+
 	if (
-		proofSubmission?.status === "pending" ||
-		proofSubmission?.status === "underpriced" ||
-		proofSubmission?.status === "submitted"
+		proofStatus === "pending" ||
+		proofStatus === "underpriced" ||
+		proofStatus === "submitted"
 	) {
 		return (
 			<div className="flex flex-col gap-4 justify-between h-full">
-				{proofSubmission.status === "pending" ? (
+				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
 						The proof has been submitted to Aligned, and it will be
 						verified soon so you can claim your points.
 					</p>
-				) : proofSubmission.status === "underpriced" ? (
+				) : proofStatus === "underpriced" ? (
 					<p className="bg-orange/20 rounded p-2 text-orange">
 						The proof is underpriced, we suggest you to bump the
 						fee.
 					</p>
 				) : (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
-						The proof has been submitted correctly to Aligned and it
-						being verified by the operators
+						The proof has been included in a batch and it will be
+						verified soon by the operators
 					</p>
 				)}
 
 				<div className="flex flex-col gap-2">
-					<p>Prover: {proofSubmission.proving_system}</p>
-					<p>Game: {proofSubmission.game}</p>
-					<p>Level reached: {proofSubmission.level_reached}</p>
+					<p>Prover: {provingSystem}</p>
+					<p>Game: {game}</p>
+					<p>Level reached: {parsedPublicInputs?.level}</p>
 				</div>
 			</div>
 		);
@@ -314,21 +360,13 @@ export const SubmitProofStep = ({
 					that rejected the proof, please submit it again.
 				</p>
 				<div className="flex flex-col gap-2">
-					<p>Prover: {proofSubmission.proving_system}</p>
-					<p>Game: {proofSubmission.game}</p>
-					<p>Level reached: {proofSubmission.level_reached}</p>
+					<p>Prover: {provingSystem}</p>
+					<p>Game: {game}</p>
+					<p>Level reached: {parsedPublicInputs?.level}</p>
 				</div>
 			</div>
 		);
 	}
-
-	useEffect(() => {
-		if (proofSubmission?.status === "pending") {
-			setInterval(() => {
-				// TODO: query server to update the proof status
-			}, 12000);
-		}
-	}, []);
 
 	return (
 		<div className="flex flex-col gap-6 justify-between h-full">

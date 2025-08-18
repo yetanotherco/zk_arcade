@@ -23,6 +23,7 @@ defmodule ZkArcadeWeb.Router do
     get "/leaderboard", PageController, :leaderboard
 
     get "/proof/verification-data", ProofController, :get_proof_verification_data
+    get "/proof/status/:proof_id", ProofController, :get_proof_status
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
     post "/proof/status/retry", ProofController, :retry_submit_proof

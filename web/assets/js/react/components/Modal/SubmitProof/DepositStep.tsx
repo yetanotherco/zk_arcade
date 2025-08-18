@@ -148,7 +148,7 @@ export const DepositStep = ({
 				className="font-normal self-end flex items-center gap-2"
 				onClick={() => updateState()}
 			>
-				Next
+				Skip
 				<span className="hero-chevron-right"></span>
 			</Button>
 			<div className="flex items-center justify-end">

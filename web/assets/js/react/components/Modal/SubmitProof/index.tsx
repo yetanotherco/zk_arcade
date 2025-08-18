@@ -17,10 +17,32 @@ type Props = {
 	userBeastSubmissions: BeastProofClaimed[];
 };
 
-const BreadCumb = ({ active, step }: { active: boolean; step: string }) => {
+type BreadCumbStatus = "success" | "warn" | "failed" | "neutral";
+
+const BreadCumb = ({
+	active,
+	step,
+	status,
+}: {
+	active: boolean;
+	step: string;
+	status: BreadCumbStatus;
+}) => {
+	const statusIcon = {
+		success: "hero-check-circle text-accent-100",
+		warn: "hero-exclamation-triangle text-yellow",
+		failed: "hero-x-circle text-red",
+		neutral: "",
+	};
+
 	return (
 		<div className="w-full max-w-[220px]">
-			<p className="text-center mb-1">{step}</p>
+			<div className="flex gap-2 justify-center items-center">
+				<p className="text-center mb-1">{step}</p>
+				{status !== "neutral" && (
+					<span className={`size-5 ${statusIcon[status]}`}></span>
+				)}
+			</div>
 			<div
 				className={`h-[5px] rounded w-full ${
 					active ? "bg-accent-100" : "bg-contrast-200"
@@ -124,6 +146,36 @@ export const SubmitProofModal = ({
 			),
 	};
 
+	const depositStatus = (): BreadCumbStatus => {
+		if (step === "deposit" || (step === "submit" && !proof)) {
+			if (Number(formatEther(balance.data || BigInt(0))) < 0.001) {
+				return "warn";
+			}
+		}
+
+		return "success";
+	};
+
+	const submissionStatus = (): BreadCumbStatus => {
+		if ((step === "deposit" || step === "submit") && !proof) {
+			return "neutral";
+		}
+
+		if (proof?.status === "pending" || proof?.status === "underpriced") {
+			return "warn";
+		}
+
+		if (proof?.status === "failed") {
+			return "failed";
+		}
+
+		if (proof?.status === "submitted" || proof?.status === "claimed") {
+			return "success";
+		}
+
+		return "neutral";
+	};
+
 	return (
 		<Modal
 			maxWidth={800}
@@ -142,15 +194,25 @@ export const SubmitProofModal = ({
 				</div>
 				<div className="w-full">
 					<div className="flex gap-8 justify-center w-full">
-						<BreadCumb step="Deposit" active={true} />
+						<BreadCumb
+							step="Deposit"
+							active={true}
+							status={depositStatus()}
+						/>
 						<BreadCumb
 							step="Submission"
 							active={step === "submit" || step === "claim"}
+							status={submissionStatus()}
 						/>
 						<BreadCumb
 							step="Claim"
 							// Check if the game is outdated and not claimed and mark as failed
 							active={step === "claim"}
+							status={
+								proof?.status === "claimed"
+									? "success"
+									: "neutral"
+							}
 						/>
 					</div>
 				</div>

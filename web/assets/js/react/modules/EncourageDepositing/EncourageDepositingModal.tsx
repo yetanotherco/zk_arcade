@@ -4,7 +4,6 @@ import { Modal } from "../../components/Modal";
 import { Button } from "../../components";
 import { DepositOnAlignedModal } from "../../components/Modal/DepositOnAligned";
 import { Address } from "../../types/blockchain";
-import { useBatcherPaymentService } from "../../hooks";
 
 type Props = {
     payment_service_address: Address;

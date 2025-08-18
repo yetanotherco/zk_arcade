@@ -82,6 +82,12 @@ export const ClaimStep = ({
 				<p>Level reached: {proofSubmission.level_reached}</p>
 				<p>Points to claim: {proofSubmission.level_reached}</p>
 			</div>
+			<a
+				href="/leaderboard"
+				className="mb-2 text-blue text-md hover:underline text-center"
+			>
+				Go to leaderboard
+			</a>
 			<div className="self-end">
 				<Button
 					variant="text"

@@ -12,61 +12,93 @@ type Props = {
 };
 
 export const EncourageDepositingModal = ({payment_service_address, user_address}: Props) => {
-    const { open: encourageOpen, setOpen: setEncourageOpen } = useModal(true);
+    const { open: encourageOpen, setOpen: setEncourageOpen } = useModal(false);
     const { open: depositOpen, setOpen: setDepositOpen } = useModal();
 
-	const { balance } = useBatcherPaymentService({
-		contractAddress: payment_service_address,
-		userAddress: user_address,
-	});
+    useEffect(() => {
+        const checkAndOpenModal = () => {
+            const viewedHowItWorks = JSON.parse(
+                localStorage.getItem("how-it-works-viewed") || "false"
+            );
+            const viewedEncourageDepositing = JSON.parse(
+                localStorage.getItem("encourage-depositing-viewed") || "false"
+            );
 
-    const showModal = balance.data != undefined && balance.data == BigInt(0);
+            if (viewedHowItWorks && !viewedEncourageDepositing) {
+                setEncourageOpen(true);
+            }
+        };
+
+        checkAndOpenModal();
+
+        const handleStorageChange = (e) => {
+            if (e.key === "how-it-works-viewed") {
+                checkAndOpenModal();
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        
+        const interval = setInterval(checkAndOpenModal, 600);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            clearInterval(interval);
+        };
+    }, [setEncourageOpen]);
+
+    const handleCloseModal = () => {
+        localStorage.setItem("encourage-depositing-viewed", "true");
+        setEncourageOpen(false);
+    };
+
+    const handleDepositNow = () => {
+        localStorage.setItem("encourage-depositing-viewed", "true");
+        setEncourageOpen(false);
+        setDepositOpen(true);
+    };
 
     return (
         <div>
-            {showModal === true && (
-                <div>
-                    <Modal
-                        open={encourageOpen}
-                        setOpen={setEncourageOpen}
-                        maxWidth={600}
-                    >
-                        <div className="bg-contrast-100 p-10 rounded flex flex-col gap-8">
-                            <div className="text-center">
-                                <p className="text-text-100">
-                                    To play zk-arcade, you need to deposit some funds into your wallet. This is necessary to submit your proofs to Aligned and claim your points in the LeaderBoard.
-                                </p>
-                            </div>
+            <Modal
+                open={encourageOpen}
+                setOpen={setEncourageOpen}
+                maxWidth={600}
+                onClose={handleCloseModal}
+            >
+                <div className="bg-contrast-100 p-10 rounded flex flex-col gap-8">
+                    <div className="text-center">
+                        <p className="text-text-100">
+                            To play zk-arcade, you need to deposit some funds into your wallet. This is necessary to submit your proofs to Aligned and claim your points in the LeaderBoard.
+                        </p>
+                    </div>
 
-                            <div className="text-center justify-between space-x-12">
-                                <Button
-                                    variant="text"
-                                    onClick={() => setEncourageOpen(false)}
-                                    className="mt-6"
-                                >
-                                    I'll deposit later
-                                </Button>
+                    <div className="text-center justify-between space-x-12">
+                        <Button
+                            variant="text"
+                            onClick={handleCloseModal}
+                            className="mt-6"
+                        >
+                            I'll deposit later
+                        </Button>
 
-                                <Button
-                                    variant="accent-fill"
-                                    onClick={() => { setEncourageOpen(false); setDepositOpen(true); }}
-                                    className="mt-6"
-                                >
-                                    Deposit funds now
-                                </Button>
-                            </div>
-                        </div>
-                    </Modal>
-
-                    <DepositOnAlignedModal
-                        payment_service_address={payment_service_address}
-                        user_address={user_address}
-                        open={depositOpen}
-                        setOpen={setDepositOpen}
-                    />
+                        <Button
+                            variant="accent-fill"
+                            onClick={handleDepositNow}
+                            className="mt-6"
+                        >
+                            Deposit funds now
+                        </Button>
+                    </div>
                 </div>
-            )}
+            </Modal>
+
+            <DepositOnAlignedModal
+                payment_service_address={payment_service_address}
+                user_address={user_address}
+                open={depositOpen}
+                setOpen={setDepositOpen}
+            />
         </div>
     );
 };
-

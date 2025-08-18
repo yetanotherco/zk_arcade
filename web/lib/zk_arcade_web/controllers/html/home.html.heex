@@ -2,6 +2,10 @@
 
   <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
 
+  <%= if @connected_wallet == true do %>
+    <x-app-encourage-depositing-modal/>
+  <% end %>
+
   <div class="section-width flex flex-row h-screen items-center">
     <div class="flex flex-row justify-between items-end w-full">
       <div style="width: 70%">

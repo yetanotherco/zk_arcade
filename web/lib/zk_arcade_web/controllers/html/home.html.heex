@@ -3,7 +3,11 @@
   <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
 
   <%= if @connected_wallet == true do %>
-    <x-app-encourage-depositing-modal/>
+    <x-app-encourage-depositing-modal
+      network={Application.get_env(:zk_arcade, :network)}
+      payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+      user_address={@conn.assigns.wallet} 
+    />
   <% end %>
 
   <div class="section-width flex flex-row h-screen items-center">

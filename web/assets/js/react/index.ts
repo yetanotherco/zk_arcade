@@ -7,6 +7,7 @@ import UpdateUsernameBtn from "./modules/History/UpdateUsernameBtn";
 import CurrentBeastGame from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
+import { EncourageDepositingModal } from "./modules/EncourageDepositingModal";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -73,3 +74,5 @@ define(
 );
 
 define({ "x-app-how-it-works-modal": HowItWorksModal });
+
+define({ "x-app-encourage-depositing-modal": EncourageDepositingModal });

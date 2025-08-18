@@ -1,13 +1,15 @@
 import React from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { shortenHash } from "../../utils/crypto";
+import { timeAgoInHs } from "../../utils/date";
 
 type KeysForStatus = ProofSubmission["status"];
 
 const colorBasedOnStatus: {
 	[key in KeysForStatus]: string;
 } = {
-	submitted: "bg-accent-100/20 text-accent-100",
+	verified: "bg-accent-100/20 text-accent-100",
+	submitted: "bg-accent-200 text-black",
 	pending: "bg-yellow/20 text-yellow",
 	claimed: "bg-blue/20 text-blue",
 	failed: "bg-red/20 text-red",
@@ -17,7 +19,8 @@ const colorBasedOnStatus: {
 const tooltipStyleBasedOnStatus: {
 	[key in KeysForStatus]: string;
 } = {
-	submitted: "bg-accent-100 text-black",
+	verified: "bg-accent-100 text-black",
+	submitted: "bg-accent-200 text-black",
 	pending: "bg-yellow text-black",
 	claimed: "bg-blue text-white",
 	failed: "bg-red text-white",
@@ -25,17 +28,18 @@ const tooltipStyleBasedOnStatus: {
 };
 
 const tooltipText: { [key in KeysForStatus]: string } = {
-	submitted: "Solution verified and ready to be claimed",
+	verified: "Solution verified and ready to be claimed",
+	submitted: "Solution submitted and waiting for verification",
 	claimed: "Already submitted to leaderboard",
-	pending:
-		"You need to wait until its verified before submitting the solution",
+	pending: "You need to wait until its verified before submitting the solution",
 	failed: "The proof failed to be verified, you have to re-send it",
-	underpriced: "The proof is underpriced, we suggest you bump the fee",
+	underpriced: "The proof is underpriced, we suggest bumping the fee",
 };
 
 const statusText: { [key in KeysForStatus]: string } = {
 	claimed: "Claimed",
-	submitted: "Ready",
+	verified: "Ready",
+	submitted: "Processing",
 	pending: "Pending",
 	failed: "Failed",
 	underpriced: "Pending",
@@ -47,6 +51,8 @@ type Props = {
 };
 
 export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
+	const isUnderpriced = proof.status === "pending" && timeAgoInHs(proof.inserted_at) > 6;
+	if (isUnderpriced) proof.status = "underpriced";
 	return (
 		<td>
 			<div

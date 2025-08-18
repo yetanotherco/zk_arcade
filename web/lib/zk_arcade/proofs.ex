@@ -89,7 +89,8 @@ defmodule ZkArcade.Proofs do
         updated_at: p.updated_at,
         wallet_address: p.wallet_address,
         level_reached: p.level_reached,
-        game_config: p.game_config
+        game_config: p.game_config,
+        submitted_max_fee: p.submitted_max_fee,
       })
       |> Repo.all()
       |> Enum.map(fn proof ->
@@ -124,7 +125,7 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
-  def create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level) do
+  def create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee) do
     {:ok, verification_data_commitment} = ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(submit_proof_message["verificationData"]["verificationData"])
     proof_params = %{
       wallet_address: address,
@@ -135,7 +136,8 @@ defmodule ZkArcade.Proofs do
       game: game,
       proving_system: proving_system,
       game_config: gameConfig,
-      level_reached: level
+      level_reached: level,
+      submitted_max_fee: max_fee
     }
 
     create_proof(proof_params)
@@ -193,6 +195,23 @@ defmodule ZkArcade.Proofs do
     end
   end
 
+  def update_proof_status_verified(proof_id) do
+    Logger.info("Updating proof #{proof_id} status to verified")
+    proof = get_proof!(proof_id)
+
+    changeset = change_proof(proof, %{status: "verified"})
+
+    case Repo.update(changeset) do
+      {:ok, updated_proof} ->
+        Logger.info("Updated proof #{proof_id} status to verified")
+        {:ok, updated_proof}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+        {:error, changeset}
+    end
+  end
+
   def update_proof_status_claimed(address, proof_id) do
     Logger.info("Updating proof #{proof_id} status to claimed")
     proof = get_proof!(proof_id)
@@ -232,14 +251,15 @@ defmodule ZkArcade.Proofs do
     end
   end
 
-  def update_proof_retry(proof_id) do
+  def update_proof_retry(proof_id, max_fee) do
     proof = get_proof!(proof_id)
 
     changeset = change_proof(proof, %{
       status: "pending",
       inserted_at: DateTime.utc_now(),
       updated_at: DateTime.utc_now(),
-      times_retried: proof.times_retried + 1
+      times_retried: proof.times_retried + 1,
+      submitted_max_fee: max_fee
     })
 
     case Repo.update(changeset) do

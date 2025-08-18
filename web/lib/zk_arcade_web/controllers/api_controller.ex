@@ -1,4 +1,4 @@
-defmodule ZkArcadeWeb.WalletApiController do
+defmodule ZkArcadeWeb.ApiController do
   use ZkArcadeWeb, :controller
 
   def check_agreement_status(conn, %{"address" => address}) do
@@ -33,5 +33,18 @@ defmodule ZkArcadeWeb.WalletApiController do
       conn
       |> put_status(:bad_request)
       |> json(%{error: "Invalid wallet address"})
+  end
+
+  def get_eth_price(conn, _) do
+    eth_price = ZkArcade.EthPrice.get_eth_price_usd()
+
+    case eth_price do
+      {:ok, eth_price} ->
+        conn |> json(%{eth_price: eth_price})
+      {:error, _} ->
+         conn
+          |> put_status(:internal_server_error)
+          |> json(%{error: "Failed to fetch ETH price"})
+    end
   end
 end

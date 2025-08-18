@@ -17,18 +17,8 @@ type Props = {
 };
 
 const textBasedOnNotEntry = {
-	pending: (commitment: string) => (
-		<>
-			The proof <span className="font-bold">{commitment}</span> is
-			underpriced we suggest you bump the fee
-		</>
-	),
-	submitted: (commitment: string) => (
-		<>
-			The proof <span className="font-bold">{commitment}</span> is ready
-			to be claimed
-		</>
-	),
+	pending: () => <>The proof is underpriced, we suggest bumping the fee.</>,
+	verified: () => <>The proof is ready to be claimed.</>,
 };
 
 const NotificationEntry = ({
@@ -54,7 +44,7 @@ const NotificationEntry = ({
 				<div className="flex items-center gap-4">
 					<div
 						className={`rounded-full h-[10px] w-[10px] ${
-							proof.status === "submitted"
+							proof.status === "verified"
 								? "bg-accent-100"
 								: "bg-orange"
 						} shrink-0`}
@@ -95,33 +85,21 @@ export const NotificationBell = ({
 	user_beast_submissions,
 }: Props) => {
 	const [proofsReady, setProofsReady] = useState<ProofSubmission[]>([]);
-	const [proofsUnderpriced, setProofsUnderpriced] = useState<
-		ProofSubmission[]
-	>([]);
-
 	const [allProofs, setAllProofs] = useState<ProofSubmission[]>([]);
 
 	useEffect(() => {
-		const proofsReady = proofs.filter(
-			proof => proof.status === "submitted"
-		);
-
-		const proofsUnderpriced = proofs.filter(
-			proof =>
-				proof.status === "pending" && timeAgoInHs(proof.inserted_at) > 6
-		);
+		const proofsReady = proofs.filter(proof => proof.status === "verified");
 
 		const allProofs = proofs.filter(
 			proof =>
-				proof.status === "submitted" ||
+				proof.status === "verified" ||
 				(proof.status === "pending" &&
 					timeAgoInHs(proof.inserted_at) > 6)
 		);
 
 		setProofsReady(proofsReady);
-		setProofsUnderpriced(proofsUnderpriced);
 		setAllProofs(allProofs);
-	}, [proofs, setProofsReady, setProofsUnderpriced]);
+	}, [proofs, setProofsReady]);
 
 	return (
 		<div className="sm:relative group">
@@ -129,9 +107,6 @@ export const NotificationBell = ({
 				<span className="hero-bell size-7"></span>
 				{proofsReady.length > 0 && (
 					<div className="rounded-full h-[10px] w-[10px] bg-accent-100 absolute top-0 left-0"></div>
-				)}
-				{proofsUnderpriced.length > 0 && (
-					<div className="rounded-full h-[10px] w-[10px] bg-orange absolute top-0 left-[5px]"></div>
 				)}
 			</div>
 

@@ -6,12 +6,13 @@ export type ProofSubmission = {
 	id: string;
 	game: string;
 	proving_system: ProvingSystem;
-	status: "submitted" | "pending" | "failed" | "claimed" | "underpriced";
+	status: "submitted" | "pending" | "failed" | "claimed" | "underpriced" | "verified";
 	inserted_at: string;
 	batch_hash: string | null;
 	verification_data_commitment: `0x${string}`;
 	level_reached: number;
 	game_config: string;
+	submitted_max_fee: `0x${string}`;
 };
 
 export type SubmitProof = {

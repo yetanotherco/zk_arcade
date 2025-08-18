@@ -17,16 +17,16 @@ type Props = {
 	userBeastSubmissions: BeastProofClaimed[];
 };
 
-type BreadCumbStatus = "success" | "warn" | "failed" | "neutral";
+type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
 
-const BreadCumb = ({
+const BreadCrumb = ({
 	active,
 	step,
 	status,
 }: {
 	active: boolean;
 	step: string;
-	status: BreadCumbStatus;
+	status: BreadCrumbStatus;
 }) => {
 	const statusIcon = {
 		success: "hero-check-circle text-accent-100",
@@ -72,9 +72,9 @@ export const SubmitProofModal = ({
 		ProofSubmission["status"] | undefined
 	>(proof?.status);
 	const [depositStatus, setDepositStatus] =
-		useState<BreadCumbStatus>("neutral");
+		useState<BreadCrumbStatus>("neutral");
 	const [submissionStatus, setSubmissionStatus] =
-		useState<BreadCumbStatus>("neutral");
+		useState<BreadCrumbStatus>("neutral");
 
 	const updateState = useCallback(() => {
 		if (proof) {
@@ -215,17 +215,17 @@ export const SubmitProofModal = ({
 				</div>
 				<div className="w-full">
 					<div className="flex gap-8 justify-center w-full">
-						<BreadCumb
+						<BreadCrumb
 							step="Deposit"
 							active={true}
 							status={depositStatus}
 						/>
-						<BreadCumb
+						<BreadCrumb
 							step="Submission"
 							active={step === "submit" || step === "claim"}
 							status={submissionStatus}
 						/>
-						<BreadCumb
+						<BreadCrumb
 							step="Claim"
 							// Check if the game is outdated and not claimed and mark as failed
 							active={step === "claim"}

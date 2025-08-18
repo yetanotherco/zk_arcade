@@ -27,7 +27,14 @@ export const useProofSentMessageReader = () => {
 		// Remove the message param from the URL without reloading the page
 		// this prevents showing the message again when the user refreshes the page
 		if (message) {
-			const newUrl = window.location.pathname;
+			const params = new URLSearchParams(window.location.search);
+			params.delete("message");
+
+			const newUrl =
+				window.location.pathname +
+				(params.toString() ? `?${params.toString()}` : "") +
+				window.location.hash;
+
 			window.history.replaceState({}, "", newUrl);
 		}
 	}, []);

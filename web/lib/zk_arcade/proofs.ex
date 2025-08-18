@@ -113,6 +113,48 @@ defmodule ZkArcade.Proofs do
       end)
   end
 
+  def get_proof_submission(proof_id) do
+    query =
+      from p in Proof,
+        where: p.id == ^proof_id,
+        select: %{
+          id: p.id,
+          verification_data_commitment: fragment("?->>'commitment'", p.verification_data_commitment),
+          batch_hash: fragment("?->>'batch_merkle_root'", p.batch_data), # text JSON
+          status: p.status,
+          game: p.game,
+          proving_system: p.proving_system,
+          inserted_at: p.inserted_at,
+          updated_at: p.updated_at,
+          wallet_address: p.wallet_address,
+          level_reached: p.level_reached,
+          game_config: p.game_config,
+          submitted_max_fee: p.submitted_max_fee
+        }
+
+    case Repo.one(query) do
+      nil ->
+        nil
+
+      proof ->
+        hex_batch_hash =
+          case proof.batch_hash do
+            nil -> nil
+
+            string when is_binary(string) ->
+              with {:ok, list} <- Jason.decode(string),
+                  true <- is_list(list) do
+                "0x" <> (:erlang.list_to_binary(list) |> Base.encode16(case: :lower))
+              else
+                _ -> nil
+              end
+
+            _ -> nil
+          end
+        %{proof | batch_hash: hex_batch_hash}
+    end
+  end
+
   def get_status(proof_id) do
     Proof
       |> where([p], p.id == ^proof_id)

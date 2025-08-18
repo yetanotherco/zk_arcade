@@ -77,8 +77,6 @@ defmodule ZkArcadeWeb.PageController do
 
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
 
-    user_connected_wallet = get_session(conn, :connected_wallet) || false
-
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
@@ -89,7 +87,6 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:username, username)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
-      |> assign(:connected_wallet, user_connected_wallet)
       |> render(:home)
   end
 

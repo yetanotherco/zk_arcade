@@ -15,7 +15,6 @@ defmodule ZkArcadeWeb.WalletController do
           Logger.info("There is already a wallet for the received address")
 
           conn
-          |> put_session(:connected_wallet, true)
           |> put_session(:wallet_address, wallet.address)
           |> redirect(to: ~p"/")
 
@@ -27,7 +26,6 @@ defmodule ZkArcadeWeb.WalletController do
               Logger.info("Created wallet for address #{wallet.address}")
 
             conn
-            |> put_session(:connected_wallet, true)
             |> put_session(:wallet_address, wallet.address)
             |> redirect(to: ~p"/")
             {:error, changeset} ->
@@ -43,7 +41,6 @@ defmodule ZkArcadeWeb.WalletController do
 
   def disconnect_wallet(conn, _params) do
      conn
-    |> delete_session(:connected_wallet)
     |> delete_session(:wallet_address)
     |> redirect(to: ~p"/")
   end

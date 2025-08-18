@@ -2,8 +2,11 @@ defmodule ZkArcade.SubmissionPoller do
   use GenServer
   require Logger
 
-  @topic "0x" <>
-           Base.encode16(ExKeccak.hash_256("NewSolutionSubmitted(address,uint256)"), case: :lower)
+@topic "0x" <>
+         Base.encode16(
+           ExKeccak.hash_256("NewSolutionSubmitted(address,uint256,uint256)"),
+           case: :lower
+         )
 
   def start_link(opts \\ []), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
@@ -91,15 +94,12 @@ defmodule ZkArcade.SubmissionPoller do
 
   # This function handles the decoded event by fetching the current score from the Leaderboard contract and
   # updating the database leaderboard entry.
-  defp handle_event(%{user: user, level: level}) do
-    Logger.info("New solution submitted by #{user} for level #{level}")
-
-    current_score = ZkArcade.LeaderboardContract.get_user_score(user)
-    Logger.info("New score for #{user}: #{current_score}")
+  defp handle_event(%{user: user, level: level, score: score}) do
+    Logger.info("New solution submitted by #{user} for level #{level} with score #{score}")
 
     case ZkArcade.Leaderboard.insert_or_update_entry(%{
            "user_address" => user,
-           "score" => current_score
+           "score" => score
          }) do
       {:ok, _entry} ->
         Logger.info("Leaderboard entry created/updated successfully.")
@@ -115,7 +115,7 @@ defmodule ZkArcade.SubmissionPoller do
          "topics" => [_event_sig],
          "data" => data
        }) do
-    <<user::binary-size(32), level::binary-size(32)>> =
+    <<user::binary-size(32), level::binary-size(32), score::binary-size(32)>> =
       Base.decode16!(String.trim_leading(data, "0x"), case: :lower)
 
     user_address =
@@ -125,8 +125,9 @@ defmodule ZkArcade.SubmissionPoller do
       |> then(&("0x" <> &1))
 
     level_value = :binary.decode_unsigned(level)
+    score_value = :binary.decode_unsigned(score)
 
-    {:ok, %{user: user_address, level: level_value}}
+    {:ok, %{user: user_address, level: level_value, score: score_value}}
   end
 
   defp decode_event_log(log) do

@@ -103,7 +103,7 @@ export const ClaimStep = ({
 						submitSolution.submitSolutionFetchingVDataIsLoading ||
 						submitSolution.receipt.isLoading
 					}
-					disabled={gameHasExpired}
+					disabled={gameHasExpired && proofStatus !== "claimed"}
 				>
 					{proofStatus === "verified" ? "Claim" : "Share on Twitter"}
 				</Button>

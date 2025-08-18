@@ -165,6 +165,7 @@ defmodule ZkArcadeWeb.PageController do
     {username, position} = get_username_and_position(wallet)
 
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+    batcher_url = Application.get_env(:zk_arcade, :batcher_url)
 
     conn
     |> assign(:wallet, wallet)
@@ -177,6 +178,7 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:username, username)
     |> assign(:user_position, position)
     |> assign(:explorer_url, explorer_url)
+    |> assign(:batcher_url, batcher_url)
     |> render(:history)
   end
 

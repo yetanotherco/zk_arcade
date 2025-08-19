@@ -128,7 +128,7 @@ export const SubmitProofModal = ({
 		},
 		claim: {
 			header: "Claim your points",
-			subtitle: "Claim your points into the leaderboard contract.",
+			subtitle: "Claim your points into the Leaderboard.",
 		},
 	};
 

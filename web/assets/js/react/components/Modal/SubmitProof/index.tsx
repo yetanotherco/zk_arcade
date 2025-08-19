@@ -117,7 +117,7 @@ export const SubmitProofModal = ({
 
 	const headerBasedOnStep = {
 		deposit: {
-			header: "Deposit into Aligned Batcher",
+			header: "Deposit into Aligned",
 			subtitle:
 				"You need to deposit money into aligned batcher in order to verify your proof on Aligned.",
 		},

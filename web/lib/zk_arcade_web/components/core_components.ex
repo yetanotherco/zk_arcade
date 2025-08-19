@@ -80,6 +80,27 @@ defmodule ZkArcadeWeb.CoreComponents do
               beast_submissions={@beast_submissions}
           />
 
+          <div class="relative hidden lg:block">
+            <button
+              id="kebab-toggle"
+              class="p-2 hover:bg-contrast-100 rounded transition-colors"
+              aria-label="Toggle kebab menu"
+              onclick="toggleKebabMenu()"
+            >
+              <.icon name="hero-ellipsis-vertical" class="w-5 h-5" />
+            </button>
+
+            <div
+              id="kebab-dropdown"
+              class="absolute right-0 top-full mt-2 w-48 bg-background border border-contrast-200 rounded-lg shadow-lg z-50 hidden"
+            >
+              <div class="py-2">
+                <button class="block w-full text-left px-4 py-2 text-sm hover:bg-contrast-100 transition-colors" id="how-it-works-nav-btn">Tutorial</button>
+                <%!-- <.link href="/" class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors">Home</.link> --%>
+              </div>
+            </div>
+          </div>
+
           <button
             class="lg:hidden z-50"
             id="menu-toggle"

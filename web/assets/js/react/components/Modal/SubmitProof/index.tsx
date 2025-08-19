@@ -81,7 +81,8 @@ export const SubmitProofModal = ({
 			if (
 				proofStatus === "pending" ||
 				proofStatus === "underpriced" ||
-				proofStatus === "submitted"
+				proofStatus === "submitted" ||
+				proofStatus === "failed"
 			) {
 				setStep("submit");
 			}

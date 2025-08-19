@@ -60,7 +60,7 @@ const NotificationEntry = ({
 					className="text-sm text-nowrap"
 					onClick={toggleOpen}
 				>
-					{proof.status === "submitted" ? "Claim" : "Bump fee"}
+					{proof.status === "verified" ? "Claim" : "Bump fee"}
 				</Button>
 			</div>
 			<SubmitProofModal

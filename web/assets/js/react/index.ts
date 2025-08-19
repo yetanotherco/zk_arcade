@@ -50,6 +50,7 @@ define(
 			"payment_service_address",
 			"user_address",
 			"explorer_url",
+			"batcher_url",
 		],
 	}
 );

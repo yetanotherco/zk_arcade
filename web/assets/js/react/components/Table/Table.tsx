@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ComponentType, PropsWithChildren } from "react";
 
 export type ColumnBody = {
 	rows: JSX.Element[];
@@ -10,7 +10,6 @@ export type ColumnHead = {
 
 type Props = React.ComponentProps<"table"> & {
 	header: ColumnHead[];
-	body: ColumnBody[];
 };
 
 export const TableBodyItem = ({
@@ -25,7 +24,7 @@ export const TableBodyItem = ({
 	);
 };
 
-export const Table = ({ header, body, className, ...props }: Props) => {
+export const Table = ({ header, className, children, ...props }: Props) => {
 	return (
 		<table
 			className={`table-fixed h-full w-full border-collapse ${className}`}
@@ -43,16 +42,7 @@ export const Table = ({ header, body, className, ...props }: Props) => {
 					))}
 				</tr>
 			</thead>
-			<tbody>
-				{body.map((item, i) => (
-					<tr
-						key={i}
-						className="gap-y-2 [&>td]:pb-2 animate-in fade-in-0 duration-700 truncat"
-					>
-						{item.rows.map(row => row)}
-					</tr>
-				))}
-			</tbody>
+			<tbody>{children}</tbody>
 		</table>
 	);
 };

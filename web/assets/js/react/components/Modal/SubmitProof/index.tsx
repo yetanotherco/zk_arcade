@@ -119,7 +119,7 @@ export const SubmitProofModal = ({
 		deposit: {
 			header: "Deposit into Aligned",
 			subtitle:
-				"You need to deposit money into aligned batcher in order to verify your proof on Aligned.",
+				"You need to deposit ETH into Aligned in order to verify your proofs.",
 		},
 		submit: {
 			header: "Submit your proof",

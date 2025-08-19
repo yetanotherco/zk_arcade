@@ -53,7 +53,6 @@ defmodule ZkArcadeWeb.CoreComponents do
               <.link href="/game/beast" class="transition hover:text-accent-100 hover:underline">Games</.link>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
-              <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">Tutorial</p>
           </div>
         </div>
 
@@ -404,6 +403,10 @@ defmodule ZkArcadeWeb.CoreComponents do
         style="max-width: 1000px;"
       >
         <div class="hidden sm:inline-block flex-1">
+          <p class="text-sm max-w-100" style="margin-bottom: 55px;">
+            Watched something to improve? Give us your feedback <a class="text-accent-100" href="#"> here </a>
+          </p>
+
           <p class="text-md">
             Powered By
             <span class="text-accent-100 block mt-1">

@@ -157,16 +157,16 @@ defmodule ZkArcadeWeb.CoreComponents do
           </div>
         </div>
 
-        <div class={[
-          "faq-content transition-[grid-template-rows] grid",
-          if(@expanded, do: "grid-rows-[1fr]", else: "grid-rows-[0fr]")
-        ]} style="will-change:grid-template-rows" id={"#{@id}-content"}>
-          <div class="overflow-hidden lg:pl-[60px]">
-            <div class="pb-4">
-              <p><%= Phoenix.HTML.raw(@answer) %></p>
-            </div>
+      <div class={[
+        "transition-[grid-template-rows] grid grid-rows-[0fr]",
+        @expanded && "grid-rows-[1fr]"
+      ]} id={"#{@id}-content"}>
+        <div class="overflow-hidden lg:pl-[60px] pr-[40px]">
+          <div class="pb-5">
+            <p class="text-text-200"><%= @answer %></p>
           </div>
         </div>
+      </div>
     </div>
     """
   end

@@ -223,15 +223,13 @@ defmodule ZkArcadeWeb.CoreComponents do
         if (isExpanded) {
           // Collapse
           content.classList.remove('grid-rows-[1fr]');
-          content.classList.add('grid-rows-[0fr]');
-          iconV.classList.remove('rotate-90');
-          iconH.classList.remove('rotate-90');
+          iconV?.classList.remove('rotate-90');
+          iconH?.classList.remove('rotate-90');
         } else {
           // Expand
-          content.classList.remove('grid-rows-[0fr]');
           content.classList.add('grid-rows-[1fr]');
-          iconV.classList.add('rotate-90');
-          iconH.classList.add('rotate-90');
+          iconV?.classList.add('rotate-90');
+          iconH?.classList.add('rotate-90');
         }
       }
     </script>

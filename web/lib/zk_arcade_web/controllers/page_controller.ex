@@ -96,23 +96,47 @@ defmodule ZkArcadeWeb.PageController do
 
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
 
-    # Example faqs
     faqs = [
       %{
         number: "01",
-        question: "Is Aligned an Ethereum L2?",
-        answer: "No. Aligned is a vertically integrated stack for building applications on a verifiable internet. However, our stack offers one-click solutions for rollups, as well as wallets, and several ZK services.",
+        question: "Why do I need a wallet to play?",
+        answer: "Your wallet is your identity in ZK Arcade. It allows you to deposit ETH into Aligned to pay for proof verification, claim your points on the leaderboard, and keep all your progress securely tied to your address."
       },
       %{
         number: "02",
-        question: "How does Aligned ensure verifiability?",
-        answer: "Aligned uses advanced cryptographic proofs and zero-knowledge technologies to ensure that all operations can be independently verified without revealing sensitive information.",
+        question: "Why do I need to verify my proofs?",
+        answer: "Verification guarantees that your results are valid and are not tampered with. It ensures the leaderboard reflects the player's real skills, and not manipulated outcomes."
       },
       %{
         number: "03",
-        question: "What are the main benefits of using Aligned?",
-        answer: "The main benefits include enhanced privacy, verifiable computations, seamless integration with existing infrastructure, and the ability to build trustless applications.",
-      }
+        question: "Can I resubmit a proof for a lower level?",
+        answer: "No. You can only submit one proof per level, and each new proof must be for a higher level than the last one submitted for the daily game."
+      },
+      %{
+        number: "04",
+        question: "What happens if my proof submission fails?",
+        answer: "If a proof fails verification, it won’t count toward your score. You can generate a new valid proof and resubmit."
+      },
+      %{
+        number: "05",
+        question: "How do I earn points on the leaderboard?",
+        answer: "Points are awarded per verified level on each day. The higher the level you submit a valid proof for, the more points you receive for it."
+      },
+      %{
+        number: "06",
+        question: "Is my gameplay data public?",
+        answer: "No. Only your proof and score are submitted. Zero-knowledge proofs allow verification without exposing your full gameplay data."
+      },
+      %{
+        number: "07",
+        question: "How often are new challenges released?",
+        answer: "There is available a new challenge everyday for each game!"
+      },
+      %{
+        number: "08",
+        question: "Can I play on mobile?",
+        answer: "Browser-based games will be mobile-friendly, but Beast 1984 game requires a desktop environment with a bash terminal."
+      },
     ]
 
     conn

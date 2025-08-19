@@ -166,6 +166,17 @@ defmodule ZkArcadeWeb.CoreComponents do
             </div>
           </div>
         </div>
+
+        <div class="relative h-[11px] w-[11px] shrink-0 transition-opacity opacity-30 group-hover:opacity-100">
+          <div class={[
+            "absolute shrink-0 bg-text-100 transition-transform duration-300 left-[5px] top-0 h-full w-[1px]",
+            @expanded && "rotate-90"
+          ]} id={"#{@id}-icon-v"}></div>
+          <div class={[
+            "absolute shrink-0 bg-text-100 transition-transform duration-300 left-0 top-[5px] h-[1px] w-full",
+            @expanded && "rotate-90"
+          ]} id={"#{@id}-icon-h"}></div>
+        </div>
       </div>
 
       <div class={[

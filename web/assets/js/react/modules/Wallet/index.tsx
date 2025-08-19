@@ -9,6 +9,7 @@ import { ToastContainer } from "../../components/Toast";
 import { useAccount } from "wagmi";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 import { NotificationBell } from "./Notifications";
+import { ProofSubmission } from "../../types/aligned";
 
 type Props = {
 	network: string;
@@ -20,6 +21,8 @@ type Props = {
 	username: string;
 	user_position: number;
 	explorer_url: string;
+	batcher_url: string;
+	user_beast_submissions: string;
 };
 
 const WalletContent = ({
@@ -31,6 +34,8 @@ const WalletContent = ({
 	username,
 	user_position,
 	explorer_url,
+	batcher_url,
+	user_beast_submissions,
 }: Omit<Props, "needs_agreement">) => {
 	const { address, isConnected } = useAccount();
 	const [needsAgreement, setNeedsAgreement] = useState(false);
@@ -65,7 +70,7 @@ const WalletContent = ({
 
 	// Case 1: User has completed session (signed agreement)
 	if (user_address) {
-		const decodedProofs = JSON.parse(proofs);
+		const decodedProofs: ProofSubmission[] = JSON.parse(proofs);
 		return (
 			<div className="flex flex-row items-center gap-8">
 				<div className="md:block hidden">
@@ -74,6 +79,10 @@ const WalletContent = ({
 						leaderboard_address={leaderboard_address}
 						payment_service_address={payment_service_address}
 						user_address={user_address}
+						batcher_url={batcher_url}
+						user_beast_submissions={JSON.parse(
+							user_beast_submissions
+						)}
 					/>
 				</div>
 				<WalletInfo
@@ -85,6 +94,7 @@ const WalletContent = ({
 					username={username}
 					user_position={user_position}
 					explorer_url={explorer_url}
+					batcher_url={batcher_url}
 				/>
 			</div>
 		);
@@ -108,6 +118,8 @@ export default ({
 	username,
 	user_position,
 	explorer_url,
+	batcher_url,
+	user_beast_submissions,
 }: Omit<Props, "needs_agreement">) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -122,6 +134,8 @@ export default ({
 					username={username}
 					user_position={user_position}
 					explorer_url={explorer_url}
+					batcher_url={batcher_url}
+					user_beast_submissions={user_beast_submissions}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

@@ -96,31 +96,25 @@ export const useBatcherPaymentService = ({
 		[sendTransactionAsync, contractAddress, chainId]
 	);
 
-	const unlockFunds = useCallback(
-		async () => {
-			await unlockWriteContract({
-				address: contractAddress,
-				abi: batcherPaymentServiceAbi,
-				functionName: "unlock",
-				args: [],
-				chainId,
-			});
-		},
-		[unlockWriteContract, contractAddress, chainId]
-	);
+	const unlockFunds = useCallback(async () => {
+		await unlockWriteContract({
+			address: contractAddress,
+			abi: batcherPaymentServiceAbi,
+			functionName: "unlock",
+			args: [],
+			chainId,
+		});
+	}, [unlockWriteContract, contractAddress, chainId]);
 
-	const lockFunds = useCallback(
-		async () => {
-			await lockWriteContract({
-				address: contractAddress,
-				abi: batcherPaymentServiceAbi,
-				functionName: "lock",
-				args: [],
-				chainId,
-			});
-		},
-		[lockWriteContract, contractAddress, chainId]
-	);
+	const lockFunds = useCallback(async () => {
+		await lockWriteContract({
+			address: contractAddress,
+			abi: batcherPaymentServiceAbi,
+			functionName: "lock",
+			args: [],
+			chainId,
+		});
+	}, [lockWriteContract, contractAddress, chainId]);
 
 	const withdrawFunds = useCallback(
 		async (amountToWithdrawInEther: string) => {

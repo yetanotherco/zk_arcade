@@ -1,33 +1,24 @@
-import React, { useEffect, useRef, useState } from "react";
-import { NoncedVerificationdata, ProofSubmission, SubmitProof } from "../../types/aligned";
+import React, { useEffect, useState } from "react";
+import { BeastProofClaimed, ProofSubmission } from "../../types/aligned";
 import { timeAgoInHs } from "../../utils/date";
 import { Button } from "../../components";
-import { toHex } from "viem";
-import { fetchProofVerificationData } from "../../utils/aligned";
-import { useCSRFToken } from "../../hooks/useCSRFToken";
-import { useAligned, useLeaderboardContract } from "../../hooks";
+import { useModal } from "../../hooks";
 import { Address } from "../../types/blockchain";
-import { useToast } from "../../state/toast";
-import { BumpFeeModal } from "../../components/Modal/BumpFee";
+import { shortenHash } from "../../utils/crypto";
+import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 
 type Props = {
 	proofs: ProofSubmission[];
 	leaderboard_address: Address;
 	payment_service_address: Address;
 	user_address: Address;
+	batcher_url: string;
+	user_beast_submissions: BeastProofClaimed[];
 };
 
 const textBasedOnNotEntry = {
-	pending: () => (
-		<>
-			The proof is underpriced, we suggest bumping the fee.
-		</>
-	),
-	verified: () => (
-		<>
-			The proof is ready to be claimed.
-		</>
-	),
+	pending: () => <>The proof is underpriced, we suggest bumping the fee.</>,
+	verified: () => <>Your points are ready to be claimed.</>,
 };
 
 const NotificationEntry = ({
@@ -35,192 +26,53 @@ const NotificationEntry = ({
 	leaderboard_address,
 	payment_service_address,
 	user_address,
+	batcher_url,
+	user_beast_submissions,
 }: {
 	proof: ProofSubmission;
 	leaderboard_address: Address;
 	payment_service_address: Address;
 	user_address: Address;
+	batcher_url: string;
+	user_beast_submissions: BeastProofClaimed[];
 }) => {
-	const { csrfToken } = useCSRFToken();
-	const formRetryRef = useRef<HTMLFormElement>(null);
-	const formSubmittedRef = useRef<HTMLFormElement>(null);
-	const [submitProofMessage, setSubmitProofMessage] = useState("");
-	const [submitProofMessageLoading, setSubmitProofMessageLoading] =
-		useState(false);
-	const { addToast } = useToast();
-
-	const [bumpOpen, setBumpOpen] = useState(false);
-
-	const { submitSolution, currentGame } = useLeaderboardContract({
-		userAddress: user_address,
-		contractAddress: leaderboard_address,
-	});
-
-	const { signVerificationData } =
-		useAligned();
-
-	useEffect(() => {
-		if (submitSolution.receipt.isSuccess) {
-			window.setTimeout(() => {
-				formSubmittedRef.current?.submit();
-			}, 1000);
-		}
-	}, [submitSolution.receipt]);
-
-	const handleConfirmBump = async (chosenWei: bigint) => {
-		try {
-			setSubmitProofMessageLoading(true);
-
-			const res = await fetchProofVerificationData(proof.id);
-			if (!res) {
-				addToast({
-					title: "There was a problem while sending the proof",
-					desc: "Please try again.",
-					type: "error",
-				});
-				setSubmitProofMessageLoading(false);
-				return;
-			}
-			const noncedVerificationData: NoncedVerificationdata = res.verification_data;
-
-			noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
-
-			const { r, s, v } = await signVerificationData(
-				noncedVerificationData,
-				payment_service_address
-			);
-
-			const submitProofMessage: SubmitProof = {
-				verificationData: noncedVerificationData,
-				signature: {
-					r,
-					s,
-					v: Number(v),
-				},
-			};
-
-			setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
-			addToast({
-				title: "Retrying submission",
-				desc: "Retrying proof submission using the newly selected fee.",
-				type: "success",
-			});
-
-			setBumpOpen(false);
-			window.setTimeout(() => {
-				formRetryRef.current?.submit();
-			}, 1000);
-		} catch (error) {
-			addToast({
-				title: "Could not apply the bump",
-				desc: "Please try again in a few seconds.",
-				type: "error",
-			});
-		} finally {
-			setSubmitProofMessageLoading(false);
-		}
-	};
-
-	const handleClick = async () => {
-		if (proof.status === "verified") {
-			const verifiedGameConfigBigInt = BigInt("0x" + proof.game_config);
-			const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
-
-			if (verifiedGameConfigBigInt !== currentGameConfigBigInt) {
-				addToast({
-					title: "Game mismatch",
-					desc: "Current game has changed since the proof was created",
-					type: "error",
-				});
-				return;
-			}
-
-			if (!proof.batch_hash) {
-				alert("Batch data not available for this proof");
-				return;
-			}
-
-			await submitSolution.submitBeastSolution(proof);
-			return;
-		}
-
-		if (proof.status === "pending") {
-			try {
-				setBumpOpen(true);
-			} catch {
-				addToast({
-					title: "Could not estimate the fee",
-					desc: "Please try again in a few seconds.",
-					type: "error",
-				});
-			}
-		}
-	};
+	const { open, setOpen, toggleOpen } = useModal();
 
 	return (
-		<div className="flex flex-row w-full items-end justify-between gap-4">
-			<div className="flex items-center gap-4">
-				<div
-					className={`rounded-full h-[10px] w-[10px] ${
-						proof.status === "verified"
-							? "bg-accent-100"
-							: "bg-orange"
-					} shrink-0`}
-				></div>
-				<p className="text-sm text-text-100">
-					{textBasedOnNotEntry[proof.status]()}
-				</p>
+		<>
+			<div className="flex flex-row w-full items-end justify-between gap-4">
+				<div className="flex items-center gap-4">
+					<div
+						className={`rounded-full h-[10px] w-[10px] ${
+							proof.status === "verified"
+								? "bg-accent-100"
+								: "bg-orange"
+						} shrink-0`}
+					></div>
+					<p className="text-sm text-text-100">
+						{textBasedOnNotEntry[proof.status](
+							shortenHash(proof.verification_data_commitment)
+						)}
+					</p>
+				</div>
+				<Button
+					variant="text-accent"
+					className="text-sm text-nowrap"
+					onClick={toggleOpen}
+				>
+					{proof.status === "verified" ? "Claim" : "Bump fee"}
+				</Button>
 			</div>
-			<Button
-				variant="text-accent"
-				className="text-sm text-nowrap"
-				onClick={handleClick}
-				isLoading={
-					submitProofMessageLoading ||
-					submitSolution.receipt.isLoading ||
-					submitSolution.submitSolutionFetchingVDataIsLoading
-				}
-			>
-				{proof.status === "verified" ? "Claim" : "Bump fee"}
-			</Button>
-
-			{proof.status === "pending" && (
-				<form
-					ref={formRetryRef}
-					action="/proof/status/retry"
-					method="post"
-					className="hidden"
-				>
-					<input type="hidden" name="_csrf_token" value={csrfToken} />
-					<input
-						type="hidden"
-						name="submit_proof_message"
-						value={submitProofMessage}
-					/>
-					<input type="hidden" name="proof_id" value={proof.id} />
-				</form>
-			)}
-			{proof.status == "verified" && (
-				<form
-					className="hidden"
-					ref={formSubmittedRef}
-					action="/proof/status/submitted"
-					method="POST"
-				>
-					<input type="hidden" name="_csrf_token" value={csrfToken} />
-					<input type="hidden" name="proof_id" value={proof.id} />
-				</form>
-			)}
-			<BumpFeeModal
-				open={bumpOpen}
-				setOpen={setBumpOpen}
-				onConfirm={handleConfirmBump}
-				isConfirmLoading={submitProofMessageLoading}
-				previousMaxFee={proof.submitted_max_fee}
-				lastTimeSubmitted={proof.inserted_at}
+			<SubmitProofModal
+				modal={{ open, setOpen }}
+				batcher_url={batcher_url}
+				leaderboard_address={leaderboard_address}
+				user_address={user_address}
+				payment_service_address={payment_service_address}
+				userBeastSubmissions={user_beast_submissions}
+				proof={proof}
 			/>
-		</div>
+		</>
 	);
 };
 
@@ -229,14 +81,14 @@ export const NotificationBell = ({
 	leaderboard_address,
 	payment_service_address,
 	user_address,
+	batcher_url,
+	user_beast_submissions,
 }: Props) => {
 	const [proofsReady, setProofsReady] = useState<ProofSubmission[]>([]);
 	const [allProofs, setAllProofs] = useState<ProofSubmission[]>([]);
 
 	useEffect(() => {
-		const proofsReady = proofs.filter(
-			proof => proof.status === "verified"
-		);
+		const proofsReady = proofs.filter(proof => proof.status === "verified");
 
 		const allProofs = proofs.filter(
 			proof =>
@@ -281,6 +133,10 @@ export const NotificationBell = ({
 										payment_service_address
 									}
 									user_address={user_address}
+									batcher_url={batcher_url}
+									user_beast_submissions={
+										user_beast_submissions
+									}
 								/>
 							))
 						) : (

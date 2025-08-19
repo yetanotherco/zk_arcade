@@ -96,6 +96,12 @@ defmodule ZkArcadeWeb.CoreComponents do
               <div class="py-2">
                 <button class="block w-full text-left px-4 py-2 text-sm hover:bg-contrast-100 transition-colors" id="how-it-works-nav-btn">Tutorial</button>
                 <.link
+                  href="#faq"
+                  class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors"
+                >
+                  FAQ
+                </.link>
+                <.link
                   href={Application.get_env(:zk_arcade, :feedback_form_url)}
                   class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors"
                   target="_blank"
@@ -410,10 +416,6 @@ defmodule ZkArcadeWeb.CoreComponents do
         style="max-width: 1000px;"
       >
         <div class="hidden sm:inline-block flex-1">
-          <p class="text-sm max-w-100" style="margin-bottom: 55px;">
-            Watched something to improve? Give us your feedback <a class="text-accent-100" href="#"> here </a>
-          </p>
-
           <p class="text-md">
             Powered By
             <span class="text-accent-100 block mt-1">

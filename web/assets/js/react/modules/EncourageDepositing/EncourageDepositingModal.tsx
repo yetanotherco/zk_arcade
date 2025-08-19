@@ -94,7 +94,7 @@ export const EncourageDepositingModal = ({payment_service_address, user_address}
                     <div className="bg-contrast-100 p-10 rounded flex flex-col gap-8">
                         <div className="text-center">
                             <p className="text-text-100">
-                                To play zk-arcade, you need to deposit some funds into your wallet. This is necessary to submit your proofs to Aligned and claim your points in the LeaderBoard.
+                                To play ZK Arcade, you need to deposit some ETH into Aligned. This is necessary to verify your proofs.
                             </p>
                         </div>
 
@@ -112,7 +112,7 @@ export const EncourageDepositingModal = ({payment_service_address, user_address}
                                 onClick={handleDepositNow}
                                 className="mt-6"
                             >
-                                Deposit funds now
+                                Deposit now
                             </Button>
                         </div>
                     </div>

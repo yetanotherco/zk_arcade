@@ -96,3 +96,5 @@ config :zk_arcade, :campaign_started_at, 1753031818
 config :zk_arcade, :batcher_host, "localhost"
 config :zk_arcade, :batcher_port, 8080
 config :zk_arcade, :batcher_url, "ws://localhost:8080"
+
+config :zk_arcade, :feedback_form_url, "http://localhost:4000/batches"

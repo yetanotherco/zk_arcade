@@ -217,7 +217,7 @@ defmodule ZkArcadeWeb.CoreComponents do
             number={faq.number}
             question={faq.question}
             answer={faq.answer}
-            expanded={Map.get(faq, :expanded, false)}
+            expanded={false}
           />
         <% end %>
       </div>

@@ -102,19 +102,16 @@ defmodule ZkArcadeWeb.PageController do
         number: "01",
         question: "Is Aligned an Ethereum L2?",
         answer: "No. Aligned is a vertically integrated stack for building applications on a verifiable internet. However, our stack offers one-click solutions for rollups, as well as wallets, and several ZK services.",
-        expanded: false
       },
       %{
         number: "02",
         question: "How does Aligned ensure verifiability?",
         answer: "Aligned uses advanced cryptographic proofs and zero-knowledge technologies to ensure that all operations can be independently verified without revealing sensitive information.",
-        expanded: false
       },
       %{
         number: "03",
         question: "What are the main benefits of using Aligned?",
         answer: "The main benefits include enhanced privacy, verifiable computations, seamless integration with existing infrastructure, and the ability to build trustless applications.",
-        expanded: false
       }
     ]
 

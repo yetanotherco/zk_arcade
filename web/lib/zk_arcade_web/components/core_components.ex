@@ -137,6 +137,85 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
+  attr :number, :string, required: true
+  attr :question, :string, required: true
+  attr :answer, :string, required: true
+  attr :expanded, :boolean, default: false
+  attr :class, :string, default: ""
+  attr :id, :string, required: true
+
+  def faq_entry(assigns) do
+    ~H"""
+    <div class={["scroll-observer", @class]} data-entry="fade-in-up">
+        <div
+          class="group flex cursor-pointer text-lg py-5 border-t"
+          onclick={"toggleFaq('#{@id}')"}
+        >
+          <div class="flex">
+            <div class="min-w-[60px] pr-4 md:block opacity-30 text text--sm"> <%= @number %> </div>
+            <div class="text text--lg"><%= @question %></div>
+          </div>
+        </div>
+
+        <div class={[
+          "faq-content transition-[grid-template-rows] grid",
+          if(@expanded, do: "grid-rows-[1fr]", else: "grid-rows-[0fr]")
+        ]} style="will-change:grid-template-rows" id={"#{@id}-content"}>
+          <div class="overflow-hidden lg:pl-[60px]">
+            <div class="pb-4">
+              <p><%= Phoenix.HTML.raw(@answer) %></p>
+            </div>
+          </div>
+        </div>
+    </div>
+    """
+  end
+
+  attr :faqs, :list, required: true
+  attr :class, :string, default: ""
+
+  def faq_list(assigns) do
+    ~H"""
+    <div class={["", @class]}>
+      <div>
+        <%= for {faq, index} <- Enum.with_index(@faqs) do %>
+          <.faq_entry
+            id={"faq-#{index}"}
+            number={faq.number}
+            question={faq.question}
+            answer={faq.answer}
+            expanded={Map.get(faq, :expanded, false)}
+          />
+        <% end %>
+      </div>
+    </div>
+
+    <script>
+      function toggleFaq(faqId) {
+        const content = document.getElementById(faqId + '-content');
+        const iconV = document.getElementById(faqId + '-icon-v');
+        const iconH = document.getElementById(faqId + '-icon-h');
+
+        const isExpanded = content.classList.contains('grid-rows-[1fr]');
+
+        if (isExpanded) {
+          // Collapse
+          content.classList.remove('grid-rows-[1fr]');
+          content.classList.add('grid-rows-[0fr]');
+          iconV.classList.remove('rotate-90');
+          iconH.classList.remove('rotate-90');
+        } else {
+          // Expand
+          content.classList.remove('grid-rows-[0fr]');
+          content.classList.add('grid-rows-[1fr]');
+          iconV.classList.add('rotate-90');
+          iconH.classList.add('rotate-90');
+        }
+      }
+    </script>
+    """
+  end
+
   def step_component(%{number: number, title: title, desc: desc, show_line: show_line} = assigns) do
     ~H"""
     <div class="w-full">

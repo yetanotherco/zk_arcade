@@ -132,7 +132,9 @@ defmodule ZkArcadeWeb.CoreComponents do
                 <.link href="/game/beast" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link>
                 <.link href="/leaderboard" class="text-text-100 transition hover:text-accent-100 hover:underline">Leaderboard</.link>
                 <.link href="/history" class="text-text-100 transition hover:text-accent-100 hover:underline">Profile</.link>
-                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">How It Works</p>
+                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">Tutorial</p>
+                <.link href="#faq" class="text-text-100 transition hover:text-accent-100 hover:underline">FAQ</.link>
+                <.link href={Application.get_env(:zk_arcade, :feedback_form_url)} target="_blank" rel="noopener noreferrer" class="text-text-100 transition hover:text-accent-100 hover:underline">Give us Feedback</.link>
             </div>
           </div>
         </div>

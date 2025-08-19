@@ -11,6 +11,25 @@ type Props = {
     user_address: Address;
 };
 
+const getUserViewedMap = (key: string): Record<string, boolean> => {
+    try {
+        return JSON.parse(localStorage.getItem(key) || "{}");
+    } catch {
+        return {};
+    }
+};
+
+const setUserViewed = (key: string, userAddress: string, viewed: boolean): void => {
+    const viewedMap = getUserViewedMap(key);
+    viewedMap[userAddress] = viewed;
+    localStorage.setItem(key, JSON.stringify(viewedMap));
+};
+
+const hasUserViewed = (key: string, userAddress: string): boolean => {
+    const viewedMap = getUserViewedMap(key);
+    return viewedMap[userAddress] === true;
+};
+
 export const EncourageDepositingModal = ({payment_service_address, user_address}: Props) => {
     const { open: encourageOpen, setOpen: setEncourageOpen } = useModal(false);
     const { open: depositOpen, setOpen: setDepositOpen } = useModal();
@@ -20,9 +39,7 @@ export const EncourageDepositingModal = ({payment_service_address, user_address}
             const viewedHowItWorks = JSON.parse(
                 localStorage.getItem("how-it-works-viewed") || "false"
             );
-            const viewedEncourageDepositing = JSON.parse(
-                localStorage.getItem("encourage-depositing-viewed") || "false"
-            );
+            const viewedEncourageDepositing = hasUserViewed("encourage-depositing-viewed", user_address);
 
             if (viewedHowItWorks && !viewedEncourageDepositing) {
                 setEncourageOpen(true);
@@ -45,15 +62,15 @@ export const EncourageDepositingModal = ({payment_service_address, user_address}
             window.removeEventListener('storage', handleStorageChange);
             clearInterval(interval);
         };
-    }, [setEncourageOpen]);
+    }, [setEncourageOpen, user_address]);
 
     const handleCloseModal = () => {
-        localStorage.setItem("encourage-depositing-viewed", "true");
+        setUserViewed("encourage-depositing-viewed", user_address, true);
         setEncourageOpen(false);
     };
 
     const handleDepositNow = () => {
-        localStorage.setItem("encourage-depositing-viewed", "true");
+        setUserViewed("encourage-depositing-viewed", user_address, true);
         setEncourageOpen(false);
         setDepositOpen(true);
     };

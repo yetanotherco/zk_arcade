@@ -2,6 +2,7 @@ import { Keccak } from "sha3";
 import {
 	BatchInclusionData,
 	NoncedVerificationdata,
+	ProofSubmission,
 	provingSystemNameToByte,
 	VerificationData,
 } from "../types/aligned";
@@ -10,6 +11,29 @@ export type FetchProofVerificationDataResponse = {
 	id: string;
 	verification_data: NoncedVerificationdata;
 	batch_data: BatchInclusionData | null;
+};
+
+export const fetchProofSubmission = async (
+	proof_id: string
+): Promise<ProofSubmission | null> => {
+	try {
+		const response = await fetch(`/proof/${proof_id}`, {
+			method: "GET",
+			credentials: "include",
+			headers: {
+				Accept: "application/json",
+			},
+		});
+
+		if (!response.ok) {
+			return null;
+		}
+
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		return null;
+	}
 };
 
 export const fetchProofVerificationData = async (

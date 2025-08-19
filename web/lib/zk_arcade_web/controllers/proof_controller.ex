@@ -17,7 +17,25 @@ defmodule ZkArcadeWeb.ProofController do
     Proofs.update_proof_status_claimed(address, proof_id)
 
     conn
-    |> redirect(to: "/")
+      |> redirect(to: build_redirect_url(conn, "", proof_id))
+  end
+
+  def get_proof_status(conn, %{"proof_id" => proof_id}) do
+    proof_status = Proofs.get_status(proof_id)
+
+    case proof_status do
+      nil -> send_resp(conn, 404, Jason.encode!(%{error: "Proof not found"}))
+      proof_status -> json(conn, %{status: proof_status.status})
+    end
+  end
+
+  def get_proof_submission(conn, %{"proof_id" => proof_id}) do
+    proof = Proofs.get_proof_submission(proof_id)
+
+    case proof do
+      nil -> send_resp(conn, 404, Jason.encode!(%{error: "Proof not found"}))
+      proof -> json(conn, proof)
+    end
   end
 
   def get_proof_verification_data(conn, %{"proof_id" => proof_id}) do
@@ -106,21 +124,21 @@ defmodule ZkArcadeWeb.ProofController do
 
                 conn
                 |> put_flash(:info, "Proof submitted successfully!")
-                |> redirect(to: build_redirect_url(conn, "proof-sent"))
+                |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
 
               {:ok, {:error, reason}} ->
                 Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
 
                 conn
                 |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-                |> redirect(to: build_redirect_url(conn, "proof-failed"))
+                |> redirect(to: build_redirect_url(conn, "proof-failed", pending_proof.id))
 
               nil ->
                 Logger.info("Task is taking longer than 10 seconds, proceeding.")
 
                 conn
                 |> put_flash(:info, "Proof is being submitted to batcher.")
-                |> redirect(to: build_redirect_url(conn, "proof-sent"))
+                |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
             end
           else
             {:error, changeset} when is_map(changeset) ->
@@ -147,7 +165,7 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp build_redirect_url(conn, message) do
+  defp build_redirect_url(conn, message, proof_id \\ "") do
     referer = get_req_header(conn, "referer") |> List.first() || "/"
     uri = URI.parse(referer)
 
@@ -160,6 +178,7 @@ defmodule ZkArcadeWeb.ProofController do
     new_query =
       query_params
       |> Map.put("message", message)
+      |> Map.put("submitProofId", proof_id)
       |> URI.encode_query()
 
     uri.path <> "?" <> new_query
@@ -287,21 +306,21 @@ defmodule ZkArcadeWeb.ProofController do
 
                     conn
                     |> put_flash(:info, "Proof retried successfully!")
-                    |> redirect(to: build_redirect_url(conn, "proof-sent"))
+                    |> redirect(to: build_redirect_url(conn, "proof-sent", proof.id))
 
                   {:ok, {:error, reason}} ->
                     Logger.error("Failed to retry proof submission: #{inspect(reason)}")
 
                     conn
                     |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
-                    |> redirect(to: build_redirect_url(conn, "proof-failed"))
+                    |> redirect(to: build_redirect_url(conn, "proof-failed", proof.id))
 
                   nil ->
                     Logger.info("Task is taking longer than 10 seconds, proceeding.")
 
                     conn
                     |> put_flash(:info, "Proof is being submitted to batcher.")
-                    |> redirect(to: build_redirect_url(conn, "proof-sent"))
+                    |> redirect(to: build_redirect_url(conn, "proof-sent", proof.id))
                 end
 
               {:ok, false} ->
@@ -309,14 +328,14 @@ defmodule ZkArcadeWeb.ProofController do
 
                 conn
                 |> put_flash(:error, "Signature verification failed.")
-                |> redirect(to: build_redirect_url(conn, "proof-failed"))
+                |> redirect(to: build_redirect_url(conn, "proof-failed", proof_id))
 
               {:error, reason} ->
                 Logger.error("Signature verification error for proof #{proof_id}: #{inspect(reason)}")
 
                 conn
                 |> put_flash(:error, "Signature verification error: #{inspect(reason)}")
-                |> redirect(to: build_redirect_url(conn, "proof-failed"))
+                |> redirect(to: build_redirect_url(conn, "proof-failed", proof_id))
             end
         end
       end

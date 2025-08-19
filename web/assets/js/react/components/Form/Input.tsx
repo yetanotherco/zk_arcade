@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 
 type Props = React.ComponentProps<"input"> & {
-	label: string;
+	label?: string;
 };
 
 export const FormInput = forwardRef<HTMLInputElement, Props>(

@@ -73,7 +73,7 @@ export const ClaimStep = ({
 			)}
 			{proofStatus === "claimed" && (
 				<p className="bg-blue/20 rounded p-2 text-blue">
-					You have already claimed the points for this proof.
+					Your points have been claimed successfully
 				</p>
 			)}
 			<div className="flex flex-col gap-2">

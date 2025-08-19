@@ -124,6 +124,12 @@ module.exports = {
 					'-webkit-text-fill-color': 'transparent',
 					'background-size': '100%',
 					'background-repeat': 'no-repeat',
+				},	
+				'.transition-grid': {
+					'transition-property': 'grid-template-rows',
+					'transition-duration': '300ms',
+					'transition-timing-function': 'ease-in-out',
+					'will-change': 'grid-template-rows',
 				},
 			});
 		}),

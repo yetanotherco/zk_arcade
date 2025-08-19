@@ -180,7 +180,7 @@ defmodule ZkArcadeWeb.CoreComponents do
       </div>
 
       <div class={[
-        "transition-[grid-template-rows] grid grid-rows-[0fr]",
+        "transition-grid grid grid-rows-[0fr]",
         @expanded && "grid-rows-[1fr]"
       ]} id={"#{@id}-content"}>
         <div class="overflow-hidden lg:pl-[60px] pr-[40px]">

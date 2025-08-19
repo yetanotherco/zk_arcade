@@ -146,16 +146,27 @@ defmodule ZkArcadeWeb.CoreComponents do
 
   def faq_entry(assigns) do
     ~H"""
-    <div class={["scroll-observer", @class]} data-entry="fade-in-up">
-        <div
-          class="group flex cursor-pointer text-lg py-5 border-t"
-          onclick={"toggleFaq('#{@id}')"}
-        >
-          <div class="flex">
-            <div class="min-w-[60px] pr-4 md:block opacity-30 text text--sm"> <%= @number %> </div>
-            <div class="text text--lg"><%= @question %></div>
+    <div class={["scroll-observer transition-[opacity,border] duration-500 hover:opacity-100 group-hover:opacity-50 border-t border-contrast-100 hover:border-accent-100/30", @class]} data-entry="fade-in-up">
+      <div
+        class="group flex !max-w-none cursor-pointer select-none justify-between gap-6 text-lg py-5"
+        onclick={"toggleFaq('#{@id}')"}
+      >
+        <div class="flex">
+          <div class="hidden min-w-15 pr-4 transition-opacity md:block opacity-30">
+            <div class="text-sm text-text-200">
+              <%= @number %>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="transition-opacity duration-500 text-lg text-text-100">
+              <%= @question %>
+            </div>
+            <div class="pointer-events-none absolute left-0 top-0 duration-500 opacity-0 group-hover:opacity-100 text-lg text-accent-gradient">
+              <%= @question %>
+            </div>
           </div>
         </div>
+      </div>
 
       <div class={[
         "transition-[grid-template-rows] grid grid-rows-[0fr]",

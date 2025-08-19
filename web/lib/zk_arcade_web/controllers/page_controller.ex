@@ -137,8 +137,9 @@ defmodule ZkArcadeWeb.PageController do
         2. Install Beast with the following command: <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
         3. Run the game with the command: <span class="code-block">beast</span>
         4. Locate the generated proof file on your system
-        5. Upload your proof to verify your gameplay
-        6. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back later to submit it to the leaderboard contract to earn points.
+        5. Deposit into <span class="text-accent-100">ALIGNED</span> to pay the proof verification
+        6. Upload your proof to verify your gameplay
+        7. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back to submit it to the Leaderboard to earn points.
 
         Important notes about proof submissions:
 

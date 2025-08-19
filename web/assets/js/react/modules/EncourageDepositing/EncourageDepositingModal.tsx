@@ -4,6 +4,7 @@ import { Modal } from "../../components/Modal";
 import { Button } from "../../components";
 import { DepositOnAlignedModal } from "../../components/Modal/DepositOnAligned";
 import { Address } from "../../types/blockchain";
+import { useBatcherPaymentService } from "../../hooks";
 
 type Props = {
     payment_service_address: Address;
@@ -57,40 +58,49 @@ export const EncourageDepositingModal = ({payment_service_address, user_address}
         setDepositOpen(true);
     };
 
+	const { balance } = useBatcherPaymentService({
+		contractAddress: payment_service_address,
+		userAddress: user_address,
+	});
+
+    const notEnoughBalance = balance.data != undefined && balance.data < BigInt(100000000000000); // 0.0001 ETH
+
     return (
         <div>
-            <Modal
-                open={encourageOpen}
-                setOpen={setEncourageOpen}
-                maxWidth={600}
-                onClose={handleCloseModal}
-            >
-                <div className="bg-contrast-100 p-10 rounded flex flex-col gap-8">
-                    <div className="text-center">
-                        <p className="text-text-100">
-                            To play zk-arcade, you need to deposit some funds into your wallet. This is necessary to submit your proofs to Aligned and claim your points in the LeaderBoard.
-                        </p>
-                    </div>
+            {notEnoughBalance === true && (
+                <Modal
+                    open={encourageOpen}
+                    setOpen={setEncourageOpen}
+                    maxWidth={600}
+                    onClose={handleCloseModal}
+                >
+                    <div className="bg-contrast-100 p-10 rounded flex flex-col gap-8">
+                        <div className="text-center">
+                            <p className="text-text-100">
+                                To play zk-arcade, you need to deposit some funds into your wallet. This is necessary to submit your proofs to Aligned and claim your points in the LeaderBoard.
+                            </p>
+                        </div>
 
-                    <div className="text-center justify-between space-x-12">
-                        <Button
-                            variant="text"
-                            onClick={handleCloseModal}
-                            className="mt-6"
-                        >
-                            I'll deposit later
-                        </Button>
+                        <div className="text-center justify-between space-x-12">
+                            <Button
+                                variant="text"
+                                onClick={handleCloseModal}
+                                className="mt-6"
+                            >
+                                I'll deposit later
+                            </Button>
 
-                        <Button
-                            variant="accent-fill"
-                            onClick={handleDepositNow}
-                            className="mt-6"
-                        >
-                            Deposit funds now
-                        </Button>
+                            <Button
+                                variant="accent-fill"
+                                onClick={handleDepositNow}
+                                className="mt-6"
+                            >
+                                Deposit funds now
+                            </Button>
+                        </div>
                     </div>
-                </div>
-            </Modal>
+                </Modal>
+            )}
 
             <DepositOnAlignedModal
                 payment_service_address={payment_service_address}

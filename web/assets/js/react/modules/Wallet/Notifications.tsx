@@ -18,7 +18,7 @@ type Props = {
 
 const textBasedOnNotEntry = {
 	pending: () => <>The proof is underpriced, we suggest bumping the fee.</>,
-	verified: () => <>The proof is ready to be claimed.</>,
+	verified: () => <>Your points are ready to be claimed.</>,
 };
 
 const NotificationEntry = ({

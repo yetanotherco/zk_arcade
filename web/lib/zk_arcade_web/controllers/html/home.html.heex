@@ -2,7 +2,15 @@
 
   <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
 
-    <div class="section-width pb-5" style="height: 100vh">
+  <%= if @wallet != nil do %>
+    <x-app-encourage-depositing-modal
+      network={Application.get_env(:zk_arcade, :network)}
+      payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+      user_address={@conn.assigns.wallet} 
+    />
+  <% end %>
+
+  <div class="section-width pb-5" style="height: 100vh">
       <div class="w-full flex flex-col justify-between" style="margin-top: 150px">
 
         <h1 class="md:text-5xl text-2xl mb-4 font-normal w-full">
@@ -149,7 +157,6 @@
     </section>
   </div>
 
-
   <div class="section-width">
     <section id="leaderboard" class="section-spacer-lg" style="width: 100%;">
         <.section_header header="LeaderBoard" />
@@ -160,5 +167,15 @@
           user_data={@user_data}
           show_view_all_link={true} />
       </section>
+  </div>
+
+  <div class="section-width">
+    <section id="faq" class="section-spacer-lg w-full">
+      <.section_header header="Frequently Asked Questions" />
+
+      <div class="">
+        <.faq_list faqs={@faqs} class="" />
+      </div>
+    </section>
   </div>
 </div>

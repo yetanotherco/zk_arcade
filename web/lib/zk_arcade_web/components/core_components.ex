@@ -53,7 +53,6 @@ defmodule ZkArcadeWeb.CoreComponents do
               <.link href="/game/beast" class="transition hover:text-accent-100 hover:underline">Games</.link>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
-              <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">Tutorial</p>
           </div>
         </div>
 
@@ -80,6 +79,42 @@ defmodule ZkArcadeWeb.CoreComponents do
               beast_submissions={@beast_submissions}
           />
 
+          <div class="relative hidden lg:block">
+            <button
+              id="kebab-toggle"
+              class="p-2 hover:bg-contrast-100 rounded transition-colors"
+              aria-label="Toggle kebab menu"
+              onclick="toggleKebabMenu()"
+            >
+              <.icon name="hero-ellipsis-vertical" class="w-7 h-7" />
+            </button>
+
+            <div
+              id="kebab-dropdown"
+              class="absolute right-0 top-full mt-2 w-48 bg-background border border-contrast-200 rounded-lg shadow-lg z-50 hidden"
+            >
+              <div>
+                <button class="block w-full text-left px-4 py-2 text-sm hover:bg-contrast-100 transition-colors rounded-tl-lg rounded-tr-lg" id="how-it-works-nav-btn">
+                  Tutorial
+                </button>
+                <.link
+                  href="/#faq"
+                  class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors"
+                >
+                  FAQ
+                </.link>
+                <.link
+                  href={Application.get_env(:zk_arcade, :feedback_form_url)}
+                  class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors rounded-bl-lg rounded-br-lg"
+                  target="_blank"
+					        rel="noopener noreferrer"
+                >
+                  Give us Feedback
+                </.link>
+              </div>
+            </div>
+          </div>
+
           <button
             class="lg:hidden z-50"
             id="menu-toggle"
@@ -99,7 +134,9 @@ defmodule ZkArcadeWeb.CoreComponents do
                 <.link href="/game/beast" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link>
                 <.link href="/leaderboard" class="text-text-100 transition hover:text-accent-100 hover:underline">Leaderboard</.link>
                 <.link href="/history" class="text-text-100 transition hover:text-accent-100 hover:underline">Profile</.link>
-                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">How It Works</p>
+                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">Tutorial</p>
+                <.link href="#faq" class="text-text-100 transition hover:text-accent-100 hover:underline">FAQ</.link>
+                <.link href={Application.get_env(:zk_arcade, :feedback_form_url)} target="_blank" rel="noopener noreferrer" class="text-text-100 transition hover:text-accent-100 hover:underline">Give us Feedback</.link>
             </div>
           </div>
         </div>
@@ -145,6 +182,120 @@ defmodule ZkArcadeWeb.CoreComponents do
         </div>
       </.link>
     <% end %>
+    """
+  end
+
+  attr :number, :string, required: true
+  attr :question, :string, required: true
+  attr :answer, :string, required: true
+  attr :expanded, :boolean, default: false
+  attr :class, :string, default: ""
+  attr :id, :string, required: true
+
+  def faq_entry(assigns) do
+    ~H"""
+    <div class={["scroll-observer transition-[opacity,border] duration-500 hover:opacity-100 group-hover:opacity-50 border-t border-contrast-100 hover:border-accent-100/30", @class]} data-entry="fade-in-up">
+      <div
+        class="group flex !max-w-none cursor-pointer select-none justify-between gap-6 text-lg py-5"
+        onclick={"toggleFaq('#{@id}')"}
+      >
+        <div class="flex">
+          <div class="hidden min-w-15 pr-4 transition-opacity md:block opacity-30">
+            <div class="text-sm text-text-200">
+              <%= @number %>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="transition-opacity duration-500 text-lg text-text-100">
+              <%= @question %>
+            </div>
+            <div class="pointer-events-none absolute left-0 top-0 duration-500 opacity-0 group-hover:opacity-100 text-lg text-accent-gradient">
+              <%= @question %>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative h-[11px] w-[11px] shrink-0 transition-opacity opacity-30 group-hover:opacity-100">
+          <div class={[
+            "absolute shrink-0 bg-text-100 transition-transform duration-300 left-[5px] top-0 h-full w-[1px]",
+            @expanded && "rotate-90"
+          ]} id={"#{@id}-icon-v"}></div>
+          <div class={[
+            "absolute shrink-0 bg-text-100 transition-transform duration-300 left-0 top-[5px] h-[1px] w-full",
+            @expanded && "rotate-90"
+          ]} id={"#{@id}-icon-h"}></div>
+        </div>
+      </div>
+
+      <div class={[
+        "transition-grid grid grid-rows-[0fr]",
+        @expanded && "grid-rows-[1fr]"
+      ]} id={"#{@id}-content"}>
+        <div class="overflow-hidden lg:pl-[60px] pr-[40px]">
+          <div class="pb-5">
+            <p class="text-text-200"><%= @answer %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr :faqs, :list, required: true
+  attr :class, :string, default: ""
+
+  def faq_list(assigns) do
+    ~H"""
+    <div class={["", @class]}>
+      <div>
+        <%= for {faq, index} <- Enum.with_index(@faqs) do %>
+          <.faq_entry
+            id={"faq-#{index}"}
+            number={faq.number}
+            question={faq.question}
+            answer={faq.answer}
+            expanded={false}
+          />
+        <% end %>
+      </div>
+    </div>
+
+    <script>
+      function toggleFaq(faqId) {
+        const content = document.getElementById(faqId + '-content');
+        const iconV = document.getElementById(faqId + '-icon-v');
+        const iconH = document.getElementById(faqId + '-icon-h');
+
+        const isExpanded = content.classList.contains('grid-rows-[1fr]');
+
+        if (isExpanded) {
+          // Collapse
+          content.classList.remove('grid-rows-[1fr]');
+          iconV?.classList.remove('rotate-90');
+          iconH?.classList.remove('rotate-90');
+        } else {
+          // Expand
+          content.classList.add('grid-rows-[1fr]');
+          iconV?.classList.add('rotate-90');
+          iconH?.classList.add('rotate-90');
+        }
+      }
+    </script>
+    """
+  end
+
+  def step_component(%{number: number, title: title, desc: desc, show_line: show_line} = assigns) do
+    ~H"""
+    <div class="w-full">
+
+      <div class="flex flex-col w-full justify-center items-center">
+        <div class="mb-2 h-[100px] w-[100px] rounded-full bg-accent-100/20 border border-accent-100 flex items-center justify-center">
+          <p class="text-2xl text-text-100"><%= @number %></p>
+        </div>
+        <h3 class="text-text-100 text-xl"><%= @title %></h3>
+        <p class="text-text-200 text-md text-center" style="min-width: 220px;"><%= @desc %></p>
+      </div>
+    </div>
     """
   end
 

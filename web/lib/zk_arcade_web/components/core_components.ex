@@ -370,9 +370,11 @@ defmodule ZkArcadeWeb.CoreComponents do
 
   def home_statistic(%{label: label, value: value, desc: desc} = assigns) do
     ~H"""
-      <div class="bg-contrast-300 p-2 rounded h-full w-full">
-        <p class="text-text-100 text-sm mb-2"><%= @label %></p>
-        <h1 class="font-normal text-accent-100 text-4xl mb-1"><%= @value %></h1>
+      <div class="bg-contrast-300 p-2 flex flex-col justify-between rounded h-full w-full">
+        <div>
+          <p class="text-text-100 text-sm mb-2"><%= @label %></p>
+          <h1 class="font-normal text-accent-100 text-4xl mb-1"><%= @value %></h1>
+        </div>
         <div class="flex w-full justify-end">
           <p class="text-text-100 bg-contrast-100 text-sm rounded" style="padding: 0 5px"><%= @desc %></p>
         </div>
@@ -695,6 +697,9 @@ defmodule ZkArcadeWeb.CoreComponents do
           id="leaderboard"
           users={@users}
           current_wallet={@current_wallet} />
+        <.link href="/leaderboard" class="text-center text-sm w-full hover:underline block mt-1">
+          View all
+        </.link>
       </div>
     <% else %>
       <p class="text-text-200 text-md">No users found in the leaderboard.</p>
@@ -710,8 +715,11 @@ defmodule ZkArcadeWeb.CoreComponents do
     ~H"""
     <div class="w-full">
       <.table id={@id} rows={@users}>
-        <:col :let={user} label={if @show_labels, do: "Position", else: ""}>
-          <%= user.position %>
+        <:col :let={user} label={if @show_labels, do: "Username", else: ""}>
+          <p class="text-text-100 text-md"><%= user.username %></p>
+        </:col>
+        <:col :let={user} label={if @show_labels, do: "Score", else: ""}>
+          <%= user.score %>
           <%= case user.position do %>
             <%= 1 -> %>
             <.icon name="hero-trophy" color="#FFD700" class="" />
@@ -721,9 +729,6 @@ defmodule ZkArcadeWeb.CoreComponents do
             <.icon name="hero-trophy" color="#b36839" class="" />
             <%= _ ->  %>
           <% end %>
-        </:col>
-        <:col :let={user} label={if @show_labels, do: "Username", else: ""}>
-          <p class="text-text-100 text-md"><%= user.username %></p>
         </:col>
       </.table>
     </div>

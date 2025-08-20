@@ -115,6 +115,24 @@ module.exports = {
 				".phx-change-loading &",
 			])
 		),
+		plugin(function({ addUtilities }) {
+			addUtilities({
+				'.text-accent-gradient': {
+					'background': 'linear-gradient(135deg, rgb(24 255 127), rgb(187 242 219))',
+					'-webkit-background-clip': 'text',
+					'background-clip': 'text',
+					'-webkit-text-fill-color': 'transparent',
+					'background-size': '100%',
+					'background-repeat': 'no-repeat',
+				},	
+				'.transition-grid': {
+					'transition-property': 'grid-template-rows',
+					'transition-duration': '300ms',
+					'transition-timing-function': 'ease-in-out',
+					'will-change': 'grid-template-rows',
+				},
+			});
+		}),
 
 		// Embeds Heroicons (https://heroicons.com) into your app.css bundle
 		// See your `CoreComponents.icon/1` for more information.

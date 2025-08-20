@@ -141,7 +141,6 @@
     </section>
   </div>
 
-
   <div class="section-width">
     <section id="leaderboard" class="section-spacer-lg" style="width: 100%;">
         <.section_header header="LeaderBoard" />
@@ -152,5 +151,15 @@
           user_data={@user_data}
           show_view_all_link={true} />
       </section>
+  </div>
+
+  <div class="section-width">
+    <section id="faq" class="section-spacer-lg w-full">
+      <.section_header header="Frequently Asked Questions" />
+
+      <div class="">
+        <.faq_list faqs={@faqs} class="" />
+      </div>
+    </section>
   </div>
 </div>

@@ -96,7 +96,7 @@ defmodule ZkArcadeWeb.CoreComponents do
               <div class="py-2">
                 <button class="block w-full text-left px-4 py-2 text-sm hover:bg-contrast-100 transition-colors" id="how-it-works-nav-btn">Tutorial</button>
                 <.link
-                  href="#faq"
+                  href="/#faq"
                   class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors"
                 >
                   FAQ

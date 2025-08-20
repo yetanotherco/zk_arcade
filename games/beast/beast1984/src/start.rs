@@ -9,11 +9,24 @@
 //!
 //!
 
-use std::env;
+use std::{env, io::{self, Write}};
 
 use crate::{game, stty};
 use dotenv::dotenv;
 use game_logic::{ANSI_RESET_FONT, BOARD_HEIGHT, BOARD_WIDTH};
+
+fn pause_and_exit(code: i32) {
+    // On Windows, always pause on error so user can see what went wrong
+    #[cfg(windows)]
+    {
+        if code != 0 {
+            println!("\nPress Enter to exit...");
+            let _ = io::stdin().read_line(&mut String::new());
+        }
+    }
+    
+    std::process::exit(code);
+}
 
 pub fn start() {
     let cli_flags = env::args().skip(1).collect::<Vec<String>>();
@@ -22,14 +35,14 @@ pub fn start() {
         || cli_flags.contains(&String::from("-V"))
     {
         println!("v{}", env!("CARGO_PKG_VERSION"));
-        std::process::exit(0);
+        pause_and_exit(0);
     }
 
     if !stty::has_stty() && std::env::var_os("CI").is_none() {
         eprintln!(
             "\x1B[31mERROR:{ANSI_RESET_FONT} This game requires a POSIX compatible terminal with stty support."
         );
-        std::process::exit(0);
+        pause_and_exit(1);
     }
 
     if std::env::var_os("CI").is_none() {
@@ -55,16 +68,37 @@ pub fn start() {
                 eprintln!(
                     "\x1B[31mERROR:{ANSI_RESET_FONT} Terminal size is too small.\nThe size is {width_color}{columns}{ANSI_RESET_FONT} x {height_color}{rows}{ANSI_RESET_FONT} but needs to be at least {min_width} x {min_height}."
                 );
-                std::process::exit(0);
+                pause_and_exit(1);
             }
         } else {
             println!("{:?}", stty::terminal_size());
             eprintln!("\x1B[31mERROR:{ANSI_RESET_FONT} Failed to detect terminal size via stty.");
-            std::process::exit(0);
+            pause_and_exit(1);
         }
     }
 
     dotenv().ok();
-    let mut game = crate::game::Game::new();
-    game.play();
+    
+    // Wrap game execution in error handling
+    let result = std::panic::catch_unwind(|| {
+        let mut game = crate::game::Game::new();
+        game.play();
+    });
+    
+    match result {
+        Ok(_) => {
+            // Game completed normally
+        }
+        Err(e) => {
+            eprintln!("\x1B[31mERROR:{ANSI_RESET_FONT} Game crashed with error:");
+            if let Some(s) = e.downcast_ref::<&str>() {
+                eprintln!("{}", s);
+            } else if let Some(s) = e.downcast_ref::<String>() {
+                eprintln!("{}", s);
+            } else {
+                eprintln!("Unknown panic occurred");
+            }
+            pause_and_exit(1);
+        }
+    }
 }

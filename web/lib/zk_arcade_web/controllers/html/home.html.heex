@@ -27,7 +27,7 @@
             <.home_statistic label="Proofs per player" value={@statistics.proofs_per_player} desc={@statistics.desc} />
           </div>
           <div class="hidden [@media(min-width:900px)]:block w-[300px] h-full max-h-[270px] overflow-y-scroll shrink-0 bg-contrast-300 rounded px-8 py-6">
-            <p class="mb-2">Top users</p>
+            <p class="mb-2 text-text-200">Top users</p>
             <.leaderboard_home 
               users={@top_users}
               current_wallet={@wallet}

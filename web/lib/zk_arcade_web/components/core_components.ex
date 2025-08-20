@@ -321,12 +321,12 @@ defmodule ZkArcadeWeb.CoreComponents do
   def home_game_component_hero(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
-      <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-100 rounded">
+      <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
         <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
       <.link href={@link} class="w-[350px] h-full shrink-0">
-        <div class="w-full h-full flex flex-col cursor-pointer bg-contrast-100 rounded p-5 group">
+        <div class="w-full h-full flex flex-col cursor-pointer bg-contrast-300 rounded p-5 group">
           <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
         </div>
       </.link>
@@ -696,7 +696,9 @@ defmodule ZkArcadeWeb.CoreComponents do
         <.leaderboard_table_home
           id="leaderboard"
           users={@users}
-          current_wallet={@current_wallet} />
+          current_wallet={@current_wallet}
+          show_labels={false}
+          />
         <.link href="/leaderboard" class="text-center text-sm w-full hover:underline block mt-1">
           View all
         </.link>

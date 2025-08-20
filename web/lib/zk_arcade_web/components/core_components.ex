@@ -93,8 +93,10 @@ defmodule ZkArcadeWeb.CoreComponents do
               id="kebab-dropdown"
               class="absolute right-0 top-full mt-2 w-48 bg-background border border-contrast-200 rounded-lg shadow-lg z-50 hidden"
             >
-              <div class="py-2">
-                <button class="block w-full text-left px-4 py-2 text-sm hover:bg-contrast-100 transition-colors" id="how-it-works-nav-btn">Tutorial</button>
+              <div>
+                <button class="block w-full text-left px-4 py-2 text-sm hover:bg-contrast-100 transition-colors rounded-tl-lg rounded-tr-lg" id="how-it-works-nav-btn">
+                  Tutorial
+                </button>
                 <.link
                   href="/#faq"
                   class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors"
@@ -103,7 +105,7 @@ defmodule ZkArcadeWeb.CoreComponents do
                 </.link>
                 <.link
                   href={Application.get_env(:zk_arcade, :feedback_form_url)}
-                  class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors"
+                  class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors rounded-bl-lg rounded-br-lg"
                   target="_blank"
 					        rel="noopener noreferrer"
                 >

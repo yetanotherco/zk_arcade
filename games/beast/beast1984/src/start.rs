@@ -15,6 +15,60 @@ use crate::{game, stty};
 use dotenv::dotenv;
 use game_logic::{ANSI_RESET_FONT, BOARD_HEIGHT, BOARD_WIDTH};
 
+#[cfg(windows)]
+fn try_resize_console(min_width: usize, min_height: usize) {
+    use winapi::um::{
+        wincon::{SetConsoleScreenBufferSize, SetConsoleWindowInfo, COORD, SMALL_RECT},
+        processenv::GetStdHandle,
+        winbase::STD_OUTPUT_HANDLE,
+        handleapi::INVALID_HANDLE_VALUE,
+    };
+    
+    unsafe {
+        let console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+        if console_handle == INVALID_HANDLE_VALUE {
+            return;
+        }
+        
+        // Set buffer size first (must be at least as large as window size)
+        let buffer_size = COORD {
+            X: min_width as i16,
+            Y: (min_height + 100) as i16, // Add extra buffer for scrollback
+        };
+        SetConsoleScreenBufferSize(console_handle, buffer_size);
+        
+        // Try to set window size
+        let window_rect = SMALL_RECT {
+            Left: 0,
+            Top: 0,
+            Right: (min_width - 1) as i16,
+            Bottom: (min_height - 1) as i16,
+        };
+        SetConsoleWindowInfo(console_handle, 1, &window_rect);
+    }
+}
+
+#[cfg(windows)]
+fn show_resize_error(columns: usize, rows: usize, min_width: usize, min_height: usize) {
+    let width_color = if columns < min_width {
+        "\x1B[31m"
+    } else {
+        ANSI_RESET_FONT
+    };
+    let height_color = if rows < min_height {
+        "\x1B[31m"
+    } else {
+        ANSI_RESET_FONT
+    };
+    eprintln!(
+        "\x1B[31mERROR:{ANSI_RESET_FONT} Could not resize terminal automatically."
+    );
+    eprintln!(
+        "Current size: {width_color}{columns}{ANSI_RESET_FONT} x {height_color}{rows}{ANSI_RESET_FONT}, Required: {min_width} x {min_height}"
+    );
+    eprintln!("Please manually resize your Command Prompt window to be larger.");
+}
+
 fn pause_and_exit(code: i32) {
     // On Windows, always pause on error so user can see what went wrong
     #[cfg(windows)]
@@ -54,6 +108,27 @@ pub fn start() {
                 + game::ANSI_FRAME_SIZE
                 + game::ANSI_FOOTER_HEIGHT
                 + 2; // the extra space at the top and bottom
+            // Try to resize the console window on Windows
+            #[cfg(windows)]
+            {
+                if columns < min_width || rows < min_height {
+                    try_resize_console(min_width, min_height);
+                    // Re-check the size after attempted resize
+                    if let Ok((new_columns, new_rows)) = stty::terminal_size() {
+                        if new_columns >= min_width && new_rows >= min_height {
+                            println!("Console resized successfully to {}x{}", new_columns, new_rows);
+                        } else {
+                            show_resize_error(new_columns, new_rows, min_width, min_height);
+                            pause_and_exit(1);
+                        }
+                    } else {
+                        show_resize_error(columns, rows, min_width, min_height);
+                        pause_and_exit(1);
+                    }
+                }
+            }
+            
+            #[cfg(not(windows))]
             if columns < min_width || rows < min_height {
                 let width_color = if columns < min_width {
                     "\x1B[31m"

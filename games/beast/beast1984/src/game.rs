@@ -625,7 +625,7 @@ impl Game {
                             break;
                         }
                     }
-                    '\n' => {
+                    '\n' | '\r' => {
                         self.state = GameState::ProveExecution;
                         break;
                     }
@@ -661,7 +661,7 @@ impl Game {
                         self.start_new_game();
                         break;
                     }
-                    '\n' => {
+                    '\n' | '\r' => {
                         self.state = GameState::ProveExecution;
                         break;
                     }

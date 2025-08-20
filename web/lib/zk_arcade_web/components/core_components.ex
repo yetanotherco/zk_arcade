@@ -57,14 +57,16 @@ defmodule ZkArcadeWeb.CoreComponents do
         </div>
 
         <div class="flex gap-8 items-center">
-          <x-app-submit-proof
-              network={@network}
-              payment_service_address={@payment_service_address}
-              user_address={@wallet}
-              batcher_url={@batcher_url}
-              leaderboard_address={@leaderboard_address}
-              beast_submissions={@beast_submissions}
-          />
+          <div class="hidden sm:block">
+            <x-app-submit-proof
+                network={@network}
+                payment_service_address={@payment_service_address}
+                user_address={@wallet}
+                batcher_url={@batcher_url}
+                leaderboard_address={@leaderboard_address}
+                beast_submissions={@beast_submissions}
+            />
+          </div>
 
           <x-app-user-wallet
               network={@network}
@@ -319,12 +321,12 @@ defmodule ZkArcadeWeb.CoreComponents do
   def home_game_component_hero(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
-      <div class="w-full p-5 bg-contrast-100 rounded">
+      <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-100 rounded">
         <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
-      <.link href={@link} class="w-full">
-        <div class="w-full cursor-pointer bg-contrast-100 rounded p-5 group">
+      <.link href={@link} class="w-[350px] h-full shrink-0">
+        <div class="w-full h-full flex flex-col cursor-pointer bg-contrast-100 rounded p-5 group">
           <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
         </div>
       </.link>
@@ -335,14 +337,14 @@ defmodule ZkArcadeWeb.CoreComponents do
   defp game_content_hero(assigns) do
     ~H"""
     <div class="flex gap-2">
-      <img class="rounded mb-1 w-full sm:h-[75px] sm:w-[100px]" src={@img}/>
+      <img class="rounded mb-1 w-full h-[75px] w-[100px]" src={@img}/>
       <p class="text-xs text-text-200"><%= @desc %></p>
     </div>
     <div>
-        <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
+        <h3 class="text-lg font-normal group-hover:underline underline-offset-4">
           <%= @title %>
         </h3>
-      <div class="flex mb-2 gap-2">
+      <div class="flex gap-2">
         <%= for variant <- @tags do %>
           <.tag variant={variant} />
         <% end %>
@@ -368,7 +370,7 @@ defmodule ZkArcadeWeb.CoreComponents do
 
   def home_statistic(%{label: label, value: value, desc: desc} = assigns) do
     ~H"""
-      <div class="bg-contrast-300 p-2 rounded" style="width: 205px">
+      <div class="bg-contrast-300 p-2 rounded h-full w-full">
         <p class="text-text-100 text-sm mb-2"><%= @label %></p>
         <h1 class="font-normal text-accent-100 text-4xl mb-1"><%= @value %></h1>
         <div class="flex w-full justify-end">

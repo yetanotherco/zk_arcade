@@ -79,7 +79,7 @@ const SubmitCircomProof = ({ payment_service_address, user_address, batcher_url 
 
             // (2) Paths to the static artifacts
             const wasmPath = "/artifacts/fibonacci.wasm";
-            const zkeyPath = "/artifacts/fib_final.zkey";
+            const zkeyPath = "/artifacts/fibonacci_final.zkey";
             const vkeyPath = "/artifacts/verification_key.json";
 
             // (3) Generate the proof and the public signals

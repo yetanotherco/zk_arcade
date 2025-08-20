@@ -2,11 +2,20 @@
 
   <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
 
-    <div class="section-width section-spacer-lg pb-5" style="height: 100vh">
+    <div class="section-width pb-5" style="height: 100vh">
       <div class="w-full flex flex-col justify-between" style="margin-top: 200px">
-        <h1 class="md:text-5xl text-2xl mb-10 font-normal w-full">
+        <h1 class="md:text-5xl text-2xl font-normal w-full">
           Play. Prove. <span class="text-accent-100">Verify</span>. Compete
         </h1>
+
+      <div class="flex flex-row gap-5 w-full overflow-scroll">
+          <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+          <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+          <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+          <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+          <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+          <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+      </div>
 
       <div class="flex-end">
         <p class="text-md mb-5 font-bold">Hottest games</p>
@@ -57,7 +66,7 @@
   </div>
 
   <div class="section-width">
-    <section id="what-is-this" class="section-spacer-lg">
+    <section id="what-is-this" class="section-spacer-lg" style="padding-top: 150px">
       <.section_header header="What is this?" />
       <p class="text-text-200 text-md">
       ZK Arcade is where on-chain gaming meets real fairness. It uses zero-knowledge proofs to let players prove their scores and outcomes without revealing all the details behind them, so you can trust what you're seeing without needing to trust who you're playing against.

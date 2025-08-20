@@ -2,11 +2,43 @@
 
   <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
 
-    <div class="section-width section-spacer-lg" style="height: calc(100vh - 150px)">
-      <div class="w-full flex flex-col justify-between" style="margin-top: 150px">
-        <h1 class="md:text-5xl text-2xl font-normal mb-4 w-full">
+    <div class="section-width section-spacer-lg pb-5" style="height: 100vh">
+      <div class="w-full flex flex-col justify-between" style="margin-top: 200px">
+        <h1 class="md:text-5xl text-2xl mb-10 font-normal w-full">
           Play. Prove. <span class="text-accent-100">Verify</span>. Compete
         </h1>
+
+      <div class="flex-end">
+        <p class="text-md mb-5 font-bold">Hottest games</p>
+          <div class="flex w-full lg:justify-between gap-5">
+            <.home_game_component_hero 
+              tags={[:cli, :risc0, :sp1]} 
+              disabled="false" 
+              link="/game/beast" 
+              title="Beast 1984" 
+              desc="Terminal-based survival game. Each wave ramps up the pressure." 
+              img={~p"/images/beast.jpg"} 
+            />
+
+            <.home_game_component_hero 
+              tags={[:browser, :circom]} 
+              disabled="true" 
+              link="/game/sudoku" 
+              title="Sudoku (Coming Soon)" 
+              desc="Browser-based Sudoku with a fresh puzzle each day. Classic rules, escalating challenge." 
+              img={~p"/images/sudoku.jpg"} 
+            />
+
+            <.home_game_component_hero
+              tags={[:browser, :circom]} 
+              disabled="true" 
+              link="/game/parity" 
+              title="Parity (Coming Soon)" 
+              desc="Daily parity puzzles in your browser. Simple rules, tricky patterns." 
+              img={~p"/images/parity.jpg"} 
+            />
+          </div>
+        </div>
 
         <div class="flex flex-col gap-5">
          <p class="text-text-200">

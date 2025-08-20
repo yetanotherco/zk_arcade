@@ -148,21 +148,6 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def step_component(%{number: number, title: title, desc: desc, show_line: show_line} = assigns) do
-    ~H"""
-    <div class="w-full">
-
-      <div class="flex flex-col w-full justify-center items-center">
-        <div class="mb-2 h-[100px] w-[100px] rounded-full bg-accent-100/20 border border-accent-100 flex items-center justify-center">
-          <p class="text-2xl text-text-100"><%= @number %></p>
-        </div>
-        <h3 class="text-text-100 text-xl"><%= @title %></h3>
-        <p class="text-text-200 text-md text-center" style="min-width: 220px;"><%= @desc %></p>
-      </div>
-    </div>
-    """
-  end
-
   defp game_content(assigns) do
     ~H"""
     <img class="rounded mb-1 w-full sm:h-[170px]" src={@img} width={280} height={180}/>
@@ -176,6 +161,56 @@ defmodule ZkArcadeWeb.CoreComponents do
         <% end %>
       </div>
       <p class="text-md text-text-200"><%= @desc %></p>
+    </div>
+    """
+  end
+
+  def home_game_component_hero(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
+    ~H"""
+    <%= if @disabled == "true" do %>
+      <div class="w-full p-5 bg-contrast-100 rounded">
+        <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
+      </div>
+    <% else %>
+      <.link href={@link} class="w-full">
+        <div class="w-full cursor-pointer bg-contrast-100 rounded p-5 group">
+          <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
+        </div>
+      </.link>
+    <% end %>
+    """
+  end
+
+  defp game_content_hero(assigns) do
+    ~H"""
+    <div class="flex gap-2">
+      <img class="rounded mb-1 w-full sm:h-[75px] sm:w-[100px]" src={@img}/>
+      <p class="text-xs text-text-200"><%= @desc %></p>
+    </div>
+    <div>
+        <h3 class="text-xl font-normal group-hover:underline underline-offset-4">
+          <%= @title %>
+        </h3>
+      <div class="flex mb-2 gap-2">
+        <%= for variant <- @tags do %>
+          <.tag variant={variant} />
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  def step_component(%{number: number, title: title, desc: desc, show_line: show_line} = assigns) do
+    ~H"""
+    <div class="w-full">
+
+      <div class="flex flex-col w-full justify-center items-center">
+        <div class="mb-2 h-[100px] w-[100px] rounded-full bg-accent-100/20 border border-accent-100 flex items-center justify-center">
+          <p class="text-2xl text-text-100"><%= @number %></p>
+        </div>
+        <h3 class="text-text-100 text-xl"><%= @title %></h3>
+        <p class="text-text-200 text-md text-center" style="min-width: 220px;"><%= @desc %></p>
+      </div>
     </div>
     """
   end

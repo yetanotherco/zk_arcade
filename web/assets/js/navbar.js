@@ -33,6 +33,16 @@ document.addEventListener("DOMContentLoaded", function() {
 		}
 	});
 
+	// Close kebab menu when clicking one of the menu options
+	document.addEventListener("click", function(event) {
+		const kebabDropdown = document.querySelector("#kebab-dropdown");
+		if (kebabDropdown && !kebabDropdown.classList.contains("hidden")) {
+			if (event.target.closest("#kebab-dropdown .block")) {
+				kebabDropdown.classList.add("hidden");
+			}
+		}
+	});
+
 	// Close kebab menu on escape key
 	document.addEventListener("keydown", function(event) {
 		if (event.key === "Escape") {

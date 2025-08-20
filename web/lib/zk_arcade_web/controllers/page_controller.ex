@@ -103,7 +103,13 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:beast_submissions, beast_submissions_json)
       |> assign(:wallet, wallet)
       |> assign(:leaderboard, leaderboard)
-      |> assign(:top_users, top_users)
+      |> assign(:top_users, [
+        %{address: "0xA1B2C3D4E5F6", score: 1500, username: "Alice", position: 1},
+        %{address: "0xB7C8D9E0F123", score: 1320, username: "Bob", position: 2},
+        %{address: "0xC9D0E1F2A345", score: 1180, username: "Charlie", position: 3},
+        %{address: "0xD4E5F6A7B890", score: 1025, username: "Dana", position: 4},
+        %{address: "0xE8F9A0B1C234", score: 980,  username: "Eve", position: 5}
+      ])
       |> assign(:user_data, user_data)
       |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
       |> assign(:username, username)

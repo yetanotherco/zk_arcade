@@ -3,21 +3,31 @@
   <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
 
     <div class="section-width pb-5" style="height: 100vh">
-      <div class="w-full flex flex-col justify-between" style="margin-top: 200px">
-        <h1 class="md:text-5xl text-2xl font-normal w-full">
+      <div class="w-full flex flex-col justify-between" style="margin-top: 150px">
+
+        <h1 class="md:text-5xl text-2xl mb-4 font-normal w-full">
           Play. Prove. <span class="text-accent-100">Verify</span>. Compete
         </h1>
 
-      <div class="flex flex-row gap-5 w-full overflow-scroll">
-          <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
-          <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
-          <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
-          <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
-          <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
-          <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+      <div class="flex flex-row gap-8 w-full overflow-scroll items-center mb-4">
+          <div class="w-full flex flex-row flex-wrap gap-5">
+            <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+            <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+            <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+            <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+            <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+            <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+          </div>
+          <div class="w-[300px] bg-contrast-100 rounded px-8 py-4">
+            <.leaderboard_home 
+              users={@top_users}
+              current_wallet={@wallet}
+              user_data={@user_data}
+              show_view_all_link={true} />
+          </div>
       </div>
 
-      <div class="flex-end">
+      <div class="mb-5">
         <p class="text-md mb-5 font-bold">Hottest games</p>
           <div class="flex w-full lg:justify-between gap-5">
             <.home_game_component_hero 

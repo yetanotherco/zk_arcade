@@ -526,4 +526,54 @@ defmodule ZkArcadeWeb.CoreComponents do
     <% end %>
     """
   end
+
+  attr :users, :list, required: true
+  attr :current_wallet, :string, default: nil
+  attr :user_data, :map, default: nil
+  attr :pagination, :map, default: nil
+  attr :show_pagination, :boolean, default: false
+  attr :show_view_all_link, :boolean, default: false
+
+  def leaderboard_home(assigns) do
+    ~H"""
+    <%= if length(@users) > 0 do %>
+      <div class="overflow-x-auto w-full">
+        <.leaderboard_table_home
+          id="leaderboard"
+          users={@users}
+          current_wallet={@current_wallet} />
+      </div>
+    <% else %>
+      <p class="text-text-200 text-md">No users found in the leaderboard.</p>
+    <% end %>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :users, :list, required: true
+  attr :current_wallet, :string, default: nil
+  attr :show_labels, :boolean, default: true
+  defp leaderboard_table_home(assigns) do
+    ~H"""
+    <div class="w-full">
+      <.table id={@id} rows={@users}>
+        <:col :let={user} label={if @show_labels, do: "Position", else: ""}>
+          <%= user.position %>
+          <%= case user.position do %>
+            <%= 1 -> %>
+            <.icon name="hero-trophy" color="#FFD700" class="" />
+            <%= 2 -> %>
+            <.icon name="hero-trophy" color="#6a697a" class="" />
+            <%= 3 -> %>
+            <.icon name="hero-trophy" color="#b36839" class="" />
+            <%= _ ->  %>
+          <% end %>
+        </:col>
+        <:col :let={user} label={if @show_labels, do: "Username", else: ""}>
+          <p class="text-text-100 text-md"><%= user.username %></p>
+        </:col>
+      </.table>
+    </div>
+    """
+  end
 end

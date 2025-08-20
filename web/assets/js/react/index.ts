@@ -8,6 +8,7 @@ import { CurrentBeastGame, SubmitBeastGameBtn } from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
 import EncourageDepositing from "./modules/EncourageDepositing";
+import SubmitCircomProof from "./modules/SubmitCircomProof";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -96,3 +97,17 @@ define(
 	{ "x-app-encourage-depositing-modal": EncourageDepositing },
 	{ attributes: ["network", "payment_service_address", "user_address"] }
 );
+
+define(
+	{ "x-app-submit-circom-proof": SubmitCircomProof },
+	{
+		attributes: [
+			"network",
+			"payment_service_address",
+			"user_address",
+			"batcher_url",
+			"leaderboard_address",
+			"circom_submissions",
+		],
+	}
+)

@@ -58,5 +58,21 @@
         />
     </div>
 
+    <div class="section-width section-width">
+        <section class="section-spacer-md">
+            <.section_header header="Submit Circom" />
+            <p class="text-md text-text-200">Submit your Circom proof below:</p>
+
+            <x-app-submit-circom-proof 
+                network={Application.get_env(:zk_arcade, :network)}
+                payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+                user_address={@wallet} 
+                batcher_url={Application.get_env(:zk_arcade, :batcher_url)}
+                leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
+                circom_submissions={@circom_submissions}
+            />
+        </section>
+    </div>
+
     <div class="section-spacer-md"></div>
 </div>

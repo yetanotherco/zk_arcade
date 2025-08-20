@@ -139,9 +139,12 @@ defmodule ZkArcadeWeb.PageController do
       },
     ]
 
+    circom_submissions_json = Jason.encode!([])
+
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:beast_submissions, beast_submissions_json)
+      |> assign(:circom_submissions, circom_submissions_json)
       |> assign(:wallet, wallet)
       |> assign(:leaderboard, leaderboard)
       |> assign(:top_users, top_users)
@@ -165,6 +168,8 @@ defmodule ZkArcadeWeb.PageController do
     {username, position} = get_username_and_position(wallet)
 
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+
+    circom_submissions_json = Jason.encode!([])
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -198,6 +203,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:beast_submissions, beast_submissions_json)
+      |> assign(:circom_submissions, circom_submissions_json)
       |> render(:game)
   end
 

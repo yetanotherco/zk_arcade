@@ -430,7 +430,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     <table class="table-fixed border-collapse w-full">
       <thead>
         <tr class="text-text-200 truncate">
-          <th :for={{col, _i} <- Enum.with_index(@col)} class="text-left font-normal pb-5">
+          <th :for={{col, _i} <- Enum.with_index(@col)} class="text-left font-normal">
           <%= col[:label] %>
           </th>
         </tr>
@@ -692,7 +692,7 @@ defmodule ZkArcadeWeb.CoreComponents do
   def leaderboard_home(assigns) do
     ~H"""
     <%= if length(@users) > 0 do %>
-      <div class="overflow-x-auto w-full">
+      <div class="overflow-x-auto w-full h-full flex flex-col justify-between">
         <.leaderboard_table_home
           id="leaderboard"
           users={@users}

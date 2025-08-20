@@ -26,7 +26,7 @@
             <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
             <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
           </div>
-          <div class="hidden [@media(min-width:900px)]:block w-[300px] shrink-0 bg-contrast-100 rounded px-8 py-4">
+          <div class="hidden [@media(min-width:900px)]:block w-[300px] h-full max-h-[270px] overflow-y-scroll shrink-0 bg-contrast-100 rounded px-8 py-6">
             <.leaderboard_home 
               users={@top_users}
               current_wallet={@wallet}

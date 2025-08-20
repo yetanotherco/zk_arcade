@@ -2,26 +2,27 @@
 
   <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
 
-  <div class="section-width flex flex-row h-screen items-center">
-    <div class="flex flex-row justify-between items-end w-full">
-      <div style="width: 70%">
-        <h1 class="typing md:text-5xl text-2xl font-normal mb-4 w-full">
+    <div class="section-width section-spacer-lg" style="height: calc(100vh - 150px)">
+      <div class="w-full flex flex-col justify-between" style="margin-top: 150px">
+        <h1 class="md:text-5xl text-2xl font-normal mb-4 w-full">
           Play. Prove. <span class="text-accent-100">Verify</span>. Compete
         </h1>
-        <p class="text-text-200">
-          The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on 
-          <.link class="text-accent-100 hover:underline" href="https://alignedlayer.com" target="_blank" rel="noopener noreferrer">ALIGNED</.link>. Climb the leaderboard, earn your rank.
-        </p>
-      </div>
-      <a href="#play-games">
-        <div class="hidden md:block cursor-pointer inline-flex items-center space-x-2 group">
-          <span>Play Games</span>
-          <.icon name="hero-arrow-long-right" class="size-7 transition-transform duration-200 group-hover:translate-x-1" />
-        </div>
-      </a>
-    </div>
-  </div>
 
+        <div class="flex flex-col gap-5">
+         <p class="text-text-200">
+            The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on 
+            <.link class="text-accent-100 hover:underline" href="https://alignedlayer.com" target="_blank" rel="noopener noreferrer">ALIGNED</.link>. Climb the leaderboard, earn your rank.
+          </p>
+
+          <a href="#what-is-this" class="w-full">
+            <div class="hidden md:flex flex-col w-full justify-center cursor-pointer items-center group">
+              <span>Show More</span>
+              <.icon name="hero-chevron-down" class="size-7 transition-transform duration-200 group-hover:translate-y-1" />
+            </div>
+          </a>
+        </div>
+      </div>
+  </div>
 
   <div class="section-width">
     <section id="what-is-this" class="section-spacer-lg">

@@ -900,11 +900,27 @@ impl Game {
     }
 
     fn render_top_frame() -> String {
-        format!("\x1b[33m▛{}▜{ANSI_RESET_FONT}\n", "▀▀".repeat(BOARD_WIDTH))
+        #[cfg(windows)]
+        {
+            // Use ASCII characters for better Windows compatibility
+            format!("\x1b[33m+{}+{ANSI_RESET_FONT}\n", "-".repeat(BOARD_WIDTH * 2))
+        }
+        #[cfg(not(windows))]
+        {
+            format!("\x1b[33m▛{}▜{ANSI_RESET_FONT}\n", "▀▀".repeat(BOARD_WIDTH))
+        }
     }
 
     fn render_bottom_frame() -> String {
-        format!("\x1b[33m▙{}▟{ANSI_RESET_FONT}\n", "▄▄".repeat(BOARD_WIDTH))
+        #[cfg(windows)]
+        {
+            // Use ASCII characters for better Windows compatibility
+            format!("\x1b[33m+{}+{ANSI_RESET_FONT}\n", "-".repeat(BOARD_WIDTH * 2))
+        }
+        #[cfg(not(windows))]
+        {
+            format!("\x1b[33m▙{}▟{ANSI_RESET_FONT}\n", "▄▄".repeat(BOARD_WIDTH))
+        }
     }
 
     fn render_intro() -> String {
@@ -1097,17 +1113,27 @@ impl Game {
             ((BOARD_WIDTH * 2 + ANSI_FRAME_SIZE * 2) / 2).saturating_sub(box_width / 2)
         );
 
-        let border = "─".repeat(box_width);
-        let message_line = format!("{left_pad}│ {:^width$} │", message, width = box_width - 2);
+        #[cfg(windows)]
+        let (border, pipe_char) = ("-".repeat(box_width), "|");
+        #[cfg(not(windows))]
+        let (border, pipe_char) = ("─".repeat(box_width), "│");
+        
+        let message_line = format!("{left_pad}{pipe_char} {:^width$} {pipe_char}", message, width = box_width - 2);
         let options_line = format!(
-            "{left_pad}│ {:^width$} │",
+            "{left_pad}{pipe_char} {:^width$} {pipe_char}",
             confirm_text,
             width = box_width - 2
         );
 
+        #[cfg(windows)]
         print!(
-        "\x1b[{top_pos}F{left_pad}┌{border}┐\n{message_line}\n{options_line}\n{left_pad}└{border}┘\n\x1b[{bottom_pos:.0}E"
-    );
+            "\x1b[{top_pos}F{left_pad}+{border}+\n{message_line}\n{options_line}\n{left_pad}+{border}+\n\x1b[{bottom_pos:.0}E"
+        );
+        
+        #[cfg(not(windows))]
+        print!(
+            "\x1b[{top_pos}F{left_pad}┌{border}┐\n{message_line}\n{options_line}\n{left_pad}└{border}┘\n\x1b[{bottom_pos:.0}E"
+        );
 
         while let Ok(byte) = input_listener.recv() {
             match byte as char {
@@ -1130,13 +1156,26 @@ impl Game {
             (((BOARD_WIDTH * 2 + ANSI_FRAME_SIZE + ANSI_FRAME_SIZE) / 2) - ((msg.len() + 4) / 2))
         );
 
-        let progress_bar = format!("{:▁<width$}", "", width = (msg.len() * progress) / 100);
-        format!(
-            "\x1b[{top_pos}F{left_pad}┌{border:─<width$}┐\n{left_pad}│ {msg} │\n{left_pad}│ \x1B[38;5;235m{progress_bar:<msg_width$}{ANSI_RESET_FONT} │\n{left_pad}└{border:─<width$}┘\n\x1b[{bottom_pos:.0}E",
-            border = "",
-            width = msg.len() + 2,
-            msg_width = msg.len()
-        )
+        #[cfg(windows)]
+        {
+            let progress_bar = format!("{:=<width$}", "", width = (msg.len() * progress) / 100);
+            format!(
+                "\x1b[{top_pos}F{left_pad}+{border:-<width$}+\n{left_pad}| {msg} |\n{left_pad}| \x1B[38;5;235m{progress_bar:<msg_width$}{ANSI_RESET_FONT} |\n{left_pad}+{border:-<width$}+\n\x1b[{bottom_pos:.0}E",
+                border = "",
+                width = msg.len() + 2,
+                msg_width = msg.len()
+            )
+        }
+        #[cfg(not(windows))]
+        {
+            let progress_bar = format!("{:▁<width$}", "", width = (msg.len() * progress) / 100);
+            format!(
+                "\x1b[{top_pos}F{left_pad}┌{border:─<width$}┐\n{left_pad}│ {msg} │\n{left_pad}│ \x1B[38;5;235m{progress_bar:<msg_width$}{ANSI_RESET_FONT} │\n{left_pad}└{border:─<width$}┘\n\x1b[{bottom_pos:.0}E",
+                border = "",
+                width = msg.len() + 2,
+                msg_width = msg.len()
+            )
+        }
     }
 
     fn push_to_log(&mut self, log: GameLogEntry) {

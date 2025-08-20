@@ -86,7 +86,7 @@ defmodule ZkArcadeWeb.CoreComponents do
               aria-label="Toggle kebab menu"
               onclick="toggleKebabMenu()"
             >
-              <.icon name="hero-ellipsis-vertical" class="w-5 h-5" />
+              <.icon name="hero-ellipsis-vertical" class="w-7 h-7" />
             </button>
 
             <div

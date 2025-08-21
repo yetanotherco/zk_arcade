@@ -79,6 +79,8 @@ pub enum GameState {
     Help,
     /// Display the prove execution screen
     ProveExecution,
+    /// Display the proof completion message
+    ProofComplete,
     /// the game is over and we quit the game entirely
     GameOver,
     /// the game was won
@@ -117,6 +119,7 @@ pub struct Game {
     _raw_mode: RawMode,
     address: String,
     proving_systems: Vec<String>,
+    proof_completion_message: String,
 }
 
 impl Game {
@@ -201,6 +204,7 @@ impl Game {
             _raw_mode,
             address,
             proving_systems,
+            proof_completion_message: String::new(),
         }
     }
 
@@ -249,6 +253,9 @@ impl Game {
                 }
                 GameState::ProveExecution => {
                     self.handle_prove_execution_state();
+                }
+                GameState::ProofComplete => {
+                    self.handle_proof_complete_state();
                 }
                 GameState::GameOver => {
                     self.handle_death_state();
@@ -811,7 +818,7 @@ impl Game {
             successful_files.push(filename.as_str());
         }
 
-        let msg = if !successful_files.is_empty() {
+        self.proof_completion_message = if !successful_files.is_empty() {
             format!(
                 "Proof saved to {}. Submit it to https://test.zkarcade.com and earn points!",
                 successful_files.join(", ")
@@ -819,14 +826,40 @@ impl Game {
         } else {
             "Could not prove program, try again...".to_string()
         };
-        let handle = Self::render_loader_in_new_thread(&msg, 3000, false);
-        let _ = handle.join();
-        
-        // Return to appropriate state instead of quitting
+        // Transition to proof complete state to show persistent message
+        self.state = GameState::ProofComplete;
+    }
+
+    fn handle_proof_complete_state(&mut self) {
+        // Show the appropriate screen with the persistent proof message
         if self.has_won {
-            self.state = GameState::Won;
+            println!("{}", self.render_winning_screen());
         } else {
-            self.state = GameState::GameOver;
+            println!("{}", self.render_death_screen());
+        }
+        
+        // Show the proof completion message that stays on screen
+        println!("\n{}\n", self.proof_completion_message);
+        println!("Press [SPACE] to play again, [Q] to quit, or [H] for help");
+
+        loop {
+            if let Ok(byte) = self.input_listener.try_recv() {
+                match byte as char {
+                    ' ' => {
+                        self.start_new_game();
+                        break;
+                    }
+                    'q' | 'Q' => {
+                        self.state = GameState::Quit;
+                        break;
+                    }
+                    'h' | 'H' => {
+                        self.state = GameState::Help;
+                        break;
+                    }
+                    _ => {}
+                }
+            }
         }
     }
 

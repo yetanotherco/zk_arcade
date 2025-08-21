@@ -10,73 +10,83 @@
     />
   <% end %>
 
-  <div class="section-width flex flex-row h-screen items-center">
-    <div class="flex flex-row justify-between items-end w-full">
-      <div style="width: 70%">
-        <h1 class="typing md:text-5xl text-2xl font-normal mb-4 w-full">
+  <div class="section-width pb-5" style="min-height: 100vh">
+      <div class="w-full flex flex-col justify-between" style="margin-top: 150px">
+
+        <h1 class="md:text-5xl text-2xl mb-4 font-normal w-full">
           Play. Prove. <span class="text-accent-100">Verify</span>. Compete
         </h1>
-        <p class="text-text-200">
-          The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on 
-          <.link class="text-accent-100 hover:underline" href="https://alignedlayer.com" target="_blank" rel="noopener noreferrer">ALIGNED</.link>. Climb the leaderboard, earn your rank.
-        </p>
-      </div>
-      <a href="#play-games">
-        <div class="hidden md:block cursor-pointer inline-flex items-center space-x-2 group">
-          <span>Play Games</span>
-          <.icon name="hero-arrow-long-right" class="size-7 transition-transform duration-200 group-hover:translate-x-1" />
-        </div>
-      </a>
-    </div>
-  </div>
 
-
-
-  <div class="w-full bg-accent-100 section-spacer-md">
-    <div class="section-width ">
-      <div class="flex flex-col gap-10 w-full justify-between md:flex-row">
-        <div class="select-invert w-full flex mt-5 md:mt-0 flex-col justify-center">
-          <h1 class="font-normal text-3xl md:text-left text-center mb-2 text-black">While you are resting,</h1>
-          <h1 class="font-normal text-3xl md:text-left text-center text-black"><span class="select-normal bg-black text-accent-100 px-2">ALIGNED</span> is verifying.</h1>
-        </div>
-        
-      <div class="marquee-container w-full flex gap-10 justify-center">
-          <div class="marquee-wrapper">
-            <div class="marquee-column scroll-up">
-              <div class="marquee-content">
-                <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
-                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
-                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
-              </div>
-              <div class="marquee-content">
-                <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
-                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
-                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
-              </div>
-            </div>
+      <div class="flex flex-row gap-8 w-full items-center mb-4 overflow-scroll">
+         <div class="w-full h-full grid grid-cols-2 sm:grid-cols-3 gap-5">
+            <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
+            <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
+            <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
+            <.home_statistic label="Users online" value={@statistics.users_online} desc={"Now"} />
+            <.home_statistic label="AVG proof cost" value={@statistics.avg_savings_per_proof} desc={@statistics.desc} />
+            <.home_statistic label="Proofs per player" value={@statistics.proofs_per_player} desc={@statistics.desc} />
           </div>
+          <div class="hidden [@media(min-width:900px)]:block w-[300px] h-full max-h-[270px] overflow-y-scroll shrink-0 bg-contrast-300 rounded px-8 py-6">
+            <p class="mb-2 text-text-200">Top users</p>
+            <.leaderboard_home 
+              users={@top_users}
+              current_wallet={@wallet}
+              user_data={@user_data}
+              show_view_all_link={true}
+            />
+          </div>
+      </div>
 
-          <div class="marquee-wrapper">
-            <div class="marquee-column scroll-down">
-               <div class="marquee-content">
-                <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
-                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
-                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
-              </div>
-              <div class="marquee-content">
-                <.home_statistic label="Proofs verified" value={@statistics.proofs_verified} desc={@statistics.desc} />
-                <.home_statistic label="Total Players" value={@statistics.total_player} desc={@statistics.desc} />
-                <.home_statistic label="Cost saved (USD)" value={@statistics.cost_saved} desc={@statistics.desc} />
-              </div>
-            </div>
+      <div class="mb-5">
+        <p class="text-md mb-5 font-bold">Choose a game</p>
+          <div class="flex w-full h-[180px] gap-5 overflow-scroll">
+            <.home_game_component_hero 
+              tags={[:cli, :risc0, :sp1]} 
+              disabled="false" 
+              link="/game/beast" 
+              title="Beast 1984" 
+              desc="Terminal-based survival game. Each wave ramps up the pressure." 
+              img={~p"/images/beast.jpg"} 
+            />
+
+            <.home_game_component_hero
+              tags={[:browser, :circom]} 
+              disabled="false" 
+              link="/game/parity" 
+              title="Parity" 
+              desc="Daily parity puzzles in your browser. Simple rules, tricky patterns." 
+              img={~p"/images/parity.jpg"} 
+            />
+
+            <.home_game_component_hero 
+              tags={[:browser, :circom]} 
+              disabled="true" 
+              link="/game/sudoku" 
+              title="Sudoku (Coming Soon)" 
+              desc="Browser-based Sudoku with a fresh puzzle each day. Classic rules, escalating challenge." 
+              img={~p"/images/sudoku.jpg"} 
+            />
           </div>
         </div>
+
+        <div class="flex flex-col gap-5">
+         <p class="text-text-200">
+            The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on 
+            <.link class="text-accent-100 hover:underline" href="https://alignedlayer.com" target="_blank" rel="noopener noreferrer">ALIGNED</.link>. Climb the leaderboard, earn your rank.
+          </p>
+
+          <a href="#what-is-this" class="w-full">
+            <div class="flex flex-col w-full justify-center cursor-pointer items-center group">
+              <span>Show More</span>
+              <.icon name="hero-chevron-down" class="size-7 transition-transform duration-200 group-hover:translate-y-1" />
+            </div>
+          </a>
+        </div>
       </div>
-    </div>
   </div>
 
   <div class="section-width">
-    <section id="what-is-this" class="section-spacer-lg">
+    <section id="what-is-this" class="section-spacer-lg" style="padding-top: 100px">
       <.section_header header="What is this?" />
       <p class="text-text-200 text-md">
       ZK Arcade is where on-chain gaming meets real fairness. It uses zero-knowledge proofs to let players prove their scores and outcomes without revealing all the details behind them, so you can trust what you're seeing without needing to trust who you're playing against.
@@ -113,52 +123,6 @@
         />
       </div>
     </section>
-  </div>
-
-  <div class="section-width">
-    <section id="play-games" class="section-spacer-lg">
-      <.section_header header="Play Games" />
-      <div class="flex w-full flex-wrap lg:justify-between gap-10">
-        <.home_game_component 
-          tags={[:cli, :risc0, :sp1]} 
-          disabled="false" 
-          link="/game/beast" 
-          title="Beast 1984" 
-          desc="Terminal-based survival game. Each wave ramps up the pressure. React fast, play smart, and see how far you can go." 
-          img={~p"/images/beast.jpg"} 
-        />
-
-        <.home_game_component 
-          tags={[:browser, :circom]} 
-          disabled="false" 
-          link="/game/parity" 
-          title="Parity" 
-          desc="Daily parity puzzles in your browser. Simple rules, tricky patterns. Test your logic and stay sharp as difficulty builds." 
-          img={~p"/images/parity.jpg"} 
-        />
-
-        <.home_game_component 
-          tags={[:browser, :circom]} 
-          disabled="true" 
-          link="/game/sudoku" 
-          title="Sudoku (Coming Soon)" 
-          desc="Browser-based Sudoku with a fresh puzzle each day. Classic rules, escalating challenge. How many days can you keep the streak alive?" 
-          img={~p"/images/sudoku.jpg"} 
-        />
-      </div>
-    </section>
-  </div>
-
-  <div class="section-width">
-    <section id="leaderboard" class="section-spacer-lg" style="width: 100%;">
-        <.section_header header="LeaderBoard" />
-
-        <.leaderboard_section 
-          users={@top_users}
-          current_wallet={@wallet}
-          user_data={@user_data}
-          show_view_all_link={true} />
-      </section>
   </div>
 
   <div class="section-width">

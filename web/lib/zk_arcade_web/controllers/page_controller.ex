@@ -84,7 +84,7 @@ defmodule ZkArcadeWeb.PageController do
       end
     avg_savings_per_proof =
       if proofs_verified > 0 do
-        div(cost_saved, proofs_verified)
+        div(trunc(cost_saved.savings), proofs_verified)
       else
         0
       end

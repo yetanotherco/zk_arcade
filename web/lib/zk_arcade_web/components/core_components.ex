@@ -443,11 +443,11 @@ defmodule ZkArcadeWeb.CoreComponents do
         >
           <td
             :for={{col, _i} <- Enum.with_index(@col)}
-            class={classes(["p-0 pr-10"])}
+            class={classes(["p-0 pr-10", col[:class]])}
           >
             <div class={
               classes([
-                "group block normal-case  text-base min-w-28"
+                "group block normal-case text-base min-w-29"
               ])
             }>
               <%= render_slot(col, @row_item.(row)) %>
@@ -717,10 +717,10 @@ defmodule ZkArcadeWeb.CoreComponents do
     ~H"""
     <div class="w-full">
       <.table id={@id} rows={@users}>
-        <:col :let={user} label={if @show_labels, do: "Username", else: ""}>
-          <p class="text-text-100 text-md"><%= user.username %></p>
+        <:col :let={user} label={if @show_labels, do: "Username", else: ""} class="w-full pr-0">
+          <p class="ellipsis text-text-100 text-md"><%= user.username %></p>
         </:col>
-        <:col :let={user} label={if @show_labels, do: "Score", else: ""}>
+        <:col :let={user} label={if @show_labels, do: "Score", else: ""} class="pr-0 w-20 text-right">
           <%= user.score %>
           <%= case user.position do %>
             <%= 1 -> %>

@@ -82,15 +82,13 @@ defmodule ZkArcadeWeb.PageController do
       else
         0
       end
+
     avg_savings_per_proof =
       if proofs_verified > 0 do
         div(trunc(cost_saved.savings), proofs_verified)
       else
         0
       end
-
-
-
 
     top_users = ZkArcade.Leaderboard.get_top_users(10)
     user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)

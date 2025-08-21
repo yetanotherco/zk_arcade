@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ZkArcadeNft} from "./ZkArcadeNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     // ======== Storage ========
@@ -28,6 +29,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         return keccak256(abi.encodePacked(user, gameHash));
     }
 
+    address public zkArcadeNft;
+
     /**
      * Errors
      */
@@ -35,6 +38,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error ProofNotVerifiedOnAligned();
     error UserHasAlreadyCompletedThisLevel(uint256 level);
     error UserAddressMismatch(address expected, address actual);
+    error UserIsNotWhitelisted(address);
     error InvalidGame(uint256 expected, uint256 provided);
     error NoActiveBeastGame();
 
@@ -51,11 +55,13 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         address owner,
         address _alignedServiceManager,
         address _alignedBatcherPaymentService,
+        address _zkArcadeNft,
         BeastGame[] calldata _beastGames
     ) public initializer {
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
+        zkArcadeNft = _zkArcadeNft;
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
     }
@@ -66,6 +72,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     /// @param _beastGames The new beast games configuration
     function setBeastGames(BeastGame[] calldata _beastGames) public onlyOwner {
         beastGames = _beastGames;
+    }
+
+    function setZkArcadeNftAddress(address nftContractAddress) public onlyOwner {
+        zkArcadeNft = nftContractAddress;
     }
 
     function submitBeastSolution(
@@ -82,6 +92,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         if (userAddress != msg.sender) {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
+        }
+
+        ZkArcadeNft nftContract = ZkArcadeNft(zkArcadeNft);
+        if (!nftContract.isWhitelisted(userAddress)) {
+            revert UserIsNotWhitelisted(userAddress);
         }
 
         bytes32 pubInputCommitment = keccak256(abi.encodePacked(publicInputs));

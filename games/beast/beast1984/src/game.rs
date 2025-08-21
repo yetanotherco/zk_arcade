@@ -821,7 +821,13 @@ impl Game {
         };
         let handle = Self::render_loader_in_new_thread(&msg, 3000, false);
         let _ = handle.join();
-        self.state = GameState::Quit;
+        
+        // Return to appropriate state instead of quitting
+        if self.has_won {
+            self.state = GameState::Won;
+        } else {
+            self.state = GameState::GameOver;
+        }
     }
 
     fn get_secs_remaining(&self) -> u64 {

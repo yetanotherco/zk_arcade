@@ -20,8 +20,14 @@ pub const ANSI_RESET_FONT: &str = "\x1B[39m";
 /// ANSI escape sequence to reset background color
 pub const ANSI_RESET_BG: &str = "\x1B[49m";
 /// left border with color ANSI escape sequence
+#[cfg(windows)]
+pub const ANSI_LEFT_BORDER: &str = "\x1b[33m|\x1b[39m";
+#[cfg(not(windows))]
 pub const ANSI_LEFT_BORDER: &str = "\x1b[33m▌\x1b[39m";
 /// right border with color ANSI escape sequence
+#[cfg(windows)]
+pub const ANSI_RIGHT_BORDER: &str = "\x1b[33m|\x1b[39m";
+#[cfg(not(windows))]
 pub const ANSI_RIGHT_BORDER: &str = "\x1b[33m▐\x1b[39m";
 /// the logo
 pub const LOGO: [&str; 10] = [
@@ -74,8 +80,14 @@ impl Tile {
     pub fn raw_symbol(&self) -> &'static str {
         match self {
             Tile::Empty => "  ",
+            #[cfg(windows)]
+            Tile::Block => "##",
+            #[cfg(not(windows))]
             Tile::Block => "░░",
-            Tile::StaticBlock => "▓▓",
+            #[cfg(windows)]
+            Tile::StaticBlock => "[]",
+            #[cfg(not(windows))]
+            Tile::StaticBlock => "##",
             Tile::Player => "◀▶",
             Tile::CommonBeast => "├┤",
             Tile::SuperBeast => "╟╢",

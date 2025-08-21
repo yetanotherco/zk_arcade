@@ -4,7 +4,7 @@
 	},
 	"alignedServiceManager": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
 	"alignedBatcherPaymentService": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
-	"zkArcadeNftContract": "",
+	"zkArcadeNftContract": "0x46b142DD1E924FAb83eCc3c08e4D46E82f005e0E",
 	"games": [
 		{
 		"endsAtTime": "0x00000000000000000000000000000000000000000000000000000000688cf40a",

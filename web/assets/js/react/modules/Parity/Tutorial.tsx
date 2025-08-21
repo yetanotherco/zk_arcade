@@ -1,0 +1,95 @@
+import React, { useState } from "react";
+import { ParityBoard } from "./Board";
+import { Button } from "../../components";
+import { useParityControls } from "./useParityControls";
+import { ParityGameState } from "./types";
+
+type Step = "";
+
+const tutorialText = [
+	{
+		text: "Parity is a numbers puzzle game. The aim of the game is to get each number on a 3x3 board of numbers to be exactly the same.",
+		button: "Okay...",
+	},
+	{
+		text: "One of the numbers is always selected. This number can be moved by using wasd",
+		button: "Sounds easy",
+	},
+	{
+		text: "Each time you move the selector, the number you select will increase in number by one.",
+		button: "I got this!",
+	},
+];
+
+const TutorialText = ({
+	header = "How to play",
+	text,
+	button,
+	onClick,
+}: {
+	header?: string;
+	text: string;
+	button: string;
+	onClick: () => void;
+}) => {
+	return (
+		<div className="flex flex-col items-center justify-center gap-10 w-full max-w-[500px]">
+			<h1 className="text-3xl font-normal">{header}</h1>
+			<p className="text-center text-text-200 text-lg">{text}</p>
+			<Button variant="accent-fill" onClick={onClick}>
+				{button}
+			</Button>
+		</div>
+	);
+};
+
+const BoardTutorial = ({
+	setGameState,
+}: {
+	setGameState: (state: ParityGameState) => void;
+}) => {
+	const { positionIdx, values, hasWon } = useParityControls({
+		initialPosition: { col: 0, row: 0 },
+		initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
+	});
+
+	return !hasWon ? (
+		<ParityBoard values={values} positionIdx={positionIdx} />
+	) : (
+		<TutorialText
+			header="End of tutorial"
+			text="You have completed the tutorial. Now that you understand how the game works, you are ready to prove it to others and climb the leadernboard"
+			button="Let's go!"
+			onClick={() => setGameState("home")}
+		/>
+	);
+};
+
+export const ParityTutorial = ({
+	setGameState,
+}: {
+	setGameState: (state: ParityGameState) => void;
+}) => {
+	const [step, setStep] = useState(0);
+
+	const goToNextStep = () => {
+		setStep(prev => prev + 1);
+	};
+
+	return (
+		<div className="w-full h-full flex flex-col gap-4 items-center">
+			<h2 className="text-2xl font-normal text-center">Tutorial</h2>
+			<div className="w-full h-full flex justify-center items-center">
+				{tutorialText[step] ? (
+					<TutorialText
+						text={tutorialText[step].text}
+						button={tutorialText[step].button}
+						onClick={goToNextStep}
+					/>
+				) : (
+					<BoardTutorial setGameState={setGameState} />
+				)}
+			</div>
+		</div>
+	);
+};

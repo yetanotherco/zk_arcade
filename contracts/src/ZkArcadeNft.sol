@@ -4,15 +4,19 @@ pragma solidity ^0.8.28;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import {
-    ERC721URIStorageUpgradeable,
-    ERC721Upgradable
-} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import {ERC721URIStorageUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 
 contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 private _nextTokenId;
 
-    constructor(address owner, string memory name, string memory symbol) {
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address owner, string memory name, string memory symbol) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
     }
@@ -21,7 +25,7 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
 
     function mint(address user, string memory tokenURI) public returns (uint256) {
         uint256 tokenId = _nextTokenId++;
-        _mint(player, tokenId);
+        _mint(user, tokenId);
         _setTokenURI(tokenId, tokenURI);
 
         return tokenId;

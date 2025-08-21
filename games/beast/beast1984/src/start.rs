@@ -18,10 +18,11 @@ use game_logic::{ANSI_RESET_FONT, BOARD_HEIGHT, BOARD_WIDTH};
 #[cfg(windows)]
 fn try_resize_console(min_width: usize, min_height: usize) {
     use winapi::um::{
-        wincon::{SetConsoleScreenBufferSize, SetConsoleWindowInfo, COORD, SMALL_RECT},
+        wincon::{SetConsoleScreenBufferSize, SetConsoleWindowInfo, GetLargestConsoleWindowSize, COORD, SMALL_RECT},
         processenv::GetStdHandle,
         winbase::STD_OUTPUT_HANDLE,
         handleapi::INVALID_HANDLE_VALUE,
+        winuser::{ShowWindow, GetConsoleWindow, SW_MAXIMIZE},
     };
     
     unsafe {
@@ -30,21 +31,49 @@ fn try_resize_console(min_width: usize, min_height: usize) {
             return;
         }
         
-        // Set buffer size first (must be at least as large as window size)
-        let buffer_size = COORD {
-            X: min_width as i16,
-            Y: (min_height + 100) as i16, // Add extra buffer for scrollback
-        };
-        SetConsoleScreenBufferSize(console_handle, buffer_size);
+        // Get the maximum possible console window size
+        let max_size = GetLargestConsoleWindowSize(console_handle);
+        let max_width = max_size.X as usize;
+        let max_height = max_size.Y as usize;
         
-        // Try to set window size
-        let window_rect = SMALL_RECT {
-            Left: 0,
-            Top: 0,
-            Right: (min_width - 1) as i16,
-            Bottom: (min_height - 1) as i16,
-        };
-        SetConsoleWindowInfo(console_handle, 1, &window_rect);
+        // If we need more space than available, go fullscreen
+        if min_width > max_width || min_height > max_height {
+            let console_window = GetConsoleWindow();
+            if !console_window.is_null() {
+                ShowWindow(console_window, SW_MAXIMIZE);
+                
+                // After maximizing, try to get the new maximum size
+                let new_max_size = GetLargestConsoleWindowSize(console_handle);
+                let buffer_size = COORD {
+                    X: new_max_size.X,
+                    Y: new_max_size.Y + 100, // Add extra buffer for scrollback
+                };
+                SetConsoleScreenBufferSize(console_handle, buffer_size);
+                
+                let window_rect = SMALL_RECT {
+                    Left: 0,
+                    Top: 0,
+                    Right: new_max_size.X - 1,
+                    Bottom: new_max_size.Y - 1,
+                };
+                SetConsoleWindowInfo(console_handle, 1, &window_rect);
+            }
+        } else {
+            // Normal resize - set to required minimum size
+            let buffer_size = COORD {
+                X: min_width as i16,
+                Y: (min_height + 100) as i16, // Add extra buffer for scrollback
+            };
+            SetConsoleScreenBufferSize(console_handle, buffer_size);
+            
+            let window_rect = SMALL_RECT {
+                Left: 0,
+                Top: 0,
+                Right: (min_width - 1) as i16,
+                Bottom: (min_height - 1) as i16,
+            };
+            SetConsoleWindowInfo(console_handle, 1, &window_rect);
+        }
     }
 }
 

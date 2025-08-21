@@ -77,10 +77,7 @@ impl Tile {
             #[cfg(windows)]
             Tile::Block => "▓▓",
             #[cfg(not(windows))]
-            Tile::Block => "░░",
-            #[cfg(windows)]
-            Tile::StaticBlock => "▓▓",
-            #[cfg(not(windows))]
+            Tile::Block => "░░", // This may not render well on Windows terminals
             Tile::StaticBlock => "▓▓",
             Tile::Player => "◀▶",
             Tile::CommonBeast => "├┤",

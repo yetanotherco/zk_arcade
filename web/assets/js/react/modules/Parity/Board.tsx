@@ -18,7 +18,6 @@ const Tile = ({
 	const prev = React.useRef(value);
 	const [changed, setChanged] = React.useState(false);
 
-	// Detect value changes
 	useEffect(() => {
 		if (prev.current !== value) {
 			setChanged(true);

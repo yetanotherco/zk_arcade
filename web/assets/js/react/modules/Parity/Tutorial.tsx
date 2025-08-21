@@ -3,6 +3,7 @@ import { ParityBoard } from "./Board";
 import { Button } from "../../components";
 import { useParityControls } from "./useParityControls";
 import { ParityGameState } from "./types";
+import { useSwapTransition } from "./useSwapTransition";
 
 type Step = "";
 
@@ -53,22 +54,26 @@ const BoardTutorial = ({
 		initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
 	});
 
-	return !hasWon ? (
-		<ParityBoard
-			values={values}
-			positionIdx={positionIdx}
-			levelNumber={1}
-			totalLevels={1}
-			reset={reset}
-		/>
-	) : (
-		<TutorialText
-			header="End of tutorial"
-			text="You have completed the tutorial. Now that you understand how the game works, you are ready to prove it to others and climb the leadernboard"
-			button="Let's go!"
-			onClick={() => setGameState("home")}
-		/>
+	const view = useSwapTransition(hasWon, (_, won) =>
+		won ? (
+			<TutorialText
+				header="End of tutorial"
+				text="You have completed the tutorial. Now that you understand how the game works, you are ready to prove it to others and climb the leaderboard."
+				button="Let's go!"
+				onClick={() => setGameState("home")}
+			/>
+		) : (
+			<ParityBoard
+				values={values}
+				positionIdx={positionIdx}
+				levelNumber={1}
+				totalLevels={1}
+				reset={reset}
+			/>
+		)
 	);
+
+	return view;
 };
 
 export const ParityTutorial = ({

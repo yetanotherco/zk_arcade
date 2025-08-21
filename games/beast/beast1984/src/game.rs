@@ -210,6 +210,7 @@ impl Game {
     }
 
     pub fn start_new_game(&mut self) {
+        Self::clear_screen();
         self.level = Level::One;
         let board_terrain_info = Board::generate_terrain(self.game_match.get_config(self.level));
         let board = Board::new(board_terrain_info.buffer);
@@ -1183,5 +1184,9 @@ impl Game {
         self.levels_completion_log[self.level.number() as usize - 1]
             .game_log
             .push(log);
+    }
+
+    fn clear_screen() {
+        print!("\x1b[2J\x1b[H");
     }
 }

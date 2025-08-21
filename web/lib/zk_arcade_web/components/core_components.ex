@@ -692,14 +692,14 @@ defmodule ZkArcadeWeb.CoreComponents do
   def leaderboard_home(assigns) do
     ~H"""
     <%= if length(@users) > 0 do %>
-      <div class="overflow-x-auto w-full h-full flex flex-col justify-between">
+      <div class="w-full h-full flex flex-col justify-between">
         <.leaderboard_table_home
           id="leaderboard"
           users={@users}
           current_wallet={@current_wallet}
           show_labels={false}
           />
-        <.link href="/leaderboard" class="text-center text-sm w-full hover:underline block mt-1">
+        <.link href="/leaderboard" class="text-center text-sm w-full hover:underline block mt-1 pb-5">
           View all
         </.link>
       </div>

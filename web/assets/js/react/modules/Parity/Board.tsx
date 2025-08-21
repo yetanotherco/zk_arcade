@@ -3,6 +3,9 @@ import React, { useEffect } from "react";
 type Props = {
 	values: number[];
 	positionIdx: number;
+	reset: () => void;
+	levelNumber: number;
+	totalLevels: number;
 };
 
 const Tile = ({
@@ -47,9 +50,15 @@ const Tile = ({
 	);
 };
 
-export const ParityBoard = ({ values, positionIdx }: Props) => {
+export const ParityBoard = ({
+	values,
+	positionIdx,
+	levelNumber,
+	totalLevels,
+	reset,
+}: Props) => {
 	return (
-		<div className="w-full h-full flex justify-center items-center ">
+		<div className="h-full flex flex-col justify-center items-center gap-2">
 			<div className="grid grid-cols-3 grid-rows-3">
 				{values.map((val, idx) => (
 					<Tile
@@ -58,6 +67,14 @@ export const ParityBoard = ({ values, positionIdx }: Props) => {
 						currentPos={positionIdx === idx}
 					/>
 				))}
+			</div>
+			<div className="w-full flex justify-between items-center">
+				<p>
+					Level {levelNumber}/{totalLevels}
+				</p>
+				<p className="cursor-pointer" onClick={reset}>
+					Reset
+				</p>
 			</div>
 		</div>
 	);

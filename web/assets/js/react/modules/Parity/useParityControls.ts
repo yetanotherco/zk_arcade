@@ -17,6 +17,11 @@ export const useParityControls = ({
 	const [values, setValues] = useState<number[]>(() => initialValues);
 	const [hasWon, setHasWon] = useState(false);
 
+	const reset = () => {
+		setValues(initialValues);
+		setPosition(initialPosition);
+	};
+
 	useEffect(() => {
 		const onKeyDown = (e: KeyboardEvent) => {
 			const k = e.key.toLowerCase();
@@ -68,6 +73,7 @@ export const useParityControls = ({
 		values,
 		position,
 		positionIdx: position.row * size + position.col,
+		reset,
 		hasWon,
 	};
 };

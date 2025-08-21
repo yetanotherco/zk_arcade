@@ -48,13 +48,19 @@ const BoardTutorial = ({
 }: {
 	setGameState: (state: ParityGameState) => void;
 }) => {
-	const { positionIdx, values, hasWon } = useParityControls({
+	const { positionIdx, values, hasWon, reset } = useParityControls({
 		initialPosition: { col: 0, row: 0 },
 		initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
 	});
 
 	return !hasWon ? (
-		<ParityBoard values={values} positionIdx={positionIdx} />
+		<ParityBoard
+			values={values}
+			positionIdx={positionIdx}
+			levelNumber={1}
+			totalLevels={1}
+			reset={reset}
+		/>
 	) : (
 		<TutorialText
 			header="End of tutorial"

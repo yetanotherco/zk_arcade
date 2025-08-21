@@ -139,9 +139,6 @@ template ValidateMovement() {
     signal xDiff <== (newPos[0] - oldPos[0]);
     signal yDiff <== newPos[1] - oldPos[1];
 
-    // Dx = x1 - x0, Dx == 0 OR Dx == 1 OR Dx == -1
-    // Dy = y1 - y0, Dy == 0 OR Dy == 1 OR Dy == -1
-
     // Check that -2 < xDiff < 2 (i.e., xDiff is in {-1, 0, 1})
     // Convert to unsigned by adding 2: xDiff + 2 should be in {1, 2, 3}
     signal xDiffUnsigned <== xDiff + 2;
@@ -184,7 +181,42 @@ template ValidateTransition() {
     signal input newPos[2];
     signal input oldBoard[9];
     signal input newBoard[9];
-    oldBoard[newPos[0] + 3 * newPos[1]] + 1 === newBoard[newPos[0] + 3 * newPos[1]];
+    
+    // Calculate the board index as an intermediate signal
+    signal boardIndex <== newPos[0] + 3 * newPos[1];
+    
+    // Extract values using linear scan approach (since dynamic indexing isn't allowed)
+    signal oldValue;
+    signal newValue;
+    
+    // Declare components outside loops
+    component isEqualOld[9];
+    component isEqualNew[9];
+    for (var i = 0; i < 9; i++) {
+        isEqualOld[i] = IsZero();
+        isEqualNew[i] = IsZero();
+    }
+    
+    // Linear scan for oldBoard[boardIndex]
+    signal oldProducts[9];
+    for (var i = 0; i < 9; i++) {
+        isEqualOld[i].in <== boardIndex - i;
+        // isEqualOld[i].out is 1 when boardIndex == i, 0 otherwise
+        oldProducts[i] <== oldBoard[i] * isEqualOld[i].out;
+    }
+    oldValue <== oldProducts[0] + oldProducts[1] + oldProducts[2] + oldProducts[3] + oldProducts[4] + oldProducts[5] + oldProducts[6] + oldProducts[7] + oldProducts[8];
+    
+    // Linear scan for newBoard[boardIndex]
+    signal newProducts[9];
+    for (var i = 0; i < 9; i++) {
+        isEqualNew[i].in <== boardIndex - i;
+        // isEqualNew[i].out is 1 when boardIndex == i, 0 otherwise
+        newProducts[i] <== newBoard[i] * isEqualNew[i].out;
+    }
+    newValue <== newProducts[0] + newProducts[1] + newProducts[2] + newProducts[3] + newProducts[4] + newProducts[5] + newProducts[6] + newProducts[7] + newProducts[8];
+    
+    // Ensure the new value is old value + 1
+    oldValue + 1 === newValue;
 }
 
-component main = ValidateMovement();
+component main = ValidateTransition();

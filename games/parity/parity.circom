@@ -139,30 +139,44 @@ template ValidateMovement() {
     signal xDiff <== (newPos[0] - oldPos[0]);
     signal yDiff <== newPos[1] - oldPos[1];
 
-    signal xIsZero;
-    component xIsZeroComp = IsZero();
-    xIsZeroComp.in <== xDiff;
-    xIsZeroComp.out ==> xIsZero;
-
-    signal yIsZero;
-    component yIsZeroComp = IsZero();
-    yIsZeroComp.in <== yDiff;
-    yIsZeroComp.out ==> yIsZero;
-
-    component xor = XOR();
-    xor.a <== xIsZero;
-    xor.b <== yIsZero;
-
-    signal result;
-    xor.out ==> result;
-
-    result === 1;
-
     // Dx = x1 - x0, Dx == 0 OR Dx == 1 OR Dx == -1
     // Dy = y1 - y0, Dy == 0 OR Dy == 1 OR Dy == -1
 
-    // -2 < Dx < 2
-    // -2 < Dx < 2
+    // Check that -2 < xDiff < 2 (i.e., xDiff is in {-1, 0, 1})
+    // Convert to unsigned by adding 2: xDiff + 2 should be in {1, 2, 3}
+    signal xDiffUnsigned <== xDiff + 2;
+    
+    // Check xDiffUnsigned >= 1 (xDiff >= -1)
+    component xGreaterEq1 = GreaterEqThan(3);
+    xGreaterEq1.in[0] <== xDiffUnsigned;
+    xGreaterEq1.in[1] <== 1;
+    xGreaterEq1.out === 1;
+    
+    // Check xDiffUnsigned < 4 (xDiff < 2)
+    component xLessThan4 = LessThan(3);
+    xLessThan4.in[0] <== xDiffUnsigned;
+    xLessThan4.in[1] <== 4;
+    xLessThan4.out === 1;
+
+    // Check that -2 < yDiff < 2 (i.e., yDiff is in {-1, 0, 1})
+    // Convert to unsigned by adding 2: yDiff + 2 should be in {1, 2, 3}
+    signal yDiffUnsigned <== yDiff + 2;
+    
+    // Check yDiffUnsigned >= 1 (yDiff >= -1)
+    component yGreaterEq1 = GreaterEqThan(3);
+    yGreaterEq1.in[0] <== yDiffUnsigned;
+    yGreaterEq1.in[1] <== 1;
+    yGreaterEq1.out === 1;
+    
+    // Check yDiffUnsigned < 4 (yDiff < 2)
+    component yLessThan4 = LessThan(3);
+    yLessThan4.in[0] <== yDiffUnsigned;
+    yLessThan4.in[1] <== 4;
+    yLessThan4.out === 1;
+
+    // Ensure no diagonal movement: xDiff * yDiff === 0
+    // This means either xDiff is 0 OR yDiff is 0 (or both)
+    xDiff * yDiff === 0;
 }
 
 

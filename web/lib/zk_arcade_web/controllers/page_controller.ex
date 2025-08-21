@@ -76,6 +76,21 @@ defmodule ZkArcadeWeb.PageController do
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
     days = ZkArcade.Utils.date_diff_days(campaign_started_at_unix_timestamp)
     desc = "Last #{days} days"
+    users_online = ZkArcade.Proofs.count_pending_proofs()
+    proofs_per_player = if total_players > 0 do
+        div(proofs_verified, total_players)
+      else
+        0
+      end
+    avg_savings_per_proof =
+      if proofs_verified > 0 do
+        div(trunc(cost_saved.savings), proofs_verified)
+      else
+        0
+      end
+
+
+
 
     top_users = ZkArcade.Leaderboard.get_top_users(10)
     user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
@@ -146,7 +161,15 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:leaderboard, leaderboard)
       |> assign(:top_users, top_users)
       |> assign(:user_data, user_data)
-      |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
+      |> assign(:statistics, %{
+          proofs_verified: proofs_verified,
+          total_player: total_players,
+          cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)),
+          users_online: users_online,
+          proofs_per_player: proofs_per_player,
+          avg_savings_per_proof: avg_savings_per_proof,
+          desc: desc
+        })
       |> assign(:username, username)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)

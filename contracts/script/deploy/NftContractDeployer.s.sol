@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Leaderboard} from "../../src/Leaderboard.sol";
+import {ZkArcadeNft} from "../../src/ZkArcadeNft.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-
 import {Script} from "forge-std/Script.sol";
 
-contract LeaderboardDeployer is Script {
+contract NftContractDeployer is Script {
     function run(string memory configFilePath, string memory outputFilePath)
         public
         returns (address _proxy, address _implementation)
@@ -14,23 +13,12 @@ contract LeaderboardDeployer is Script {
         string memory configData = vm.readFile(configFilePath);
 
         address owner = vm.parseJsonAddress(configData, ".permissions.owner");
-        address alignedServiceManagerAddress = vm.parseJsonAddress(configData, ".alignedServiceManager");
-        address alignedBatcherPaymentAddress = vm.parseJsonAddress(configData, ".alignedBatcherPaymentService");
-        address zkArcadeNftContract = vm.parseJsonAddress(configData, ".zkArcadeNftContract");
-
-        Leaderboard.BeastGame[] memory beastGames =
-            abi.decode(vm.parseJson(configData, ".games"), (Leaderboard.BeastGame[]));
+        string memory name = vm.parseJsonString(configData, ".name");
+        string memory symbol = vm.parseJsonString(configData, ".symbol");
 
         vm.startBroadcast();
-        Leaderboard implementation = new Leaderboard();
-        bytes memory data = abi.encodeWithSignature(
-            "initialize(address,address,address,address,(uint256,uint256,uint256)[])",
-            owner,
-            alignedServiceManagerAddress,
-            alignedBatcherPaymentAddress,
-            zkArcadeNftContract,
-            beastGames
-        );
+        ZkArcadeNft implementation = new ZkArcadeNft();
+        bytes memory data = abi.encodeWithSignature("initialize(address,string,string)", owner, name, symbol);
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);
         vm.stopBroadcast();
 

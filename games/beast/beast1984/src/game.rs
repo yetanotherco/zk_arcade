@@ -1130,13 +1130,13 @@ impl Game {
             (((BOARD_WIDTH * 2 + ANSI_FRAME_SIZE + ANSI_FRAME_SIZE) / 2) - ((msg.len() + 4) / 2))
         );
 
-        let progress_bar = format!("{:▁<width$}", "", width = (msg.len() * progress) / 100);
-        format!(
-            "\x1b[{top_pos}F{left_pad}┌{border:─<width$}┐\n{left_pad}│ {msg} │\n{left_pad}│ \x1B[38;5;235m{progress_bar:<msg_width$}{ANSI_RESET_FONT} │\n{left_pad}└{border:─<width$}┘\n\x1b[{bottom_pos:.0}E",
-            border = "",
-            width = msg.len() + 2,
-            msg_width = msg.len()
-        )
+            let progress_bar = format!("{:▁<width$}", "", width = (msg.len() * progress) / 100);
+            format!(
+                "\x1b[{top_pos}F{left_pad}┌{border:─<width$}┐\n{left_pad}│ {msg} │\n{left_pad}│ \x1B[38;5;235m{progress_bar:<msg_width$}{ANSI_RESET_FONT} │\n{left_pad}└{border:─<width$}┘\n\x1b[{bottom_pos:.0}E",
+                border = "",
+                width = msg.len() + 2,
+                msg_width = msg.len()
+            )
     }
 
     fn push_to_log(&mut self, log: GameLogEntry) {

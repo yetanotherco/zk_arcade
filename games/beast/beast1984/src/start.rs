@@ -18,11 +18,11 @@ use game_logic::{ANSI_RESET_FONT, BOARD_HEIGHT, BOARD_WIDTH};
 #[cfg(windows)]
 fn try_resize_console(min_width: usize, min_height: usize) {
     use winapi::um::{
-        wincon::{SetConsoleScreenBufferSize, SetConsoleWindowInfo, GetLargestConsoleWindowSize, COORD, SMALL_RECT},
+        wincon::{SetConsoleScreenBufferSize, SetConsoleWindowInfo, GetLargestConsoleWindowSize, GetConsoleWindow, COORD, SMALL_RECT},
         processenv::GetStdHandle,
         winbase::STD_OUTPUT_HANDLE,
         handleapi::INVALID_HANDLE_VALUE,
-        winuser::{ShowWindow, GetConsoleWindow, SW_MAXIMIZE},
+        winuser::{ShowWindow, SW_MAXIMIZE},
     };
     
     unsafe {

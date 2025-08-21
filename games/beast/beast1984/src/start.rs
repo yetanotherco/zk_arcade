@@ -18,13 +18,23 @@ use game_logic::{ANSI_RESET_FONT, BOARD_HEIGHT, BOARD_WIDTH};
 #[cfg(windows)]
 fn try_resize_console(min_width: usize, min_height: usize) {
     use winapi::um::{
-        wincon::{SetConsoleScreenBufferSize, SetConsoleWindowInfo, GetConsoleScreenBufferInfo, GetLargestConsoleWindowSize, CONSOLE_SCREEN_BUFFER_INFO, COORD, SMALL_RECT},
+        wincon::{GetConsoleWindow, SetConsoleScreenBufferSize, SetConsoleWindowInfo, GetConsoleScreenBufferInfo, GetLargestConsoleWindowSize, CONSOLE_SCREEN_BUFFER_INFO, COORD, SMALL_RECT},
+        winuser::{ShowWindow, SW_MAXIMIZE},
         processenv::GetStdHandle,
         winbase::STD_OUTPUT_HANDLE,
         handleapi::INVALID_HANDLE_VALUE,
     };
     
     unsafe {
+        // First, maximize the actual console window
+        let console_window = GetConsoleWindow();
+        if console_window != std::ptr::null_mut() {
+            ShowWindow(console_window, SW_MAXIMIZE);
+            
+            // Give the window time to maximize
+            std::thread::sleep(std::time::Duration::from_millis(100));
+        }
+        
         let console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
         if console_handle == INVALID_HANDLE_VALUE {
             return;
@@ -35,11 +45,7 @@ fn try_resize_console(min_width: usize, min_height: usize) {
             return;
         }
         
-        let current_width = (buffer_info.srWindow.Right - buffer_info.srWindow.Left + 1) as usize;
-        let current_height = (buffer_info.srWindow.Bottom - buffer_info.srWindow.Top + 1) as usize;
-        
-        // Always resize to fullscreen on Windows
-        // Get the maximum possible console window size
+        // After maximizing, get the new maximum size
         let max_size = GetLargestConsoleWindowSize(console_handle);
         let max_width = max_size.X as usize;
         let max_height = max_size.Y as usize;
@@ -55,7 +61,7 @@ fn try_resize_console(min_width: usize, min_height: usize) {
         };
         SetConsoleScreenBufferSize(console_handle, buffer_size);
         
-        // Set window size to fullscreen
+        // Set window size to use the full available space
         let window_rect = SMALL_RECT {
             Left: 0,
             Top: 0,

@@ -59,6 +59,7 @@ export const Button = ({
 	const playSound = () => {
 		const audio = new Audio("/audio/mouse-click.mp3");
 		audio.currentTime = 0;
+		audio.play();
 	};
 
 	if (variant === "arcade") {

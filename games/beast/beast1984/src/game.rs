@@ -302,10 +302,42 @@ impl Game {
     fn handle_playing_state(&mut self, mut last_tick: Instant) {
         print!("{}", self.render_board());
         let mut escape_sequence = Vec::new();
+        let mut expecting_extended_key = false;
 
         loop {
             if let Ok(byte) = self.input_listener.try_recv() {
-                // Handle escape sequences for arrow keys
+                // Handle Windows extended keys (arrow keys send 224 followed by direction code)
+                if byte == 224 { // Extended key prefix on Windows
+                    expecting_extended_key = true;
+                    continue;
+                }
+                
+                if expecting_extended_key {
+                    expecting_extended_key = false;
+                    match byte {
+                        72 => { // Up arrow on Windows
+                            self.handle_movement(Dir::Up);
+                            continue;
+                        }
+                        80 => { // Down arrow on Windows
+                            self.handle_movement(Dir::Down);
+                            continue;
+                        }
+                        75 => { // Left arrow on Windows
+                            self.handle_movement(Dir::Left);
+                            continue;
+                        }
+                        77 => { // Right arrow on Windows
+                            self.handle_movement(Dir::Right);
+                            continue;
+                        }
+                        _ => {
+                            // Unknown extended key, continue to normal processing
+                        }
+                    }
+                }
+                
+                // Handle Unix/Linux escape sequences for arrow keys
                 if byte == 27 { // ESC character
                     escape_sequence.clear();
                     escape_sequence.push(byte);

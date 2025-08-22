@@ -24,7 +24,7 @@ use std::{
     time::{Duration, Instant},
 };
 use crossterm::{
-    event::{self, Event, KeyCode},
+    event::{self, Event, KeyCode, KeyEventKind},
 };
 
 /// the height of the board
@@ -266,22 +266,24 @@ impl Game {
         loop {
             if event::poll(Duration::from_millis(100)).unwrap_or(false) {
                 if let Ok(Event::Key(key_event)) = event::read() {
-                    match key_event.code {
-                        KeyCode::Char(' ') => {
-                            self.level_start = Into::into(Instant::now());
-                            self.state = GameState::Playing;
-                            break;
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
+                            KeyCode::Char(' ') => {
+                                self.level_start = Into::into(Instant::now());
+                                self.state = GameState::Playing;
+                                break;
+                            }
+                            KeyCode::Char('h') | KeyCode::Char('H') => {
+                                self.level_start = Into::into(Instant::now());
+                                self.state = GameState::Help;
+                                break;
+                            }
+                            KeyCode::Char('q') | KeyCode::Char('Q') => {
+                                self.state = GameState::Quit;
+                                break;
+                            }
+                            _ => {}
                         }
-                        KeyCode::Char('h') | KeyCode::Char('H') => {
-                            self.level_start = Into::into(Instant::now());
-                            self.state = GameState::Help;
-                            break;
-                        }
-                        KeyCode::Char('q') | KeyCode::Char('Q') => {
-                            self.state = GameState::Quit;
-                            break;
-                        }
-                        _ => {}
                     }
                 }
             }
@@ -295,7 +297,9 @@ impl Game {
             // Handle crossterm input events
             if event::poll(Duration::from_millis(1)).unwrap_or(false) {
                 if let Ok(Event::Key(key_event)) = event::read() {
-                    match key_event.code {
+                    // Only handle key press events, ignore key release and repeat
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
                         // Arrow keys
                         KeyCode::Up => {
                             self.handle_movement(Dir::Up);
@@ -332,6 +336,7 @@ impl Game {
                             break;
                         }
                         _ => {}
+                        }
                     }
                 }
             }
@@ -439,7 +444,8 @@ impl Game {
         loop {
             if event::poll(Duration::from_millis(100)).unwrap_or(false) {
                 if let Ok(Event::Key(key_event)) = event::read() {
-                    match key_event.code {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
                         KeyCode::Char(' ') => {
                             if Self::render_confirmation_prompt("Are you sure you want to restart the game?") {
                                 self.start_new_game();
@@ -467,6 +473,7 @@ impl Game {
                             }
                         }
                         _ => {}
+                        }
                     }
                 }
             }
@@ -479,7 +486,8 @@ impl Game {
         loop {
             if event::poll(Duration::from_millis(100)).unwrap_or(false) {
                 if let Ok(Event::Key(key_event)) = event::read() {
-                    match key_event.code {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
                         KeyCode::Char(' ') => {
                             self.start_new_game();
                             break;
@@ -497,6 +505,7 @@ impl Game {
                             break;
                         }
                         _ => {}
+                        }
                     }
                 }
             }
@@ -541,7 +550,8 @@ impl Game {
         loop {
             if event::poll(Duration::from_millis(100)).unwrap_or(false) {
                 if let Ok(Event::Key(key_event)) = event::read() {
-                    match key_event.code {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
                         KeyCode::Char(' ') => {
                             self.level_start += pause.elapsed();
                             self.state = GameState::Playing;
@@ -560,6 +570,7 @@ impl Game {
                             println!("{}", help.render());
                         }
                         _ => {}
+                        }
                     }
                 }
             }
@@ -664,7 +675,8 @@ impl Game {
         loop {
             if event::poll(Duration::from_millis(100)).unwrap_or(false) {
                 if let Ok(Event::Key(key_event)) = event::read() {
-                    match key_event.code {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
                         KeyCode::Char(' ') => {
                             self.start_new_game();
                             break;
@@ -678,6 +690,7 @@ impl Game {
                             break;
                         }
                         _ => {}
+                        }
                     }
                 }
             }
@@ -972,10 +985,12 @@ impl Game {
         loop {
             if event::poll(Duration::from_millis(100)).unwrap_or(false) {
                 if let Ok(Event::Key(key_event)) = event::read() {
-                    match key_event.code {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
                         KeyCode::Char('y') | KeyCode::Char('Y') => return true,
                         KeyCode::Char('n') | KeyCode::Char('N') => return false,
                         _ => {}
+                        }
                     }
                 }
             }

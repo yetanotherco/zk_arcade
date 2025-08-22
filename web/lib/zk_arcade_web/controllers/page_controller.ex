@@ -196,20 +196,29 @@ defmodule ZkArcadeWeb.PageController do
         desc: "Survive across waves of enemies",
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
         how_to_play: """
-        1. Install Beast with the following command: <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
-        2. Run the game with the command: <span class="code-block">beast</span>
-        3. Locate the generated proof file on your system
-        4. Deposit into <span class="text-accent-100">ALIGNED</span> to pay the proof verification
-        5. Upload your proof to verify your gameplay
-        6. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back to submit it to the Leaderboard to earn points.
+        1. Install Beast:
+          - Windows: Download the portable executable:
+          #{Application.get_env(:zk_arcade, :beast_windows_download_url)}
+          - Linux/MacOS: Run the following command:
+          <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
 
-        Important notes about proof submissions:
+        2. Start playing: Run the game with the command: <span class="code-block">beast</span>
 
-        - You can only submit <span class="text-accent-100">one proof per level</span>. For example, if you've reached level 5 and then try to submit a proof for level 4, it will fail.
-        - Each submission must be for a level <span class="text-accent-100">higher than any previously submitted proof</span>. So, if you've already submitted level 5, your next valid submission must be at least level 6.
-        - Points are awarded <span class="text-accent-100">per level</span>, not cumulatively. The best strategy is to submit a proof when you’re confident you won’t reach higher levels or after completing the entire game.
+        3. Find your proof: After completing levels, locate the generated proof file on your system
 
-        You can uninstall Beast at any time with the command: <span class="code-block">rm $(which beast)</span>
+        4. Fund verification: Deposit ETH into <span class="text-accent-100">ALIGNED</span> to pay for proof verification
+
+        5. Verify your proof: Upload your proof to verify your gameplay
+
+        6. Claim points: After the proof is verified on <span class="text-accent-100">ALIGNED</span>, return here to submit it to the leaderboard and earn points
+
+        Important submission rules:
+
+        - You can only submit <span class="text-accent-100">one proof per level</span>. If you've reached level 5, you cannot later submit a proof for level 4.
+        - Each new submission must be for a <span class="text-accent-100">higher level than your previous submission</span>. If you've submitted level 5, your next valid submission must be at least level 6.
+        - Points are awarded <span class="text-accent-100">per level achieved</span>, not cumulatively. Submit strategically when you're confident you won't reach higher levels, or after completing the entire game.
+
+        Uninstall: Remove Beast anytime with: <span class="code-block">rm $(which beast)</span>
         """,
         acknowledgments: acknowledgements,
         tags: [:cli, :risc0, :sp1]

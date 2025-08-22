@@ -53,6 +53,9 @@ ureq = "2"
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["consoleapi", "handleapi", "processenv", "winbase", "wincon", "winuser"] }
+
 [package.metadata.risc0]
 methods = ["./risc0_program/"]
 

@@ -98,6 +98,8 @@ if config_env() == :prod do
 
   config :zk_arcade, :feedback_form_url, System.get_env("FEEDBACK_FORM_URL")
 
+  config :zk_arcade, :beast_windows_download_url, System.get_env("BEAST_WINDOWS_DOWNLOAD_URL")
+
   newrelic_license_key = System.get_env("NEWRELIC_KEY")
   newrelic_app_name = System.get_env("NEWRELIC_APP_NAME")
 

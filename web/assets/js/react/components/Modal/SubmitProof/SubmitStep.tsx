@@ -409,6 +409,26 @@ export const SubmitProofStep = ({
 				</div>
 
 				{!bumpFeeOpen && (
+					<div className="flex w-full items-center justify-center mb-2">
+						<svg
+							className="w-6 h-6 animate-spin-slow "
+							viewBox="0 0 50 50"
+						>
+							<circle
+								cx="25"
+								cy="25"
+								r="20"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="6"
+								strokeLinecap="round"
+								strokeDasharray="45 195"
+							/>
+						</svg>
+					</div>
+				)}
+
+				{!bumpFeeOpen && (
 					<Button
 						className=""
 						variant="text-accent"

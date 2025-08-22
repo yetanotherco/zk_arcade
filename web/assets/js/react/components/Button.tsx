@@ -7,7 +7,8 @@ type ButtonVariant =
 	| "disabled"
 	| "disabled-text"
 	| "contrast"
-	| "icon";
+	| "icon"
+	| "arcade";
 
 const buttonVariantStyles: { [key in ButtonVariant]: string } = {
 	"accent-fill":
@@ -18,11 +19,13 @@ const buttonVariantStyles: { [key in ButtonVariant]: string } = {
 	"text-accent": "font-bold text-accent-100 hover:underline",
 	contrast: "border border-contrast-100 px-2 text-sm py-2",
 	icon: "p-1 bg-accent-100 text-black flex justify-center items-center",
+	arcade: "",
 };
 
 type Props = React.ComponentProps<"button"> & {
 	variant: ButtonVariant;
 	isLoading?: boolean;
+	arcadeBtnFront?: React.ComponentProps<"span">;
 };
 
 export const Button = ({
@@ -32,6 +35,8 @@ export const Button = ({
 	className,
 	children,
 	style,
+	onClick,
+	arcadeBtnFront = {},
 	...props
 }: Props) => {
 	const [currentVariant, setCurrentVariant] =
@@ -51,11 +56,45 @@ export const Button = ({
 		}
 	}, [isLoading, disabled]);
 
+	const playSound = () => {
+		const audio = new Audio("/audio/mouse-click.mp3");
+		audio.currentTime = 0;
+		audio.play().then(() => {
+			console.log("Audio playted");
+		});
+	};
+
+	if (variant === "arcade") {
+		return (
+			<button
+				className={`arcade-btn ${buttonVariantStyles[currentVariant]} ${className}`}
+				disabled={disabled || isLoading}
+				style={style}
+				onClick={e => {
+					playSound();
+					onClick && onClick(e);
+				}}
+				{...props}
+			>
+				<audio src="/audio/mouse-click.mp3"></audio>
+				<span className="arcade-btn-shadow"></span>
+				<span className="arcade-btn-edge"></span>
+				<span
+					{...arcadeBtnFront}
+					className={`arcade-btn-front ${arcadeBtnFront.className}`}
+				>
+					{isLoading ? "Loading..." : children}
+				</span>
+			</button>
+		);
+	}
+
 	return (
 		<button
 			className={`rounded text-md ${buttonVariantStyles[currentVariant]} ${className}`}
 			disabled={disabled || isLoading}
 			style={style}
+			onClick={onClick}
 			{...props}
 		>
 			{isLoading ? "Loading..." : children}

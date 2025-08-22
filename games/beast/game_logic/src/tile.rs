@@ -74,7 +74,10 @@ impl Tile {
     pub fn raw_symbol(&self) -> &'static str {
         match self {
             Tile::Empty => "  ",
-            Tile::Block => "░░",
+            #[cfg(windows)]
+            Tile::Block => "▓▓",
+            #[cfg(not(windows))]
+            Tile::Block => "░░", // This may not render well on Windows terminals
             Tile::StaticBlock => "▓▓",
             Tile::Player => "◀▶",
             Tile::CommonBeast => "├┤",

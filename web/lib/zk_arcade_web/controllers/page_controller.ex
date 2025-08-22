@@ -76,6 +76,19 @@ defmodule ZkArcadeWeb.PageController do
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
     days = ZkArcade.Utils.date_diff_days(campaign_started_at_unix_timestamp)
     desc = "Last #{days} days"
+    users_online = ZkArcade.Proofs.count_pending_proofs()
+    proofs_per_player = if total_players > 0 do
+        div(proofs_verified, total_players)
+      else
+        0
+      end
+
+    avg_savings_per_proof =
+      if proofs_verified > 0 do
+        div(trunc(cost_saved.savings), proofs_verified)
+      else
+        0
+      end
 
     top_users = ZkArcade.Leaderboard.get_top_users(10)
     user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
@@ -149,7 +162,15 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:leaderboard, leaderboard)
       |> assign(:top_users, top_users)
       |> assign(:user_data, user_data)
-      |> assign(:statistics, %{proofs_verified: proofs_verified, total_player: total_players, cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)), desc: desc})
+      |> assign(:statistics, %{
+          proofs_verified: proofs_verified,
+          total_player: total_players,
+          cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)),
+          users_online: users_online,
+          proofs_per_player: proofs_per_player,
+          avg_savings_per_proof: avg_savings_per_proof,
+          desc: desc
+        })
       |> assign(:username, username)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
@@ -157,8 +178,9 @@ defmodule ZkArcadeWeb.PageController do
       |> render(:home)
   end
 
-  def game(conn, %{"name" => _game_name}) do
+  def game(conn, %{"name" => "beast"}) do
     wallet = get_wallet_from_session(conn)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
     {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
     acknowledgements = [
       %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
@@ -166,10 +188,6 @@ defmodule ZkArcadeWeb.PageController do
     ]
 
     {username, position} = get_username_and_position(wallet)
-
-    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
-
-    circom_submissions_json = Jason.encode!([])
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -180,21 +198,29 @@ defmodule ZkArcadeWeb.PageController do
         desc: "Survive across waves of enemies",
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
         how_to_play: """
-        1. Install Rust by following the official guide: https://www.rust-lang.org/tools/install
-        2. Install Beast with the following command: <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
-        3. Run the game with the command: <span class="code-block">beast</span>
-        4. Locate the generated proof file on your system
-        5. Deposit into <span class="text-accent-100">ALIGNED</span> to pay the proof verification
-        6. Upload your proof to verify your gameplay
-        7. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back to submit it to the Leaderboard to earn points.
+        1. Install Beast:
+          - Windows: Download the portable executable:
+          #{Application.get_env(:zk_arcade, :beast_windows_download_url)}
+          - Linux/MacOS: Run the following command:
+          <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
 
-        Important notes about proof submissions:
+        2. Start playing: Run the game with the command: <span class="code-block">beast</span>
 
-        - You can only submit <span class="text-accent-100">one proof per level</span>. For example, if you've reached level 5 and then try to submit a proof for level 4, it will fail.
-        - Each submission must be for a level <span class="text-accent-100">higher than any previously submitted proof</span>. So, if you've already submitted level 5, your next valid submission must be at least level 6.
-        - Points are awarded <span class="text-accent-100">per level</span>, not cumulatively. The best strategy is to submit a proof when you’re confident you won’t reach higher levels or after completing the entire game.
+        3. Find your proof: After completing levels, locate the generated proof file on your system
 
-        You can uninstall Beast at any time with the command: <span class="code-block">rm $(which beast)</span>
+        4. Fund verification: Deposit ETH into <span class="text-accent-100">ALIGNED</span> to pay for proof verification
+
+        5. Verify your proof: Upload your proof to verify your gameplay
+
+        6. Claim points: After the proof is verified on <span class="text-accent-100">ALIGNED</span>, return here to submit it to the leaderboard and earn points
+
+        Important submission rules:
+
+        - You can only submit <span class="text-accent-100">one proof per level</span>. If you've reached level 5, you cannot later submit a proof for level 4.
+        - Each new submission must be for a <span class="text-accent-100">higher level than your previous submission</span>. If you've submitted level 5, your next valid submission must be at least level 6.
+        - Points are awarded <span class="text-accent-100">per level achieved</span>, not cumulatively. Submit strategically when you're confident you won't reach higher levels, or after completing the entire game.
+
+        Uninstall: Remove Beast anytime with: <span class="code-block">rm $(which beast)</span>
         """,
         acknowledgments: acknowledgements,
         tags: [:cli, :risc0, :sp1]
@@ -203,8 +229,35 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:beast_submissions, beast_submissions_json)
-      |> assign(:circom_submissions, circom_submissions_json)
-      |> render(:game)
+      |> render(:beast_game)
+  end
+
+  def game(conn, %{"name" => "parity"}) do
+    wallet = get_wallet_from_session(conn)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+    acknowledgements = [
+      %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
+      %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
+    ]
+    {username, position} = get_username_and_position(wallet)
+    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
+
+    conn
+      |> assign(:wallet, wallet)
+      |> assign(:game, %{
+        image: "/images/parity.jpg",
+        name: "Parity",
+        desc: "Survive across waves of enemies",
+        full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
+        acknowledgments: acknowledgements,
+        tags: [:cli, :risc0, :sp1]
+      })
+      |> assign(:username, username)
+      |> assign(:submitted_proofs, Jason.encode!(proofs))
+      |> assign(:beast_submissions, beast_submissions_json)
+      |> assign(:user_position, position)
+      |> assign(:explorer_url, explorer_url)
+      |> render(:parity_game)
   end
 
   def history(conn, _params) do

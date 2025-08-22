@@ -8,7 +8,7 @@ import { CurrentBeastGame, SubmitBeastGameBtn } from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
 import EncourageDepositing from "./modules/EncourageDepositing";
-import SubmitCircomProof from "./modules/SubmitCircomProof";
+import { ParityGame } from "./modules/Parity";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -99,7 +99,9 @@ define(
 );
 
 define(
-	{ "x-app-submit-circom-proof": SubmitCircomProof },
+	{
+		"x-app-parity-game": ParityGame,
+	},
 	{
 		attributes: [
 			"network",
@@ -107,7 +109,6 @@ define(
 			"user_address",
 			"batcher_url",
 			"leaderboard_address",
-			"circom_submissions",
 		],
 	}
-)
+);

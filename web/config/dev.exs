@@ -85,7 +85,7 @@ config :phoenix_live_view,
 config :zk_arcade, :payment_service_address, "0x7969c5ed335650692bc04293b07f5bf2e7a673c0"
 config :zk_arcade, :service_manager_address, "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
 # Deploy the contract with `make deploy_contract NETWORK=devnet` and put the address here
-config :zk_arcade, :leaderboard_address, "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823"
+config :zk_arcade, :leaderboard_address, "0x4C2F7092C2aE51D986bEFEe378e50BD4dB99C901"
 config :ethereumex,
   url: "http://localhost:8545"
 
@@ -98,3 +98,5 @@ config :zk_arcade, :batcher_port, 8080
 config :zk_arcade, :batcher_url, "ws://localhost:8080"
 
 config :zk_arcade, :feedback_form_url, "http://localhost:4000/batches"
+
+config :zk_arcade, :beast_windows_download_url, "https://github.com/yetanotherco/zk_arcade/releases/download/v0.3.0/beast.exe"

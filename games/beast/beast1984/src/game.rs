@@ -746,7 +746,7 @@ impl Game {
             self.player.lives.to_string()
         };
 
-        output.push_str("⌂⌂                                      ");
+        output.push_str("⌂⌂ Move [WASD/↑↓←→]                     ");
         output.push_str("  Beasts: ");
         output.push_str(&format!(
             "{ANSI_BOLD}{:>2}{ANSI_RESET}",

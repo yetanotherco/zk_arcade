@@ -306,200 +306,16 @@ impl Game {
             if let Ok(byte) = self.input_listener.try_recv() {
                 match byte as char {
                     'w' | 'W' => {
-                        let player_action = self.player.advance(&mut self.board, &Dir::Up);
-                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Up });
-                        match player_action {
-                            PlayerAction::KillCommonBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .common_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.common_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillSuperBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .super_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.super_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillEgg(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) =
-                                    self.eggs.iter().position(|egg| egg.position == coord)
-                                {
-                                    self.eggs.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillHatchedBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .hatched_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.hatched_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillPlayer => {
-                                self.state = GameState::Dying(Beat::One);
-                            }
-                            PlayerAction::None => {}
-                        }
-                        self.render_with_state();
+                        self.handle_movement(Dir::Up);
                     }
                     's' | 'S' => {
-                        let player_action = self.player.advance(&mut self.board, &Dir::Down);
-                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Down });
-                        match player_action {
-                            PlayerAction::KillCommonBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .common_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.common_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillSuperBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .super_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.super_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillEgg(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) =
-                                    self.eggs.iter().position(|egg| egg.position == coord)
-                                {
-                                    self.eggs.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillHatchedBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .hatched_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.hatched_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillPlayer => {
-                                self.state = GameState::Dying(Beat::One);
-                            }
-                            PlayerAction::None => {}
-                        }
-                        self.render_with_state();
+                        self.handle_movement(Dir::Down);
                     }
                     'a' | 'A' => {
-                        let player_action = self.player.advance(&mut self.board, &Dir::Left);
-                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Left });
-                        match player_action {
-                            PlayerAction::KillCommonBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .common_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.common_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillSuperBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .super_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.super_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillEgg(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) =
-                                    self.eggs.iter().position(|egg| egg.position == coord)
-                                {
-                                    self.eggs.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillHatchedBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .hatched_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.hatched_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillPlayer => {
-                                self.state = GameState::Dying(Beat::One);
-                            }
-                            PlayerAction::None => {}
-                        }
-                        self.render_with_state();
+                        self.handle_movement(Dir::Left);
                     }
                     'd' | 'D' => {
-                        let player_action = self.player.advance(&mut self.board, &Dir::Right);
-                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Right });
-                        match player_action {
-                            PlayerAction::KillCommonBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .common_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.common_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillSuperBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .super_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.super_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillEgg(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) =
-                                    self.eggs.iter().position(|egg| egg.position == coord)
-                                {
-                                    self.eggs.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillHatchedBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .hatched_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.hatched_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillPlayer => {
-                                self.state = GameState::Dying(Beat::One);
-                            }
-                            PlayerAction::None => {}
-                        }
-                        self.render_with_state();
+                        self.handle_movement(Dir::Right);
                     }
                     'q' | 'Q' => {
                         self.state = GameState::Quit;
@@ -565,9 +381,7 @@ impl Game {
                         });
 
                         if action == BeastAction::PlayerKilled {
-                            self.player.lives -= 1;
-                            self.player.respawn(&mut self.board);
-                            self.state = GameState::Dying(Beat::One);
+                            self.handle_player_killed();
                         }
                     }
                     for idx in 0..self.super_beasts.len() {
@@ -581,9 +395,7 @@ impl Game {
                         });
 
                         if action == BeastAction::PlayerKilled {
-                            self.player.lives -= 1;
-                            self.player.respawn(&mut self.board);
-                            self.state = GameState::Dying(Beat::One);
+                            self.handle_player_killed();
                         }
                     }
                     for idx in 0..self.hatched_beasts.len() {
@@ -595,9 +407,7 @@ impl Game {
                         });
 
                         if action == BeastAction::PlayerKilled {
-                            self.player.lives -= 1;
-                            self.player.respawn(&mut self.board);
-                            self.state = GameState::Dying(Beat::One);
+                            self.handle_player_killed();
                         }
                     }
                 }
@@ -1188,5 +998,65 @@ impl Game {
 
     fn clear_screen() {
         print!("\x1b[2J\x1b[H");
+    }
+
+    fn handle_player_action(&mut self, player_action: PlayerAction) {
+        match player_action {
+            PlayerAction::KillCommonBeast(coord) => {
+                self.state = GameState::Killing(Beat::One);
+                if let Some(idx) = self
+                    .common_beasts
+                    .iter()
+                    .position(|beast| beast.position == coord)
+                {
+                    self.common_beasts.swap_remove(idx);
+                }
+            }
+            PlayerAction::KillSuperBeast(coord) => {
+                self.state = GameState::Killing(Beat::One);
+                if let Some(idx) = self
+                    .super_beasts
+                    .iter()
+                    .position(|beast| beast.position == coord)
+                {
+                    self.super_beasts.swap_remove(idx);
+                }
+            }
+            PlayerAction::KillEgg(coord) => {
+                self.state = GameState::Killing(Beat::One);
+                if let Some(idx) =
+                    self.eggs.iter().position(|egg| egg.position == coord)
+                {
+                    self.eggs.swap_remove(idx);
+                }
+            }
+            PlayerAction::KillHatchedBeast(coord) => {
+                self.state = GameState::Killing(Beat::One);
+                if let Some(idx) = self
+                    .hatched_beasts
+                    .iter()
+                    .position(|beast| beast.position == coord)
+                {
+                    self.hatched_beasts.swap_remove(idx);
+                }
+            }
+            PlayerAction::KillPlayer => {
+                self.state = GameState::Dying(Beat::One);
+            }
+            PlayerAction::None => {}
+        }
+        self.render_with_state();
+    }
+
+    fn handle_movement(&mut self, direction: Dir) {
+        let player_action = self.player.advance(&mut self.board, &direction);
+        self.push_to_log(GameLogEntry::PlayerMoved { dir: direction });
+        self.handle_player_action(player_action);
+    }
+
+    fn handle_player_killed(&mut self) {
+        self.player.lives -= 1;
+        self.player.respawn(&mut self.board);
+        self.state = GameState::Dying(Beat::One);
     }
 }

@@ -7,6 +7,7 @@ type Props = {
 	reset: () => void;
 	levelNumber: number;
 	totalLevels: number;
+	home: () => void;
 };
 
 const Tile = ({
@@ -55,6 +56,7 @@ export const ParityBoard = ({
 	positionIdx,
 	levelNumber,
 	totalLevels,
+	home,
 	reset,
 }: Props) => {
 	return (
@@ -72,6 +74,14 @@ export const ParityBoard = ({
 				<p>
 					Level {levelNumber}/{totalLevels}
 				</p>
+				<Button
+					variant="arcade"
+					className="cursor-pointer"
+					arcadeBtnFront={{ style: { padding: "2px 10px" } }}
+					onClick={home}
+				>
+					Home
+				</Button>
 				<Button
 					variant="arcade"
 					className="cursor-pointer"

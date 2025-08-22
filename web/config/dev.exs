@@ -98,3 +98,5 @@ config :zk_arcade, :batcher_port, 8080
 config :zk_arcade, :batcher_url, "ws://localhost:8080"
 
 config :zk_arcade, :feedback_form_url, "http://localhost:4000/batches"
+
+config :zk_arcade, :beast_windows_download_url, "https://github.com/yetanotherco/zk_arcade/releases/download/v0.3.0/beast.exe"

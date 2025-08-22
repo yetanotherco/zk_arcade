@@ -39,14 +39,6 @@ template GreaterEqThan(n) {
     lt.out ==> out;
 }
 
-template XOR() {
-    signal input a;
-    signal input b;
-    signal output out;
-
-    out <== a + b - 2*a*b;
-}
-
 template IsZero() {
     signal input in;
     signal output out;
@@ -219,4 +211,33 @@ template ValidateTransition() {
     oldValue + 1 === newValue;
 }
 
-component main = ValidateTransition();
+template ParityLevel(MAX_ROUNDS) {
+    signal input levelBoards[MAX_ROUNDS][9];
+    signal input userPositions[MAX_ROUNDS][2];
+    
+    component positionValidation[MAX_ROUNDS];
+    for (var i = 0; i < MAX_ROUNDS; i++) {
+        positionValidation[i] = ValidPos();
+        positionValidation[i].pos <== userPositions[i];
+    }
+    
+    component movementValidation[MAX_ROUNDS-1];
+    for (var i = 0; i < MAX_ROUNDS-1; i++) {
+        movementValidation[i] = ValidateMovement();
+        movementValidation[i].oldPos <== userPositions[i];
+        movementValidation[i].newPos <== userPositions[i+1];
+    }
+    
+    component transitionValidation[MAX_ROUNDS-1];
+    for (var i = 0; i < MAX_ROUNDS-1; i++) {
+        transitionValidation[i] = ValidateTransition();
+        transitionValidation[i].newPos <== userPositions[i+1];
+        transitionValidation[i].oldBoard <== levelBoards[i];
+        transitionValidation[i].newBoard <== levelBoards[i+1];
+    }
+    
+    component finalRoundValidation = ValidateFinalRound();
+    finalRoundValidation.board <== levelBoards[MAX_ROUNDS-1];
+}
+
+component main = ParityLevel(20);

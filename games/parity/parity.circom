@@ -176,49 +176,19 @@ template ValidateTransition() {
     
     // Calculate the board index as an intermediate signal
     signal boardIndex <== newPos[0] + 3 * newPos[1];
-    
-    // Extract values using linear scan approach (since dynamic indexing isn't allowed)
-    signal oldValue;
-    signal newValue;
-    
-    // Declare components outside loops
-    component isEqualOld[9];
-    component isEqualNew[9];
-    for (var i = 0; i < 9; i++) {
-        isEqualOld[i] = IsZero();
-        isEqualNew[i] = IsZero();
-    }
-    
-    // Linear scan for oldBoard[boardIndex]
-    signal oldProducts[9];
-    for (var i = 0; i < 9; i++) {
-        isEqualOld[i].in <== boardIndex - i;
-        // isEqualOld[i].out is 1 when boardIndex == i, 0 otherwise
-        oldProducts[i] <== oldBoard[i] * isEqualOld[i].out;
-    }
-    oldValue <== oldProducts[0] + oldProducts[1] + oldProducts[2] + oldProducts[3] + oldProducts[4] + oldProducts[5] + oldProducts[6] + oldProducts[7] + oldProducts[8];
-    
-    // Linear scan for newBoard[boardIndex]
-    signal newProducts[9];
-    for (var i = 0; i < 9; i++) {
-        isEqualNew[i].in <== boardIndex - i;
-        // isEqualNew[i].out is 1 when boardIndex == i, 0 otherwise
-        newProducts[i] <== newBoard[i] * isEqualNew[i].out;
-    }
-    newValue <== newProducts[0] + newProducts[1] + newProducts[2] + newProducts[3] + newProducts[4] + newProducts[5] + newProducts[6] + newProducts[7] + newProducts[8];
-    
-    // Ensure the new value is old value + 1
-    oldValue + 1 === newValue;
 
-    // Ensure that the total sum of the cell values are previous + 1
-    // Note: this is a weak validation, since the cells could change and the total sum would remain equal
-    signal sumOld <== oldBoard[0] + oldBoard[1] + oldBoard[2] + oldBoard[3] + oldBoard[4] + oldBoard[5] + oldBoard[6] + oldBoard[7] + oldBoard[8];
-    signal sumNew <== newBoard[0] + newBoard[1] + newBoard[2] + newBoard[3] + newBoard[4] + newBoard[5] + newBoard[6] + newBoard[7] + newBoard[8];
+    component isUserPosition[9];
+    for (var i = 0; i < 9; i++) {
+        isUserPosition[i] = IsZero();
+        isUserPosition[i].in <== boardIndex - i;
 
-    sumOld + 1 === sumNew;
+        // This means the cell should be the same excepting the user new
+        // position, which should be the previous value + 1
+        newBoard[i] === oldBoard[i] + isUserPosition[i].out;
+    }
 }
 
-template ParityLevel(MAX_ROUNDS) {
+template ValidateParityLevel(MAX_ROUNDS) {
     signal input levelBoards[MAX_ROUNDS][9];
     signal input userPositions[MAX_ROUNDS][2];
     
@@ -247,4 +217,4 @@ template ParityLevel(MAX_ROUNDS) {
     finalRoundValidation.board <== levelBoards[MAX_ROUNDS-1];
 }
 
-component main = ParityLevel(20);
+component main = ValidateParityLevel(20);

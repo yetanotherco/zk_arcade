@@ -209,6 +209,13 @@ template ValidateTransition() {
     
     // Ensure the new value is old value + 1
     oldValue + 1 === newValue;
+
+    // Ensure that the total sum of the cell values are previous + 1
+    // Note: this is a weak validation, since the cells could change and still remain equal
+    signal sumOld <== oldBoard[0] + oldBoard[1] + oldBoard[2] + oldBoard[3] + oldBoard[4] + oldBoard[5] + oldBoard[6] + oldBoard[7] + oldBoard[8];
+    signal sumNew <== newBoard[0] + newBoard[1] + newBoard[2] + newBoard[3] + newBoard[4] + newBoard[5] + newBoard[6] + newBoard[7] + newBoard[8];
+
+    sumOld + 1 === sumNew;
 }
 
 template ParityLevel(MAX_ROUNDS) {

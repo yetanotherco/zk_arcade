@@ -26,9 +26,13 @@ type Props = {
 	payment_service_address: Address;
 	user_address?: Address;
 	batcher_url: string;
+	userPositions: [[number, number]];
+	levelBoards: [[number, number, number, number, number, number, number, number, number]];
 };
 
-const SubmitCircomProof = ({ payment_service_address, user_address, batcher_url }: Props) => {
+const MaxRounds = 50;
+
+export const SubmitCircomProof = ({ payment_service_address, user_address, batcher_url, userPositions, levelBoards }: Props) => {
     const { open, setOpen, toggleOpen } = useModal();
     const { csrfToken } = useCSRFToken();
     const formRef = useRef<HTMLFormElement>(null);
@@ -73,113 +77,20 @@ const SubmitCircomProof = ({ payment_service_address, user_address, batcher_url 
     const generateParityProof = useCallback(async () => {
         try {
             setGenerating(true);
+            const roundsToFill = MaxRounds - userPositions.length;
+
+            const lastPosition = userPositions[userPositions.length - 1] || [0, 0];
+            const lastLevelBoard = levelBoards[levelBoards.length - 1] || [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+            for (let i = 0; i < roundsToFill; i++) {
+                userPositions.push(lastPosition);
+                levelBoards.push(lastLevelBoard);
+            }
 
             // (1) Define the proof inputs (a0, a1)
             const input = {
-                levelBoards: [
-                    [2, 1, 1, 1, 1, 0, 1, 1, 1],
-                    [2, 2, 1, 1, 1, 0, 1, 1, 1],
-                    [2, 2, 2, 1, 1, 0, 1, 1, 1],
-                    [2, 2, 2, 1, 1, 1, 1, 1, 1],
-                    [2, 2, 2, 1, 2, 1, 1, 1, 1],
-                    [2, 2, 2, 2, 2, 1, 1, 1, 1],
-                    [2, 2, 2, 2, 2, 1, 2, 1, 1],
-                    [2, 2, 2, 2, 2, 1, 2, 2, 1],
-                    [2, 2, 2, 2, 2, 1, 2, 2, 2],
-                    [2, 2, 2, 2, 2, 1, 2, 3, 2],
-                    [2, 2, 2, 2, 2, 1, 3, 3, 2],
-                    [2, 2, 2, 3, 2, 1, 3, 3, 2],
-                    [3, 2, 2, 3, 2, 1, 3, 3, 2],
-                    [3, 3, 2, 3, 2, 1, 3, 3, 2],
-                    [3, 3, 3, 3, 2, 1, 3, 3, 2],
-                    [3, 3, 3, 3, 2, 2, 3, 3, 2],
-                    [3, 3, 3, 3, 3, 2, 3, 3, 2],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 2],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
-                    [3, 3, 3, 3, 3, 3, 3, 3, 3]
-                ],
-                userPositions: [
-                    [0, 0],
-                    [1, 0],
-                    [2, 0],
-                    [2, 1],
-                    [1, 1],
-                    [0, 1],
-                    [0, 2],
-                    [1, 2],
-                    [2, 2],
-                    [1, 2],
-                    [0, 2],
-                    [0, 1],
-                    [0, 0],
-                    [1, 0],
-                    [2, 0],
-                    [2, 1],
-                    [1, 1],
-                    [2, 1],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2],
-                    [2, 2]
-                ]
+                levelBoards: levelBoards,
+                userPositions: userPositions
             }
 
             // (2) Paths to the static artifacts
@@ -391,6 +302,8 @@ export default ({
                     payment_service_address={payment_service_address}
                     user_address={user_address}
                     batcher_url={batcher_url}
+                    userPositions={[[0, 0]]}
+                    levelBoards={[[1, 0, 0, 1, 1, 0, 1, 1, 0]]}
                 />
 			</ToastsProvider>
 		</Web3EthProvider>

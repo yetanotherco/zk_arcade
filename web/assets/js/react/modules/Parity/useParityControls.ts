@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 type Position = { row: number; col: number };
 
@@ -17,9 +17,15 @@ export const useParityControls = ({
 	const [values, setValues] = useState<number[]>(() => initialValues);
 	const [hasWon, setHasWon] = useState(false);
 
+	const userPositions = useRef<[[number, number]]>([[initialPosition.col, initialPosition.row]]);
+	const levelBoards = useRef<[[number, number, number, number, number, number, number, number, number]]>([[initialValues[0], initialValues[1], initialValues[2], initialValues[3], initialValues[4], initialValues[5], initialValues[6], initialValues[7], initialValues[8]]]);
+
 	const reset = () => {
 		setValues(initialValues);
 		setPosition(initialPosition);
+
+		userPositions.current = [[initialPosition.col, initialPosition.row]];
+		levelBoards.current = [[initialValues[0], initialValues[1], initialValues[2], initialValues[3], initialValues[4], initialValues[5], initialValues[6], initialValues[7], initialValues[8]]];
 	};
 
 	useEffect(() => {
@@ -58,6 +64,9 @@ export const useParityControls = ({
 					const allEqual = next.every(v => v === next[0]);
 					if (allEqual) setHasWon(true);
 
+					userPositions.current.push([newCol, newRow]);
+					levelBoards.current.push([next[0], next[1], next[2], next[3], next[4], next[5], next[6], next[7], next[8]]);
+
 					return next;
 				});
 
@@ -75,5 +84,7 @@ export const useParityControls = ({
 		positionIdx: position.row * size + position.col,
 		reset,
 		hasWon,
+		userPositions,
+		levelBoards,
 	};
 };

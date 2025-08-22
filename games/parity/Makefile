@@ -33,4 +33,4 @@ fullprove:
 	snarkjs groth16 verify $(PUB_DIR)/verification_key.json public.json proof.json
 
 clean:
-	rm -rf build *.zkey *.ptau input.json proof.json public.json
+	rm -rf build *.zkey *.ptau proof.json public.json

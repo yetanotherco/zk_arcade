@@ -229,4 +229,4 @@ template ValidateParityLevel(MAX_ROUNDS) {
     finalRoundValidation.board <== levelBoards[MAX_ROUNDS-1];
 }
 
-component main = ValidateParityLevel(22);
+component main = ValidateParityLevel(50);

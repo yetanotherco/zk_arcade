@@ -70,16 +70,121 @@ const SubmitCircomProof = ({ payment_service_address, user_address, batcher_url 
         userAddress: user_address,
     });
 
-    const generateFibonacciProof = useCallback(async () => {
+    const generateParityProof = useCallback(async () => {
         try {
             setGenerating(true);
 
             // (1) Define the proof inputs (a0, a1)
-            const input = { a0: "0", a1: "1" };
+            const input = {
+                levelBoards: [
+                    [2, 1, 1, 1, 1, 0, 1, 1, 1],
+                    [2, 2, 1, 1, 1, 0, 1, 1, 1],
+                    [2, 2, 2, 1, 1, 0, 1, 1, 1],
+                    [2, 2, 2, 1, 1, 1, 1, 1, 1],
+                    [2, 2, 2, 1, 2, 1, 1, 1, 1],
+                    [2, 2, 2, 2, 2, 1, 1, 1, 1],
+                    [2, 2, 2, 2, 2, 1, 2, 1, 1],
+                    [2, 2, 2, 2, 2, 1, 2, 2, 1],
+                    [2, 2, 2, 2, 2, 1, 2, 2, 2],
+                    [2, 2, 2, 2, 2, 1, 2, 3, 2],
+                    [2, 2, 2, 2, 2, 1, 3, 3, 2],
+                    [2, 2, 2, 3, 2, 1, 3, 3, 2],
+                    [3, 2, 2, 3, 2, 1, 3, 3, 2],
+                    [3, 3, 2, 3, 2, 1, 3, 3, 2],
+                    [3, 3, 3, 3, 2, 1, 3, 3, 2],
+                    [3, 3, 3, 3, 2, 2, 3, 3, 2],
+                    [3, 3, 3, 3, 3, 2, 3, 3, 2],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 2],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3],
+                    [3, 3, 3, 3, 3, 3, 3, 3, 3]
+                ],
+                userPositions: [
+                    [0, 0],
+                    [1, 0],
+                    [2, 0],
+                    [2, 1],
+                    [1, 1],
+                    [0, 1],
+                    [0, 2],
+                    [1, 2],
+                    [2, 2],
+                    [1, 2],
+                    [0, 2],
+                    [0, 1],
+                    [0, 0],
+                    [1, 0],
+                    [2, 0],
+                    [2, 1],
+                    [1, 1],
+                    [2, 1],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2],
+                    [2, 2]
+                ]
+            }
 
             // (2) Paths to the static artifacts
-            const wasmPath = "/artifacts/fibonacci.wasm";
-            const zkeyPath = "/artifacts/fibonacci_final.zkey";
+            const wasmPath = "/artifacts/parity.wasm";
+            const zkeyPath = "/artifacts/parity_final.zkey";
             const vkeyPath = "/artifacts/verification_key.json";
 
             // (3) Generate the proof and the public signals
@@ -95,7 +200,7 @@ const SubmitCircomProof = ({ payment_service_address, user_address, batcher_url 
             setVerificationKey(vKeyBytes);
 
             addToast({
-                title: "Fibonacci proof generated",
+                title: "Parity proof generated",
                 desc: "Proof + public inputs + verification key are ready to submit.",
                 type: "success",
             });
@@ -219,8 +324,8 @@ const SubmitCircomProof = ({ payment_service_address, user_address, batcher_url 
 						</form>
 
                         <div className="w-full">
-                            <Button variant="text-accent" isLoading={generating} onClick={generateFibonacciProof}>
-                                {generating ? "Generating..." : "Generate Fibonacci proof in browser"}
+                            <Button variant="text-accent" isLoading={generating} onClick={generateParityProof}>
+                                {generating ? "Generating..." : "Generate Parity proof in browser"}
                             </Button>
 
                             <div className="mt-4 text-xs text-text-100 space-y-1">

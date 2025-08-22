@@ -196,13 +196,12 @@ defmodule ZkArcadeWeb.PageController do
         desc: "Survive across waves of enemies",
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
         how_to_play: """
-        1. Install Rust by following the official guide: https://www.rust-lang.org/tools/install
-        2. Install Beast with the following command: <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
-        3. Run the game with the command: <span class="code-block">beast</span>
-        4. Locate the generated proof file on your system
-        5. Deposit into <span class="text-accent-100">ALIGNED</span> to pay the proof verification
-        6. Upload your proof to verify your gameplay
-        7. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back to submit it to the Leaderboard to earn points.
+        1. Install Beast with the following command: <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
+        2. Run the game with the command: <span class="code-block">beast</span>
+        3. Locate the generated proof file on your system
+        4. Deposit into <span class="text-accent-100">ALIGNED</span> to pay the proof verification
+        5. Upload your proof to verify your gameplay
+        6. After the proof is verified on <span class="text-accent-100">ALIGNED</span>, come back to submit it to the Leaderboard to earn points.
 
         Important notes about proof submissions:
 

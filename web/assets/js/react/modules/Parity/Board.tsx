@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Button } from "../../components";
 
 type Props = {
 	values: number[];
@@ -21,7 +22,7 @@ const Tile = ({
 	useEffect(() => {
 		if (prev.current !== value) {
 			setChanged(true);
-			const t = setTimeout(() => setChanged(false), 350); // reset after animation
+			const t = setTimeout(() => setChanged(false), 350);
 			prev.current = value;
 			return () => clearTimeout(t);
 		}
@@ -30,11 +31,11 @@ const Tile = ({
 	return (
 		<div
 			className={[
-				"h-[150px] w-[150px] flex items-center justify-center text-xl",
+				"h-[100px] sm:h-[150px] w-[100px] sm:w-[150px] flex items-center justify-center text-xl",
 				"border transition-all duration-300 ease-out will-change-transform",
 				"border-accent-100 bg-accent-100/20",
 				currentPos ? "bg-accent-200/50" : "",
-				changed ? "scale-105 ring-2 ring-accent-300" : "ring-0",
+				changed ? "scale-102 ring-2 ring-accent-100" : "ring-0",
 			].join(" ")}
 		>
 			<p
@@ -71,9 +72,14 @@ export const ParityBoard = ({
 				<p>
 					Level {levelNumber}/{totalLevels}
 				</p>
-				<p className="cursor-pointer" onClick={reset}>
+				<Button
+					variant="arcade"
+					className="cursor-pointer"
+					arcadeBtnFront={{ style: { padding: "2px 10px" } }}
+					onClick={reset}
+				>
 					Reset
-				</p>
+				</Button>
 			</div>
 		</div>
 	);

@@ -5,15 +5,13 @@ import { useParityControls } from "./useParityControls";
 import { ParityGameState } from "./types";
 import { useSwapTransition } from "./useSwapTransition";
 
-type Step = "";
-
 const tutorialText = [
 	{
 		text: "Parity is a numbers puzzle game. The aim of the game is to get each number on a 3x3 board of numbers to be exactly the same.",
 		button: "Okay...",
 	},
 	{
-		text: "One of the numbers is always selected. This number can be moved by using wasd",
+		text: "One of the numbers is always selected. This number can be moved by using WASD",
 		button: "Sounds easy",
 	},
 	{
@@ -37,7 +35,7 @@ const TutorialText = ({
 		<div className="flex flex-col items-center justify-center gap-10 w-full max-w-[500px]">
 			<h1 className="text-3xl font-normal">{header}</h1>
 			<p className="text-center text-text-200 text-lg">{text}</p>
-			<Button variant="accent-fill" onClick={onClick}>
+			<Button variant="arcade" onClick={onClick}>
 				{button}
 			</Button>
 		</div>

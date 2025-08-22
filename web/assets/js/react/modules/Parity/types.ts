@@ -3,4 +3,4 @@ export type ParityGameState =
 	| "tutorial"
 	| "running"
 	| "proving"
-	| "submission";
+	| "all-levels-completed";

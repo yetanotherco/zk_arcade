@@ -301,9 +301,59 @@ impl Game {
 
     fn handle_playing_state(&mut self, mut last_tick: Instant) {
         print!("{}", self.render_board());
+        let mut escape_sequence = Vec::new();
 
         loop {
             if let Ok(byte) = self.input_listener.try_recv() {
+                // Handle escape sequences for arrow keys
+                if byte == 27 { // ESC character
+                    escape_sequence.clear();
+                    escape_sequence.push(byte);
+                    continue;
+                }
+                
+                if !escape_sequence.is_empty() {
+                    escape_sequence.push(byte);
+                    
+                    // Check if we have a complete arrow key sequence
+                    if escape_sequence.len() == 3 && escape_sequence[1] == b'[' {
+                        match escape_sequence[2] {
+                            b'A' => { // Up arrow
+                                self.handle_movement(Dir::Up);
+                                escape_sequence.clear();
+                                continue;
+                            }
+                            b'B' => { // Down arrow
+                                self.handle_movement(Dir::Down);
+                                escape_sequence.clear();
+                                continue;
+                            }
+                            b'C' => { // Right arrow
+                                self.handle_movement(Dir::Right);
+                                escape_sequence.clear();
+                                continue;
+                            }
+                            b'D' => { // Left arrow
+                                self.handle_movement(Dir::Left);
+                                escape_sequence.clear();
+                                continue;
+                            }
+                            _ => {
+                                escape_sequence.clear();
+                                continue;
+                            }
+                        }
+                    }
+                    
+                    // If we don't have a complete sequence yet, continue reading
+                    if escape_sequence.len() < 3 {
+                        continue;
+                    }
+                    
+                    // If we get here, it's not an arrow key sequence, reset and process normally
+                    escape_sequence.clear();
+                }
+                
                 match byte as char {
                     'w' | 'W' => {
                         self.handle_movement(Dir::Up);

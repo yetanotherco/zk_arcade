@@ -306,8 +306,8 @@ impl Game {
 
         loop {
             if let Ok(byte) = self.input_listener.try_recv() {
-                // Handle Windows extended keys (arrow keys send 224 followed by direction code)
-                if byte == 224 { // Extended key prefix on Windows
+                // Handle Windows extended keys (multiple possible formats)
+                if byte == 224 || byte == 0 { // Extended key prefix on Windows (can be 224 or 0)
                     expecting_extended_key = true;
                     continue;
                 }
@@ -315,19 +315,19 @@ impl Game {
                 if expecting_extended_key {
                     expecting_extended_key = false;
                     match byte {
-                        72 => { // Up arrow on Windows
+                        72 | b'H' => { // Up arrow on Windows (72 or 'H')
                             self.handle_movement(Dir::Up);
                             continue;
                         }
-                        80 => { // Down arrow on Windows
+                        80 | b'P' => { // Down arrow on Windows (80 or 'P')
                             self.handle_movement(Dir::Down);
                             continue;
                         }
-                        75 => { // Left arrow on Windows
+                        75 | b'K' => { // Left arrow on Windows (75 or 'K')
                             self.handle_movement(Dir::Left);
                             continue;
                         }
-                        77 => { // Right arrow on Windows
+                        77 | b'M' => { // Right arrow on Windows (77 or 'M')
                             self.handle_movement(Dir::Right);
                             continue;
                         }

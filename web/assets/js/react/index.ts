@@ -8,6 +8,7 @@ import { CurrentBeastGame, SubmitBeastGameBtn } from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
 import EncourageDepositing from "./modules/EncourageDepositing";
+import { ParityGame } from "./modules/Parity";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -95,4 +96,19 @@ define({ "x-app-how-it-works-modal": HowItWorksModal });
 define(
 	{ "x-app-encourage-depositing-modal": EncourageDepositing },
 	{ attributes: ["network", "payment_service_address", "user_address"] }
+);
+
+define(
+	{
+		"x-app-parity-game": ParityGame,
+	},
+	{
+		attributes: [
+			"network",
+			"payment_service_address",
+			"user_address",
+			"batcher_url",
+			"leaderboard_address",
+		],
+	}
 );

@@ -19,14 +19,12 @@ use game_logic::{
     ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH, LOGO,
 };
 use std::{
-    io::{self, Read},
-    sync::mpsc,
+    io::{self, Read, Write},
     thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
 use crossterm::{
-    event::{self, Event, KeyCode, KeyEvent},
-    terminal::{disable_raw_mode, enable_raw_mode},
+    event::{self, Event, KeyCode},
 };
 
 /// the height of the board
@@ -167,9 +165,6 @@ impl Game {
             eprintln!("Raw mode could not be entered in this shell: {error}\x1b[?25h",);
             std::process::exit(1);
         });
-        
-        // Enable crossterm raw mode for better input handling
-        enable_raw_mode().expect("Failed to enable raw mode");
 
         let board = Board::new(board_terrain_info.buffer);
 
@@ -1014,7 +1009,9 @@ impl Game {
 
     fn clear_screen() {
         print!("\x1b[2J\x1b[H");
+        io::stdout().flush().unwrap_or(());
     }
+
 
     fn handle_player_action(&mut self, player_action: PlayerAction) {
         match player_action {

@@ -287,3 +287,34 @@ thead {
 .arcade-btn:focus:not(:focus-visible) {
 	outline: none;
 }
+
+.arcade-btn:disabled,
+.arcade-btn[disabled] {
+	cursor: not-allowed;
+	filter: grayscale(70%) brightness(80%);
+	pointer-events: none;
+}
+
+.arcade-btn:disabled .arcade-btn-front,
+.arcade-btn[disabled] .arcade-btn-front {
+	background: hsl(147, 0%, 65%);
+	color: hsl(0, 0%, 40%);
+	transform: translateY(-4px);
+}
+
+.arcade-btn:disabled .arcade-btn-edge,
+.arcade-btn[disabled] .arcade-btn-edge {
+	background: linear-gradient(
+		to left,
+		hsl(0, 0%, 25%) 0%,
+		hsl(0, 0%, 35%) 8%,
+		hsl(0, 0%, 35%) 92%,
+		hsl(0, 0%, 25%) 100%
+	);
+}
+
+.arcade-btn:disabled .arcade-btn-shadow,
+.arcade-btn[disabled] .arcade-btn-shadow {
+	background: hsl(0 0% 0% / 0.15);
+	transform: translateY(2px);
+}

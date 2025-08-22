@@ -170,11 +170,22 @@ template ValidateMovement() {
 
 
 template ValidateTransition() {
+    signal input oldPos[2];
     signal input newPos[2];
     signal input oldBoard[9];
     signal input newBoard[9];
-    
-    // Calculate the board index as an intermediate signal
+
+    // Calculate if the user has moved and the user's board index
+    signal dx <== newPos[0] - oldPos[0];
+    signal dy <== newPos[1] - oldPos[1];
+
+    component isDxZero = IsZero();
+    isDxZero.in <== dx;
+    component isDyZero = IsZero();
+    isDyZero.in <== dy;
+
+    signal moved <== 1 - isDxZero.out * isDyZero.out;
+
     signal boardIndex <== newPos[0] + 3 * newPos[1];
 
     component isUserPosition[9];
@@ -182,9 +193,9 @@ template ValidateTransition() {
         isUserPosition[i] = IsZero();
         isUserPosition[i].in <== boardIndex - i;
 
-        // This means the cell should be the same excepting the user new
-        // position, which should be the previous value + 1
-        newBoard[i] === oldBoard[i] + isUserPosition[i].out;
+        // This means the cell should be the same excepting the user new position, which
+        // should be the previous value + 1 in case there has been a movement
+        newBoard[i] === oldBoard[i] + moved * isUserPosition[i].out;
     }
 }
 
@@ -208,6 +219,7 @@ template ValidateParityLevel(MAX_ROUNDS) {
     component transitionValidation[MAX_ROUNDS-1];
     for (var i = 0; i < MAX_ROUNDS-1; i++) {
         transitionValidation[i] = ValidateTransition();
+        transitionValidation[i].oldPos <== userPositions[i];
         transitionValidation[i].newPos <== userPositions[i+1];
         transitionValidation[i].oldBoard <== levelBoards[i];
         transitionValidation[i].newBoard <== levelBoards[i+1];
@@ -217,4 +229,4 @@ template ValidateParityLevel(MAX_ROUNDS) {
     finalRoundValidation.board <== levelBoards[MAX_ROUNDS-1];
 }
 
-component main = ValidateParityLevel(20);
+component main = ValidateParityLevel(22);

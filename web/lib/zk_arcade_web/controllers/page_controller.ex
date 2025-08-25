@@ -152,12 +152,9 @@ defmodule ZkArcadeWeb.PageController do
       },
     ]
 
-    circom_submissions_json = Jason.encode!([])
-
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:beast_submissions, beast_submissions_json)
-      |> assign(:circom_submissions, circom_submissions_json)
       |> assign(:wallet, wallet)
       |> assign(:leaderboard, leaderboard)
       |> assign(:top_users, top_users)

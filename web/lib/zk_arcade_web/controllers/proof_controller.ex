@@ -72,6 +72,7 @@ defmodule ZkArcadeWeb.ProofController do
     }
   end
 
+  # TODO: Replace with the proof public inputs when available
   def parse_public_input_circom(public_input) when is_list(public_input) do
     %{
       level: 0,

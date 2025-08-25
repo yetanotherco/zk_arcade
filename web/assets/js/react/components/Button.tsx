@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useAudioState } from "../state/audio";
 
 type ButtonVariant =
 	| "accent-fill"
@@ -41,6 +42,7 @@ export const Button = ({
 }: Props) => {
 	const [currentVariant, setCurrentVariant] =
 		useState<ButtonVariant>(variant);
+	const { muted } = useAudioState();
 
 	useEffect(() => {
 		if (isLoading || disabled) {
@@ -57,9 +59,11 @@ export const Button = ({
 	}, [isLoading, disabled]);
 
 	const playSound = () => {
-		const audio = new Audio("/audio/mouse-click.mp3");
-		audio.currentTime = 0;
-		audio.play();
+		if (!muted) {
+			const audio = new Audio("/audio/mouse-click.mp3");
+			audio.currentTime = 0;
+			audio.play();
+		}
 	};
 
 	if (variant === "arcade") {
@@ -74,7 +78,6 @@ export const Button = ({
 				}}
 				{...props}
 			>
-				<audio src="/audio/mouse-click.mp3"></audio>
 				<span className="arcade-btn-shadow"></span>
 				<span className="arcade-btn-edge"></span>
 				<span
@@ -89,7 +92,7 @@ export const Button = ({
 
 	return (
 		<button
-			className={`rounded text-md ${buttonVariantStyles[currentVariant]} ${className}`}
+			className={`focus:outline-none focus:ring-0 rounded text-md ${buttonVariantStyles[currentVariant]} ${className}`}
 			disabled={disabled || isLoading}
 			style={style}
 			onClick={onClick}

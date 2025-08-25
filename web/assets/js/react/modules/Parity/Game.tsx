@@ -8,9 +8,11 @@ import { useSwapTransition } from "./useSwapTransition";
 import { useParityGames } from "./useParityGames";
 import { Address } from "viem";
 import { Completed } from "./Completed";
+import { useAudioState } from "../../state/audio";
 
 export const Game = ({ userAddress }: { userAddress: Address }) => {
-	const [gameState, setGameState] = useState<ParityGameState>("home");
+	const [gameState, setGameState] = useState<ParityGameState>("running");
+	const { muted, toggleMuted } = useAudioState();
 	const {
 		currentLevel,
 		levels,
@@ -41,6 +43,13 @@ export const Game = ({ userAddress }: { userAddress: Address }) => {
 					onClick={() => setGameState("tutorial")}
 				>
 					Tutorial
+				</Button>
+				<Button
+					variant="arcade"
+					className="max-w-[300px] w-full"
+					onClick={toggleMuted}
+				>
+					{muted ? "Unmute" : "Mute"}
 				</Button>
 			</div>
 		),

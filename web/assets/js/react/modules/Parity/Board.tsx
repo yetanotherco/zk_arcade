@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Button } from "../../components";
+import { useAudioState } from "../../state/audio";
 
 type Props = {
 	values: number[];
@@ -18,12 +19,15 @@ const Tile = ({
 	currentPos: boolean;
 }) => {
 	const prev = React.useRef(value);
+	const { muted } = useAudioState();
 	const [changed, setChanged] = React.useState(false);
 
 	useEffect(() => {
 		if (prev.current !== value) {
-			const sound = new Audio("/audio/slide_sound.mp3");
-			sound.play();
+			if (!muted) {
+				const sound = new Audio("/audio/slide_sound.mp3");
+				sound.play();
+			}
 			setChanged(true);
 			const t = setTimeout(() => setChanged(false), 350);
 			prev.current = value;
@@ -61,8 +65,9 @@ export const ParityBoard = ({
 	home,
 	reset,
 }: Props) => {
+	const { muted, toggleMuted } = useAudioState();
 	return (
-		<div className="h-full flex flex-col justify-center items-center gap-2">
+		<div className="h-full flex flex-col justify-center items-center gap-4">
 			<div className="grid grid-cols-3 grid-rows-3">
 				{values.map((val, idx) => (
 					<Tile
@@ -84,14 +89,30 @@ export const ParityBoard = ({
 				>
 					Home
 				</Button>
-				<Button
-					variant="arcade"
-					className="cursor-pointer"
-					arcadeBtnFront={{ style: { padding: "2px 10px" } }}
-					onClick={reset}
-				>
-					Reset
-				</Button>
+				<div className="flex items-start gap-4">
+					<Button
+						variant="arcade"
+						className="cursor-pointer"
+						arcadeBtnFront={{ style: { padding: "2px 10px" } }}
+						onClick={reset}
+					>
+						Reset
+					</Button>
+					<Button
+						variant="text"
+						className="cursor-pointer"
+						arcadeBtnFront={{ style: { padding: "2px 10px" } }}
+						onClick={toggleMuted}
+					>
+						<span
+							className={`${
+								muted
+									? "hero-speaker-x-mark"
+									: "hero-speaker-wave"
+							}`}
+						></span>
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

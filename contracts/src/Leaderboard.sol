@@ -45,6 +45,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error UserAddressMismatch(address expected, address actual);
     error InvalidGame(uint256 expected, uint256 provided);
     error NoActiveBeastGame();
+    error NoActiveParityGame();
 
     /**
      * Events
@@ -168,6 +169,16 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
 
         revert NoActiveBeastGame();
+    }
+
+    function getCurrentParityGame() public view returns (ParityGame memory) {
+        for (uint256 i = 0; i < parityGames.length; i++) {
+            if (block.timestamp >= parityGames[i].startsAtTime && block.timestamp < parityGames[i].endsAtTime) {
+                return parityGames[i];
+            }
+        }
+
+        revert NoActiveParityGame();
     }
 
     function getTop10Score() external view returns (address[10] memory) {

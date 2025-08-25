@@ -56,11 +56,11 @@ beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
 
 PARITY_NUM_GAMES ?= 10
-PARITY_LEVELS_PER_GAME ?= 9
+PARITY_LEVELS_PER_GAME ?= 3
 PARITY_MIN_END_OF_LEVEL ?= 0
 PARITY_MAX_END_OF_LEVEL ?= 30
-PARITY_MIN_MOVEMENTS ?= 14
-PARITY_MAX_MOVEMENTS ?= 32
+PARITY_MIN_MOVEMENTS ?= 5
+PARITY_MAX_MOVEMENTS ?= 12
 PARITY_CAMPAIGN_DAYS ?= 1
 parity_gen_levels:
 	@cd games/parity/level_generator && \
@@ -74,8 +74,11 @@ update_leaderboard_address:
 		| grep -Eo "0x[0-9a-fA-F]{40}" | head -n1); \
 	sed -E -i '' "s|(^[[:space:]]*config :zk_arcade, :leaderboard_address, \")[^\"]+(\".*)|\1$$addr\2|" "web/config/dev.exs";
 
-gen_and_deploy_devnet: beast_gen_levels
+gen_and_deploy_devnet: beast_gen_levels parity_gen_levels
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
+		contracts/script/deploy/config/devnet/leaderboard.json \
+		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
+	@jq ".parityGames = $$(jq '.games' games/parity/level_generator/levels/parity_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
 	@$(MAKE) deploy_contract NETWORK=devnet

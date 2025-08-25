@@ -158,7 +158,7 @@ export const SubmitProofModal = ({
 				proofStatus={proofStatus}
 				setProofStatus={setProofStatus}
 				proofToSubmitData={proofToSubmitData}
-				gameName={gameName}
+				gameName={proof?.game || "beast"}
 			/>
 		),
 		claim: () =>

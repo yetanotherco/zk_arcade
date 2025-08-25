@@ -93,7 +93,6 @@ export const SubmitProofStep = ({
 	gameName: string;
 }) => {
 	const chainId = useChainId();
-	const [game, setGame] = useState<GameId>("beast");
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
@@ -469,7 +468,7 @@ export const SubmitProofStep = ({
 
 				<div className="flex flex-col gap-2">
 					<p>Prover: {provingSystem}</p>
-					<p>Game: {game}</p>
+					<p>Game: {gameName}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
 				</div>
 
@@ -557,7 +556,7 @@ export const SubmitProofStep = ({
 				</p>
 				<div className="flex flex-col gap-2">
 					<p>Prover: {provingSystem}</p>
-					<p>Game: {game}</p>
+					<p>Game: {gameName}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
 				</div>
 			</div>
@@ -665,7 +664,7 @@ export const SubmitProofStep = ({
 			>
 				<input type="hidden" name="submit_proof_message" value={submitProofMessage} />
 				<input type="hidden" name="_csrf_token" value={csrfToken} />
-				<input type="hidden" name="game" value={"Beast"} />
+				<input type="hidden" name="game" value={gameData?.name} />
 			</form>
 			<Button
 				variant="text"

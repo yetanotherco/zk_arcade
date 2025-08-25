@@ -86,6 +86,7 @@ const BoardTutorial = ({
 					onClick={() => setGameState("home")}
 				/>				
 
+				{/* TODO: Remove the proof generation from tutorial once we have it available for normal levels */}
 				<Button
 					onClick={generateproofVerificationData}
 					variant="arcade"

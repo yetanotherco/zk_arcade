@@ -227,6 +227,9 @@ template ValidateParityLevel(MAX_ROUNDS) {
     
     component finalRoundValidation = ValidateFinalRound();
     finalRoundValidation.board <== levelBoards[MAX_ROUNDS-1];
+
+    signal output initialBoard[9] <== levelBoards[0];
+    signal output initialPosition[2] <== userPositions[0];
 }
 
 component main = ValidateParityLevel(50);

@@ -568,9 +568,8 @@ export const SubmitProofStep = ({
 
 	return (
 		<div className="flex flex-col gap-6 justify-between h-full">
-			<div className="w-full flex flex-col gap-8">
-				<p className="mb-2">What game have you proved?</p>
-				<div className="flex flex-col gap-4 overflow-x-auto p-2 max-w-[150px]">
+			<div className="w-full flex flex-col gap-4">
+				<div className="flex flex-col overflow-x-auto p-2 max-w-[150px]">
 					<div className="">
 						<img
 							src={gameData?.cover}

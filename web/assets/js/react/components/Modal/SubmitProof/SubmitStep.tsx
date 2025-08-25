@@ -64,7 +64,7 @@ export const SubmitProofStep = ({
 	proofSubmission,
 	proofStatus,
 	setProofStatus,
-	proofToSubmitJson
+	proofToSubmitData
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -76,7 +76,7 @@ export const SubmitProofStep = ({
 	proofSubmission?: ProofSubmission;
 	proofStatus?: ProofSubmission["status"];
 	setProofStatus: (status: ProofSubmission["status"]) => void;
-	proofToSubmitJson: string;
+	proofToSubmitData: VerificationData | null;
 }) => {
 	const chainId = useChainId();
 	const [game, setGame] = useState<GameId>("beast");
@@ -289,14 +289,54 @@ export const SubmitProofStep = ({
 		nonce,
 	]);
 
-	const handleSend = useCallback(async (submitProofMessageJson) => {
-		setSubmitProofMessage(submitProofMessageJson);
+	const handleSend = useCallback(async (proofToSubmitData: VerificationData) => {
+		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
+		if (!maxFee) {
+			alert("Could not estimate max fee");
+			return;
+		}
+
+		if (nonce == null) {
+			alert("Nonce is still loading or failed");
+			return;
+		}
+
+		const noncedVerificationdata: NoncedVerificationdata = {
+			maxFee: toHex(maxFee, { size: 32 }),
+			nonce: toHex(nonce, { size: 32 }),
+			chain_id: toHex(chainId, { size: 32 }),
+			payment_service_addr,
+			verificationData: proofToSubmitData,
+		};
+
+		const { r, s, v } = await signVerificationData(
+			noncedVerificationdata,
+			payment_service_addr
+		);
+
+		const submitProofMessage: SubmitProof = {
+			verificationData: noncedVerificationdata,
+			signature: {
+				r,
+				s,
+				v: Number(v),
+			},
+		};
+
+		setSubmitProofMessage(JSON.stringify(submitProofMessage));
 		setSubmissionIsLoading(true);
 		window.setTimeout(() => {
 			formRef.current?.submit();
 		}, 100);
 
-	}, []);
+	}, [
+		setSubmitProofMessage,
+		estimateMaxFeeForBatchOfProofs,
+		signVerificationData,
+		payment_service_addr,
+		chainId,
+		nonce,
+	]);
 
 	const [bumpLoading, setBumpLoading] = useState(false);
 	const formRetryRef = useRef<HTMLFormElement>(null);
@@ -547,13 +587,13 @@ export const SubmitProofStep = ({
 					</div>
 				</div>
 				<div>
-					{proofToSubmitJson ? 
+					{proofToSubmitData ? 
 						<div>
-							<p> Proof to submit data: {proofToSubmitJson}</p> 
+							<p> Proof to submit data: {JSON.stringify(proofToSubmitData)}</p> 
 
 							<Button
 								variant="text-accent"
-								onClick={() => handleSend(proofToSubmitJson)}
+								onClick={() => handleSend(proofToSubmitData)}
 							>
 								Submit the game proof
 							</Button>							
@@ -653,11 +693,12 @@ export const SubmitProofStep = ({
 				>
 					Cancel
 				</Button>
-				<Button
-					variant="accent-fill"
-					disabled={
-						!proof ||
-						!proofId ||
+				{!proofToSubmitData ? (
+					<Button
+						variant="accent-fill"
+						disabled={
+							!proof ||
+							!proofId ||
 						!publicInputs ||
 						(balance.data || 0) < maxFee ||
 						nonceLoading ||
@@ -668,6 +709,20 @@ export const SubmitProofStep = ({
 				>
 					Confirm
 				</Button>
+				) : (
+					<Button
+						variant="accent-fill"
+						disabled={
+							(balance.data || 0) < maxFee ||
+							nonceLoading ||
+							nonce == null
+						}
+						isLoading={submissionIsLoading}
+						onClick={() => handleSend(proofToSubmitData)}
+					>
+						Confirm
+					</Button>
+				)}
 			</div>
 		</div>
 	);

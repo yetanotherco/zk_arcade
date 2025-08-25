@@ -8,8 +8,7 @@ import { generateCircomParityProof } from "./GenerateProof";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 import { useModal } from "../../hooks/useModal";
 import { Address } from "viem";
-import { useAligned, useBatcherNonce } from "../../hooks";
-import { useChainId } from "wagmi";
+import { VerificationData } from "../../types/aligned";
 
 const tutorialText = [
 	{
@@ -60,28 +59,16 @@ const BoardTutorial = ({
 		initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
 	});
 	const { open, setOpen, toggleOpen } = useModal();
-	const [proofJson, setProofJson] = useState("");
+	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
 
-	const chainId = useChainId();
-	const { nonce, isLoading: nonceLoading } = useBatcherNonce(gameProps.batcher_url, gameProps.user_address);
-
-	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
-		useAligned();
-
-	const generateProofJson = async () => {
-		if (nonceLoading || nonce == undefined) return;
-		const submitProofJson = await generateCircomParityProof({
-			payment_service_address: gameProps.payment_service_address,
+	const generateproofVerificationData = async () => {
+		const submitproofVerificationData = await generateCircomParityProof({
 			user_address: gameProps.user_address,
 			userPositions: userPositions,
 			levelBoards: levelBoards,
-			nonce: nonce,
-			chainId: chainId,
-			estimateMaxFeeForBatchOfProofs: estimateMaxFeeForBatchOfProofs,
-			signVerificationData: signVerificationData,
 		});
 
-		setProofJson(submitProofJson);
+		setProofVerificationData(submitproofVerificationData);
 		setOpen(true);
 	};
 
@@ -97,7 +84,7 @@ const BoardTutorial = ({
 				/>				
 
 				<Button
-					onClick={generateProofJson}
+					onClick={generateproofVerificationData}
 					variant="arcade"
 				>
 					Generate Proof
@@ -110,7 +97,7 @@ const BoardTutorial = ({
 					payment_service_address={gameProps.payment_service_address}
 					user_address={gameProps.user_address}
 					userBeastSubmissions={[]}
-					proofToSubmitJson={proofJson}
+					proofToSubmitData={proofVerificationData}
 				/>
 
 			</div>

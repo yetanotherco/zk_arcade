@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Modal, ModalProps } from "../Modal";
 import { Address, formatEther } from "viem";
-import { BeastProofClaimed, ProofSubmission } from "../../../types/aligned";
+import { BeastProofClaimed, ProofSubmission, VerificationData } from "../../../types/aligned";
 import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentService";
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
@@ -15,7 +15,7 @@ type Props = {
 	leaderboard_address: Address;
 	proof?: ProofSubmission;
 	userBeastSubmissions: BeastProofClaimed[];
-	proofToSubmitJson: string;
+	proofToSubmitData: VerificationData | null;
 };
 
 type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
@@ -63,7 +63,7 @@ export const SubmitProofModal = ({
 	batcher_url,
 	leaderboard_address,
 	userBeastSubmissions,
-	proofToSubmitJson,
+	proofToSubmitData,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
 	const { balance } = useBatcherPaymentService({
@@ -155,7 +155,7 @@ export const SubmitProofModal = ({
 				proofSubmission={proof}
 				proofStatus={proofStatus}
 				setProofStatus={setProofStatus}
-				proofToSubmitJson={proofToSubmitJson}
+				proofToSubmitData={proofToSubmitData}
 			/>
 		),
 		claim: () =>

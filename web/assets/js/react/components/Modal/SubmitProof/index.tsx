@@ -15,6 +15,7 @@ type Props = {
 	leaderboard_address: Address;
 	proof?: ProofSubmission;
 	userBeastSubmissions: BeastProofClaimed[];
+	proofToSubmitJson: string;
 };
 
 type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
@@ -62,6 +63,7 @@ export const SubmitProofModal = ({
 	batcher_url,
 	leaderboard_address,
 	userBeastSubmissions,
+	proofToSubmitJson,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
 	const { balance } = useBatcherPaymentService({
@@ -153,6 +155,7 @@ export const SubmitProofModal = ({
 				proofSubmission={proof}
 				proofStatus={proofStatus}
 				setProofStatus={setProofStatus}
+				proofToSubmitJson={proofToSubmitJson}
 			/>
 		),
 		claim: () =>

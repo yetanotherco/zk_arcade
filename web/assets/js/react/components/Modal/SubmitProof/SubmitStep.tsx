@@ -64,6 +64,7 @@ export const SubmitProofStep = ({
 	proofSubmission,
 	proofStatus,
 	setProofStatus,
+	proofToSubmitJson
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -75,6 +76,7 @@ export const SubmitProofStep = ({
 	proofSubmission?: ProofSubmission;
 	proofStatus?: ProofSubmission["status"];
 	setProofStatus: (status: ProofSubmission["status"]) => void;
+	proofToSubmitJson: string;
 }) => {
 	const chainId = useChainId();
 	const [game, setGame] = useState<GameId>("beast");
@@ -286,6 +288,15 @@ export const SubmitProofStep = ({
 		chainId,
 		nonce,
 	]);
+
+	const handleSend = useCallback(async (submitProofMessageJson) => {
+		setSubmitProofMessage(submitProofMessageJson);
+		setSubmissionIsLoading(true);
+		window.setTimeout(() => {
+			formRef.current?.submit();
+		}, 100);
+
+	}, []);
 
 	const [bumpLoading, setBumpLoading] = useState(false);
 	const formRetryRef = useRef<HTMLFormElement>(null);
@@ -536,39 +547,37 @@ export const SubmitProofStep = ({
 					</div>
 				</div>
 				<div>
-					<div className="mb-2">
-						<p>Proof file</p>
-						<p className="text-sm text-text-200">
-							Submit the solution of the file
-						</p>
-					</div>
-					<form
-						ref={formRef}
-						action="/proof/"
-						method="post"
-						className="hidden"
-					>
-						<input
-							type="hidden"
-							name="submit_proof_message"
-							value={submitProofMessage}
-						/>
-						<input
-							type="hidden"
-							name="_csrf_token"
-							value={csrfToken}
-						/>
-						<input type="hidden" name="game" value={"Beast"} />
-					</form>
+					{proofToSubmitJson ? 
+						<div>
+							<p> Proof to submit data: {proofToSubmitJson}</p> 
 
-					<div className="flex flex-col gap-6">
-						<FormInput
-							name="proof-data"
-							id="proof-data"
-							type="file"
-							onChange={handleCombinedProofFile}
-						/>
-					</div>
+							<Button
+								variant="text-accent"
+								onClick={() => handleSend(proofToSubmitJson)}
+							>
+								Submit the game proof
+							</Button>							
+						</div>
+
+					: 
+						<div>
+							<div className="mb-2">
+								<p>Proof file</p>
+								<p className="text-sm text-text-200">
+									Submit the solution of the file
+								</p>
+							</div>
+
+							<div className="flex flex-col gap-6">
+								<FormInput
+									name="proof-data"
+									id="proof-data"
+									type="file"
+									onChange={handleCombinedProofFile}
+								/>
+							</div>
+						</div>
+					}
 				</div>
 				<div className="flex flex-col gap-2">
 					{provingSystem && <p>Prover: {provingSystem}</p>}
@@ -617,6 +626,17 @@ export const SubmitProofStep = ({
 					)}
 				</div>
 			</div>
+
+			<form
+				ref={formRef}
+				action="/proof/"
+				method="post"
+				className="hidden"
+			>
+				<input type="hidden" name="submit_proof_message" value={submitProofMessage} />
+				<input type="hidden" name="_csrf_token" value={csrfToken} />
+				<input type="hidden" name="game" value={"Beast"} />
+			</form>
 			<Button
 				variant="text"
 				className="font-normal text-start flex items-center gap-2"

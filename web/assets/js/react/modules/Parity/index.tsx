@@ -4,6 +4,7 @@ import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import Web3EthProvider from "../../providers/web3-eth-provider";
 import { Game } from "./Game";
+import { AudioProvider } from "../../state/audio";
 
 type Props = {
 	network: string;
@@ -13,12 +14,14 @@ type Props = {
 	batcher_url: string;
 };
 
-export const ParityGame = ({ network }: Props) => {
+export const ParityGame = ({ network, user_address }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
 				<ToastContainer />
-				<Game />
+				<AudioProvider>
+					<Game userAddress={user_address} />
+				</AudioProvider>
 			</ToastsProvider>
 		</Web3EthProvider>
 	);

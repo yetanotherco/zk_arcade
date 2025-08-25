@@ -75,5 +75,6 @@ export const useParityControls = ({
 		positionIdx: position.row * size + position.col,
 		reset,
 		hasWon,
+		setValues,
 	};
 };

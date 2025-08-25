@@ -67,6 +67,7 @@ const BoardTutorial = ({
 				levelNumber={1}
 				totalLevels={1}
 				reset={reset}
+				home={() => setGameState("home")}
 			/>
 		)
 	);

@@ -202,7 +202,8 @@ template ValidateTransition() {
 template ValidateParityLevel(MAX_ROUNDS) {
     signal input levelBoards[MAX_ROUNDS][9];
     signal input userPositions[MAX_ROUNDS][2];
-    
+    signal input userAddress;
+
     component positionValidation[MAX_ROUNDS];
     for (var i = 0; i < MAX_ROUNDS; i++) {
         positionValidation[i] = ValidPos();
@@ -232,4 +233,4 @@ template ValidateParityLevel(MAX_ROUNDS) {
     signal output initialPosition[2] <== userPositions[0];
 }
 
-component main = ValidateParityLevel(50);
+component main {public [userAddress]}  = ValidateParityLevel(50);

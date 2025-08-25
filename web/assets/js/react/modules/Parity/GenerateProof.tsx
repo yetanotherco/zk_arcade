@@ -34,7 +34,8 @@ export async function generateCircomParityProof({
 
     const input = {
         levelBoards: levelBoards,
-        userPositions: userPositions
+        userPositions: userPositions,
+        userAddress: user_address
     };
 
     const wasmPath = "/artifacts/parity.wasm";

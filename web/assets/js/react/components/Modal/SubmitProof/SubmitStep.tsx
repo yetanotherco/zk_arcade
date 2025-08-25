@@ -15,7 +15,7 @@ import {
 	useBatcherNonce,
 	useBatcherPaymentService,
 	useEthPrice,
-	useLeaderboardContract,
+	useBeastLeaderboardContract,
 } from "../../../hooks";
 import { Address } from "../../../types/blockchain";
 import { useToast } from "../../../state/toast";
@@ -115,10 +115,11 @@ export const SubmitProofStep = ({
 			: undefined
 	);
 
-	const { currentGame, currentGameLevelCompleted } = useLeaderboardContract({
-		contractAddress: leaderboard_address,
-		userAddress: user_address,
-	});
+	const { currentGame, currentGameLevelCompleted } =
+		useBeastLeaderboardContract({
+			contractAddress: leaderboard_address,
+			userAddress: user_address,
+		});
 
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_addr,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Address } from "../../types/blockchain";
-import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
+import { useBeastLeaderboardContract } from "../../hooks/useBeastLeaderboardContract";
 import { useBlock } from "wagmi";
 import Web3EthProvider from "../../providers/web3-eth-provider";
 
@@ -49,10 +49,11 @@ const CurrentBeastGameComponent = ({
 		? currentBlock.data.timestamp
 		: 0;
 
-	const { currentGame, currentGameLevelCompleted } = useLeaderboardContract({
-		contractAddress: leaderboard_address,
-		userAddress: user_address,
-	});
+	const { currentGame, currentGameLevelCompleted } =
+		useBeastLeaderboardContract({
+			contractAddress: leaderboard_address,
+			userAddress: user_address,
+		});
 
 	const [timeRemaining, setTimeRemaining] = useState<{
 		hours: number;

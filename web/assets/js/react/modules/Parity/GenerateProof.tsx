@@ -16,8 +16,8 @@ const fetchTextAsBytes = async (url: string) =>
 type GenerateSubmitProofParams = {
     payment_service_address: Address;
     user_address: Address;
-    userPositions: [[number, number]];
-    levelBoards: [[number, number, number, number, number, number, number, number, number]];
+    userPositions: [number, number][];
+    levelBoards: number[][];
     nonce: bigint;
     chainId: number;
     estimateMaxFeeForBatchOfProofs: (batchSize: number) => Promise<bigint | null>;

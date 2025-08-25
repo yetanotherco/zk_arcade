@@ -73,8 +73,8 @@ const BoardTutorial = ({
 		const submitProofJson = await generateCircomParityProof({
 			payment_service_address: gameProps.payment_service_address,
 			user_address: gameProps.user_address,
-			userPositions: userPositions.current,
-			levelBoards: levelBoards.current,
+			userPositions: userPositions,
+			levelBoards: levelBoards,
 			nonce: nonce,
 			chainId: chainId,
 			estimateMaxFeeForBatchOfProofs: estimateMaxFeeForBatchOfProofs,

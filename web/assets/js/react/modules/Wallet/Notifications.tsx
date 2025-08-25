@@ -71,6 +71,8 @@ const NotificationEntry = ({
 				payment_service_address={payment_service_address}
 				userBeastSubmissions={user_beast_submissions}
 				proof={proof}
+				proofToSubmitData={null}
+				gameName="beast"
 			/>
 		</>
 	);

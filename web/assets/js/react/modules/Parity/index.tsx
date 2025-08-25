@@ -13,12 +13,12 @@ type Props = {
 	batcher_url: string;
 };
 
-export const ParityGame = ({ network }: Props) => {
+export const ParityGame = ({ network, payment_service_address, user_address, leaderboard_address, batcher_url }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
 				<ToastContainer />
-				<Game />
+				<Game network={network} payment_service_address={payment_service_address} user_address={user_address} leaderboard_address={leaderboard_address} batcher_url={batcher_url} />
 			</ToastsProvider>
 		</Web3EthProvider>
 	);

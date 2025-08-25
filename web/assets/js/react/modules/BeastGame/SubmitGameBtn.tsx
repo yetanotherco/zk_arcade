@@ -38,6 +38,8 @@ const SubmitModal = ({
 				payment_service_address={payment_service_address}
 				user_address={user_address}
 				userBeastSubmissions={JSON.parse(beast_submissions)}
+				proofToSubmitData={null}
+				gameName="beast"
 			/>
 		</>
 	);

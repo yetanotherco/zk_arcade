@@ -22,6 +22,8 @@ const Tile = ({
 
 	useEffect(() => {
 		if (prev.current !== value) {
+			const sound = new Audio("/audio/slide_sound.mp3");
+			sound.play();
 			setChanged(true);
 			const t = setTimeout(() => setChanged(false), 350);
 			prev.current = value;

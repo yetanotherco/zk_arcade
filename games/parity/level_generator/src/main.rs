@@ -1,0 +1,206 @@
+use std::{fs::File, io::Write};
+
+use rand::Rng;
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize, Debug)]
+#[allow(non_snake_case)]
+struct GameEntry {
+    endsAtTime: u64,
+    gameConfig: String,
+    startsAtTime: u64,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct Game {
+    games: Vec<GameEntry>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+enum Movement {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct ParityLevel {
+    number: u8,
+    initial_pos_x: u8,
+    initial_pos_y: u8,
+    board: Vec<u8>,
+    solution: Vec<Movement>,
+}
+
+fn encode_parity_levels(levels: Vec<ParityLevel>) -> Vec<u8> {
+    let mut bytes: Vec<u8> = vec![];
+
+    for level in levels {
+        let initial_pos: u8 = (level.initial_pos_x << 4) | (level.initial_pos_y & 0x0F);
+        bytes.push(initial_pos);
+        let mut board_bytes: Vec<u8> = vec![];
+        for tile in level.board {
+            board_bytes.push(tile);
+        }
+        bytes.extend_from_slice(&board_bytes);
+    }
+
+    bytes
+}
+
+fn random_number_between(min: u8, max: u8) -> u8 {
+    let mut rng = rand::rng();
+    rng.random_range(min.into()..max.into())
+}
+
+fn possible(roll: i16, selected: u8) -> bool {
+    match roll {
+        -1 => false,
+        0 if selected / 3 == 0 => false,
+        1 if selected / 3 == 2 => false,
+        2 if selected % 3 == 0 => false,
+        3 if selected % 3 == 2 => false,
+        _ => true,
+    }
+}
+
+fn gen_levels(
+    num_levels: u8,
+    min_end_of_level: u8,
+    max_end_of_level: u8,
+    min_movements: u8,
+    max_movements: u8,
+) -> Vec<ParityLevel> {
+    let mut levels: Vec<ParityLevel> = vec![];
+    for i in 0..num_levels {
+        let end = random_number_between(min_end_of_level, max_end_of_level);
+        let mut board = vec![];
+        for _ in 0..9 {
+            board.push(end);
+        }
+
+        let mut selected = random_number_between(0, 9);
+        let mut solution: Vec<Movement> = vec![];
+        board[selected as usize] -= 1;
+
+        let moves = random_number_between(min_movements, max_movements);
+
+        for j in 0..moves {
+            let mut roll = -1;
+
+            while !possible(roll, selected) {
+                roll = random_number_between(0, 4) as i16;
+            }
+
+            match roll {
+                0 => {
+                    selected -= 3;
+                    solution.push(Movement::Down);
+                    if j + 1 != moves {
+                        board[selected as usize] -= 1;
+                    }
+                }
+                1 => {
+                    selected += 3;
+                    solution.push(Movement::Up);
+                    if j + 1 != moves {
+                        board[selected as usize] -= 1;
+                    }
+                }
+                2 => {
+                    selected -= 1;
+                    solution.push(Movement::Right);
+                    if j + 1 != moves {
+                        board[selected as usize] -= 1;
+                    }
+                }
+                3 => {
+                    selected += 1;
+                    solution.push(Movement::Left);
+                    if j + 1 != moves {
+                        board[selected as usize] -= 1;
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let x = selected % 3;
+        let y = selected / 3;
+
+        // Get the solution
+        solution.reverse();
+
+        levels.push(ParityLevel {
+            number: i + 1,
+            board,
+            solution,
+            initial_pos_x: x,
+            initial_pos_y: y,
+        })
+    }
+
+    levels
+}
+
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() != 9 {
+        eprintln!(
+            "Usage: {} <number_of_games> <levels_per_game> <min_end_of_level> <max_end_of_level> <min_movements> <max_movements> <total_campaign_in_days> <network>",
+            args[0]
+        );
+        std::process::exit(1);
+    }
+
+    let num_games: usize = args[1].parse().expect("Invalid number of games");
+    let num_levels = args[2].parse().expect("Invalid levels per game");
+    let min_end_of_level = args[3].parse().expect("Invalid min end of level");
+    let max_end_of_level = args[4].parse().expect("Invalid max end of level");
+    let min_movements = args[5].parse().expect("Invalid min movements");
+    let max_movements = args[6].parse().expect("Invalid max movements");
+    let time_days: u64 = args[7].parse().expect("Invalid total campaign in days");
+    let network: String = args[8].parse().expect("Invalid network");
+
+    let current_time = std::time::SystemTime::now();
+    let mut current_timestamp = current_time
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_secs();
+
+    let time_in_seconds = time_days * 24 * 3600;
+    let seconds_per_game = time_in_seconds / num_games as u64;
+
+    let mut games: Vec<GameEntry> = vec![];
+    for _ in 0..num_games {
+        let game_levels = gen_levels(
+            num_levels,
+            min_end_of_level,
+            max_end_of_level,
+            min_movements,
+            max_movements,
+        );
+        let bytes = encode_parity_levels(game_levels);
+        let game_config = format!("0x{}", hex::encode(bytes));
+
+        let from_time = current_timestamp;
+        let to_time = current_timestamp + seconds_per_game;
+        current_timestamp = to_time;
+
+        games.push(GameEntry {
+            startsAtTime: from_time,
+            endsAtTime: to_time,
+            gameConfig: game_config,
+        });
+    }
+
+    let game = Game { games };
+    let json = serde_json::to_string_pretty(&game).expect("Failed to serialize");
+
+    let mut file =
+        File::create(format!("levels/parity_{}.json", network)).expect("Unable to create file");
+    file.write_all(json.as_bytes())
+        .expect("Unable to write to file");
+    println!("Levels written to levels/parity_{}.json", network);
+}

@@ -89,5 +89,6 @@ export const useParityControls = ({
 		hasWon,
 		userPositions,
 		levelBoards,
+		setValues,
 	};
 };

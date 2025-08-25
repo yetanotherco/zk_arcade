@@ -6,6 +6,7 @@ type SwapOptions = Omit<UseTransitionProps, "items" | "children">;
 export function useSwapTransition<T>(
 	item: T,
 	render: (style: any, item: T) => ReactNode,
+	containerProps: Omit<React.ComponentProps<"div">, "ref"> = {},
 	options?: SwapOptions
 ) {
 	const transitions = useTransition(item, {
@@ -18,6 +19,8 @@ export function useSwapTransition<T>(
 	});
 
 	return transitions((style, i) => (
-		<animated.div style={style}>{render(style, i)}</animated.div>
+		<animated.div style={style} {...containerProps}>
+			{render(style, i)}
+		</animated.div>
 	));
 }

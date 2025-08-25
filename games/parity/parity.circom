@@ -202,7 +202,6 @@ template ValidateTransition() {
 template ValidateParityLevel(MAX_ROUNDS) {
     signal input levelBoards[MAX_ROUNDS][9];
     signal input userPositions[MAX_ROUNDS][2];
-    signal input userAddress;
 
     component positionValidation[MAX_ROUNDS];
     for (var i = 0; i < MAX_ROUNDS; i++) {
@@ -233,4 +232,22 @@ template ValidateParityLevel(MAX_ROUNDS) {
     signal output initialPosition[2] <== userPositions[0];
 }
 
-component main {public [userAddress]}  = ValidateParityLevel(50);
+template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
+    signal input userAddress;
+    signal input levelsBoards[MAX_LEVELS][MAX_ROUNDS][9];
+    signal input userPositions[MAX_LEVELS][MAX_ROUNDS][2];
+    signal output initialBoards[MAX_LEVELS][9];
+    signal output initialPositions[MAX_LEVELS][2];
+    
+    component levelsValidation[MAX_LEVELS];
+    
+    for (var i = 0; i < MAX_LEVELS; i++) {
+        levelsValidation[i] = ValidateParityLevel(MAX_ROUNDS);
+        levelsValidation[i].levelBoards <== levelsBoards[i];
+        levelsValidation[i].userPositions <== userPositions[i];
+        levelsValidation[i].initialBoard ==> initialBoards[i];
+        levelsValidation[i].initialPosition ==> initialPositions[i];
+    }
+}
+
+component main {public [userAddress]}  = ValidateParityGame(3, 32);

@@ -62,10 +62,13 @@ const BoardTutorial = ({
 	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
 
 	const generateproofVerificationData = async () => {
+		const totalLevelBoards = [[...levelBoards]];
+		const totalUserPositions = [[...userPositions]];
+
 		const submitproofVerificationData = await generateCircomParityProof({
 			user_address: gameProps.user_address,
-			userPositions: userPositions,
-			levelBoards: levelBoards,
+			userPositions: totalUserPositions,
+			levelsBoards: totalLevelBoards,
 		});
 
 		setProofVerificationData(submitproofVerificationData);

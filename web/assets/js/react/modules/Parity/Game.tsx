@@ -11,7 +11,7 @@ import { Completed } from "./Completed";
 import { useAudioState } from "../../state/audio";
 
 export const Game = ({ userAddress }: { userAddress: Address }) => {
-	const [gameState, setGameState] = useState<ParityGameState>("running");
+	const [gameState, setGameState] = useState<ParityGameState>("home");
 	const { muted, toggleMuted } = useAudioState();
 	const {
 		currentLevel,

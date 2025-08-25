@@ -4,7 +4,12 @@ import { Button } from "../../components";
 import { useParityControls } from "./useParityControls";
 import { ParityGameState } from "./types";
 import { useSwapTransition } from "./useSwapTransition";
-import {SubmitCircomProof} from "./../SubmitCircomProof";
+import { generateCircomParityProof } from "./GenerateProof";
+import { SubmitProofModal } from "../../components/Modal/SubmitProof";
+import { useModal } from "../../hooks/useModal";
+import { Address } from "viem";
+import { useAligned, useBatcherNonce } from "../../hooks";
+import { useChainId } from "wagmi";
 
 const tutorialText = [
 	{
@@ -54,6 +59,31 @@ const BoardTutorial = ({
 		initialPosition: { col: 0, row: 0 },
 		initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
 	});
+	const { open, setOpen, toggleOpen } = useModal();
+	const [proofJson, setProofJson] = useState("");
+
+	const chainId = useChainId();
+	const { nonce, isLoading: nonceLoading } = useBatcherNonce(gameProps.batcher_url, gameProps.user_address);
+
+	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
+		useAligned();
+
+	const generateProofJson = async () => {
+		if (nonceLoading || nonce == undefined) return;
+		const submitProofJson = await generateCircomParityProof({
+			payment_service_address: gameProps.payment_service_address,
+			user_address: gameProps.user_address,
+			userPositions: userPositions.current,
+			levelBoards: levelBoards.current,
+			nonce: nonce,
+			chainId: chainId,
+			estimateMaxFeeForBatchOfProofs: estimateMaxFeeForBatchOfProofs,
+			signVerificationData: signVerificationData,
+		});
+
+		setProofJson(submitProofJson);
+		setOpen(true);
+	};
 
 	const view = useSwapTransition(hasWon, (_, won) =>
 		won ? (
@@ -66,13 +96,23 @@ const BoardTutorial = ({
 					onClick={() => setGameState("home")}
 				/>				
 
-				<SubmitCircomProof
-                    payment_service_address={gameProps.payment_service_address}
-                    user_address={gameProps.user_address}
-                    batcher_url={gameProps.batcher_url}
-					userPositions={userPositions.current}
-					levelBoards={levelBoards.current}
-                />
+				<Button
+					onClick={generateProofJson}
+					variant="arcade"
+				>
+					Generate Proof
+				</Button>
+
+				<SubmitProofModal
+					modal={{ open, setOpen }}
+					batcher_url={gameProps.batcher_url}
+					leaderboard_address={gameProps.leaderboard_address}
+					payment_service_address={gameProps.payment_service_address}
+					user_address={gameProps.user_address}
+					userBeastSubmissions={[]}
+					proofToSubmitJson={proofJson}
+				/>
+
 			</div>
 		) : (
 			<ParityBoard
@@ -87,8 +127,6 @@ const BoardTutorial = ({
 
 	return view;
 };
-
-import { Address } from "viem";
 
 type GameProps = {
 	network: string;

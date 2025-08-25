@@ -16,6 +16,7 @@ type Props = {
 	proof?: ProofSubmission;
 	userBeastSubmissions: BeastProofClaimed[];
 	proofToSubmitData: VerificationData | null;
+	gameName: string;
 };
 
 type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
@@ -64,6 +65,7 @@ export const SubmitProofModal = ({
 	leaderboard_address,
 	userBeastSubmissions,
 	proofToSubmitData,
+	gameName,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
 	const { balance } = useBatcherPaymentService({
@@ -156,6 +158,7 @@ export const SubmitProofModal = ({
 				proofStatus={proofStatus}
 				setProofStatus={setProofStatus}
 				proofToSubmitData={proofToSubmitData}
+				gameName={gameName}
 			/>
 		),
 		claim: () =>

@@ -98,6 +98,7 @@ const BoardTutorial = ({
 					user_address={gameProps.user_address}
 					userBeastSubmissions={[]}
 					proofToSubmitData={proofVerificationData}
+					gameName="parity"
 				/>
 
 			</div>

@@ -37,7 +37,19 @@ const GAMES: Game[] = [
 		name: "Beast",
 		cover: "/images/beast.jpg",
 	},
+	{
+		id: "parity",
+		name: "Parity",
+		cover: "/images/parity.jpg",
+	},
+	{
+		id: "Sudoku",
+		name: "Sudoku",
+		cover: "/images/sudoku.jpg",
+	}
 ];
+
+const getGameData = (id: GameId) => GAMES.find((game) => game.id === id);
 
 type GameId = (typeof GAMES)[number]["id"];
 
@@ -64,7 +76,8 @@ export const SubmitProofStep = ({
 	proofSubmission,
 	proofStatus,
 	setProofStatus,
-	proofToSubmitData
+	proofToSubmitData,
+	gameName,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -77,6 +90,7 @@ export const SubmitProofStep = ({
 	proofStatus?: ProofSubmission["status"];
 	setProofStatus: (status: ProofSubmission["status"]) => void;
 	proofToSubmitData: VerificationData | null;
+	gameName: string;
 }) => {
 	const chainId = useChainId();
 	const [game, setGame] = useState<GameId>("beast");
@@ -550,40 +564,22 @@ export const SubmitProofStep = ({
 		);
 	}
 
+	const gameData = getGameData(gameName);
+
 	return (
 		<div className="flex flex-col gap-6 justify-between h-full">
 			<div className="w-full flex flex-col gap-8">
-				<div>
-					<p className="mb-2">What game have you proved?</p>
-					<div className="flex gap-4 overflow-x-auto p-2">
-						{GAMES.map(g => {
-							const isActive = g.id === game;
-							return (
-								<button
-									key={g.id}
-									onClick={() => setGame(g.id)}
-									className="flex-shrink-0"
-								>
-									<img
-										src={g.cover}
-										alt={g.name}
-										className={`w-[150px] h-[100px] object-cover rounded border-2 transition  ${
-											isActive
-												? "border-blue"
-												: "border-transparent"
-										}`}
-									/>
-									<div className="flex flex-row gap-2 justify-center items-center mt-1">
-										<div
-											className={`h-[15px] w-[15px] border border-accent-100 rounded-full ${
-												isActive ? "bg-accent-100" : ""
-											}`}
-										></div>
-										<p>{g.name}</p>
-									</div>
-								</button>
-							);
-						})}
+				<p className="mb-2">What game have you proved?</p>
+				<div className="flex flex-col gap-4 overflow-x-auto p-2 max-w-[150px]">
+					<div className="">
+						<img
+							src={gameData?.cover}
+							alt={gameData?.name}
+							className="w-[150px] h-[100px] object-cover rounded border-2"
+						/>
+					</div>
+					<div className="text-center">
+					{gameData?.name}
 					</div>
 				</div>
 				<div>

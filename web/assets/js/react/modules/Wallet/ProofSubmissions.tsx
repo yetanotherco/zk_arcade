@@ -57,6 +57,8 @@ const Proof = ({
 				payment_service_address={payment_service_address}
 				user_address={user_address}
 				userBeastSubmissions={[]}
+				proofToSubmitData={null}
+				gameName="beast"
 			/>
 		</>
 	);

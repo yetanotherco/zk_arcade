@@ -589,14 +589,9 @@ export const SubmitProofStep = ({
 				<div>
 					{proofToSubmitData ? 
 						<div>
-							<p> Proof to submit data: {JSON.stringify(proofToSubmitData)}</p> 
-
-							<Button
-								variant="text-accent"
-								onClick={() => handleSend(proofToSubmitData)}
-							>
-								Submit the game proof
-							</Button>							
+							<p className="text-xl mb-2">Proof data:</p>
+							<p className="mb-1">Proof size: {proofToSubmitData.proof.length} bytes</p>
+							<p>Public Input size: {proofToSubmitData.publicInput?.length} bytes</p>
 						</div>
 
 					: 

@@ -21,7 +21,7 @@ type GameProps = {
 
 export const Game = ({ network, payment_service_address, user_address, leaderboard_address, batcher_url }: GameProps) => {
 
-	const [gameState, setGameState] = useState<ParityGameState>("running");
+	const [gameState, setGameState] = useState<ParityGameState>("home");
 	const { muted, toggleMuted } = useAudioState();
 	const {
 		currentLevel,

@@ -1,14 +1,15 @@
 use std::{fs::File, io::Write};
 
+use primitive_types::U256;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 #[allow(non_snake_case)]
 struct GameEntry {
-    endsAtTime: u64,
+    endsAtTime: String,
     gameConfig: String,
-    startsAtTime: u64,
+    startsAtTime: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -184,13 +185,15 @@ fn main() {
         let bytes = encode_parity_levels(game_levels);
         let game_config = format!("0x{}", hex::encode(bytes));
 
-        let from_time = current_timestamp;
-        let to_time = current_timestamp + seconds_per_game;
-        current_timestamp = to_time;
+        let mut start_at_time_bytes = [0u8; 32];
+        let mut ends_at_time_bytes = [0u8; 32];
+        U256::from(current_timestamp).to_big_endian(&mut start_at_time_bytes);
+        U256::from(current_timestamp + seconds_per_game).to_big_endian(&mut ends_at_time_bytes);
+        current_timestamp = current_timestamp + seconds_per_game;
 
         games.push(GameEntry {
-            startsAtTime: from_time,
-            endsAtTime: to_time,
+            startsAtTime: format!("0x{}", hex::encode(&start_at_time_bytes)),
+            endsAtTime: format!("0x{}", hex::encode(&ends_at_time_bytes)),
             gameConfig: game_config,
         });
     }

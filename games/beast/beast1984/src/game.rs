@@ -19,10 +19,12 @@ use game_logic::{
     ANSI_RIGHT_BORDER, BOARD_HEIGHT, BOARD_WIDTH, LOGO,
 };
 use std::{
-    io::{self, Read},
-    sync::mpsc,
+    io::{self, Read, Write},
     thread::{self, JoinHandle},
     time::{Duration, Instant},
+};
+use crossterm::{
+    event::{self, Event, KeyCode, KeyEventKind},
 };
 
 /// the height of the board
@@ -115,7 +117,6 @@ pub struct Game {
     pub levels_completion_log: Vec<LevelLog>,
     pub has_won: bool,
     beat: Beat,
-    input_listener: mpsc::Receiver<u8>,
     _raw_mode: RawMode,
     address: String,
     proving_systems: Vec<String>,
@@ -164,19 +165,6 @@ impl Game {
             eprintln!("Raw mode could not be entered in this shell: {error}\x1b[?25h",);
             std::process::exit(1);
         });
-        let (sender, receiver) = mpsc::channel::<u8>();
-        {
-            let stdin = io::stdin();
-            thread::spawn(move || {
-                let mut lock = stdin.lock();
-                let mut buffer = [0u8; 1];
-                while lock.read_exact(&mut buffer).is_ok() {
-                    if sender.send(buffer[0]).is_err() {
-                        break;
-                    }
-                }
-            });
-        }
 
         let board = Board::new(board_terrain_info.buffer);
 
@@ -201,7 +189,6 @@ impl Game {
             state: GameState::Intro,
             beat: Beat::One,
             has_won: false,
-            input_listener: receiver,
             _raw_mode,
             address,
             proving_systems,
@@ -277,23 +264,27 @@ impl Game {
         println!("{}", Self::render_intro());
 
         loop {
-            if let Ok(byte) = self.input_listener.try_recv() {
-                match byte as char {
-                    ' ' => {
-                        self.level_start = Into::into(Instant::now());
-                        self.state = GameState::Playing;
-                        break;
+            if event::poll(Duration::from_millis(100)).unwrap_or(false) {
+                if let Ok(Event::Key(key_event)) = event::read() {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
+                            KeyCode::Char(' ') => {
+                                self.level_start = Into::into(Instant::now());
+                                self.state = GameState::Playing;
+                                break;
+                            }
+                            KeyCode::Char('h') | KeyCode::Char('H') => {
+                                self.level_start = Into::into(Instant::now());
+                                self.state = GameState::Help;
+                                break;
+                            }
+                            KeyCode::Char('q') | KeyCode::Char('Q') => {
+                                self.state = GameState::Quit;
+                                break;
+                            }
+                            _ => {}
+                        }
                     }
-                    'h' | 'H' => {
-                        self.level_start = Into::into(Instant::now());
-                        self.state = GameState::Help;
-                        break;
-                    }
-                    'q' | 'Q' => {
-                        self.state = GameState::Quit;
-                        break;
-                    }
-                    _ => {}
                 }
             }
         }
@@ -303,213 +294,50 @@ impl Game {
         print!("{}", self.render_board());
 
         loop {
-            if let Ok(byte) = self.input_listener.try_recv() {
-                match byte as char {
-                    'w' | 'W' => {
-                        let player_action = self.player.advance(&mut self.board, &Dir::Up);
-                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Up });
-                        match player_action {
-                            PlayerAction::KillCommonBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .common_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.common_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillSuperBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .super_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.super_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillEgg(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) =
-                                    self.eggs.iter().position(|egg| egg.position == coord)
-                                {
-                                    self.eggs.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillHatchedBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .hatched_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.hatched_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillPlayer => {
-                                self.state = GameState::Dying(Beat::One);
-                            }
-                            PlayerAction::None => {}
+            // Handle crossterm input events
+            if event::poll(Duration::from_millis(1)).unwrap_or(false) {
+                if let Ok(Event::Key(key_event)) = event::read() {
+                    // Only handle key press events, ignore key release and repeat
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
+                        // Arrow keys
+                        KeyCode::Up => {
+                            self.handle_movement(Dir::Up);
                         }
-                        self.render_with_state();
-                    }
-                    's' | 'S' => {
-                        let player_action = self.player.advance(&mut self.board, &Dir::Down);
-                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Down });
-                        match player_action {
-                            PlayerAction::KillCommonBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .common_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.common_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillSuperBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .super_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.super_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillEgg(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) =
-                                    self.eggs.iter().position(|egg| egg.position == coord)
-                                {
-                                    self.eggs.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillHatchedBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .hatched_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.hatched_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillPlayer => {
-                                self.state = GameState::Dying(Beat::One);
-                            }
-                            PlayerAction::None => {}
+                        KeyCode::Down => {
+                            self.handle_movement(Dir::Down);
                         }
-                        self.render_with_state();
-                    }
-                    'a' | 'A' => {
-                        let player_action = self.player.advance(&mut self.board, &Dir::Left);
-                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Left });
-                        match player_action {
-                            PlayerAction::KillCommonBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .common_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.common_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillSuperBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .super_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.super_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillEgg(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) =
-                                    self.eggs.iter().position(|egg| egg.position == coord)
-                                {
-                                    self.eggs.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillHatchedBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .hatched_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.hatched_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillPlayer => {
-                                self.state = GameState::Dying(Beat::One);
-                            }
-                            PlayerAction::None => {}
+                        KeyCode::Left => {
+                            self.handle_movement(Dir::Left);
                         }
-                        self.render_with_state();
-                    }
-                    'd' | 'D' => {
-                        let player_action = self.player.advance(&mut self.board, &Dir::Right);
-                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Right });
-                        match player_action {
-                            PlayerAction::KillCommonBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .common_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.common_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillSuperBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .super_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.super_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillEgg(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) =
-                                    self.eggs.iter().position(|egg| egg.position == coord)
-                                {
-                                    self.eggs.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillHatchedBeast(coord) => {
-                                self.state = GameState::Killing(Beat::One);
-                                if let Some(idx) = self
-                                    .hatched_beasts
-                                    .iter()
-                                    .position(|beast| beast.position == coord)
-                                {
-                                    self.hatched_beasts.swap_remove(idx);
-                                }
-                            }
-                            PlayerAction::KillPlayer => {
-                                self.state = GameState::Dying(Beat::One);
-                            }
-                            PlayerAction::None => {}
+                        KeyCode::Right => {
+                            self.handle_movement(Dir::Right);
                         }
-                        self.render_with_state();
+                        // WASD keys
+                        KeyCode::Char('w') | KeyCode::Char('W') => {
+                            self.handle_movement(Dir::Up);
+                        }
+                        KeyCode::Char('s') | KeyCode::Char('S') => {
+                            self.handle_movement(Dir::Down);
+                        }
+                        KeyCode::Char('a') | KeyCode::Char('A') => {
+                            self.handle_movement(Dir::Left);
+                        }
+                        KeyCode::Char('d') | KeyCode::Char('D') => {
+                            self.handle_movement(Dir::Right);
+                        }
+                        // Other keys
+                        KeyCode::Char('q') | KeyCode::Char('Q') => {
+                            self.state = GameState::Quit;
+                            break;
+                        }
+                        KeyCode::Char('h') | KeyCode::Char('H') => {
+                            self.state = GameState::Help;
+                            break;
+                        }
+                        _ => {}
+                        }
                     }
-                    'q' | 'Q' => {
-                        self.state = GameState::Quit;
-                        break;
-                    }
-                    'h' | 'H' => {
-                        self.state = GameState::Help;
-                        break;
-                    }
-                    _ => {}
                 }
             }
 
@@ -565,9 +393,7 @@ impl Game {
                         });
 
                         if action == BeastAction::PlayerKilled {
-                            self.player.lives -= 1;
-                            self.player.respawn(&mut self.board);
-                            self.state = GameState::Dying(Beat::One);
+                            self.handle_player_killed();
                         }
                     }
                     for idx in 0..self.super_beasts.len() {
@@ -581,9 +407,7 @@ impl Game {
                         });
 
                         if action == BeastAction::PlayerKilled {
-                            self.player.lives -= 1;
-                            self.player.respawn(&mut self.board);
-                            self.state = GameState::Dying(Beat::One);
+                            self.handle_player_killed();
                         }
                     }
                     for idx in 0..self.hatched_beasts.len() {
@@ -595,9 +419,7 @@ impl Game {
                         });
 
                         if action == BeastAction::PlayerKilled {
-                            self.player.lives -= 1;
-                            self.player.respawn(&mut self.board);
-                            self.state = GameState::Dying(Beat::One);
+                            self.handle_player_killed();
                         }
                     }
                 }
@@ -620,41 +442,39 @@ impl Game {
         println!("{}", self.render_death_screen());
 
         loop {
-            if let Ok(byte) = self.input_listener.try_recv() {
-                match byte as char {
-                    ' ' => {
-                        if Self::render_confirmation_prompt(
-                            "Are you sure you want to restart the game?",
-                            &self.input_listener,
-                        ) {
-                            self.start_new_game();
-                            break;
-                        } else {
-                            println!("{}", self.render_death_screen());
+            if event::poll(Duration::from_millis(100)).unwrap_or(false) {
+                if let Ok(Event::Key(key_event)) = event::read() {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
+                        KeyCode::Char(' ') => {
+                            if Self::render_confirmation_prompt("Are you sure you want to restart the game?") {
+                                self.start_new_game();
+                                break;
+                            } else {
+                                println!("{}", self.render_death_screen());
+                                break;
+                            }
+                        }
+                        KeyCode::Enter => {
+                            self.state = GameState::ProveExecution;
                             break;
                         }
-                    }
-                    '\n' | '\r' => {
-                        self.state = GameState::ProveExecution;
-                        break;
-                    }
-                    'h' | 'H' => {
-                        self.state = GameState::Help;
-                        break;
-                    }
-                    'q' | 'Q' => {
-                        if Self::render_confirmation_prompt(
-                            "Are you sure you want to quit?",
-                            &self.input_listener,
-                        ) {
-                            self.state = GameState::Quit;
-                            break;
-                        } else {
-                            println!("{}", self.render_death_screen());
+                        KeyCode::Char('h') | KeyCode::Char('H') => {
+                            self.state = GameState::Help;
                             break;
                         }
+                        KeyCode::Char('q') | KeyCode::Char('Q') => {
+                            if Self::render_confirmation_prompt("Are you sure you want to quit?") {
+                                self.state = GameState::Quit;
+                                break;
+                            } else {
+                                println!("{}", self.render_death_screen());
+                                break;
+                            }
+                        }
+                        _ => {}
+                        }
                     }
-                    _ => {}
                 }
             }
         }
@@ -664,25 +484,29 @@ impl Game {
         println!("{}", self.render_winning_screen());
 
         loop {
-            if let Ok(byte) = self.input_listener.try_recv() {
-                match byte as char {
-                    ' ' => {
-                        self.start_new_game();
-                        break;
+            if event::poll(Duration::from_millis(100)).unwrap_or(false) {
+                if let Ok(Event::Key(key_event)) = event::read() {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
+                        KeyCode::Char(' ') => {
+                            self.start_new_game();
+                            break;
+                        }
+                        KeyCode::Enter => {
+                            self.state = GameState::ProveExecution;
+                            break;
+                        }
+                        KeyCode::Char('h') | KeyCode::Char('H') => {
+                            self.state = GameState::Help;
+                            break;
+                        }
+                        KeyCode::Char('q') | KeyCode::Char('Q') => {
+                            self.state = GameState::Quit;
+                            break;
+                        }
+                        _ => {}
+                        }
                     }
-                    '\n' | '\r' => {
-                        self.state = GameState::ProveExecution;
-                        break;
-                    }
-                    'h' | 'H' => {
-                        self.state = GameState::Help;
-                        break;
-                    }
-                    'q' | 'Q' => {
-                        self.state = GameState::Quit;
-                        break;
-                    }
-                    _ => {}
                 }
             }
         }
@@ -724,26 +548,30 @@ impl Game {
         println!("{}", help.render());
 
         loop {
-            if let Ok(byte) = self.input_listener.try_recv() {
-                match byte as char {
-                    ' ' => {
-                        self.level_start += pause.elapsed();
-                        self.state = GameState::Playing;
-                        break;
+            if event::poll(Duration::from_millis(100)).unwrap_or(false) {
+                if let Ok(Event::Key(key_event)) = event::read() {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
+                        KeyCode::Char(' ') => {
+                            self.level_start += pause.elapsed();
+                            self.state = GameState::Playing;
+                            break;
+                        }
+                        KeyCode::Char('q') | KeyCode::Char('Q') => {
+                            self.state = GameState::Quit;
+                            break;
+                        }
+                        KeyCode::Char('d') | KeyCode::Char('D') | KeyCode::Right => {
+                            help.next_page();
+                            println!("{}", help.render());
+                        }
+                        KeyCode::Char('a') | KeyCode::Char('A') | KeyCode::Left => {
+                            help.previous_page();
+                            println!("{}", help.render());
+                        }
+                        _ => {}
+                        }
                     }
-                    'q' | 'Q' => {
-                        self.state = GameState::Quit;
-                        break;
-                    }
-                    'd' | 'D' => {
-                        help.next_page();
-                        println!("{}", help.render());
-                    }
-                    'a' | 'A' => {
-                        help.previous_page();
-                        println!("{}", help.render());
-                    }
-                    _ => {}
                 }
             }
         }
@@ -845,21 +673,25 @@ impl Game {
         println!("Press [SPACE] to play again, [Q] to quit, or [H] for help");
 
         loop {
-            if let Ok(byte) = self.input_listener.try_recv() {
-                match byte as char {
-                    ' ' => {
-                        self.start_new_game();
-                        break;
+            if event::poll(Duration::from_millis(100)).unwrap_or(false) {
+                if let Ok(Event::Key(key_event)) = event::read() {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
+                        KeyCode::Char(' ') => {
+                            self.start_new_game();
+                            break;
+                        }
+                        KeyCode::Char('q') | KeyCode::Char('Q') => {
+                            self.state = GameState::Quit;
+                            break;
+                        }
+                        KeyCode::Char('h') | KeyCode::Char('H') => {
+                            self.state = GameState::Help;
+                            break;
+                        }
+                        _ => {}
+                        }
                     }
-                    'q' | 'Q' => {
-                        self.state = GameState::Quit;
-                        break;
-                    }
-                    'h' | 'H' => {
-                        self.state = GameState::Help;
-                        break;
-                    }
-                    _ => {}
                 }
             }
         }
@@ -914,7 +746,7 @@ impl Game {
             self.player.lives.to_string()
         };
 
-        output.push_str("⌂⌂ [WASD] Move                          ");
+        output.push_str("⌂⌂ Move [WASD/↑↓←→]                     ");
         output.push_str("  Beasts: ");
         output.push_str(&format!(
             "{ANSI_BOLD}{:>2}{ANSI_RESET}",
@@ -1126,7 +958,7 @@ impl Game {
         })
     }
 
-    fn render_confirmation_prompt(message: &str, input_listener: &mpsc::Receiver<u8>) -> bool {
+    fn render_confirmation_prompt(message: &str) -> bool {
         let confirm_text = "[Y] Yes    [N] No";
         let box_width = message.len().max(confirm_text.len()) + 4;
 
@@ -1150,15 +982,19 @@ impl Game {
             "\x1b[{top_pos}F{left_pad}┌{border}┐\n{message_line}\n{options_line}\n{left_pad}└{border}┘\n\x1b[{bottom_pos:.0}E"
         );
 
-        while let Ok(byte) = input_listener.recv() {
-            match byte as char {
-                'y' | 'Y' => return true,
-                'n' | 'N' => return false,
-                _ => {}
+        loop {
+            if event::poll(Duration::from_millis(100)).unwrap_or(false) {
+                if let Ok(Event::Key(key_event)) = event::read() {
+                    if key_event.kind == KeyEventKind::Press {
+                        match key_event.code {
+                        KeyCode::Char('y') | KeyCode::Char('Y') => return true,
+                        KeyCode::Char('n') | KeyCode::Char('N') => return false,
+                        _ => {}
+                        }
+                    }
+                }
             }
         }
-
-        false
     }
 
     fn alert(msg: &str, progress: usize) -> String {
@@ -1188,5 +1024,67 @@ impl Game {
 
     fn clear_screen() {
         print!("\x1b[2J\x1b[H");
+        io::stdout().flush().unwrap_or(());
+    }
+
+
+    fn handle_player_action(&mut self, player_action: PlayerAction) {
+        match player_action {
+            PlayerAction::KillCommonBeast(coord) => {
+                self.state = GameState::Killing(Beat::One);
+                if let Some(idx) = self
+                    .common_beasts
+                    .iter()
+                    .position(|beast| beast.position == coord)
+                {
+                    self.common_beasts.swap_remove(idx);
+                }
+            }
+            PlayerAction::KillSuperBeast(coord) => {
+                self.state = GameState::Killing(Beat::One);
+                if let Some(idx) = self
+                    .super_beasts
+                    .iter()
+                    .position(|beast| beast.position == coord)
+                {
+                    self.super_beasts.swap_remove(idx);
+                }
+            }
+            PlayerAction::KillEgg(coord) => {
+                self.state = GameState::Killing(Beat::One);
+                if let Some(idx) =
+                    self.eggs.iter().position(|egg| egg.position == coord)
+                {
+                    self.eggs.swap_remove(idx);
+                }
+            }
+            PlayerAction::KillHatchedBeast(coord) => {
+                self.state = GameState::Killing(Beat::One);
+                if let Some(idx) = self
+                    .hatched_beasts
+                    .iter()
+                    .position(|beast| beast.position == coord)
+                {
+                    self.hatched_beasts.swap_remove(idx);
+                }
+            }
+            PlayerAction::KillPlayer => {
+                self.state = GameState::Dying(Beat::One);
+            }
+            PlayerAction::None => {}
+        }
+        self.render_with_state();
+    }
+
+    fn handle_movement(&mut self, direction: Dir) {
+        let player_action = self.player.advance(&mut self.board, &direction);
+        self.push_to_log(GameLogEntry::PlayerMoved { dir: direction });
+        self.handle_player_action(player_action);
+    }
+
+    fn handle_player_killed(&mut self) {
+        self.player.lives -= 1;
+        self.player.respawn(&mut self.board);
+        self.state = GameState::Dying(Beat::One);
     }
 }

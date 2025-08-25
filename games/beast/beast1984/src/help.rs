@@ -91,7 +91,7 @@ impl Help {
         output.push_str(&format!("{ANSI_LEFT_BORDER}  You must survive while {ANSI_BOLD}beasts{ANSI_RESET} attack you. The only way to fight back is to squish the beasts      {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  between blocks. But there are different types of beasts that attack you the longer you survive.   {ANSI_RIGHT_BORDER}\n"));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));
-        output.push_str(&format!("{ANSI_LEFT_BORDER}  You are {} and you move around with the WASD keys on your keyboard.                               {ANSI_RIGHT_BORDER}\n", Tile::Player));
+        output.push_str(&format!("{ANSI_LEFT_BORDER}  You are {} and you move around with the WASD/↑↓←→ keys on your keyboard.                               {ANSI_RIGHT_BORDER}\n", Tile::Player));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  You can push {} around the board.                                                                 {ANSI_RIGHT_BORDER}\n", Tile::Block));
         output.push_str(&format!("{ANSI_LEFT_BORDER}  However, {} can't be moved.                                                                       {ANSI_RIGHT_BORDER}\n", Tile::StaticBlock));
         output.push_str(&format!("{ANSI_LEFT_BORDER}                                                                                                    {ANSI_RIGHT_BORDER}\n"));

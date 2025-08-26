@@ -9,6 +9,7 @@ import { useParityGames } from "./useParityGames";
 import { Address } from "viem";
 import { Completed } from "./Completed";
 import { useAudioState } from "../../state/audio";
+import { useParityControls } from "./useParityControls";
 
 
 type GameProps = {
@@ -30,6 +31,16 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 		setCurrentLevel,
 		renewsIn,
 	} = useParityGames(user_address);
+
+	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards } = useParityControls(
+		{
+			initialPosition: { col: 0, row: 0 },
+			initialValues:
+				currentLevel !== null
+					? levels[currentLevel - 1]
+					: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+		}
+	);
 
 	const gameComponentBasedOnState: {
 		[key in ParityGameState]: ReactNode;
@@ -72,6 +83,11 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				setCurrentLevel={setCurrentLevel}
 				setGameState={setGameState}
 				renewsIn={renewsIn}
+				hasWon={hasWon}
+				positionIdx={positionIdx}
+				values={values}
+				reset={reset}
+				setValues={setValues}
 			/>
 		),
 		proving: (
@@ -90,6 +106,12 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 					});
 					setGameState("running");
 				}}
+				levelBoards={levelBoards}
+				userPositions={userPositions}
+				batcher_url={batcher_url}
+				leaderboard_address={leaderboard_address}
+				payment_service_address={payment_service_address}
+				user_address={user_address}
 			/>
 		),
 		"all-levels-completed": (

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ParityGameState } from "./types";
 import { Button } from "../../components";
-import { useParityControls } from "./useParityControls";
 import { ParityBoard } from "./Board";
 import { useSwapTransition } from "./useSwapTransition";
 
@@ -37,6 +36,11 @@ export const PlayState = ({
 	levels,
 	setCurrentLevel,
 	renewsIn,
+	values,
+	setValues,
+	positionIdx,
+	reset,
+	hasWon,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
@@ -44,17 +48,12 @@ export const PlayState = ({
 	setCurrentLevel: (level: number) => void;
 	playerLevelReached: number;
 	renewsIn: Date;
+	values: number[];
+	setValues: (values: number[]) => void;
+	positionIdx: number;
+	reset: () => void;
+	hasWon: boolean;
 }) => {
-	const { hasWon, positionIdx, values, reset, setValues } = useParityControls(
-		{
-			initialPosition: { col: 0, row: 0 },
-			initialValues:
-				currentLevel !== null
-					? levels[currentLevel - 1]
-					: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-		}
-	);
-
 	const view = useSwapTransition(
 		currentLevel,
 		(_, level) =>

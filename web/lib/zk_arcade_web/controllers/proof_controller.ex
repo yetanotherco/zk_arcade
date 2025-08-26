@@ -55,7 +55,7 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  def parse_public_input(public_input) when is_list(public_input) and length(public_input) >= 96 do
+  def parse_public_input_risc0_sp1(public_input) when is_list(public_input) and length(public_input) >= 96 do
     <<level_bytes::binary-size(32), game_bytes::binary-size(32), address_bytes::binary-size(32)>> =
       :binary.list_to_bin(public_input)
 
@@ -69,6 +69,15 @@ defmodule ZkArcadeWeb.ProofController do
       level: level,
       game: Base.encode16(game_bytes, case: :lower),
       address: "0x" <> Base.encode16(binary_part(address_bytes, 12, 20), case: :lower)
+    }
+  end
+
+  # TODO: Replace with the proof public inputs when available
+  def parse_public_input_circom(public_input) when is_list(public_input) do
+    %{
+      level: 0,
+      game: "00000000000000000000000000000000",
+      address: "0x0000000000000000000000000000000000000000"
     }
   end
 
@@ -99,8 +108,25 @@ defmodule ZkArcadeWeb.ProofController do
               submit_proof_message["verificationData"]["verificationData"]["provingSystem"]
 
           %{level: level, game: gameConfig, address: _address} =
-            submit_proof_message["verificationData"]["verificationData"]["publicInput"]
-            |> parse_public_input()
+            case proving_system do
+              "Risc0" ->
+                parse_public_input_risc0_sp1(
+                  submit_proof_message["verificationData"]["verificationData"]["publicInput"]
+                )
+
+              "SP1" ->
+                parse_public_input_risc0_sp1(
+                  submit_proof_message["verificationData"]["verificationData"]["publicInput"]
+                )
+
+              "CircomGroth16Bn256" ->
+                parse_public_input_circom(
+                  submit_proof_message["verificationData"]["verificationData"]["publicInput"]
+                )
+
+              _ ->
+                raise "Unsupported proving system: #{proving_system}"
+            end
 
           max_fee =
             submit_proof_message["verificationData"]["maxFee"]

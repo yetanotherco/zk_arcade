@@ -33,7 +33,7 @@ defmodule ZkArcade.Proofs.Proof do
     |> validate_required([:verification_data, :verification_data_commitment, :wallet_address, :status, :game, :proving_system, :submitted_max_fee])
     |> validate_inclusion(:status, ["pending", "submitted", "failed", "claimed", "verified"])
     |> validate_inclusion(:game, ["Beast", "Sudoku", "Parity"])
-    |> validate_inclusion(:proving_system, ["Risc0", "SP1"]) # TODO add more proving systems
+    |> validate_inclusion(:proving_system, ["Risc0", "SP1", "CircomGroth16Bn256"]) # TODO add more proving systems
     |> foreign_key_constraint(:wallet_address)
     |> update_timestamps(attrs)
   end

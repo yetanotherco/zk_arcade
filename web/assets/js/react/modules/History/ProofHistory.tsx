@@ -103,6 +103,8 @@ const Entry = ({
 				userBeastSubmissions={[]}
 				user_address={user_address}
 				proof={proof}
+				proofToSubmitData={null}
+				gameName="beast"
 			/>
 		</>
 	);

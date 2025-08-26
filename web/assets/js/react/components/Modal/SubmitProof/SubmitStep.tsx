@@ -37,7 +37,19 @@ const GAMES: Game[] = [
 		name: "Beast",
 		cover: "/images/beast.jpg",
 	},
+	{
+		id: "parity",
+		name: "Parity",
+		cover: "/images/parity.jpg",
+	},
+	{
+		id: "Sudoku",
+		name: "Sudoku",
+		cover: "/images/sudoku.jpg",
+	}
 ];
+
+const getGameData = (id: GameId) => GAMES.find((game) => game.id === id);
 
 type GameId = (typeof GAMES)[number]["id"];
 
@@ -64,6 +76,8 @@ export const SubmitProofStep = ({
 	proofSubmission,
 	proofStatus,
 	setProofStatus,
+	proofToSubmitData,
+	gameName,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -75,9 +89,10 @@ export const SubmitProofStep = ({
 	proofSubmission?: ProofSubmission;
 	proofStatus?: ProofSubmission["status"];
 	setProofStatus: (status: ProofSubmission["status"]) => void;
+	proofToSubmitData: VerificationData | null;
+	gameName: string;
 }) => {
 	const chainId = useChainId();
-	const [game, setGame] = useState<GameId>("beast");
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
@@ -288,6 +303,55 @@ export const SubmitProofStep = ({
 		nonce,
 	]);
 
+	const handleSend = useCallback(async (proofToSubmitData: VerificationData) => {
+		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
+		if (!maxFee) {
+			alert("Could not estimate max fee");
+			return;
+		}
+
+		if (nonce == null) {
+			alert("Nonce is still loading or failed");
+			return;
+		}
+
+		const noncedVerificationdata: NoncedVerificationdata = {
+			maxFee: toHex(maxFee, { size: 32 }),
+			nonce: toHex(nonce, { size: 32 }),
+			chain_id: toHex(chainId, { size: 32 }),
+			payment_service_addr,
+			verificationData: proofToSubmitData,
+		};
+
+		const { r, s, v } = await signVerificationData(
+			noncedVerificationdata,
+			payment_service_addr
+		);
+
+		const submitProofMessage: SubmitProof = {
+			verificationData: noncedVerificationdata,
+			signature: {
+				r,
+				s,
+				v: Number(v),
+			},
+		};
+
+		setSubmitProofMessage(JSON.stringify(submitProofMessage));
+		setSubmissionIsLoading(true);
+		window.setTimeout(() => {
+			formRef.current?.submit();
+		}, 100);
+
+	}, [
+		setSubmitProofMessage,
+		estimateMaxFeeForBatchOfProofs,
+		signVerificationData,
+		payment_service_addr,
+		chainId,
+		nonce,
+	]);
+
 	const [bumpLoading, setBumpLoading] = useState(false);
 	const formRetryRef = useRef<HTMLFormElement>(null);
 	const handleBump = async (chosenWei: bigint) => {
@@ -405,7 +469,7 @@ export const SubmitProofStep = ({
 
 				<div className="flex flex-col gap-2">
 					<p>Prover: {provingSystem}</p>
-					<p>Game: {game}</p>
+					<p>Game: {gameName}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
 				</div>
 
@@ -493,83 +557,57 @@ export const SubmitProofStep = ({
 				</p>
 				<div className="flex flex-col gap-2">
 					<p>Prover: {provingSystem}</p>
-					<p>Game: {game}</p>
+					<p>Game: {gameName}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
 				</div>
 			</div>
 		);
 	}
 
+	const gameData = getGameData(gameName);
+
 	return (
 		<div className="flex flex-col gap-6 justify-between h-full">
-			<div className="w-full flex flex-col gap-8">
-				<div>
-					<p className="mb-2">What game have you proved?</p>
-					<div className="flex gap-4 overflow-x-auto p-2">
-						{GAMES.map(g => {
-							const isActive = g.id === game;
-							return (
-								<button
-									key={g.id}
-									onClick={() => setGame(g.id)}
-									className="flex-shrink-0"
-								>
-									<img
-										src={g.cover}
-										alt={g.name}
-										className={`w-[150px] h-[100px] object-cover rounded border-2 transition  ${
-											isActive
-												? "border-blue"
-												: "border-transparent"
-										}`}
-									/>
-									<div className="flex flex-row gap-2 justify-center items-center mt-1">
-										<div
-											className={`h-[15px] w-[15px] border border-accent-100 rounded-full ${
-												isActive ? "bg-accent-100" : ""
-											}`}
-										></div>
-										<p>{g.name}</p>
-									</div>
-								</button>
-							);
-						})}
+			<div className="w-full flex flex-col gap-4">
+				<div className="flex flex-col overflow-x-auto p-2 max-w-[150px]">
+					<div className="">
+						<img
+							src={gameData?.cover}
+							alt={gameData?.name}
+							className="w-[150px] h-[100px] object-cover rounded border-2"
+						/>
+					</div>
+					<div className="text-center">
+					{gameData?.name}
 					</div>
 				</div>
 				<div>
-					<div className="mb-2">
-						<p>Proof file</p>
-						<p className="text-sm text-text-200">
-							Submit the solution of the file
-						</p>
-					</div>
-					<form
-						ref={formRef}
-						action="/proof/"
-						method="post"
-						className="hidden"
-					>
-						<input
-							type="hidden"
-							name="submit_proof_message"
-							value={submitProofMessage}
-						/>
-						<input
-							type="hidden"
-							name="_csrf_token"
-							value={csrfToken}
-						/>
-						<input type="hidden" name="game" value={"Beast"} />
-					</form>
+					{proofToSubmitData ? 
+						<div>
+							<p className="text-xl mb-2">Proof data:</p>
+							<p className="mb-1">Proof size: {proofToSubmitData.proof.length} bytes</p>
+							<p>Public Input size: {proofToSubmitData.publicInput?.length} bytes</p>
+						</div>
 
-					<div className="flex flex-col gap-6">
-						<FormInput
-							name="proof-data"
-							id="proof-data"
-							type="file"
-							onChange={handleCombinedProofFile}
-						/>
-					</div>
+					: 
+						<div>
+							<div className="mb-2">
+								<p>Proof file</p>
+								<p className="text-sm text-text-200">
+									Submit the solution of the file
+								</p>
+							</div>
+
+							<div className="flex flex-col gap-6">
+								<FormInput
+									name="proof-data"
+									id="proof-data"
+									type="file"
+									onChange={handleCombinedProofFile}
+								/>
+							</div>
+						</div>
+					}
 				</div>
 				<div className="flex flex-col gap-2">
 					{provingSystem && <p>Prover: {provingSystem}</p>}
@@ -618,6 +656,17 @@ export const SubmitProofStep = ({
 					)}
 				</div>
 			</div>
+
+			<form
+				ref={formRef}
+				action="/proof/"
+				method="post"
+				className="hidden"
+			>
+				<input type="hidden" name="submit_proof_message" value={submitProofMessage} />
+				<input type="hidden" name="_csrf_token" value={csrfToken} />
+				<input type="hidden" name="game" value={gameData?.name} />
+			</form>
 			<Button
 				variant="text"
 				className="font-normal text-start flex items-center gap-2"
@@ -634,11 +683,12 @@ export const SubmitProofStep = ({
 				>
 					Cancel
 				</Button>
-				<Button
-					variant="accent-fill"
-					disabled={
-						!proof ||
-						!proofId ||
+				{!proofToSubmitData ? (
+					<Button
+						variant="accent-fill"
+						disabled={
+							!proof ||
+							!proofId ||
 						!publicInputs ||
 						(balance.data || 0) < maxFee ||
 						nonceLoading ||
@@ -649,6 +699,20 @@ export const SubmitProofStep = ({
 				>
 					Confirm
 				</Button>
+				) : (
+					<Button
+						variant="accent-fill"
+						disabled={
+							(balance.data || 0) < maxFee ||
+							nonceLoading ||
+							nonce == null
+						}
+						isLoading={submissionIsLoading}
+						onClick={() => handleSend(proofToSubmitData)}
+					>
+						Confirm
+					</Button>
+				)}
 			</div>
 		</div>
 	);

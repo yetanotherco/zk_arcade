@@ -17,18 +17,14 @@ export const useParityControls = ({
 	const [values, setValues] = useState<number[]>(() => initialValues);
 	const [hasWon, setHasWon] = useState(false);
 
-	const [userPositions, setUserPositions] = useState<[number, number][]>(() => 
-		[[initialPosition.col, initialPosition.row]]
-	);
-	const [levelBoards, setLevelBoards] = useState<number[][]>(() => 
-		[initialValues.slice()]
-	);
+	const [userPositions, setUserPositions] = useState<[number, number][]>(() => []);
+	const [levelBoards, setLevelBoards] = useState<number[][]>(() => []);
 
 	const reset = () => {
 		setValues(initialValues);
 		setPosition(initialPosition);
-		setUserPositions([[initialPosition.col, initialPosition.row]]);
-		setLevelBoards([initialValues.slice()]);
+		setUserPositions(() => []);
+		setLevelBoards(() => []);
 	};
 
 	useEffect(() => {
@@ -67,6 +63,11 @@ export const useParityControls = ({
 					const allEqual = next.every(v => v === next[0]);
 					if (allEqual) setHasWon(true);
 
+					if (userPositions.length === 0){
+						setUserPositions(prevPos => [...prevPos, [prev.col, prev.row]]);
+						setLevelBoards(prevBoards => [...prevBoards, prevVals.slice()]);
+					}
+
 					setUserPositions(prevPos => [...prevPos, [newCol, newRow]]);
 					setLevelBoards(prevBoards => [...prevBoards, next.slice()]);
 
@@ -79,7 +80,7 @@ export const useParityControls = ({
 
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [size]);
+	}, [size, userPositions, levelBoards]);
 
 	return {
 		values,

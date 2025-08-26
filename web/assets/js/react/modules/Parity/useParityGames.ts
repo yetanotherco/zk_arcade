@@ -1,21 +1,46 @@
-import { useState } from "react";
-import { Address } from "viem";
+import { useEffect, useState } from "react";
+import { Address, toBytes } from "viem";
+import { ParityLevel } from "./types";
+import { useParityLeaderboardContract } from "../../hooks/useParityLeaderboardContract";
 
-// TODO: this is all hardcoded for now, we would query this from the backend or contract
-export const useParityGames = (_userAddress: Address) => {
-	const playerLevelReached = 1;
+type Args = {
+	leaderBoardContractAddress: Address;
+};
+
+export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
+	const { currentGame } = useParityLeaderboardContract({
+		contractAddress: leaderBoardContractAddress,
+	});
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
-	const levels = [
-		[6, 8, 8, 6, 8, 8, 6, 5, 8],
-		[-5, -5, -4, -5, -6, -7, -7, -8, -7],
-		[0, -2, -3, 1, -1, -1, 1, 0, 1],
-		[6, 3, 4, 3, 0, 3, 2, 0, 3],
-		[-7, -10, -9, -8, -12, -13, -8, -11, -13],
-		[4, 3, 2, 4, 3, 0, 4, 3, 1],
-		[5, 6, 5, 1, 1, 4, 4, 4, 6],
-		[17, 16, 15, 17, 17, 16, 18, 18, 18],
-		[-2, -2, -2, -3, -3, -7, -4, -8, -11],
-	];
+	const [levels, setLevels] = useState<ParityLevel[]>([]);
+
+	useEffect(() => {
+		if (!currentGame.data) {
+			return;
+		}
+
+		let gameConfigBytes = toBytes(currentGame.data.gameConfig);
+
+		let levels: ParityLevel[] = [];
+
+		for (let i = 0; i < gameConfigBytes.length / 10; i++) {
+			let byte_idx = i * 10;
+			let initialPos: ParityLevel["initialPos"] = { col: 0, row: 0 };
+			initialPos.col = gameConfigBytes[byte_idx] >> 4;
+			initialPos.row = gameConfigBytes[byte_idx] & 0xf;
+			byte_idx += 1;
+			let board = [];
+			for (let j = 0; j < 9; j++) {
+				board[j] = gameConfigBytes[byte_idx];
+				byte_idx += 1;
+			}
+			levels.push({ board, initialPos });
+		}
+
+		setLevels(levels);
+	}, [currentGame.data]);
+
+	const playerLevelReached = 1;
 	const renewsIn = new Date();
 
 	return {

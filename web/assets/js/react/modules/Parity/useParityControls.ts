@@ -76,5 +76,6 @@ export const useParityControls = ({
 		reset,
 		hasWon,
 		setValues,
+		setPosition,
 	};
 };

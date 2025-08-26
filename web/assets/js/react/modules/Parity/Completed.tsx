@@ -24,7 +24,7 @@ export const Completed = ({
 				</p>
 			</div>
 			<Button variant="arcade" onClick={() => setGameState("home")}>
-				I am the best
+				Ok!
 			</Button>
 		</div>
 	);

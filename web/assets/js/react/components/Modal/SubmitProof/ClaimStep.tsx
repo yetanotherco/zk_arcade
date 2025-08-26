@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Button } from "../../Button";
 import { ProofSubmission } from "../../../types/aligned";
-import { useLeaderboardContract } from "../../../hooks";
+import { useBeastLeaderboardContract } from "../../../hooks";
 import { Address } from "../../../types/blockchain";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
 
@@ -18,7 +18,7 @@ export const ClaimStep = ({
 	leaderboard_address: Address;
 	proofStatus?: ProofSubmission["status"];
 }) => {
-	const { submitSolution, currentGame } = useLeaderboardContract({
+	const { submitSolution, currentGame } = useBeastLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});

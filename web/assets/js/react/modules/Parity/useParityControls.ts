@@ -91,5 +91,6 @@ export const useParityControls = ({
 		userPositions,
 		levelBoards,
 		setValues,
+		setPosition,
 	};
 };

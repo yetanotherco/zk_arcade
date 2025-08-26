@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { ParityGameState } from "./types";
+import React, { useEffect } from "react";
+import { ParityGameState, ParityLevel } from "./types";
 import { Button } from "../../components";
 import { ParityBoard } from "./Board";
 import { useSwapTransition } from "./useSwapTransition";
@@ -44,7 +44,7 @@ export const PlayState = ({
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
-	levels: number[][];
+	levels: ParityLevel[];
 	setCurrentLevel: (level: number) => void;
 	playerLevelReached: number;
 	renewsIn: Date;
@@ -61,7 +61,8 @@ export const PlayState = ({
 				<PickGame
 					setLevel={number => {
 						setCurrentLevel(number);
-						setValues(levels[number - 1]);
+						setValues(levels[number - 1].board);
+						setPosition(levels[number - 1].initialPos);
 					}}
 					numberOfGames={levels.length}
 					unlockedUntil={playerLevelReached}

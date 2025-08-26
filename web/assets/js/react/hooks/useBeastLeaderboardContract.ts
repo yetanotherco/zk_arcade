@@ -32,7 +32,7 @@ function getBeastKey(user: `0x${string}`, game: bigint): `0x${string}` {
 	return beastKey;
 }
 
-export const useLeaderboardContract = ({
+export const useBeastLeaderboardContract = ({
 	contractAddress,
 	userAddress,
 }: Args) => {

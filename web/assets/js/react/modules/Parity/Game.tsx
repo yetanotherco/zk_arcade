@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
 import { Button } from "../../components";
 import { ParityTutorial } from "./Tutorial";
 import { ParityGameState } from "./types";
@@ -21,7 +21,6 @@ type GameProps = {
 };
 
 export const Game = ({ network, payment_service_address, user_address, leaderboard_address, batcher_url }: GameProps) => {
-
 	const [gameState, setGameState] = useState<ParityGameState>("home");
 	const { muted, toggleMuted } = useAudioState();
 	const {
@@ -30,7 +29,7 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 		playerLevelReached,
 		setCurrentLevel,
 		renewsIn,
-	} = useParityGames(user_address);
+	} = useParityGames({ leaderBoardContractAddress: leaderboard_address });
 
 	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards } = useParityControls(
 		{
@@ -41,6 +40,19 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 					: [0, 0, 0, 0, 0, 0, 0, 0, 0],
 		}
 	);
+
+	const goToNextLevel = useCallback(() => {
+		setCurrentLevel(prev => {
+			if (prev === levels.length) {
+				setGameState("all-levels-completed");
+				return prev;
+			}
+			const next = prev == null ? 0 : prev + 1;
+			setGameState("running");
+
+			return next;
+		});
+	}, [levels.length, setCurrentLevel, setGameState]);
 
 	const gameComponentBasedOnState: {
 		[key in ParityGameState]: ReactNode;
@@ -92,20 +104,7 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 		),
 		proving: (
 			<ProveAndSubmit
-				goToNextLevel={() => {
-					setCurrentLevel(prev => {
-						if (prev === levels.length - 1) {
-							setGameState("all-levels-completed");
-							return prev;
-						}
-						if (prev) {
-							return prev + 1;
-						}
-
-						return 0;
-					});
-					setGameState("running");
-				}}
+				goToNextLevel={goToNextLevel}
 				levelBoards={levelBoards}
 				userPositions={userPositions}
 				batcher_url={batcher_url}

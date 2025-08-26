@@ -1,0 +1,5 @@
+[workspace]
+resolver = "2"
+members = ["./level_generator"]
+
+[workspace.dependencies]

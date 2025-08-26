@@ -31,15 +31,17 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 		renewsIn,
 	} = useParityGames({ leaderBoardContractAddress: leaderboard_address });
 
-	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards } = useParityControls(
-		{
-			initialPosition: { col: 0, row: 0 },
+	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards, setPosition } =
+		useParityControls({
+			initialPosition:
+				currentLevel !== null
+					? levels[currentLevel - 1].initialPos
+					: { row: 0, col: 0 },
 			initialValues:
 				currentLevel !== null
-					? levels[currentLevel - 1]
+					? levels[currentLevel - 1].board
 					: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-		}
-	);
+		});
 
 	const goToNextLevel = useCallback(() => {
 		setCurrentLevel(prev => {
@@ -100,6 +102,7 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				values={values}
 				reset={reset}
 				setValues={setValues}
+				setPosition={setPosition}
 			/>
 		),
 		proving: (

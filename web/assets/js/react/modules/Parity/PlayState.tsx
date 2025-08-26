@@ -41,6 +41,7 @@ export const PlayState = ({
 	positionIdx,
 	reset,
 	hasWon,
+	setPosition,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
@@ -53,6 +54,7 @@ export const PlayState = ({
 	positionIdx: number;
 	reset: () => void;
 	hasWon: boolean;
+	setPosition: (position: { col: number; row: number }) => void;
 }) => {
 	const view = useSwapTransition(
 		currentLevel,

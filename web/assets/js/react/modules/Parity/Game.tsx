@@ -13,7 +13,6 @@ import { useAudioState } from "../../state/audio";
 export const Game = ({
 	leaderboard_address,
 }: {
-	userAddress: Address;
 	leaderboard_address: Address;
 }) => {
 	const [gameState, setGameState] = useState<ParityGameState>("home");

@@ -27,7 +27,7 @@ export async function generateCircomParityProof({
     console.log("User positions:", userPositions);
     console.log("Levels boards:", levelsBoards);
 
-    // There is a bug in how the levels are filled.
+    // There is a bug in how the levels are filled. 
 
     // Fill the remaining rounds for each passed level with the last state
     for (let i = 0; i < levelsBoards.length; i++) {

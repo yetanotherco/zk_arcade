@@ -14,12 +14,17 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
 	const [levels, setLevels] = useState<ParityLevel[]>([]);
 
+	const [currentGameConfig, setCurrentGameConfig] = useState<string>("");
+
+
 	useEffect(() => {
 		if (!currentGame.data) {
 			return;
 		}
 
 		let gameConfigBytes = toBytes(currentGame.data.gameConfig);
+
+		setCurrentGameConfig(currentGame.data.gameConfig);
 
 		let levels: ParityLevel[] = [];
 
@@ -38,7 +43,7 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 		}
 
 		setLevels(levels);
-	}, [currentGame.data]);
+	}, [currentGame.data, currentGameConfig]);
 
 	const playerLevelReached = 1;
 	const renewsIn = new Date();
@@ -49,5 +54,6 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 		setCurrentLevel,
 		levels,
 		renewsIn,
+		currentGameConfig
 	};
 };

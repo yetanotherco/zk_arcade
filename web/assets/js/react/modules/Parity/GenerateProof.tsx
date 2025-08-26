@@ -23,6 +23,12 @@ export async function generateCircomParityProof({
     userPositions,
     levelsBoards,
 }: GenerateSubmitProofParams): Promise<VerificationData> {
+    console.log("Generating proof for user:", user_address);
+    console.log("User positions:", userPositions);
+    console.log("Levels boards:", levelsBoards);
+
+    // There is a bug in how the levels are filled.
+
     // Fill the remaining rounds for each passed level with the last state
     for (let i = 0; i < levelsBoards.length; i++) {
         const roundsToFill = MaxRounds - userPositions[i].length;

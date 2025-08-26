@@ -42,6 +42,7 @@ export const PlayState = ({
 	reset,
 	hasWon,
 	setPosition,
+	setHasWon,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
@@ -55,6 +56,7 @@ export const PlayState = ({
 	reset: () => void;
 	hasWon: boolean;
 	setPosition: (position: { col: number; row: number }) => void;
+	setHasWon: (hasWon: boolean) => void;
 }) => {
 	const view = useSwapTransition(
 		currentLevel,
@@ -83,8 +85,11 @@ export const PlayState = ({
 	);
 
 	useEffect(() => {
-		if (hasWon) setGameState("proving");
-	}, [hasWon]);
+		if (hasWon) {
+			setGameState("proving");
+			setHasWon(false);
+		}
+	}, [hasWon, setHasWon]);
 
 	return (
 		<div className="w-full h-full flex flex-col gap-4 items-center">

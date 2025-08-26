@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { Button } from "../../components";
 import { ParityTutorial } from "./Tutorial";
 import { ParityGameState } from "./types";
@@ -29,9 +29,10 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 		playerLevelReached,
 		setCurrentLevel,
 		renewsIn,
+		currentGameConfig,
 	} = useParityGames({ leaderBoardContractAddress: leaderboard_address });
 
-	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards, setPosition } =
+	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards, setPosition, setHasWon } =
 		useParityControls({
 			initialPosition:
 				currentLevel !== null
@@ -51,6 +52,9 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 			}
 			const next = prev == null ? 0 : prev + 1;
 			setGameState("running");
+
+			setValues(levels[next - 1].board);
+			setPosition(levels[next - 1].initialPos);
 
 			return next;
 		});
@@ -103,6 +107,7 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				reset={reset}
 				setValues={setValues}
 				setPosition={setPosition}
+				setHasWon={setHasWon}
 			/>
 		),
 		proving: (
@@ -114,6 +119,8 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				leaderboard_address={leaderboard_address}
 				payment_service_address={payment_service_address}
 				user_address={user_address}
+				setGameState={setGameState}
+				currentGameConfig={currentGameConfig}
 			/>
 		),
 		"all-levels-completed": (

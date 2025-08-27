@@ -1,4 +1,3 @@
-import { formatEther, toHex } from "viem";
 import { VerificationData } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import * as snarkjs from "snarkjs";
@@ -18,44 +17,66 @@ type GenerateSubmitProofParams = {
 const MaxRounds = 32;
 const MaxLevels = 3;
 
+// We clone the positions to avoid overlapping between the round elements of each level
+function clonePos(p: [number, number]): [number, number] {
+    return [p[0], p[1]];
+}
+
+// Fill the elements of the remaining rounds for each passed level with the last state recorded
+function fillLevelElements(
+    positions: [number, number][],
+    boards: number[][]
+): { positions: [number, number][]; boards: number[][] } {
+    const pos = positions.map(clonePos);
+    const brd = boards.map((row) => row.slice());
+
+    const lastPos: [number, number] = pos[pos.length - 1] ?? [0, 0];
+    const lastBrd: number[] = brd[brd.length - 1] ?? Array(9).fill(0);
+
+    while (pos.length < MaxRounds) pos.push(clonePos(lastPos));
+    while (brd.length < MaxRounds) brd.push([...lastBrd]);
+
+    return { positions: pos, boards: brd };
+}
+
+function makeEmptyLevel(): { positions: [number, number][]; boards: number[][] } {
+    const zeroPos: [number, number] = [0, 0];
+    const zeroBoard = Array(9).fill(0);
+    return {
+        positions: Array.from({ length: MaxRounds }, () => clonePos(zeroPos)),
+        boards: Array.from({ length: MaxRounds }, () => [...zeroBoard]),
+    };
+}
+
 export async function generateCircomParityProof({
     user_address,
     userPositions,
     levelsBoards,
 }: GenerateSubmitProofParams): Promise<VerificationData> {
-    console.log("Generating proof for user:", user_address);
-    console.log("User positions:", userPositions);
-    console.log("Levels boards:", levelsBoards);
+    const allUserPositions: [number, number][][] = [];
+    const allLevelsBoards: number[][][] = [];
 
-    // There is a bug in how the levels are filled. 
+    const usedLevels = Math.min(levelsBoards.length, MaxLevels);
 
-    // Fill the remaining rounds for each passed level with the last state
-    for (let i = 0; i < levelsBoards.length; i++) {
-        const roundsToFill = MaxRounds - userPositions[i].length;
-        const lastPosition = userPositions[i][userPositions[i].length - 1] || [0, 0];
-        const lastLevelBoard = levelsBoards[i][levelsBoards[i].length - 1] || [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < usedLevels; i++) {
+        const levelUserPositions = userPositions[i] ?? [];
+        const levelBoards = levelsBoards[i] ?? [];
 
-        for (let j = 0; j < roundsToFill; j++) {
-            userPositions[i].push(lastPosition);
-            levelsBoards[i].push(lastLevelBoard);
-        }
+        const { positions, boards } = fillLevelElements(levelUserPositions, levelBoards);
+        allUserPositions.push(positions);
+        allLevelsBoards.push(boards);
     }
 
-    // Fill not passed levels with zeros
-    const levelsToFill = MaxLevels - levelsBoards.length;
-
-    for (let i = 0; i < levelsToFill; i++) {
-        const emptyLevelBoards = Array(MaxRounds).fill(Array(9).fill(0));
-        levelsBoards.push(emptyLevelBoards);
-
-        const emptyUserPositions = Array(MaxRounds).fill([0, 0]);
-        userPositions.push(emptyUserPositions);
+    while (allLevelsBoards.length < MaxLevels) {
+        const empty = makeEmptyLevel();
+        allUserPositions.push(empty.positions);
+        allLevelsBoards.push(empty.boards);
     }
 
     const input = {
-        levelsBoards: levelsBoards,
-        userPositions: userPositions,
-        userAddress: user_address
+        levelsBoards: allLevelsBoards,
+        userPositions: allUserPositions,
+        userAddress: user_address,
     };
 
     const wasmPath = "/artifacts/parity.wasm";

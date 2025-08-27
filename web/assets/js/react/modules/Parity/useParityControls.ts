@@ -25,6 +25,15 @@ export const useParityControls = ({
 		setPosition(initialPosition);
 		setUserPositions(() => []);
 		setLevelBoards(() => []);
+		setHasWon(false);
+	};
+
+	const startLevel = (pos: Position, vals: number[]) => {
+		setPosition(pos);
+		setValues(vals);
+		setUserPositions([]);
+		setLevelBoards([]);
+		setHasWon(false);
 	};
 
 	useEffect(() => {
@@ -80,13 +89,14 @@ export const useParityControls = ({
 
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [size, userPositions, levelBoards]);
+	}, [size]);
 
 	return {
 		values,
 		position,
 		positionIdx: position.row * size + position.col,
 		reset,
+		startLevel,
 		hasWon,
 		userPositions,
 		levelBoards,

@@ -43,7 +43,7 @@ export const ProveAndSubmit = ({
 			? JSON.parse(stored)
 			: {};
 
-		const currentLevelReached = gameData[currentGameConfig] || {
+		const currentLevelReached: GameStatus = gameData[currentGameConfig] || {
 			levelsBoards: [],
 			userPositions: [],
 		};
@@ -51,10 +51,8 @@ export const ProveAndSubmit = ({
 		currentLevelReached.levelsBoards.push(levelBoards);
 		currentLevelReached.userPositions.push(userPositions);
 
-		console.log("Current Level Reached for proof generation:", currentLevelReached);
-
 		const submitproofVerificationData = await generateCircomParityProof({
-			user_address: user_address,
+			user_address,
 			userPositions: currentLevelReached.userPositions,
 			levelsBoards: currentLevelReached.levelsBoards,
 		});
@@ -69,12 +67,10 @@ export const ProveAndSubmit = ({
 			? JSON.parse(stored)
 			: {};
 
-		const currentLevelReached = gameData[currentGameConfig] || {
+		const currentLevelReached: GameStatus = gameData[currentGameConfig] || {
 			levelsBoards: [],
 			userPositions: [],
 		};
-
-		console.log("Current Level Reached:", currentLevelReached);
 
 		currentLevelReached.levelsBoards.push(levelBoards);
 		currentLevelReached.userPositions.push(userPositions);
@@ -83,7 +79,7 @@ export const ProveAndSubmit = ({
 		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
 	};
 
-	const view = useSwapTransition(proofVerificationData, (_, proven) =>
+	const view = useSwapTransition(proofVerificationData, (_, proven) => (
 		<div>
 			<div className="w-full h-full flex flex-col gap-4 items-center max-w-[500px]">
 				<div className="h-full w-full flex flex-col gap-10 items-center justify-center">
@@ -120,7 +116,7 @@ export const ProveAndSubmit = ({
 				</div>
 			</div>
 		</div>
-	);
+	));
 
 	return (
 		<div>

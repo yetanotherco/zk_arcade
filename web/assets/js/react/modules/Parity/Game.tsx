@@ -32,7 +32,7 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 		currentGameConfig,
 	} = useParityGames({ leaderBoardContractAddress: leaderboard_address });
 
-	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards, setPosition, setHasWon } =
+	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards, setPosition, setHasWon, startLevel } =
 		useParityControls({
 			initialPosition:
 				currentLevel !== null
@@ -53,12 +53,13 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 			const next = prev == null ? 0 : prev + 1;
 			setGameState("running");
 
-			setValues(levels[next - 1].board);
-			setPosition(levels[next - 1].initialPos);
+			const nextBoard = levels[next - 1].board;
+			const nextPos = levels[next - 1].initialPos;
+			startLevel(nextPos, nextBoard);
 
 			return next;
 		});
-	}, [levels.length, setCurrentLevel, setGameState]);
+	}, [levels, setCurrentLevel, setGameState, startLevel]);
 
 	const gameComponentBasedOnState: {
 		[key in ParityGameState]: ReactNode;

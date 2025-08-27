@@ -134,4 +134,10 @@ defmodule ZkArcade.Leaderboard do
       end
     end
   end
+
+  def count_total_claimed_points() do
+    LeaderboardEntry
+    |> Repo.aggregate(:sum, :score)
+    |> Kernel.||(0)
+  end
 end

@@ -24,6 +24,14 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     /// See `getBeastKey` to see the key implementation
     mapping(bytes32 => uint256) public usersBeastLevelCompleted;
 
+    struct ParityGame {
+        uint256 endsAtTime;
+        bytes gameConfig;
+        uint256 startsAtTime;
+    }
+
+    ParityGame[] public parityGames;
+
     function getBeastKey(address user, uint256 game) internal pure returns (bytes32) {
         bytes32 gameHash = keccak256(abi.encodePacked(game));
         return keccak256(abi.encodePacked(user, gameHash));
@@ -41,6 +49,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error UserIsNotWhitelisted(address);
     error InvalidGame(uint256 expected, uint256 provided);
     error NoActiveBeastGame();
+    error NoActiveParityGame();
 
     /**
      * Events
@@ -56,12 +65,14 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         address _alignedServiceManager,
         address _alignedBatcherPaymentService,
         address _zkArcadeNft,
-        BeastGame[] calldata _beastGames
+        BeastGame[] calldata _beastGames,
+        ParityGame[] calldata _parityGames
     ) public initializer {
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
         zkArcadeNft = _zkArcadeNft;
+        parityGames = _parityGames;
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
     }
@@ -76,6 +87,20 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function setZkArcadeNftAddress(address nftContractAddress) public onlyOwner {
         zkArcadeNft = nftContractAddress;
+    }
+
+    /// @notice Sets the parity games configuration
+    /// @param _parityGames The new parity games configuration
+    function setParityGames(ParityGame[] calldata _parityGames) public onlyOwner {
+        parityGames = _parityGames;
+    }
+
+    /// @notice Adds new parity games configuration
+    /// @param _newParityGames The new parity games configuration to add
+    function addParityGames(ParityGame[] calldata _newParityGames) public onlyOwner {
+        for (uint256 i = 0; i < _newParityGames.length; i++) {
+            parityGames.push(_newParityGames[i]);
+        }
     }
 
     function submitBeastSolution(
@@ -159,6 +184,16 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
 
         revert NoActiveBeastGame();
+    }
+
+    function getCurrentParityGame() public view returns (ParityGame memory) {
+        for (uint256 i = 0; i < parityGames.length; i++) {
+            if (block.timestamp >= parityGames[i].startsAtTime && block.timestamp < parityGames[i].endsAtTime) {
+                return parityGames[i];
+            }
+        }
+
+        revert NoActiveParityGame();
     }
 
     function getTop10Score() external view returns (address[10] memory) {

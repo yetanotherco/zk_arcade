@@ -21,15 +21,19 @@ contract LeaderboardDeployer is Script {
         Leaderboard.BeastGame[] memory beastGames =
             abi.decode(vm.parseJson(configData, ".games"), (Leaderboard.BeastGame[]));
 
+        Leaderboard.ParityGame[] memory parityGames =
+            abi.decode(vm.parseJson(configData, ".parityGames"), (Leaderboard.ParityGame[]));
+
         vm.startBroadcast();
         Leaderboard implementation = new Leaderboard();
         bytes memory data = abi.encodeWithSignature(
-            "initialize(address,address,address,address,(uint256,uint256,uint256)[])",
+            "initialize(address,address,address,address,(uint256,uint256,uint256)[],(uint256,bytes,uint256)[])",
             owner,
             alignedServiceManagerAddress,
             alignedBatcherPaymentAddress,
             zkArcadeNftContract,
-            beastGames
+            beastGames,
+            parityGames
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);
         vm.stopBroadcast();

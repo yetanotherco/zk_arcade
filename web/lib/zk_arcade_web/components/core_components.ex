@@ -57,14 +57,16 @@ defmodule ZkArcadeWeb.CoreComponents do
         </div>
 
         <div class="flex gap-8 items-center">
-          <x-app-submit-proof
-              network={@network}
-              payment_service_address={@payment_service_address}
-              user_address={@wallet}
-              batcher_url={@batcher_url}
-              leaderboard_address={@leaderboard_address}
-              beast_submissions={@beast_submissions}
-          />
+          <div class="hidden sm:block">
+            <x-app-submit-proof
+                network={@network}
+                payment_service_address={@payment_service_address}
+                user_address={@wallet}
+                batcher_url={@batcher_url}
+                leaderboard_address={@leaderboard_address}
+                beast_submissions={@beast_submissions}
+            />
+          </div>
 
           <x-app-user-wallet
               network={@network}
@@ -316,11 +318,63 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
+  def home_game_component_hero(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
+    ~H"""
+    <%= if @disabled == "true" do %>
+      <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
+        <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
+      </div>
+    <% else %>
+      <.link href={@link} class="w-[350px] h-full shrink-0">
+        <div class="w-full h-full flex flex-col cursor-pointer bg-contrast-300 rounded p-5 group">
+          <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
+        </div>
+      </.link>
+    <% end %>
+    """
+  end
+
+  defp game_content_hero(assigns) do
+    ~H"""
+    <div class="flex gap-2">
+      <img class="rounded mb-1 w-full h-[75px] w-[100px]" src={@img}/>
+      <p class="text-xs text-text-200"><%= @desc %></p>
+    </div>
+    <div>
+        <h3 class="text-lg font-normal group-hover:underline underline-offset-4">
+          <%= @title %>
+        </h3>
+      <div class="flex gap-2">
+        <%= for variant <- @tags do %>
+          <.tag variant={variant} />
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  def step_component(%{number: number, title: title, desc: desc, show_line: show_line} = assigns) do
+    ~H"""
+    <div class="w-full">
+
+      <div class="flex flex-col w-full justify-center items-center">
+        <div class="mb-2 h-[100px] w-[100px] rounded-full bg-accent-100/20 border border-accent-100 flex items-center justify-center">
+          <p class="text-2xl text-text-100"><%= @number %></p>
+        </div>
+        <h3 class="text-text-100 text-xl"><%= @title %></h3>
+        <p class="text-text-200 text-md text-center" style="min-width: 220px;"><%= @desc %></p>
+      </div>
+    </div>
+    """
+  end
+
   def home_statistic(%{label: label, value: value, desc: desc} = assigns) do
     ~H"""
-      <div class="bg-contrast-300 p-2 rounded" style="width: 205px">
-        <p class="text-text-100 text-sm mb-2"><%= @label %></p>
-        <h1 class="font-normal text-accent-100 text-4xl mb-1"><%= @value %></h1>
+      <div class="bg-contrast-300 p-2 flex flex-col justify-between rounded h-full w-full">
+        <div>
+          <p class="text-text-100 text-sm mb-2"><%= @label %></p>
+          <h1 class="font-normal text-accent-100 text-4xl mb-1"><%= @value %></h1>
+        </div>
         <div class="flex w-full justify-end">
           <p class="text-text-100 bg-contrast-100 text-sm rounded" style="padding: 0 5px"><%= @desc %></p>
         </div>
@@ -376,7 +430,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     <table class="table-fixed border-collapse w-full">
       <thead>
         <tr class="text-text-200 truncate">
-          <th :for={{col, _i} <- Enum.with_index(@col)} class="text-left font-normal pb-5">
+          <th :for={{col, _i} <- Enum.with_index(@col)} class="text-left font-normal">
           <%= col[:label] %>
           </th>
         </tr>
@@ -389,11 +443,11 @@ defmodule ZkArcadeWeb.CoreComponents do
         >
           <td
             :for={{col, _i} <- Enum.with_index(@col)}
-            class={classes(["p-0 pr-10"])}
+            class={classes(["p-0 pr-10", col[:class]])}
           >
             <div class={
               classes([
-                "group block normal-case  text-base min-w-28"
+                "group block normal-case text-base min-w-29"
               ])
             }>
               <%= render_slot(col, @row_item.(row)) %>
@@ -625,6 +679,61 @@ defmodule ZkArcadeWeb.CoreComponents do
     <% else %>
       <p class="text-text-200 text-md">No users found in the leaderboard.</p>
     <% end %>
+    """
+  end
+
+  attr :users, :list, required: true
+  attr :current_wallet, :string, default: nil
+  attr :user_data, :map, default: nil
+  attr :pagination, :map, default: nil
+  attr :show_pagination, :boolean, default: false
+  attr :show_view_all_link, :boolean, default: false
+
+  def leaderboard_home(assigns) do
+    ~H"""
+    <%= if length(@users) > 0 do %>
+      <div class="w-full h-full flex flex-col justify-between">
+        <.leaderboard_table_home
+          id="leaderboard"
+          users={@users}
+          current_wallet={@current_wallet}
+          show_labels={false}
+          />
+        <.link href="/leaderboard" class="text-center text-sm w-full hover:underline block mt-1 pb-5">
+          View all
+        </.link>
+      </div>
+    <% else %>
+      <p class="text-text-200 text-md">No users found in the leaderboard.</p>
+    <% end %>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :users, :list, required: true
+  attr :current_wallet, :string, default: nil
+  attr :show_labels, :boolean, default: true
+  defp leaderboard_table_home(assigns) do
+    ~H"""
+    <div class="w-full">
+      <.table id={@id} rows={@users}>
+        <:col :let={user} label={if @show_labels, do: "Username", else: ""} class="w-full pr-0">
+          <p class="ellipsis text-text-100 text-md"><%= user.username %></p>
+        </:col>
+        <:col :let={user} label={if @show_labels, do: "Score", else: ""} class="pr-0 w-20 text-right">
+          <%= user.score %>
+          <%= case user.position do %>
+            <%= 1 -> %>
+            <.icon name="hero-trophy" color="#FFD700" class="" />
+            <%= 2 -> %>
+            <.icon name="hero-trophy" color="#6a697a" class="" />
+            <%= 3 -> %>
+            <.icon name="hero-trophy" color="#b36839" class="" />
+            <%= _ ->  %>
+          <% end %>
+        </:col>
+      </.table>
+    </div>
     """
   end
 end

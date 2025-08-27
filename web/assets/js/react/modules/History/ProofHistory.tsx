@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Address } from "../../types/blockchain";
 import {
 	useBatcherPaymentService,
-	useLeaderboardContract,
+	useBeastLeaderboardContract,
 	useModal,
 } from "../../hooks";
 import { formatEther } from "viem";
@@ -103,6 +103,8 @@ const Entry = ({
 				userBeastSubmissions={[]}
 				user_address={user_address}
 				proof={proof}
+				proofToSubmitData={null}
+				gameName="beast"
 			/>
 		</>
 	);
@@ -122,7 +124,7 @@ export const ProofHistory = ({
 		userAddress: user_address,
 	});
 
-	const { score } = useLeaderboardContract({
+	const { score } = useBeastLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});

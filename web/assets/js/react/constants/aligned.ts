@@ -19,9 +19,7 @@ export const batcherPaymentServiceAbi = [
 		name: "withdraw",
 		type: "function",
 		stateMutability: "nonpayable",
-		inputs: [
-			{ name: "amount", type: "uint256", internalType: "uint256" }
-		],
+		inputs: [{ name: "amount", type: "uint256", internalType: "uint256" }],
 		outputs: [],
 	},
 	{
@@ -107,7 +105,38 @@ export const leaderboardAbi = [
 		],
 		stateMutability: "view",
 	},
+	{
+		type: "function",
+		name: "getCurrentParityGame",
+		inputs: [],
+		outputs: [
+			{
+				name: "",
+				type: "tuple",
+				internalType: "struct Leaderboard.ParityGame",
+				components: [
+					{
+						name: "endsAtTime",
+						type: "uint256",
+						internalType: "uint256",
+					},
+					{
+						name: "gameConfig",
+						type: "bytes",
+						internalType: "bytes",
+					},
+					{
+						name: "startsAtTime",
+						type: "uint256",
+						internalType: "uint256",
+					},
+				],
+			},
+		],
+		stateMutability: "view",
+	},
 	{ type: "error", name: "NoActiveBeastGame", inputs: [] },
+	{ type: "error", name: "NoActiveParityGame", inputs: [] },
 ];
 
 export const eip712Domain = (

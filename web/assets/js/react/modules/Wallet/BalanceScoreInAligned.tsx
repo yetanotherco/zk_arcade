@@ -3,7 +3,7 @@ import { formatEther } from "viem";
 import { Address } from "../../types/blockchain";
 import { Button } from "../../components";
 import { useModal, useBatcherPaymentService } from "../../hooks";
-import { useLeaderboardContract } from "../../hooks/useLeaderboardContract";
+import { useBeastLeaderboardContract } from "../../hooks/useBeastLeaderboardContract";
 import { DepositOnAlignedModal } from "../../components/Modal/DepositOnAligned";
 import { WithdrawFromAlignedModal } from "../../components/Modal/WithdrawFromAligned";
 
@@ -34,7 +34,7 @@ export const BalanceScoreInAligned = ({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
 	});
-	const { score } = useLeaderboardContract({
+	const { score } = useBeastLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});

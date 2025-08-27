@@ -4,7 +4,7 @@ use crate::levels::get_game_levels;
 use crate::{
     ethereum,
     help::Help,
-    risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
+    // risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
     sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
     stty::{install_raw_mode_signal_handler, RawMode},
 };
@@ -37,7 +37,7 @@ pub const ANSI_FOOTER_HEIGHT: usize = 2;
 const TICK_DURATION: Duration = Duration::from_millis(200);
 
 const SP1: &str = "SP1";
-const RISC0: &str = "Risc0";
+// const RISC0: &str = "Risc0"; // Risc0 is disabled
 
 /// we need the [Beat] to count down when we call the beast advance methods and for animations
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -79,6 +79,8 @@ pub enum GameState {
     Help,
     /// Display the prove execution screen
     ProveExecution,
+    /// Display the proof completion message
+    ProofComplete,
     /// the game is over and we quit the game entirely
     GameOver,
     /// the game was won
@@ -117,6 +119,7 @@ pub struct Game {
     _raw_mode: RawMode,
     address: String,
     proving_systems: Vec<String>,
+    proof_completion_message: String,
 }
 
 impl Game {
@@ -124,26 +127,27 @@ impl Game {
     pub fn new() -> Self {
         let address = ethereum::read_address();
 
-        let items = vec![SP1, RISC0];
+        // let items = vec![SP1, RISC0];
 
-        let proving_systems = loop {
-            let selection = MultiSelect::new()
-                .with_prompt(
-                    "Choose proving systems to use\n(Press [SPACE] to select, [ENTER] to confirm)",
-                )
-                .items(&items)
-                .interact()
-                .unwrap();
-
-            if !selection.is_empty() {
-                break selection
-                    .into_iter()
-                    .map(|i| items[i].to_string())
-                    .collect::<Vec<String>>();
-            }
-
-            eprintln!("You must select at least one proving system. Please try again.");
-        };
+        // let proving_systems = loop {
+        //     let selection = MultiSelect::new()
+        //         .with_prompt(
+        //             "Choose proving systems to use\n(Press [SPACE] to select, [ENTER] to confirm)",
+        //         )
+        //         .items(&items)
+        //         .interact()
+        //         .unwrap();
+        //
+        //     if !selection.is_empty() {
+        //         break selection
+        //             .into_iter()
+        //             .map(|i| items[i].to_string())
+        //             .collect::<Vec<String>>();
+        //     }
+        //
+        //     eprintln!("You must select at least one proving system. Please try again.");
+        // };
+        let proving_systems = vec![SP1.to_string()]; // RISC0 is disabled for now
 
         let block_timestamp = ethereum::get_current_block_timestamp()
             .expect("Could not get block timestamp from rpc");
@@ -201,10 +205,12 @@ impl Game {
             _raw_mode,
             address,
             proving_systems,
+            proof_completion_message: String::new(),
         }
     }
 
     pub fn start_new_game(&mut self) {
+        Self::clear_screen();
         self.level = Level::One;
         let board_terrain_info = Board::generate_terrain(self.game_match.get_config(self.level));
         let board = Board::new(board_terrain_info.buffer);
@@ -249,6 +255,9 @@ impl Game {
                 }
                 GameState::ProveExecution => {
                     self.handle_prove_execution_state();
+                }
+                GameState::ProofComplete => {
+                    self.handle_proof_complete_state();
                 }
                 GameState::GameOver => {
                     self.handle_death_state();
@@ -295,42 +304,10 @@ impl Game {
 
         loop {
             if let Ok(byte) = self.input_listener.try_recv() {
-                if byte == 0x1B {
-                    let second = self.input_listener.recv().unwrap_or(0);
-                    let third = self.input_listener.recv().unwrap_or(0);
-                    if second == b'[' {
-                        let mut render = false;
-                        let player_action = match third {
-                            b'A' => {
-                                let player_action = self.player.advance(&mut self.board, &Dir::Up);
-                                render = true;
-                                self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Up });
-                                player_action
-                            }
-                            b'C' => {
-                                let player_action =
-                                    self.player.advance(&mut self.board, &Dir::Right);
-                                render = true;
-                                self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Right });
-                                player_action
-                            }
-                            b'B' => {
-                                let player_action =
-                                    self.player.advance(&mut self.board, &Dir::Down);
-                                render = true;
-                                self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Down });
-                                player_action
-                            }
-                            b'D' => {
-                                let player_action =
-                                    self.player.advance(&mut self.board, &Dir::Left);
-                                render = true;
-                                self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Left });
-                                player_action
-                            }
-                            _ => PlayerAction::None,
-                        };
-
+                match byte as char {
+                    'w' | 'W' => {
+                        let player_action = self.player.advance(&mut self.board, &Dir::Up);
+                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Up });
                         match player_action {
                             PlayerAction::KillCommonBeast(coord) => {
                                 self.state = GameState::Killing(Beat::One);
@@ -375,24 +352,164 @@ impl Game {
                             }
                             PlayerAction::None => {}
                         }
-
-                        if render {
-                            // the player renders independent from the tick speed of the beasts
-                            self.render_with_state();
-                        }
+                        self.render_with_state();
                     }
-                } else {
-                    match byte as char {
-                        'q' | 'Q' => {
-                            self.state = GameState::Quit;
-                            break;
+                    's' | 'S' => {
+                        let player_action = self.player.advance(&mut self.board, &Dir::Down);
+                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Down });
+                        match player_action {
+                            PlayerAction::KillCommonBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .common_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.common_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillSuperBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .super_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.super_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillEgg(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) =
+                                    self.eggs.iter().position(|egg| egg.position == coord)
+                                {
+                                    self.eggs.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillHatchedBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .hatched_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.hatched_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillPlayer => {
+                                self.state = GameState::Dying(Beat::One);
+                            }
+                            PlayerAction::None => {}
                         }
-                        'h' | 'H' => {
-                            self.state = GameState::Help;
-                            break;
-                        }
-                        _ => {}
+                        self.render_with_state();
                     }
+                    'a' | 'A' => {
+                        let player_action = self.player.advance(&mut self.board, &Dir::Left);
+                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Left });
+                        match player_action {
+                            PlayerAction::KillCommonBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .common_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.common_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillSuperBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .super_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.super_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillEgg(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) =
+                                    self.eggs.iter().position(|egg| egg.position == coord)
+                                {
+                                    self.eggs.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillHatchedBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .hatched_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.hatched_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillPlayer => {
+                                self.state = GameState::Dying(Beat::One);
+                            }
+                            PlayerAction::None => {}
+                        }
+                        self.render_with_state();
+                    }
+                    'd' | 'D' => {
+                        let player_action = self.player.advance(&mut self.board, &Dir::Right);
+                        self.push_to_log(GameLogEntry::PlayerMoved { dir: Dir::Right });
+                        match player_action {
+                            PlayerAction::KillCommonBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .common_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.common_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillSuperBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .super_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.super_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillEgg(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) =
+                                    self.eggs.iter().position(|egg| egg.position == coord)
+                                {
+                                    self.eggs.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillHatchedBeast(coord) => {
+                                self.state = GameState::Killing(Beat::One);
+                                if let Some(idx) = self
+                                    .hatched_beasts
+                                    .iter()
+                                    .position(|beast| beast.position == coord)
+                                {
+                                    self.hatched_beasts.swap_remove(idx);
+                                }
+                            }
+                            PlayerAction::KillPlayer => {
+                                self.state = GameState::Dying(Beat::One);
+                            }
+                            PlayerAction::None => {}
+                        }
+                        self.render_with_state();
+                    }
+                    'q' | 'Q' => {
+                        self.state = GameState::Quit;
+                        break;
+                    }
+                    'h' | 'H' => {
+                        self.state = GameState::Help;
+                        break;
+                    }
+                    _ => {}
                 }
             }
 
@@ -517,7 +634,7 @@ impl Game {
                             break;
                         }
                     }
-                    '\n' => {
+                    '\n' | '\r' => {
                         self.state = GameState::ProveExecution;
                         break;
                     }
@@ -553,7 +670,7 @@ impl Game {
                         self.start_new_game();
                         break;
                     }
-                    '\n' => {
+                    '\n' | '\r' => {
                         self.state = GameState::ProveExecution;
                         break;
                     }
@@ -608,40 +725,25 @@ impl Game {
 
         loop {
             if let Ok(byte) = self.input_listener.try_recv() {
-                if byte == 0x1B {
-                    let second = self.input_listener.recv().unwrap_or(0);
-                    let third = self.input_listener.recv().unwrap_or(0);
-                    if second == b'[' {
-                        let mut render = false;
-                        match third {
-                            b'C' => {
-                                help.next_page();
-                                render = true;
-                            }
-                            b'D' => {
-                                help.previous_page();
-                                render = true;
-                            }
-                            _ => {}
-                        }
-
-                        if render {
-                            println!("{}", help.render());
-                        }
+                match byte as char {
+                    ' ' => {
+                        self.level_start += pause.elapsed();
+                        self.state = GameState::Playing;
+                        break;
                     }
-                } else {
-                    match byte as char {
-                        ' ' => {
-                            self.level_start += pause.elapsed();
-                            self.state = GameState::Playing;
-                            break;
-                        }
-                        'q' | 'Q' => {
-                            self.state = GameState::Quit;
-                            break;
-                        }
-                        _ => {}
+                    'q' | 'Q' => {
+                        self.state = GameState::Quit;
+                        break;
                     }
+                    'd' | 'D' => {
+                        help.next_page();
+                        println!("{}", help.render());
+                    }
+                    'a' | 'A' => {
+                        help.previous_page();
+                        println!("{}", help.render());
+                    }
+                    _ => {}
                 }
             }
         }
@@ -655,7 +757,7 @@ impl Game {
         );
 
         let mut sp1_res: Result<String, _> = Err("SP1 not used".to_string());
-        let mut risc0_res: Result<String, _> = Err("RISC0 not used".to_string());
+        // let mut risc0_res: Result<String, _> = Err("RISC0 not used".to_string());
 
         if self.proving_systems.contains(&SP1.to_string()) {
             // If it hasn't won, then don't include the last level as it wasn't completed
@@ -680,27 +782,27 @@ impl Game {
             sp1_res = sp1_handle.join().map_err(|_| "SP1 proving failed".to_string());
         }
 
-        if self.proving_systems.contains(&RISC0.to_string()) {
-            let risc0_levels_completion_log = if self.has_won {
-                self.levels_completion_log.clone()
-            } else {
-                let mut levels_log = self.levels_completion_log.clone();
-                levels_log.pop();
-                levels_log
-            };
-            let risc0_address = self.address.clone();
-            let levels = self.game_match.get_levels_in_json();
-
-            let risc0_handle = thread::spawn(move || {
-                let res = risc0_prove(risc0_levels_completion_log, levels, risc0_address);
-                if let Ok(receipt) = res {
-                    risc0_save_proof(receipt).expect("To be able to write proof")
-                } else {
-                    panic!("Could prove program")
-                }
-            });
-            risc0_res = risc0_handle.join().map_err(|_| "RISC0 proving failed".to_string());
-        }
+        // if self.proving_systems.contains(&RISC0.to_string()) {
+        //     let risc0_levels_completion_log = if self.has_won {
+        //         self.levels_completion_log.clone()
+        //     } else {
+        //         let mut levels_log = self.levels_completion_log.clone();
+        //         levels_log.pop();
+        //         levels_log
+        //     };
+        //     let risc0_address = self.address.clone();
+        //     let levels = self.game_match.get_levels_in_json();
+        //
+        //     let risc0_handle = thread::spawn(move || {
+        //         let res = risc0_prove(risc0_levels_completion_log, levels, risc0_address);
+        //         if let Ok(receipt) = res {
+        //             risc0_save_proof(receipt).expect("To be able to write proof")
+        //         } else {
+        //             panic!("Could prove program")
+        //         }
+        //     });
+        //     risc0_res = risc0_handle.join().map_err(|_| "RISC0 proving failed".to_string());
+        // }
 
         let _ = proving_alert_handle.join();
 
@@ -714,11 +816,11 @@ impl Game {
         if let Ok(filename) = &sp1_res {
             successful_files.push(filename.as_str());
         }
-        if let Ok(filename) = &risc0_res {
-            successful_files.push(filename.as_str());
-        }
+        // if let Ok(filename) = &risc0_res {
+        //     successful_files.push(filename.as_str());
+        // }
 
-        let msg = if !successful_files.is_empty() {
+        self.proof_completion_message = if !successful_files.is_empty() {
             format!(
                 "Proof saved to {}. Submit it to https://test.zkarcade.com and earn points!",
                 successful_files.join(", ")
@@ -726,9 +828,41 @@ impl Game {
         } else {
             "Could not prove program, try again...".to_string()
         };
-        let handle = Self::render_loader_in_new_thread(&msg, 3000, false);
-        let _ = handle.join();
-        self.state = GameState::Quit;
+        // Transition to proof complete state to show persistent message
+        self.state = GameState::ProofComplete;
+    }
+
+    fn handle_proof_complete_state(&mut self) {
+        // Show the appropriate screen with the persistent proof message
+        if self.has_won {
+            println!("{}", self.render_winning_screen());
+        } else {
+            println!("{}", self.render_death_screen());
+        }
+        
+        // Show the proof completion message that stays on screen
+        println!("\n{}\n", self.proof_completion_message);
+        println!("Press [SPACE] to play again, [Q] to quit, or [H] for help");
+
+        loop {
+            if let Ok(byte) = self.input_listener.try_recv() {
+                match byte as char {
+                    ' ' => {
+                        self.start_new_game();
+                        break;
+                    }
+                    'q' | 'Q' => {
+                        self.state = GameState::Quit;
+                        break;
+                    }
+                    'h' | 'H' => {
+                        self.state = GameState::Help;
+                        break;
+                    }
+                    _ => {}
+                }
+            }
+        }
     }
 
     fn get_secs_remaining(&self) -> u64 {
@@ -780,7 +914,7 @@ impl Game {
             self.player.lives.to_string()
         };
 
-        output.push_str("⌂⌂                                      ");
+        output.push_str("⌂⌂ [WASD] Move                          ");
         output.push_str("  Beasts: ");
         output.push_str(&format!(
             "{ANSI_BOLD}{:>2}{ANSI_RESET}",
@@ -1003,18 +1137,18 @@ impl Game {
             "\x1b[{:.0}C",
             ((BOARD_WIDTH * 2 + ANSI_FRAME_SIZE * 2) / 2).saturating_sub(box_width / 2)
         );
-
-        let border = "─".repeat(box_width);
-        let message_line = format!("{left_pad}│ {:^width$} │", message, width = box_width - 2);
+        let (border, pipe_char) = ("─".repeat(box_width), "│");
+        
+        let message_line = format!("{left_pad}{pipe_char} {:^width$} {pipe_char}", message, width = box_width - 2);
         let options_line = format!(
-            "{left_pad}│ {:^width$} │",
+            "{left_pad}{pipe_char} {:^width$} {pipe_char}",
             confirm_text,
             width = box_width - 2
         );
 
         print!(
-        "\x1b[{top_pos}F{left_pad}┌{border}┐\n{message_line}\n{options_line}\n{left_pad}└{border}┘\n\x1b[{bottom_pos:.0}E"
-    );
+            "\x1b[{top_pos}F{left_pad}┌{border}┐\n{message_line}\n{options_line}\n{left_pad}└{border}┘\n\x1b[{bottom_pos:.0}E"
+        );
 
         while let Ok(byte) = input_listener.recv() {
             match byte as char {
@@ -1050,5 +1184,9 @@ impl Game {
         self.levels_completion_log[self.level.number() as usize - 1]
             .game_log
             .push(log);
+    }
+
+    fn clear_screen() {
+        print!("\x1b[2J\x1b[H");
     }
 }

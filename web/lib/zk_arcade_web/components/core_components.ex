@@ -53,6 +53,9 @@ defmodule ZkArcadeWeb.CoreComponents do
               <.link href="/game/beast" class="transition hover:text-accent-100 hover:underline">Games</.link>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
+              <button class="transition hover:text-accent-100 hover:underline" id="how-it-works-nav-btn">
+                Tutorial
+              </button>
           </div>
         </div>
 

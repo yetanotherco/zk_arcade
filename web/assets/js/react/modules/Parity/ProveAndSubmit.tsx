@@ -22,6 +22,7 @@ export const ProveAndSubmit = ({
 	leaderboard_address,
 	setGameState,
 	currentGameConfig,
+	currentLevel,
 }: {
 	goToNextLevel: () => void;
 	levelBoards: number[][];
@@ -32,6 +33,7 @@ export const ProveAndSubmit = ({
 	leaderboard_address: Address;
 	setGameState: (state: ParityGameState) => void;
 	currentGameConfig: string;
+	currentLevel: number | null;
 }) => {
 	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
 	const [open, setOpen] = useState(false);
@@ -47,6 +49,18 @@ export const ProveAndSubmit = ({
 			levelsBoards: [],
 			userPositions: [],
 		};
+
+		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
+		if (currentLevel && currentLevelReached.levelsBoards.length > currentLevel) {
+			currentLevelReached.levelsBoards = currentLevelReached.levelsBoards.slice(0, currentLevel);
+			currentLevelReached.userPositions = currentLevelReached.userPositions.slice(0, currentLevel);
+		}
+
+		// If the current level is equal to the levels reached length, then erase the current level data
+		if (currentLevel && currentLevelReached.levelsBoards.length === currentLevel) {
+			currentLevelReached.levelsBoards.pop();
+			currentLevelReached.userPositions.pop();
+		}
 
 		currentLevelReached.levelsBoards.push(levelBoards);
 		currentLevelReached.userPositions.push(userPositions);
@@ -75,6 +89,18 @@ export const ProveAndSubmit = ({
 			levelsBoards: [],
 			userPositions: [],
 		};
+
+		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
+		if (currentLevel && currentLevelReached.levelsBoards.length > currentLevel) {
+			currentLevelReached.levelsBoards = currentLevelReached.levelsBoards.slice(0, currentLevel);
+			currentLevelReached.userPositions = currentLevelReached.userPositions.slice(0, currentLevel);
+		}
+
+		// If the current level is equal to the levels reached length, then erase the current level data
+		if (currentLevel && currentLevelReached.levelsBoards.length === currentLevel) {
+			currentLevelReached.levelsBoards.pop();
+			currentLevelReached.userPositions.pop();
+		}
 
 		currentLevelReached.levelsBoards.push(levelBoards);
 		currentLevelReached.userPositions.push(userPositions);

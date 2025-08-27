@@ -127,6 +127,7 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				user_address={user_address}
 				setGameState={setGameState}
 				currentGameConfig={currentGameConfig}
+				currentLevel={currentLevel}
 			/>
 		),
 		"all-levels-completed": (

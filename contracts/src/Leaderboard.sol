@@ -25,7 +25,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     struct ParityGame {
         uint256 endsAtTime;
-        bytes gameConfig;
+        uint256 gameConfig;
         uint256 startsAtTime;
     }
 
@@ -38,8 +38,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         return keccak256(abi.encodePacked(user, gameHash));
     }
 
-    function getParityKey(address user, bytes memory gameConfig) internal pure returns (bytes32) {
-        bytes32 gameHash = keccak256(abi.encodePacked(keccak256(gameConfig)));
+    function getParityKey(address user, uint256 gameConfig) internal pure returns (bytes32) {
+        bytes32 gameHash = keccak256(abi.encodePacked(gameConfig));
         return keccak256(abi.encodePacked(user, gameHash));
     }
 
@@ -169,8 +169,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes memory merkleProof,
         uint256 verificationDataBatchIndex
     ) public {
-        (uint256 levelCompleted, address userAddress, bytes memory gameConfig) =
-            abi.decode(publicInputs, (uint256, address, bytes));
+        (uint256 levelCompleted, uint256 gameConfig, address userAddress) =
+            abi.decode(publicInputs, (uint256, uint256, address));
 
         if (userAddress != msg.sender) {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
@@ -202,8 +202,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         // Validate the game is available and the config is correct
         ParityGame memory currentGame = getCurrentParityGame();
-        if (keccak256(currentGame.gameConfig) != keccak256(gameConfig)) {
-            revert InvalidGame(uint256(keccak256(currentGame.gameConfig)), uint256(keccak256(currentGame.gameConfig)));
+        if (currentGame.gameConfig != gameConfig) {
+            revert InvalidGame(currentGame.gameConfig, gameConfig);
         }
 
         bytes32 key = getParityKey(msg.sender, gameConfig);

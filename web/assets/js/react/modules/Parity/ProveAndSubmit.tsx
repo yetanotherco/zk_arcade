@@ -51,6 +51,10 @@ export const ProveAndSubmit = ({
 		currentLevelReached.levelsBoards.push(levelBoards);
 		currentLevelReached.userPositions.push(userPositions);
 
+		// Save the data in local storage to use this level data for higher level proofs
+		gameData[currentGameConfig] = currentLevelReached;
+		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
+
 		const submitproofVerificationData = await generateCircomParityProof({
 			user_address,
 			userPositions: currentLevelReached.userPositions,

@@ -27,6 +27,7 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 		currentLevel,
 		levels,
 		playerLevelReached,
+		setPlayerLevelReached,
 		setCurrentLevel,
 		renewsIn,
 		currentGameConfig,
@@ -59,6 +60,10 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 
 			return next;
 		});
+		const newLevelReached = (currentLevel || 0) + 1;
+		if (currentLevel && newLevelReached > playerLevelReached) {
+			setPlayerLevelReached(newLevelReached);
+		}
 	}, [levels, setCurrentLevel, setGameState, startLevel]);
 
 	const gameComponentBasedOnState: {

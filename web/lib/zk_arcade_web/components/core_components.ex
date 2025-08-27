@@ -40,7 +40,7 @@ defmodule ZkArcadeWeb.CoreComponents do
   def nav(assigns) do
     ~H"""
       <nav class="w-full flex justify-between items-center">
-        <div class="w-full flex gap-20 items-center">
+        <div class="w-full flex gap-[3rem] items-center">
           <.link href="/">
             <h1 class="text-xl">
               ZK Arcade
@@ -59,7 +59,7 @@ defmodule ZkArcadeWeb.CoreComponents do
           </div>
         </div>
 
-        <div class="flex gap-8 items-center">
+        <div class="flex gap-[1.5rem] items-center">
           <div class="hidden sm:block">
             <x-app-submit-proof
                 network={@network}

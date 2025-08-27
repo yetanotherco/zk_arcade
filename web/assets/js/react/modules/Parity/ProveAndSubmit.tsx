@@ -20,7 +20,6 @@ export const ProveAndSubmit = ({
 	payment_service_address,
 	batcher_url,
 	leaderboard_address,
-	setGameState,
 	currentGameConfig,
 	currentLevel,
 }: {
@@ -31,7 +30,6 @@ export const ProveAndSubmit = ({
 	payment_service_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
-	setGameState: (state: ParityGameState) => void;
 	currentGameConfig: string;
 	currentLevel: number | null;
 }) => {

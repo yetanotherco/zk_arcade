@@ -125,13 +125,19 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				leaderboard_address={leaderboard_address}
 				payment_service_address={payment_service_address}
 				user_address={user_address}
-				setGameState={setGameState}
 				currentGameConfig={currentGameConfig}
 				currentLevel={currentLevel}
 			/>
 		),
 		"all-levels-completed": (
-			<Completed renewsIn={renewsIn} setGameState={setGameState} />
+			<Completed 
+				renewsIn={renewsIn}
+				currentGameConfig={currentGameConfig}
+				user_address={user_address}
+				payment_service_address={payment_service_address}
+				batcher_url={batcher_url}
+				leaderboard_address={leaderboard_address}
+			/>
 		),
 	};
 

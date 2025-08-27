@@ -38,6 +38,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     address public zkArcadeNft;
+    bool public useWhitelist;
 
     /**
      * Errors
@@ -66,12 +67,14 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         address _alignedBatcherPaymentService,
         address _zkArcadeNft,
         BeastGame[] calldata _beastGames,
-        ParityGame[] calldata _parityGames
+        ParityGame[] calldata _parityGames,
+        bool _useWhitelist
     ) public initializer {
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
         zkArcadeNft = _zkArcadeNft;
+        useWhitelist = _useWhitelist;
         parityGames = _parityGames;
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
@@ -85,6 +88,14 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         beastGames = _beastGames;
     }
 
+    /// @notice Sets whether to use the whitelist or not
+    /// @param _useWhitelist The new whitelist status
+    function setUseWhitelist(bool _useWhitelist) public onlyOwner {
+        useWhitelist = _useWhitelist;
+    }
+
+    /// @notice Sets the zkArcadeNft address
+    /// @param nftContractAddress The new zkArcadeNft address
     function setZkArcadeNftAddress(address nftContractAddress) public onlyOwner {
         zkArcadeNft = nftContractAddress;
     }
@@ -120,7 +131,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
 
         ZkArcadeNft nftContract = ZkArcadeNft(zkArcadeNft);
-        if (!nftContract.isWhitelisted(userAddress)) {
+        if (useWhitelist && !nftContract.isWhitelisted(userAddress)) {
             revert UserIsNotWhitelisted(userAddress);
         }
 

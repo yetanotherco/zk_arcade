@@ -107,7 +107,7 @@ export const ProveAndSubmit = ({
 		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
 	};
 
-	const view = useSwapTransition(proofVerificationData, (_, proven) => (
+	return (
 		<div>
 			<div className="w-full h-full flex flex-col gap-4 items-center max-w-[500px]">
 				<div className="h-full w-full flex flex-col gap-10 items-center justify-center">
@@ -142,12 +142,6 @@ export const ProveAndSubmit = ({
 					</Button>
 				</div>
 			</div>
-		</div>
-	));
-
-	return (
-		<div>
-			{view}
 			<SubmitProofModal
 				modal={{ open, setOpen }}
 				batcher_url={batcher_url}

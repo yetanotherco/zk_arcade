@@ -138,7 +138,6 @@ export const ProveAndSubmit = ({
 						onClick={() => {
 							saveLevelData();
 							goToNextLevel();
-							setGameState("running");
 						}}
 					>
 						Next Level

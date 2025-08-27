@@ -11,6 +11,7 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 
 contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 private _nextTokenId;
+    mapping(address => bool) public minters;
 
     constructor() {
         _disableInitializers();
@@ -23,9 +24,9 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    function mint(address user, string memory tokenURI) public returns (uint256) {
+    function mint(string memory tokenURI) public onlyMinters(msg.sender) returns (uint256) {
         uint256 tokenId = _nextTokenId++;
-        _mint(user, tokenId);
+        _mint(msg.sender, tokenId);
         _setTokenURI(tokenId, tokenURI);
 
         return tokenId;
@@ -33,5 +34,18 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
 
     function isWhitelisted(address user) public view returns (bool) {
         return balanceOf(user) >= 1;
+    }
+
+    function authorizeMinter(address user) public onlyOwner {
+        minters[user] = true;
+    }
+
+    function revokeMinter(address user) public onlyOwner {
+        minters[user] = false;
+    }
+
+    modifier onlyMinters(address user) {
+        require(minters[user], "Only minters can call this function");
+        _;
     }
 }

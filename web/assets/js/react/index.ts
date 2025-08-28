@@ -9,6 +9,7 @@ import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
 import EncourageDepositing from "./modules/EncourageDepositing";
 import { ParityGame } from "./modules/Parity";
+import { ClaimNft } from "./modules/ClaimNft";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -109,6 +110,17 @@ define(
 			"user_address",
 			"batcher_url",
 			"leaderboard_address",
+		],
+	}
+);
+
+define(
+	{
+		"x-app-claim-nft": ClaimNft,
+	},
+	{
+		attributes: [
+			"network", "merkle_proof", "tokenURI", "contract_address", "user_address"
 		],
 	}
 );

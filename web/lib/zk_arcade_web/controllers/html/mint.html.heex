@@ -1,0 +1,19 @@
+<div class="w-full" style="margin-top: 150px">
+  <div class="section-width section-spacer-md">
+
+    <%= if @minted_nft do %>
+      <p>Your NFT has been minted successfully!</p>
+    <% else %>
+      <div>
+        <p class="mb-4">You have not minted an NFT yet.</p>
+
+        <%= if @wallet do %>
+          <p>Your wallet address: <%= @wallet %></p>
+        <% else %>
+          <p>No wallet connected.</p>
+        <% end %>
+      </div>
+    <% end %>
+
+  </div>
+</div>

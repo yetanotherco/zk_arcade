@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ZkArcadeNft} from "./ZkArcadeNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     // ======== Storage ========
@@ -36,6 +37,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         return keccak256(abi.encodePacked(user, gameHash));
     }
 
+    address public zkArcadeNft;
+    bool public useWhitelist;
+
     /**
      * Errors
      */
@@ -43,6 +47,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error ProofNotVerifiedOnAligned();
     error UserHasAlreadyCompletedThisLevel(uint256 level);
     error UserAddressMismatch(address expected, address actual);
+    error UserIsNotWhitelisted(address);
     error InvalidGame(uint256 expected, uint256 provided);
     error NoActiveBeastGame();
     error NoActiveParityGame();
@@ -60,12 +65,16 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         address owner,
         address _alignedServiceManager,
         address _alignedBatcherPaymentService,
+        address _zkArcadeNft,
         BeastGame[] calldata _beastGames,
-        ParityGame[] calldata _parityGames
+        ParityGame[] calldata _parityGames,
+        bool _useWhitelist
     ) public initializer {
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
+        zkArcadeNft = _zkArcadeNft;
+        useWhitelist = _useWhitelist;
         parityGames = _parityGames;
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
@@ -77,6 +86,18 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     /// @param _beastGames The new beast games configuration
     function setBeastGames(BeastGame[] calldata _beastGames) public onlyOwner {
         beastGames = _beastGames;
+    }
+
+    /// @notice Sets whether to use the whitelist or not
+    /// @param _useWhitelist The new whitelist status
+    function setUseWhitelist(bool _useWhitelist) public onlyOwner {
+        useWhitelist = _useWhitelist;
+    }
+
+    /// @notice Sets the zkArcadeNft address
+    /// @param nftContractAddress The new zkArcadeNft address
+    function setZkArcadeNftAddress(address nftContractAddress) public onlyOwner {
+        zkArcadeNft = nftContractAddress;
     }
 
     /// @notice Sets the parity games configuration
@@ -107,6 +128,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         if (userAddress != msg.sender) {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
+        }
+
+        ZkArcadeNft nftContract = ZkArcadeNft(zkArcadeNft);
+        if (useWhitelist && !nftContract.isWhitelisted(userAddress)) {
+            revert UserIsNotWhitelisted(userAddress);
         }
 
         bytes32 pubInputCommitment = keccak256(abi.encodePacked(publicInputs));

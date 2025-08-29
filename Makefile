@@ -74,6 +74,12 @@ update_leaderboard_address:
 		| grep -Eo "0x[0-9a-fA-F]{40}" | head -n1); \
 	sed -E -i '' "s|(^[[:space:]]*config :zk_arcade, :leaderboard_address, \")[^\"]+(\".*)|\1$$addr\2|" "web/config/dev.exs";
 
+update_token_address:
+	@set -e; \
+	addr=$$(jq -r '(.. | objects | to_entries[]? | select(.key|test("proxy";"i")) | .value) // empty' "contracts/script/output/devnet/nft.json" \
+		| grep -Eo "0x[0-9a-fA-F]{40}" | head -n1); \
+	sed -E -i '' "s|(^[[:space:]]*config :zk_arcade, :nft_contract_address, \")[^\"]+(\".*)|\1$$addr\2|" "web/config/dev.exs";
+
 gen_and_deploy_devnet: beast_gen_levels parity_gen_levels
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
@@ -83,6 +89,7 @@ gen_and_deploy_devnet: beast_gen_levels parity_gen_levels
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
 	@$(MAKE) deploy_contract NETWORK=devnet
 	@$(MAKE) update_leaderboard_address
+	@$(MAKE) update_token_address
 
 __CONTRACTS__:
 deploy_contract: submodules

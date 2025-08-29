@@ -356,6 +356,8 @@ defmodule ZkArcadeWeb.PageController do
           []
       end
 
+      Logger.info("Merkle proof for address #{wallet_address}: #{inspect(merkle_proof)}")
+
       conn
       |> assign(:wallet, wallet_address)
       |> assign(:network, Application.get_env(:zk_arcade, :network))
@@ -386,7 +388,7 @@ defmodule ZkArcadeWeb.PageController do
       |> Path.join("merkle/merkle-proofs.json")
 
     with {:ok, bin} <- File.read(file),
-        {:ok, %{"proofs" => proofs}} <- Jason.decode(bin),
+        {:ok, proofs} when is_list(proofs) <- Jason.decode(bin),
         norm <- String.downcase(wallet_address),
         %{"proof" => proof} <- Enum.find(proofs, fn %{"address" => a} ->
           String.downcase(a) == norm

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Address } from "viem";
 import {
   useChainId,
@@ -7,33 +7,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { useToast } from "../state/toast";
-
-export const zkArcadeNftAbi = [
-    {
-        type: "function",
-        stateMutability: "view",
-        name: "isWhitelisted",
-        inputs: [{ name: "user", type: "address" }],
-        outputs: [{ type: "bool" }],
-    },
-    {
-        type: "function",
-        stateMutability: "view",
-        name: "balanceOf",
-        inputs: [{ name: "owner", type: "address" }],
-        outputs: [{ type: "uint256" }],
-    },
-    {
-        type: "function",
-        stateMutability: "nonpayable",
-        name: "claimNFT",
-        inputs: [
-            { name: "merkleProof", type: "bytes32[]" },
-            { name: "tokenURI", type: "string" },
-        ],
-        outputs: [],
-    },
-] as const;
+import { zkArcadeNftAbi } from "../constants/aligned";
 
 type HookArgs = {
     userAddress: Address;

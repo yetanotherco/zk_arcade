@@ -339,9 +339,6 @@ defmodule ZkArcadeWeb.PageController do
     wallet_address = get_session(conn, :wallet_address)
 
     if wallet_address do
-      # TODO: Check if the user has minted an NFT
-      minted_nft = false
-
       {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet_address, 1, 10)
 
       {username, position} = get_username_and_position(wallet_address)
@@ -370,7 +367,6 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:batcher_url, batcher_url)
-      |> assign(:minted_nft, minted_nft)
       |> assign(:merkle_proof, merkle_proof)
       |> render(:mint)
     else

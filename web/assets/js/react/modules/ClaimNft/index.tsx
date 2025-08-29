@@ -21,7 +21,7 @@ const ClaimLogic = ({
     tokenURI,
     merkle_proof,
 }: Omit<ClaimNFTButtonProps, "network">) => {
-    const { balance, userInWhitelist, claimNft, receipt, tx, disabled } = useNftContract({
+    const { balance, claimNft, receipt, tx, disabled } = useNftContract({
         userAddress: user_address,
         contractAddress: contract_address,
         tokenURI,
@@ -32,40 +32,34 @@ const ClaimLogic = ({
 
     return (
         <div className="flex flex-col gap-2">
-            {userInWhitelist ? (
-                <div>
-                    {userHasClaimed ?(
-                        <div>
-                            <p>You have already claimed your NFT! You can now play games and submit your solutions to the leaderboard.</p>
-                        </div>
-                    ) : (
-                        <div>
-                            <p>You are eligible to claim your NFT! Claim it using the button below:</p>
-                        </div>
-                    )}
-
-                    <div className="flex justify-center">
-                        <Button
-                            variant="accent-fill"
-                            disabled={disabled}
-                            onClick={() => claimNft()}
-                            className="mt-4"
-                        >
-                            {balance.isFetching
-                            ? "Reading…"
-                            : tx.isPending
-                            ? "Sending…"
-                            : receipt.isLoading
-                            ? "Confirming…"
-                            : "Claim NFT"}
-                        </Button>
+            <div>
+                {userHasClaimed ?(
+                    <div>
+                        <p>You have already claimed your NFT! You can now play games and submit your solutions to the leaderboard.</p>
                     </div>
+                ) : (
+                    <div>
+                        <p>You are eligible to claim your NFT! Claim it using the button below:</p>
+                    </div>
+                )}
+
+                <div className="flex justify-center">
+                    <Button
+                        variant="accent-fill"
+                        disabled={disabled}
+                        onClick={() => claimNft()}
+                        className="mt-4"
+                    >
+                        {balance.isFetching
+                        ? "Reading…"
+                        : tx.isPending
+                        ? "Sending…"
+                        : receipt.isLoading
+                        ? "Confirming…"
+                        : "Claim NFT"}
+                    </Button>
                 </div>
-            ) : (
-                <div>
-                    You aren’t whitelisted!
-                </div>
-            )}
+            </div>
         </div>
     );
 };

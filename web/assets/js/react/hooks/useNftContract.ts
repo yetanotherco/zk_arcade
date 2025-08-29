@@ -66,14 +66,6 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
         chainId,
     });
 
-    const whitelist = useReadContract({
-        address: contractAddress,
-        abi: zkArcadeNftAbi,
-        functionName: "isWhitelisted",
-        args: userAddress ? [userAddress] : undefined,
-        chainId,
-    });
-
     const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
     const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
@@ -133,12 +125,13 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
         }
     }, [receipt.isLoading, receipt.isError, receipt.isSuccess]);
 
+    const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
+
     return {
         balance,
-        userInWhitelist: whitelist.data,
         claimNft,
         receipt,
         tx: { hash: txHash, ...txRest },
-        disabled: !userAddress || (balance.data && balance.data >= 0n) || (whitelist.data === false),
+        disabled: !userAddress || balanceMoreThanZero,
     };
 }

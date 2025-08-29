@@ -5,8 +5,17 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # At this point we are in scripts/contracts/
 cd "$parent_path"
 
+# cd to merkle-tree/
+cd ../../merkle-tree/
+
+# Generate the merkle root and the merkle proof for each address of the whitelist
+cargo run -- --in ../contracts/script/deploy/config/devnet/nft.json --out ./merkle_output.json
+
+# Copy the merkle proofs from the file and paste them into ../web/priv/merkle/merkle-proofs.json using jq
+jq '.proofs' ./merkle_output.json > ../web/priv/merkle/merkle-proofs.json
+
 # cd to contracts/
-cd ../
+cd ../contracts/
 
 # Deploy NFT Contract with Merkle Tree
 CMD="forge script script/deploy/NftContractDeployer.s.sol:NftContractDeployer \
@@ -24,13 +33,6 @@ else
 fi
 
 eval $CMD
-
-# Generate Merkle Proofs for frontend
-MERKLE_PROOFS_PATH="script/output/devnet/merkle-proofs.json"
-forge script script/deploy/GenerateMerkleProofs.s.sol:GenerateMerkleProofs \
-    $NFT_CONFIG_PATH \
-    $MERKLE_PROOFS_PATH \
-    --sig "run(string memory configPath, string memory outputFilePath)"
 
 # Obtain the proxy address and copy it to the leaderboard config
 nft_contract_proxy=$(jq -r '.addresses.proxy' $NFT_OUTPUT_PATH)

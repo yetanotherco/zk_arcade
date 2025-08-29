@@ -72,7 +72,6 @@ const NotificationEntry = ({
 				userBeastSubmissions={user_beast_submissions}
 				proof={proof}
 				proofToSubmitData={null}
-				gameName="beast"
 			/>
 		</>
 	);

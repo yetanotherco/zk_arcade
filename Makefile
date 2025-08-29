@@ -56,6 +56,7 @@ beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
 
 PARITY_NUM_GAMES ?= 10
+# This number can be up to 3 (to fit in 32 bytes)
 PARITY_LEVELS_PER_GAME ?= 3
 PARITY_MIN_END_OF_LEVEL ?= 0
 PARITY_MAX_END_OF_LEVEL ?= 30

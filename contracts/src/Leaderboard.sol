@@ -25,14 +25,21 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     struct ParityGame {
         uint256 endsAtTime;
-        bytes gameConfig;
+        uint256 gameConfig;
         uint256 startsAtTime;
     }
 
     ParityGame[] public parityGames;
+    /// See `getParityKey` to see the key implementation
+    mapping(bytes32 => uint256) public usersParityLevelCompleted;
 
     function getBeastKey(address user, uint256 game) internal pure returns (bytes32) {
         bytes32 gameHash = keccak256(abi.encodePacked(game));
+        return keccak256(abi.encodePacked(user, gameHash));
+    }
+
+    function getParityKey(address user, uint256 gameConfig) internal pure returns (bytes32) {
+        bytes32 gameHash = keccak256(abi.encodePacked(gameConfig));
         return keccak256(abi.encodePacked(user, gameHash));
     }
 
@@ -145,6 +152,66 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert UserHasAlreadyCompletedThisLevel(currentLevelCompleted);
         }
         usersBeastLevelCompleted[key] = levelCompleted;
+
+        usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
+
+        verifyAndReplaceInTop10(msg.sender);
+
+        emit NewSolutionSubmitted(msg.sender, levelCompleted, usersScore[msg.sender]);
+    }
+
+    function submitParitySolution(
+        bytes32 proofCommitment,
+        bytes calldata publicInputs,
+        bytes32 provingSystemAuxDataCommitment,
+        bytes20 proofGeneratorAddr,
+        bytes32 batchMerkleRoot,
+        bytes memory merkleProof,
+        uint256 verificationDataBatchIndex
+    ) public {
+        (uint256 levelCompleted, uint256 gameConfig, address userAddress) =
+            abi.decode(publicInputs, (uint256, uint256, address));
+
+        if (userAddress != msg.sender) {
+            revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
+        }
+
+        bytes32 pubInputCommitment = keccak256(abi.encodePacked(publicInputs));
+        (bool callWasSuccessful, bytes memory proofIsIncluded) = alignedServiceManager.staticcall(
+            abi.encodeWithSignature(
+                "verifyBatchInclusion(bytes32,bytes32,bytes32,bytes20,bytes32,bytes,uint256,address)",
+                proofCommitment,
+                pubInputCommitment,
+                provingSystemAuxDataCommitment,
+                proofGeneratorAddr,
+                batchMerkleRoot,
+                merkleProof,
+                verificationDataBatchIndex,
+                alignedBatcherPaymentService
+            )
+        );
+
+        if (!callWasSuccessful) {
+            revert CallToAlignedContractFailed();
+        }
+
+        bool proofIncluded = abi.decode(proofIsIncluded, (bool));
+        if (!proofIncluded) {
+            revert ProofNotVerifiedOnAligned();
+        }
+
+        // Validate the game is available and the config is correct
+        ParityGame memory currentGame = getCurrentParityGame();
+        if (currentGame.gameConfig != gameConfig) {
+            revert InvalidGame(currentGame.gameConfig, gameConfig);
+        }
+
+        bytes32 key = getParityKey(msg.sender, gameConfig);
+        uint256 currentLevelCompleted = usersParityLevelCompleted[key];
+        if (levelCompleted <= currentLevelCompleted) {
+            revert UserHasAlreadyCompletedThisLevel(currentLevelCompleted);
+        }
+        usersParityLevelCompleted[key] = levelCompleted;
 
         usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
 

@@ -26,7 +26,7 @@ contract LeaderboardDeployer is Script {
         vm.startBroadcast();
         Leaderboard implementation = new Leaderboard();
         bytes memory data = abi.encodeWithSignature(
-            "initialize(address,address,address,(uint256,uint256,uint256)[],(uint256,bytes,uint256)[])",
+            "initialize(address,address,address,(uint256,uint256,uint256)[],(uint256,uint256,uint256)[])",
             owner,
             alignedServiceManagerAddress,
             alignedBatcherPaymentAddress,

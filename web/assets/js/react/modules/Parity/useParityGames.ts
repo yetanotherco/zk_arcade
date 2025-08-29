@@ -10,6 +10,7 @@ type Args = {
 export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 	const { currentGame } = useParityLeaderboardContract({
 		contractAddress: leaderBoardContractAddress,
+		userAddress: "0x0",
 	});
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
 	const [levels, setLevels] = useState<ParityLevel[]>([]);

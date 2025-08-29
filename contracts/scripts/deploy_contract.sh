@@ -8,6 +8,27 @@ cd "$parent_path"
 # cd to contracts/
 cd ../
 
+CMD="forge script script/deploy/NftContractDeployer.s.sol:NftContractDeployer \
+    $NFT_CONFIG_PATH \
+    $NFT_OUTPUT_PATH \
+    --rpc-url $RPC_URL \
+    --private-key $DEPLOYER_PRIVATE_KEY \
+    --broadcast \
+    --sig \"run(string memory configPath, string memory outputPath)\""
+
+if [ -n "$ETHERSCAN_API_KEY" ]; then
+    CMD+=" --etherscan-api-key $ETHERSCAN_API_KEY --verify"
+else
+    echo "Warning: ETHERSCAN_API_KEY not set. Skipping contract verification."
+fi
+
+eval $CMD
+
+# Obtain the proxy address and copy it to the leaderboard config
+nft_contract_proxy=$(jq -r '.addresses.proxy' $NFT_OUTPUT_PATH)
+jq --arg nft_contract_proxy "$nft_contract_proxy" '.zkArcadeNftContract = $nft_contract_proxy' $CONFIG_PATH > "script/deploy/config/devnet/leaderboard_temp.json"
+mv "script/deploy/config/devnet/leaderboard_temp.json" $CONFIG_PATH
+
 CMD="forge script script/deploy/LeaderboardDeployer.s.sol:LeaderboardDeployer \
     $CONFIG_PATH \
     $OUTPUT_PATH \

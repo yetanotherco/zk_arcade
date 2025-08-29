@@ -124,7 +124,7 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
         });
 
         addToast({
-            title: "Transaction sent",
+            title: "Transaction sent. You should see your NFT in your wallet soon.",
             desc: `Tx: ${hash.slice(0, 10)}…`,
             type: "success",
         });
@@ -133,13 +133,6 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
     }, [userAddress, proof, tokenURI, contractAddress, writeContractAsync, chainId, addToast]);
 
     useEffect(() => {
-        if (txRest.isSuccess) {
-            addToast({
-                title: "Claim sent",
-                desc: "Waiting for receipt…",
-                type: "success",
-            });
-        }
         if (txRest.isError) {
             addToast({
                 title: "Claim failed",
@@ -160,7 +153,7 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
         if (receipt.isSuccess) {
             addToast({
                 title: "NFT minted",
-                desc: "Your claim has been confirmed on-chain.",
+                desc: "Your claim has been confirmed on-chain, you should see your NFT in your wallet shortly.",
                 type: "success",
             });
         }
@@ -168,10 +161,10 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
 
     return {
         balance,
-        whitelist,
+        userInWhitelist: whitelist.data,
         claimNft,
         receipt,
         tx: { hash: txHash, ...txRest },
-        disabled: !userAddress,
+        disabled: !userAddress || (balance.data && balance.data >= 0n) || (whitelist.data === false),
     };
 }

@@ -5,6 +5,7 @@ import { useNftContract } from "../../hooks/useNftContract";
 import Web3EthProvider from "../../providers/web3-eth-provider";
 import { ToastContainer } from "../../components/Toast";
 import { ToastsProvider } from "../../state/toast";
+import { Button } from "../../components/Button";
 
 type ClaimNFTButtonProps = {
     network: string;
@@ -20,38 +21,51 @@ const ClaimLogic = ({
     tokenURI,
     merkle_proof,
 }: Omit<ClaimNFTButtonProps, "network">) => {
-
-    const { balance, whitelist, claimNft, receipt, tx, disabled } = useNftContract({
+    const { balance, userInWhitelist, claimNft, receipt, tx, disabled } = useNftContract({
         userAddress: user_address,
         contractAddress: contract_address,
         tokenURI,
         proof: merkle_proof,
     });
-    const alreadyHas = (balance.data as bigint | undefined) ?? 0n;
+
+    const userHasClaimed = ((balance.data as bigint | undefined) ?? 0n) > 0n;
 
     return (
-        <div className="flex flex-col gap-2 max-w-sm">
-        <div className="text-sm">
-            Whitelist: {whitelist.isFetching ? "…" : whitelist.data ? "Yes" : "No"}
-        </div>
-        <div className="text-sm">Balance: {balance.isFetching ? "…" : alreadyHas.toString()}</div>
-        <button
-            disabled={disabled}
-            onClick={() => claimNft()}
-            className={`rounded-2xl px-4 py-2 border shadow ${disabled ? "opacity-60 cursor-not-allowed" : "hover:shadow-md"}`}
-            title={"Configure a valid tokenURI"}
-        >
-            {balance.isFetching
-            ? "Reading…"
-            : tx.isPending
-            ? "Sending…"
-            : receipt.isLoading
-            ? "Confirming…"
-            : "Claim NFT"}
-        </button>
-        {tx.hash && (
-            <div className="text-xs font-mono break-all">tx: {tx.hash}</div>
-        )}
+        <div className="flex flex-col gap-2">
+            {userInWhitelist ? (
+                <div>
+                    {userHasClaimed ?(
+                        <div>
+                            <p>You have already claimed your NFT! You can now play games and submit your solutions to the leaderboard.</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <p>You are eligible to claim your NFT! Claim it using the button below:</p>
+                        </div>
+                    )}
+
+                    <div className="flex justify-center">
+                        <Button
+                            variant="accent-fill"
+                            disabled={disabled}
+                            onClick={() => claimNft()}
+                            className="mt-4"
+                        >
+                            {balance.isFetching
+                            ? "Reading…"
+                            : tx.isPending
+                            ? "Sending…"
+                            : receipt.isLoading
+                            ? "Confirming…"
+                            : "Claim NFT"}
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <div>
+                    You aren’t whitelisted!
+                </div>
+            )}
         </div>
     );
 };

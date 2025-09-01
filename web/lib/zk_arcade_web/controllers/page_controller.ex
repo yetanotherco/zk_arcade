@@ -353,7 +353,15 @@ defmodule ZkArcadeWeb.PageController do
           []
       end
 
+      merkle_proof_2 = case ZkArcade.MerklePaths.get_merkle_proof(wallet_address) do
+        {:ok, proof} ->
+          proof
+        {:error, :proof_not_found} ->
+          []
+      end
+
       Logger.info("Merkle proof for address #{wallet_address}: #{inspect(merkle_proof)}")
+      Logger.info("Merkle proof 2 for address #{wallet_address}: #{inspect(merkle_proof_2)}")
 
       conn
       |> assign(:wallet, wallet_address)

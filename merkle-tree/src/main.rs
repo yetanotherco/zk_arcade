@@ -1,5 +1,6 @@
 use merkle_tree_rs::standard::{LeafType, StandardMerkleTree};
 use serde::{Deserialize, Serialize};
+use sqlx::{Postgres, postgres::PgPoolOptions};
 use std::{env, fs};
 
 #[derive(Deserialize)]
@@ -22,7 +23,8 @@ struct Output {
     proofs: Vec<ProofEntry>,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
     if args.is_empty() {
         eprintln!("Usage: merkle_json_cli --in <input.json> --out <output.json>");
@@ -57,7 +59,12 @@ fn main() {
     let parsed: WhitelistWrapper =
         serde_json::from_str(&data).unwrap_or_else(|e| panic!("Invalid JSON: {e}"));
 
-    let addresses = parsed.whitelist.addresses;
+    let addresses = parsed
+        .whitelist
+        .addresses
+        .into_iter()
+        .map(|a| a.to_lowercase().trim().to_string())
+        .collect::<Vec<_>>();
 
     let values: Vec<Vec<String>> = addresses.iter().map(|a| vec![a.clone()]).collect();
 
@@ -85,4 +92,18 @@ fn main() {
 
     fs::write(&out_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {out_path}: {e}"));
     println!("Merkle proof data written to merkle-tree/{}", out_path);
+
+    let pool = PgPoolOptions::new()
+        .connect("postgresql://postgres:postgres@127.0.0.1:5433/zk_arcade_dev")
+        .await
+        .expect("Failed to connect to the database!");
+
+    let mut query_builder =
+        sqlx::QueryBuilder::<Postgres>::new("INSERT INTO merkle_paths (id, address, merkle_proof)");
+    query_builder.push_values(out.proofs.iter(), |mut b, ProofEntry { address, proof }| {
+        b.push_bind(uuid::Uuid::new_v4())
+            .push_bind(address)
+            .push_bind(proof);
+    });
+    let _result = query_builder.build().execute(&pool).await.unwrap();
 }

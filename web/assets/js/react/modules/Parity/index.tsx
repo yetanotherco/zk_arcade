@@ -20,7 +20,13 @@ export const ParityGame = ({ network, payment_service_address, user_address, lea
 			<ToastsProvider>
 				<ToastContainer />
 				<AudioProvider>
-					<Game network={network} payment_service_address={payment_service_address} user_address={user_address} leaderboard_address={leaderboard_address} batcher_url={batcher_url} />
+					<Game
+						network={network}
+						payment_service_address={payment_service_address}
+						user_address={user_address}
+						leaderboard_address={leaderboard_address}
+						batcher_url={batcher_url}
+					/>
 				</AudioProvider>
 			</ToastsProvider>
 		</Web3EthProvider>

@@ -22,12 +22,6 @@ defmodule ZkArcade.Proofs do
     Repo.aggregate(Proof, :count, :id)
   end
 
-  def count_pending_proofs() do
-    Proof
-    |> where([p], p.status == "pending")
-    |> Repo.aggregate(:count, :id)
-  end
-
   @doc """
   Gets a single proof.
 

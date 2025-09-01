@@ -493,7 +493,7 @@ export const SubmitProofStep = ({
 					</div>
 				)}
 
-				{!bumpFeeOpen && (
+				{(!bumpFeeOpen && proofStatus !== "submitted") && (
 					<Button
 						className=""
 						variant="text-accent"

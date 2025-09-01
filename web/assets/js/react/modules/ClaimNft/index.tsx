@@ -34,31 +34,31 @@ const ClaimLogic = ({
         <div className="flex flex-col gap-2">
             <div>
                 {userHasClaimed ?(
-                    <div>
-                        <p>You have already claimed your NFT! You can now play games and submit your solutions to the leaderboard.</p>
-                    </div>
+                    <p>You have already claimed your NFT! You can now play games and submit your solutions to the leaderboard.</p>
                 ) : (
                     <div>
-                        <p>You are eligible to claim your NFT! Claim it using the button below:</p>
+                        {merkle_proof.length > 0 ? (
+                            <p>You are eligible to claim your NFT! Claim it using the button below:</p>
+                        ) : (
+                            <p>You are not eligible to claim this NFT.</p>
+                        )}
                     </div>
                 )}
 
-                <div className="flex justify-center">
-                    <Button
-                        variant="accent-fill"
-                        disabled={disabled}
-                        onClick={() => claimNft()}
-                        className="mt-4"
-                    >
-                        {balance.isFetching
-                        ? "Reading…"
-                        : tx.isPending
-                        ? "Sending…"
-                        : receipt.isLoading
-                        ? "Confirming…"
-                        : "Claim NFT"}
-                    </Button>
-                </div>
+                <Button
+                    variant="accent-fill"
+                    disabled={disabled || merkle_proof.length === 0}
+                    onClick={() => claimNft()}
+                    className="mt-4"
+                >
+                    {balance.isFetching
+                    ? "Reading…"
+                    : tx.isPending
+                    ? "Sending…"
+                    : receipt.isLoading
+                    ? "Confirming…"
+                    : "Claim NFT"}
+                </Button>
             </div>
         </div>
     );

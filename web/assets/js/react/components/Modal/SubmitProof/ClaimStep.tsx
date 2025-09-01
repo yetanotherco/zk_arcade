@@ -4,6 +4,7 @@ import { ProofSubmission } from "../../../types/aligned";
 import { useBeastLeaderboardContract } from "../../../hooks";
 import { Address } from "../../../types/blockchain";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
+import { useNftContract } from "../../../hooks/useNftContract";
 
 export const ClaimStep = ({
 	setOpen,
@@ -11,12 +12,14 @@ export const ClaimStep = ({
 	user_address,
 	leaderboard_address,
 	proofStatus,
+	nft_contract_address,
 }: {
 	setOpen: (prev: boolean) => void;
 	proofSubmission: ProofSubmission;
 	user_address: Address;
 	leaderboard_address: Address;
 	proofStatus?: ProofSubmission["status"];
+	nft_contract_address: Address;
 }) => {
 	const { submitSolution, currentGame } = useBeastLeaderboardContract({
 		userAddress: user_address,
@@ -24,6 +27,15 @@ export const ClaimStep = ({
 	});
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
+
+	const { balance: userNftBalance } = useNftContract({
+		userAddress: user_address,
+		contractAddress: nft_contract_address,
+		tokenURI: "",
+		proof: [],
+	});
+
+	console.log("userNftBalance", userNftBalance.data);
 
 	const handleClaim = async () => {
 		if (proofStatus === "claimed") {
@@ -88,6 +100,11 @@ export const ClaimStep = ({
 			>
 				Go to leaderboard
 			</a>
+			{userNftBalance?.data !== undefined && userNftBalance.data === 0n ? (
+				<p className="rounded p-2 text-red">
+					You need to have the Aligned NFT to claim points for your proofs.
+				</p>
+			) : null}
 			<div className="self-end">
 				<Button
 					variant="text"
@@ -103,7 +120,7 @@ export const ClaimStep = ({
 						submitSolution.submitSolutionFetchingVDataIsLoading ||
 						submitSolution.receipt.isLoading
 					}
-					disabled={gameHasExpired && proofStatus !== "claimed"}
+					disabled={gameHasExpired && proofStatus !== "claimed" || userNftBalance?.data === 0n}
 				>
 					{proofStatus === "verified" ? "Claim" : "Share on Twitter"}
 				</Button>

@@ -12,9 +12,10 @@ type Props = {
 	user_address: Address;
 	leaderboard_address: Address;
 	batcher_url: string;
+	nft_contract_address: Address;
 };
 
-export const ParityGame = ({ network, payment_service_address, user_address, leaderboard_address, batcher_url }: Props) => {
+export const ParityGame = ({ network, payment_service_address, user_address, leaderboard_address, batcher_url, nft_contract_address }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
@@ -26,6 +27,7 @@ export const ParityGame = ({ network, payment_service_address, user_address, lea
 						user_address={user_address}
 						leaderboard_address={leaderboard_address}
 						batcher_url={batcher_url}
+						nft_contract_address={nft_contract_address}
 					/>
 				</AudioProvider>
 			</ToastsProvider>

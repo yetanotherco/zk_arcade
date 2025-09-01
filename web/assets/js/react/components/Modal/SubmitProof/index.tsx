@@ -16,7 +16,7 @@ type Props = {
 	proof?: ProofSubmission;
 	userBeastSubmissions: BeastProofClaimed[];
 	proofToSubmitData: VerificationData | null;
-	gameName: string;
+	gameName?: string;
 };
 
 type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
@@ -158,7 +158,7 @@ export const SubmitProofModal = ({
 				proofStatus={proofStatus}
 				setProofStatus={setProofStatus}
 				proofToSubmitData={proofToSubmitData}
-				gameName={proof?.game || "beast"}
+				gameName={gameName ? gameName : (proof?.game || "beast")}
 			/>
 		),
 		claim: () =>

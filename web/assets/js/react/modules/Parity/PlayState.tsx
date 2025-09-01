@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { ParityGameState, ParityLevel } from "./types";
 import { Button } from "../../components";
-import { useParityControls } from "./useParityControls";
 import { ParityBoard } from "./Board";
 import { useSwapTransition } from "./useSwapTransition";
 
@@ -37,6 +36,13 @@ export const PlayState = ({
 	levels,
 	setCurrentLevel,
 	renewsIn,
+	values,
+	setValues,
+	positionIdx,
+	reset,
+	hasWon,
+	setPosition,
+	setHasWon,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
@@ -44,19 +50,14 @@ export const PlayState = ({
 	setCurrentLevel: (level: number) => void;
 	playerLevelReached: number;
 	renewsIn: Date;
+	values: number[];
+	setValues: (values: number[]) => void;
+	positionIdx: number;
+	reset: () => void;
+	hasWon: boolean;
+	setPosition: (position: { col: number; row: number }) => void;
+	setHasWon: (hasWon: boolean) => void;
 }) => {
-	const { hasWon, positionIdx, values, reset, setValues, setPosition } =
-		useParityControls({
-			initialPosition:
-				currentLevel !== null
-					? levels[currentLevel - 1].initialPos
-					: { row: 0, col: 0 },
-			initialValues:
-				currentLevel !== null
-					? levels[currentLevel - 1].board
-					: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-		});
-
 	const view = useSwapTransition(
 		currentLevel,
 		(_, level) =>
@@ -84,8 +85,11 @@ export const PlayState = ({
 	);
 
 	useEffect(() => {
-		if (hasWon) setGameState("proving");
-	}, [hasWon]);
+		if (hasWon) {
+			setGameState("proving");
+			setHasWon(false);
+		}
+	}, [hasWon, setHasWon]);
 
 	return (
 		<div className="w-full h-full flex flex-col gap-4 items-center">

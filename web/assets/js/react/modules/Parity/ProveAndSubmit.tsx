@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Button } from "../../components";
-import { useSwapTransition } from "./useSwapTransition";
 import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
 import { Address } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
-import { ParityGameState } from "./types";
 
 type GameStatus = {
 	levelsBoards: number[][][];
@@ -22,6 +20,7 @@ export const ProveAndSubmit = ({
 	leaderboard_address,
 	currentGameConfig,
 	currentLevel,
+	nft_contract_address
 }: {
 	goToNextLevel: () => void;
 	levelBoards: number[][];
@@ -32,6 +31,7 @@ export const ProveAndSubmit = ({
 	leaderboard_address: Address;
 	currentGameConfig: string;
 	currentLevel: number | null;
+	nft_contract_address: Address;
 }) => {
 	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
 	const [open, setOpen] = useState(false);
@@ -151,6 +151,7 @@ export const ProveAndSubmit = ({
 				userBeastSubmissions={[]}
 				proofToSubmitData={proofVerificationData}
 				gameName="parity"
+				nft_contract_address={nft_contract_address}
 			/>
 		</div>
 	);

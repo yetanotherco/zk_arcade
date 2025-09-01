@@ -13,6 +13,7 @@ type Props = {
 	payment_service_address: Address;
 	user_address: Address;
 	batcher_url: string;
+	nft_contract_address: Address;
 	user_beast_submissions: BeastProofClaimed[];
 };
 
@@ -28,6 +29,7 @@ const NotificationEntry = ({
 	user_address,
 	batcher_url,
 	user_beast_submissions,
+	nft_contract_address,
 }: {
 	proof: ProofSubmission;
 	leaderboard_address: Address;
@@ -35,6 +37,7 @@ const NotificationEntry = ({
 	user_address: Address;
 	batcher_url: string;
 	user_beast_submissions: BeastProofClaimed[];
+	nft_contract_address: Address;
 }) => {
 	const { open, setOpen, toggleOpen } = useModal();
 
@@ -72,6 +75,7 @@ const NotificationEntry = ({
 				userBeastSubmissions={user_beast_submissions}
 				proof={proof}
 				proofToSubmitData={null}
+				nft_contract_address={nft_contract_address}
 			/>
 		</>
 	);
@@ -84,6 +88,7 @@ export const NotificationBell = ({
 	user_address,
 	batcher_url,
 	user_beast_submissions,
+	nft_contract_address
 }: Props) => {
 	const [proofsReady, setProofsReady] = useState<ProofSubmission[]>([]);
 	const [allProofs, setAllProofs] = useState<ProofSubmission[]>([]);
@@ -138,6 +143,7 @@ export const NotificationBell = ({
 									user_beast_submissions={
 										user_beast_submissions
 									}
+									nft_contract_address={nft_contract_address}
 								/>
 							))
 						) : (

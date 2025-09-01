@@ -12,7 +12,6 @@ type Props = {
 	leaderboard_address: Address;
 	user_address: Address;
 	proofs: ProofSubmission[];
-	nft_contract_address: Address;
 	username: string;
 	user_position: number;
 	explorer_url: string;
@@ -28,7 +27,6 @@ export const WalletInfo = ({
 	user_position,
 	explorer_url,
 	batcher_url,
-	nft_contract_address,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const { disconnect } = useDisconnect();
@@ -79,7 +77,6 @@ export const WalletInfo = ({
 						explorer_url={explorer_url}
 						user_address={user_address}
 						batcher_url={batcher_url}
-						nft_contract_address={nft_contract_address}
 					/>
 					<div>
 						<form

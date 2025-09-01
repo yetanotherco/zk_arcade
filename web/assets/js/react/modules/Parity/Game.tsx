@@ -18,10 +18,9 @@ type GameProps = {
 	user_address: Address;
 	leaderboard_address: Address;
 	batcher_url: string;
-	nft_contract_address: Address;
 };
 
-export const Game = ({ network, payment_service_address, user_address, leaderboard_address, batcher_url, nft_contract_address }: GameProps) => {
+export const Game = ({ network, payment_service_address, user_address, leaderboard_address, batcher_url }: GameProps) => {
 	const [gameState, setGameState] = useState<ParityGameState>("home");
 	const { muted, toggleMuted } = useAudioState();
 	const {
@@ -128,7 +127,6 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				user_address={user_address}
 				currentGameConfig={currentGameConfig}
 				currentLevel={currentLevel}
-				nft_contract_address={nft_contract_address}
 			/>
 		),
 		"all-levels-completed": (
@@ -139,7 +137,6 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				payment_service_address={payment_service_address}
 				batcher_url={batcher_url}
 				leaderboard_address={leaderboard_address}
-				nft_contract_address={nft_contract_address}
 			/>
 		),
 	};

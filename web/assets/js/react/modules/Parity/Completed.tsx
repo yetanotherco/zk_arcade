@@ -17,8 +17,7 @@ export const Completed = ({
 	user_address,
 	payment_service_address,
 	batcher_url,
-	leaderboard_address,
-	nft_contract_address,
+	leaderboard_address
 }: {
 	renewsIn: Date;
 	currentGameConfig: string;
@@ -26,7 +25,6 @@ export const Completed = ({
 	payment_service_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
-	nft_contract_address: Address;
 }) => {
 	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
 	const [open, setOpen] = useState(false);
@@ -79,7 +77,6 @@ export const Completed = ({
 				userBeastSubmissions={[]}
 				proofToSubmitData={proofVerificationData}
 				gameName="parity"
-				nft_contract_address={nft_contract_address}
 			/>
 		</div>
 	);

@@ -104,7 +104,6 @@ const Entry = ({
 				user_address={user_address}
 				proof={proof}
 				proofToSubmitData={null}
-				gameName="beast"
 			/>
 		</>
 	);

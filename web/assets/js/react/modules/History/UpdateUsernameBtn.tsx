@@ -65,7 +65,6 @@ const UpdateUsernameBtn = ({ username }: Omit<Props, "network">) => {
 						value={newUsername}
 					/>
 					<input type="hidden" name="_csrf_token" value={csrfToken} />
-					<input type="hidden" name="game" value={"Beast"} />
 				</form>
 			</div>
 		</>

@@ -1,0 +1,6 @@
+node_modules
+build
+/parity_*
+pot*
+proof.json
+public.json

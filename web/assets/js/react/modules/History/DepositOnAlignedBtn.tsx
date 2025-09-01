@@ -3,7 +3,6 @@ import { Address } from "../../types/blockchain";
 import Web3EthProvider from "../../providers/web3-eth-provider";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
-import { ProofHistory } from "./ProofHistory";
 import { DepositOnAlignedModal } from "../../components/Modal/DepositOnAligned";
 import { useModal } from "../../hooks";
 

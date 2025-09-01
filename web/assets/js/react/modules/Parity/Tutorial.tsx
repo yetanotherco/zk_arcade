@@ -103,7 +103,6 @@ const BoardTutorial = ({
 					userBeastSubmissions={[]}
 					proofToSubmitData={proofVerificationData}
 					gameName="parity"
-					nft_contract_address="0x00"
 				/>
 
 			</div>

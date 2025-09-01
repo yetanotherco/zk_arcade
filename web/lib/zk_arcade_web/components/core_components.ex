@@ -68,7 +68,6 @@ defmodule ZkArcadeWeb.CoreComponents do
                 batcher_url={@batcher_url}
                 leaderboard_address={@leaderboard_address}
                 beast_submissions={@beast_submissions}
-                nft_contract_address={@nft_contract_address}
             />
           </div>
 
@@ -83,7 +82,6 @@ defmodule ZkArcadeWeb.CoreComponents do
               explorer_url={@explorer_url}
               batcher_url={@batcher_url}
               beast_submissions={@beast_submissions}
-              nft_contract_address={@nft_contract_address}
           />
 
           <div class="relative hidden lg:block">

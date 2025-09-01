@@ -70,7 +70,7 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
     const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
     const claimNft = useCallback(async () => {
-        if (!userAddress) throw new Error("Wallet no conectada");
+        if (!userAddress) throw new Error("Wallet not connected");
 
         let proofArray: `0x${string}`[];
         try {

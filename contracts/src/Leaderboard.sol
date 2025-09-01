@@ -43,7 +43,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes32 gameHash = keccak256(abi.encodePacked(gameConfig));
         return keccak256(abi.encodePacked(user, gameHash));
     }
-    
+
     address public zkArcadeNft;
     bool public useWhitelist;
 
@@ -195,11 +195,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes memory merkleProof,
         uint256 verificationDataBatchIndex
     ) public {
-        uint256[] memory decoded = abi.decode(publicInputs, (uint256[]));
+        (uint256 levelCompleted, uint256 gameConfig, uint256 userAddressNum) =
+            abi.decode(publicInputs, (uint256, uint256, uint256));
 
-        uint256 levelCompleted = decoded[0];
-        uint256 gameConfig = decoded[1];
-        address userAddress = address(uint160(decoded[2]));
+        address userAddress = address(uint160(userAddressNum));
 
         if (userAddress != msg.sender) {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});

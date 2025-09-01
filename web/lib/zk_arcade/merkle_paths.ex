@@ -44,7 +44,7 @@ defmodule ZkArcade.MerklePaths do
     Repo.all(MerklePath)
   end
 
-  def get_merkle_proof(address) do
+  def get_merkle_proof_for_address(address) do
     query = from(mp in MerklePath, where: mp.address == ^address)
     Logger.info("Querying Merkle proof for address: #{address} with query: #{inspect(query)}")
 

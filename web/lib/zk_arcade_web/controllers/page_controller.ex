@@ -346,14 +346,7 @@ defmodule ZkArcadeWeb.PageController do
       explorer_url = Application.get_env(:zk_arcade, :explorer_url)
       batcher_url = Application.get_env(:zk_arcade, :batcher_url)
 
-      merkle_proof = case get_merkle_proof(wallet_address) do
-        {:ok, proof} ->
-          proof
-        {:error, :proof_not_found} ->
-          []
-      end
-
-      merkle_proof_2 = case ZkArcade.MerklePaths.get_merkle_proof(wallet_address) do
+      merkle_proof = case ZkArcade.MerklePaths.get_merkle_proof_for_address(wallet_address) do
         {:ok, proof} ->
           proof
         {:error, :proof_not_found} ->
@@ -361,7 +354,6 @@ defmodule ZkArcadeWeb.PageController do
       end
 
       Logger.info("Merkle proof for address #{wallet_address}: #{inspect(merkle_proof)}")
-      Logger.info("Merkle proof 2 for address #{wallet_address}: #{inspect(merkle_proof_2)}")
 
       conn
       |> assign(:wallet, wallet_address)
@@ -381,26 +373,6 @@ defmodule ZkArcadeWeb.PageController do
       conn
       |> assign(:error, "No wallet connected")
       |> render(:home)
-    end
-  end
-
-  defp get_merkle_proof(wallet_address) do
-    file =
-      :zk_arcade
-      |> :code.priv_dir()
-      |> to_string()
-      |> Path.join("merkle/merkle-proofs.json")
-
-    with {:ok, bin} <- File.read(file),
-        {:ok, proofs} when is_list(proofs) <- Jason.decode(bin),
-        norm <- String.downcase(wallet_address),
-        %{"proof" => proof} <- Enum.find(proofs, fn %{"address" => a} ->
-          String.downcase(a) == norm
-        end) do
-      {:ok, proof}
-    else
-      {:error, _} = err -> err
-      _ -> {:error, :proof_not_found}
     end
   end
 end

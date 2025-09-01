@@ -58,7 +58,6 @@ const Proof = ({
 				user_address={user_address}
 				userBeastSubmissions={[]}
 				proofToSubmitData={null}
-				gameName="beast"
 			/>
 		</>
 	);

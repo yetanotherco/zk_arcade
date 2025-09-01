@@ -40,7 +40,7 @@ defmodule ZkArcadeWeb.CoreComponents do
   def nav(assigns) do
     ~H"""
       <nav class="w-full flex justify-between items-center">
-        <div class="w-full flex gap-20 items-center">
+        <div class="w-full flex gap-12 items-center">
           <.link href="/">
             <h1 class="text-xl">
               ZK Arcade
@@ -53,10 +53,13 @@ defmodule ZkArcadeWeb.CoreComponents do
               <.link href="/game/beast" class="transition hover:text-accent-100 hover:underline">Games</.link>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
+              <button class="transition hover:text-accent-100 hover:underline" id="how-it-works-nav-btn">
+                Tutorial
+              </button>
           </div>
         </div>
 
-        <div class="flex gap-8 items-center">
+        <div class="flex gap-6 items-center">
           <div class="hidden sm:block">
             <x-app-submit-proof
                 network={@network}
@@ -96,9 +99,6 @@ defmodule ZkArcadeWeb.CoreComponents do
               class="absolute right-0 top-full mt-2 w-48 bg-background border border-contrast-200 rounded-lg shadow-lg z-50 hidden"
             >
               <div>
-                <button class="block w-full text-left px-4 py-2 text-sm hover:bg-contrast-100 transition-colors rounded-tl-lg rounded-tr-lg" id="how-it-works-nav-btn">
-                  Tutorial
-                </button>
                 <.link
                   href="/#faq"
                   class="block px-4 py-2 text-sm hover:bg-contrast-100 transition-colors"

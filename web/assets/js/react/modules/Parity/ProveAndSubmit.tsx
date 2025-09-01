@@ -1,39 +1,114 @@
 import React, { useState } from "react";
 import { Button } from "../../components";
 import { useSwapTransition } from "./useSwapTransition";
+import { generateCircomParityProof } from "./GenerateProof";
+import { VerificationData } from "../../types/aligned";
+import { Address } from "viem";
+import { SubmitProofModal } from "../../components/Modal/SubmitProof";
+import { ParityGameState } from "./types";
+
+type GameStatus = {
+	levelsBoards: number[][][];
+	userPositions: [number, number][][];
+};
 
 export const ProveAndSubmit = ({
 	goToNextLevel,
+	levelBoards,
+	userPositions,
+	user_address,
+	payment_service_address,
+	batcher_url,
+	leaderboard_address,
+	currentGameConfig,
+	currentLevel,
 }: {
 	goToNextLevel: () => void;
+	levelBoards: number[][];
+	userPositions: [number, number][];
+	user_address: Address;
+	payment_service_address: Address;
+	batcher_url: string;
+	leaderboard_address: Address;
+	currentGameConfig: string;
+	currentLevel: number | null;
 }) => {
-	const [proofGenerated, setProofGenerated] = useState(false);
+	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
+	const [open, setOpen] = useState(false);
 
-	const view = useSwapTransition(proofGenerated, (_, proven) =>
-		proven ? (
-			<div className="w-full h-full flex flex-col gap-4 items-center max-w-[500px]">
-				<div className="h-full w-full flex flex-col gap-10 items-center justify-center">
-					<div>
-						<h2 className="text-2xl mb-2 font-normal text-center">
-							Level completed and proven
-						</h2>
-						<p className="text-text-200 text-center">
-							You have completed this level and submitted the
-							proof you can continue with the next level.
-						</p>
-					</div>
-					<div className="flex flex-col gap-5 items-center justify-center w-full">
-						<Button
-							variant="arcade"
-							className="max-w-[300px] w-full"
-							onClick={goToNextLevel}
-						>
-							Next Level
-						</Button>
-					</div>
-				</div>
-			</div>
-		) : (
+	const generateproofVerificationData = async () => {
+		const stored = localStorage.getItem("parity-game-data");
+
+		const gameData: { [key: string]: GameStatus } = stored
+			? JSON.parse(stored)
+			: {};
+
+		const currentLevelReached: GameStatus = gameData[currentGameConfig] || {
+			levelsBoards: [],
+			userPositions: [],
+		};
+
+		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
+		if (currentLevel && currentLevelReached.levelsBoards.length > currentLevel) {
+			currentLevelReached.levelsBoards = currentLevelReached.levelsBoards.slice(0, currentLevel);
+			currentLevelReached.userPositions = currentLevelReached.userPositions.slice(0, currentLevel);
+		}
+
+		// If the current level is equal to the levels reached length, then erase the current level data
+		if (currentLevel && currentLevelReached.levelsBoards.length === currentLevel) {
+			currentLevelReached.levelsBoards.pop();
+			currentLevelReached.userPositions.pop();
+		}
+
+		currentLevelReached.levelsBoards.push(levelBoards);
+		currentLevelReached.userPositions.push(userPositions);
+
+		// Save the data in local storage to use this level data for higher level proofs
+		gameData[currentGameConfig] = currentLevelReached;
+		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
+
+		const submitproofVerificationData = await generateCircomParityProof({
+			user_address,
+			userPositions: currentLevelReached.userPositions,
+			levelsBoards: currentLevelReached.levelsBoards,
+		});
+
+		setProofVerificationData(submitproofVerificationData);
+		setOpen(true);
+	};
+
+	const saveLevelData = () => {
+		const stored = localStorage.getItem("parity-game-data");
+		const gameData: { [key: string]: GameStatus } = stored
+			? JSON.parse(stored)
+			: {};
+
+		const currentLevelReached: GameStatus = gameData[currentGameConfig] || {
+			levelsBoards: [],
+			userPositions: [],
+		};
+
+		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
+		if (currentLevel && currentLevelReached.levelsBoards.length > currentLevel) {
+			currentLevelReached.levelsBoards = currentLevelReached.levelsBoards.slice(0, currentLevel);
+			currentLevelReached.userPositions = currentLevelReached.userPositions.slice(0, currentLevel);
+		}
+
+		// If the current level is equal to the levels reached length, then erase the current level data
+		if (currentLevel && currentLevelReached.levelsBoards.length === currentLevel) {
+			currentLevelReached.levelsBoards.pop();
+			currentLevelReached.userPositions.pop();
+		}
+
+		currentLevelReached.levelsBoards.push(levelBoards);
+		currentLevelReached.userPositions.push(userPositions);
+
+		gameData[currentGameConfig] = currentLevelReached;
+		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
+	};
+
+	return (
+		<div>
 			<div className="w-full h-full flex flex-col gap-4 items-center max-w-[500px]">
 				<div className="h-full w-full flex flex-col gap-10 items-center justify-center">
 					<div>
@@ -49,15 +124,34 @@ export const ProveAndSubmit = ({
 						variant="arcade"
 						className="max-w-[300px] w-full"
 						onClick={() => {
-							setProofGenerated(true);
+							generateproofVerificationData();
 						}}
 					>
 						Generate Proof
 					</Button>
+
+					<Button
+						variant="arcade"
+						className="max-w-[300px] w-full"
+						onClick={() => {
+							saveLevelData();
+							goToNextLevel();
+						}}
+					>
+						Next Level
+					</Button>
 				</div>
 			</div>
-		)
+			<SubmitProofModal
+				modal={{ open, setOpen }}
+				batcher_url={batcher_url}
+				leaderboard_address={leaderboard_address}
+				payment_service_address={payment_service_address}
+				user_address={user_address}
+				userBeastSubmissions={[]}
+				proofToSubmitData={proofVerificationData}
+				gameName="parity"
+			/>
+		</div>
 	);
-
-	return view;
 };

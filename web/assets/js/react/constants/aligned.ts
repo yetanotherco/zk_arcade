@@ -137,8 +137,8 @@ export const leaderboardAbi = [
 					},
 					{
 						name: "gameConfig",
-						type: "bytes",
-						internalType: "bytes",
+						type: "uint256",
+						internalType: "uint256",
 					},
 					{
 						name: "startsAtTime",

@@ -62,9 +62,9 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						isLoading={isLoading}
 						disabled={gameHasExpired && proofStatus !== "claimed"}
 					>
-						{proofStatus === "verified"
-							? "Claim"
-							: "Share on Twitter"}
+						{proofStatus === "claimed"
+							? "Share on twitter"
+							: "Claim"}
 					</Button>
 				</div>
 				<form

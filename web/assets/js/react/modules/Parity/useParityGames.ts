@@ -34,7 +34,7 @@ export const useParityGames = ({
 			let byte_idx = i * 10;
 			let initialPos: ParityLevel["initialPos"] = {
 				col: gameConfigBytes[byte_idx] >> 4,
-				row: gameConfigBytes[byte_idx] & 0xf,
+				row: gameConfigBytes[byte_idx] & 0x0f,
 			};
 			byte_idx += 1;
 			let board: number[] = [];

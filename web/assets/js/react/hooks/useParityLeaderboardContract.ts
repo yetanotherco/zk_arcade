@@ -98,7 +98,6 @@ export const useParityLeaderboardContract = ({
 					p => `${Buffer.from(p).toString("hex")}`
 				);
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
-
 			const args = [
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
@@ -139,7 +138,6 @@ export const useParityLeaderboardContract = ({
 		}
 	}, [txRest.isSuccess, txRest.isError]);
 
-	console.log(txHash, receipt);
 	useEffect(() => {
 		if (receipt.isError) {
 			addToast({

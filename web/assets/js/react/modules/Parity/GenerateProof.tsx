@@ -1,4 +1,4 @@
-import { toBytes, toHex } from "viem";
+import { getAddress, pad, toBytes, toHex } from "viem";
 import { VerificationData } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import * as snarkjs from "snarkjs";
@@ -99,7 +99,10 @@ export async function generateCircomParityProof({
 	const proofBytes = toBytesFromJSON(proof);
 	const publicInputsBytes: number[] = [];
 	publicSignals.forEach(pub => {
-		let number = toHex(BigInt(pub), { size: 32 });
+		let number = pad(toHex(BigInt(pub)), {
+			dir: "left",
+			size: 32,
+		});
 		let bytes = toBytes(number);
 		bytes.forEach(byte => publicInputsBytes.push(byte));
 	});

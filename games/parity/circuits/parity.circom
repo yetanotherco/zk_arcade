@@ -188,7 +188,6 @@ template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
     component levelsValidation[MAX_LEVELS];
 
     var acc = 0;
-    var index = 0;
 
     max_level_completed <== 1;
     for (var i = 0; i < MAX_LEVELS; i++) {
@@ -196,14 +195,12 @@ template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
         levelsValidation[i].levelBoards <== levelsBoards[i];
         levelsValidation[i].userPositions <== userPositions[i];
 
-        var val0 = (userPositions[i][0][0] << 4) | (userPositions[i][0][1] & 0x0F);
-        acc = acc + (val0 << (index * 8));
-        index++;
+        var posByte = ((userPositions[i][0][0] & 0x0F) << 4) | (userPositions[i][0][1] & 0x0F);
+        acc = (acc << 8) + posByte;
 
-        for (var j = 1; j < 10; j++) {
-            var val = levelsBoards[i][0][j - 1];
-            acc = acc + (val << (index * 8));
-            index++;
+        for (var j = 0; j < 9; j++) {
+            var b = levelsBoards[i][0][j] & 0xFF;
+            acc = (acc << 8) + b;
         }
     }
 

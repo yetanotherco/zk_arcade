@@ -169,14 +169,17 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes memory merkleProof,
         uint256 verificationDataBatchIndex
     ) public {
-        (uint256 levelCompleted, uint256 gameConfig, address userAddress) =
-            abi.decode(publicInputs, (uint256, uint256, address));
+        uint256[] memory decoded = abi.decode(publicInputs, (uint256[]));
+
+        uint256 levelCompleted = decoded[0];
+        uint256 gameConfig = decoded[1];
+        address userAddress = address(uint160(decoded[2]));
 
         if (userAddress != msg.sender) {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
         }
 
-        bytes32 pubInputCommitment = keccak256(abi.encodePacked(publicInputs));
+        bytes32 pubInputCommitment = keccak256(publicInputs);
         (bool callWasSuccessful, bytes memory proofIsIncluded) = alignedServiceManager.staticcall(
             abi.encodeWithSignature(
                 "verifyBatchInclusion(bytes32,bytes32,bytes32,bytes20,bytes32,bytes,uint256,address)",

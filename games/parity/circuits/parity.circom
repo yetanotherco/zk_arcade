@@ -190,11 +190,11 @@ template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
     var acc = 0;
     var index = 0;
 
+    max_level_completed <== 1;
     for (var i = 0; i < MAX_LEVELS; i++) {
         levelsValidation[i] = ValidateParityLevel(MAX_ROUNDS);
         levelsValidation[i].levelBoards <== levelsBoards[i];
         levelsValidation[i].userPositions <== userPositions[i];
-        max_level_completed = 0;
 
         var val0 = (userPositions[i][0][0] << 4) | (userPositions[i][0][1] & 0x0F);
         acc = acc + (val0 << (index * 8));

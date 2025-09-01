@@ -1,17 +1,18 @@
+import { toBytes, toHex } from "viem";
 import { VerificationData } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import * as snarkjs from "snarkjs";
 
 const toBytesFromJSON = (obj: unknown) =>
-  new TextEncoder().encode(JSON.stringify(obj));
+	new TextEncoder().encode(JSON.stringify(obj));
 
 const fetchTextAsBytes = async (url: string) =>
-  new TextEncoder().encode(await (await fetch(url)).text());
+	new TextEncoder().encode(await (await fetch(url)).text());
 
 type GenerateSubmitProofParams = {
-    user_address: Address;
-    userPositions: [number, number][][];
-    levelsBoards: number[][][];
+	user_address: Address;
+	userPositions: [number, number][][];
+	levelsBoards: number[][][];
 };
 
 const MaxRounds = 32;
@@ -19,85 +20,101 @@ const MaxLevels = 3;
 
 // We clone the positions to avoid overlapping between the round elements of each level
 function clonePos(p: [number, number]): [number, number] {
-    return [p[0], p[1]];
+	return [p[0], p[1]];
 }
 
 // Fill the elements of the remaining rounds for each passed level with the last state recorded
 function fillLevelElements(
-    positions: [number, number][],
-    boards: number[][]
+	positions: [number, number][],
+	boards: number[][]
 ): { positions: [number, number][]; boards: number[][] } {
-    const pos = positions.map(clonePos);
-    const brd = boards.map((row) => row.slice());
+	const pos = positions.map(clonePos);
+	const brd = boards.map(row => row.slice());
 
-    const lastPos: [number, number] = pos[pos.length - 1] ?? [0, 0];
-    const lastBrd: number[] = brd[brd.length - 1] ?? Array(9).fill(0);
+	const lastPos: [number, number] = pos[pos.length - 1] ?? [0, 0];
+	const lastBrd: number[] = brd[brd.length - 1] ?? Array(9).fill(0);
 
-    while (pos.length < MaxRounds) pos.push(clonePos(lastPos));
-    while (brd.length < MaxRounds) brd.push([...lastBrd]);
+	while (pos.length < MaxRounds) pos.push(clonePos(lastPos));
+	while (brd.length < MaxRounds) brd.push([...lastBrd]);
 
-    return { positions: pos, boards: brd };
+	return { positions: pos, boards: brd };
 }
 
-function makeEmptyLevel(): { positions: [number, number][]; boards: number[][] } {
-    const zeroPos: [number, number] = [0, 0];
-    const zeroBoard = Array(9).fill(0);
-    return {
-        positions: Array.from({ length: MaxRounds }, () => clonePos(zeroPos)),
-        boards: Array.from({ length: MaxRounds }, () => [...zeroBoard]),
-    };
+function makeEmptyLevel(): {
+	positions: [number, number][];
+	boards: number[][];
+} {
+	const zeroPos: [number, number] = [0, 0];
+	const zeroBoard = Array(9).fill(0);
+	return {
+		positions: Array.from({ length: MaxRounds }, () => clonePos(zeroPos)),
+		boards: Array.from({ length: MaxRounds }, () => [...zeroBoard]),
+	};
 }
 
 export async function generateCircomParityProof({
-    user_address,
-    userPositions,
-    levelsBoards,
+	user_address,
+	userPositions,
+	levelsBoards,
 }: GenerateSubmitProofParams): Promise<VerificationData> {
-    const allUserPositions: [number, number][][] = [];
-    const allLevelsBoards: number[][][] = [];
+	const allUserPositions: [number, number][][] = [];
+	const allLevelsBoards: number[][][] = [];
 
-    const usedLevels = Math.min(levelsBoards.length, MaxLevels);
+	const usedLevels = Math.min(levelsBoards.length, MaxLevels);
 
-    for (let i = 0; i < usedLevels; i++) {
-        const levelUserPositions = userPositions[i] ?? [];
-        const levelBoards = levelsBoards[i] ?? [];
+	for (let i = 0; i < usedLevels; i++) {
+		const levelUserPositions = userPositions[i] ?? [];
+		const levelBoards = levelsBoards[i] ?? [];
 
-        const { positions, boards } = fillLevelElements(levelUserPositions, levelBoards);
-        allUserPositions.push(positions);
-        allLevelsBoards.push(boards);
-    }
+		const { positions, boards } = fillLevelElements(
+			levelUserPositions,
+			levelBoards
+		);
+		allUserPositions.push(positions);
+		allLevelsBoards.push(boards);
+	}
 
-    while (allLevelsBoards.length < MaxLevels) {
-        const empty = makeEmptyLevel();
-        allUserPositions.push(empty.positions);
-        allLevelsBoards.push(empty.boards);
-    }
+	while (allLevelsBoards.length < MaxLevels) {
+		const empty = makeEmptyLevel();
+		allUserPositions.push(empty.positions);
+		allLevelsBoards.push(empty.boards);
+	}
 
-    const input = {
-        levelsBoards: allLevelsBoards,
-        userPositions: allUserPositions,
-        userAddress: user_address,
-    };
+	const input = {
+		levelsBoards: allLevelsBoards,
+		userPositions: allUserPositions,
+		userAddress: user_address,
+	};
 
-    const wasmPath = "/artifacts/parity.wasm";
-    const zkeyPath = "/artifacts/parity_final.zkey";
-    const vkeyPath = "/artifacts/verification_key.json";
+	const wasmPath = "/artifacts/parity.wasm";
+	const zkeyPath = "/artifacts/parity_final.zkey";
+	const vkeyPath = "/artifacts/verification_key.json";
 
-    const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
+	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+		input,
+		wasmPath,
+		zkeyPath
+	);
 
-    const proofBytes = toBytesFromJSON(proof);
-    const publicInputsBytes = toBytesFromJSON(publicSignals);
-    const vKeyBytes = await fetchTextAsBytes(vkeyPath);
+	const proofBytes = toBytesFromJSON(proof);
+	const publicInputsBytes: number[] = [];
+	publicSignals.forEach(pub => {
+		let number = toHex(BigInt(pub), { size: 32 });
+		let bytes = toBytes(number);
+		bytes.forEach(byte => publicInputsBytes.push(byte));
+	});
 
-    // Create verification data
-    const verificationData: VerificationData = {
-        provingSystem: "CircomGroth16Bn256",
-        proof: Array.from(proofBytes),
-        publicInput: Array.from(publicInputsBytes),
-        vmProgramCode: undefined,
-        verificationKey: Array.from(vKeyBytes),
-        proofGeneratorAddress: user_address,
-    };
+	const vKeyBytes = await fetchTextAsBytes(vkeyPath);
 
-    return verificationData;
+	// Create verification data
+	const verificationData: VerificationData = {
+		provingSystem: "CircomGroth16Bn256",
+		proof: Array.from(proofBytes),
+		publicInput: publicInputsBytes,
+		vmProgramCode: undefined,
+		verificationKey: Array.from(vKeyBytes),
+		proofGeneratorAddress: user_address,
+	};
+
+	return verificationData;
 }

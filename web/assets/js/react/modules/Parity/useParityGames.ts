@@ -5,6 +5,7 @@ import { useParityLeaderboardContract } from "../../hooks/useParityLeaderboardCo
 
 type Args = {
 	leaderBoardContractAddress: Address;
+	userAddress;
 };
 
 type GameStatus = {
@@ -12,10 +13,13 @@ type GameStatus = {
 	userPositions: [number, number][][];
 };
 
-export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
+export const useParityGames = ({
+	leaderBoardContractAddress,
+	userAddress,
+}: Args) => {
 	const { currentGame } = useParityLeaderboardContract({
 		contractAddress: leaderBoardContractAddress,
-		userAddress: "0x0",
+		userAddress,
 	});
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
 
@@ -28,7 +32,7 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 
 		for (let i = 0; i < gameConfigBytes.length / 10; i++) {
 			let byte_idx = i * 10;
-			let initialPos: ParityLevel["initialPos"] = { 
+			let initialPos: ParityLevel["initialPos"] = {
 				col: gameConfigBytes[byte_idx] >> 4,
 				row: gameConfigBytes[byte_idx] & 0xf,
 			};
@@ -45,6 +49,7 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 
 	const [playerLevelReached, setPlayerLevelReached] = useState(0);
 
+	// TODO: show actual renewal
 	const renewsIn = new Date();
 
 	useEffect(() => {
@@ -61,9 +66,9 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 		}
 		const current = gameData[gameConfig];
 
+		// TODO: do this only if the gameConfig matches the one in the contracr
 		setPlayerLevelReached((current?.levelsBoards?.length ?? 0) + 1);
 	}, [gameConfig]);
-
 
 	return {
 		playerLevelReached,

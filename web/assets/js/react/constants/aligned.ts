@@ -63,6 +63,21 @@ export const leaderboardAbi = [
 	},
 	{
 		type: "function",
+		name: "submitParitySolution",
+		stateMutability: "nonpayable",
+		inputs: [
+			{ name: "proofCommitment", type: "bytes32" },
+			{ name: "publicInputs", type: "bytes" },
+			{ name: "provingSystemAuxDataCommitment", type: "bytes32" },
+			{ name: "proofGeneratorAddr", type: "bytes20" },
+			{ name: "batchMerkleRoot", type: "bytes32" },
+			{ name: "merkleProof", type: "bytes" },
+			{ name: "verificationDataBatchIndex", type: "uint256" },
+		],
+		outputs: [],
+	},
+	{
+		type: "function",
 		name: "getUserScore",
 		stateMutability: "view",
 		inputs: [{ name: "user", type: "address" }],

@@ -49,17 +49,19 @@ const TutorialText = ({
 
 const BoardTutorial = ({
 	setGameState,
-	gameProps
+	gameProps,
 }: {
 	setGameState: (state: ParityGameState) => void;
-		gameProps: GameProps;
+	gameProps: GameProps;
 }) => {
-	const { positionIdx, values, hasWon, reset, userPositions, levelBoards } = useParityControls({
-		initialPosition: { col: 0, row: 0 },
-		initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
-	});
+	const { positionIdx, values, hasWon, reset, userPositions, levelBoards } =
+		useParityControls({
+			initialPosition: { col: 0, row: 0 },
+			initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
+		});
 	const { open, setOpen, toggleOpen } = useModal();
-	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
+	const [proofVerificationData, setProofVerificationData] =
+		useState<VerificationData | null>(null);
 
 	const generateproofVerificationData = async () => {
 		const totalLevelBoards = [[...levelBoards]];
@@ -77,14 +79,13 @@ const BoardTutorial = ({
 
 	const view = useSwapTransition(hasWon, (_, won) =>
 		won ? (
-
 			<div className="flex flex-col gap-2">
 				<TutorialText
 					header="End of tutorial"
 					text="You have completed the tutorial. Now that you understand how the game works, you are ready to prove it to others and climb the leaderboard."
 					button="Let's go!"
 					onClick={() => setGameState("home")}
-				/>				
+				/>
 
 				{/* TODO: Remove the proof generation from tutorial once we have it available for normal levels */}
 				<Button
@@ -104,7 +105,6 @@ const BoardTutorial = ({
 					proofToSubmitData={proofVerificationData}
 					gameName="parity"
 				/>
-
 			</div>
 		) : (
 			<ParityBoard
@@ -131,7 +131,7 @@ type GameProps = {
 
 export const ParityTutorial = ({
 	setGameState,
-	gameProps
+	gameProps,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	gameProps: GameProps;
@@ -153,7 +153,10 @@ export const ParityTutorial = ({
 						onClick={goToNextStep}
 					/>
 				) : (
-					<BoardTutorial setGameState={setGameState} gameProps={gameProps} />
+					<BoardTutorial
+						setGameState={setGameState}
+						gameProps={gameProps}
+					/>
 				)}
 			</div>
 		</div>

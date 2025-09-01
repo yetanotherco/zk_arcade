@@ -113,7 +113,7 @@ export const useParityLeaderboardContract = ({
 
 			await writeContractAsync({
 				address: contractAddress,
-				functionName: "submitBeastSolution",
+				functionName: "submitParitySolution",
 				abi: leaderboardAbi,
 				args,
 			});
@@ -139,6 +139,7 @@ export const useParityLeaderboardContract = ({
 		}
 	}, [txRest.isSuccess, txRest.isError]);
 
+	console.log(txHash, receipt);
 	useEffect(() => {
 		if (receipt.isError) {
 			addToast({

@@ -20,7 +20,7 @@ contract NftContractDeployer is Script {
             abi.decode(vm.parseJson(configData, ".whitelist.addresses"), (address[]));
 
         // Read merkle root from the generated merkle proof data
-        string memory merkleData = vm.readFile("../merkle-tree/merkle_output.json");
+        string memory merkleData = vm.readFile("../merkle_tree/merkle_output.json");
         bytes32 merkleRoot = vm.parseJsonBytes32(merkleData, ".root");
 
         vm.startBroadcast();

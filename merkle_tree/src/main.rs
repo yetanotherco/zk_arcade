@@ -192,5 +192,5 @@ fn main() {
 
     fs::write(&out_path, &serialized)
         .unwrap_or_else(|e| panic!("Failed to write {}: {}", out_path, e));
-    println!("Merkle proof data written to merkle-tree/{}", out_path);
+    println!("Merkle proof data written to merkle_tree/{}", out_path);
 }

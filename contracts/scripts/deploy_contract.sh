@@ -5,14 +5,14 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # At this point we are in scripts/contracts/
 cd "$parent_path"
 
-# cd to merkle-tree/
-cd ../../merkle-tree/
+# cd to merkle_tree/
+cd ../../merkle_tree/
 
 # Generate the merkle root and the merkle proof for each address of the whitelist
 cargo run -- --in ../contracts/script/deploy/config/devnet/nft.json --out merkle_output.json
 
-# Copy the merkle proofs from the file and paste them into ../web/priv/merkle/merkle-proofs.json using jq
-jq '.proofs' ./merkle_output.json > ../web/priv/merkle/merkle-proofs.json
+# Copy the merkle proofs from the file and paste them into ../web/priv/merkle/merkle_proofs.json using jq
+jq '.proofs' ./merkle_output.json > ../web/priv/merkle/merkle_proofs.json
 
 # cd to contracts/
 cd ../contracts/

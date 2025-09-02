@@ -381,7 +381,7 @@ defmodule ZkArcadeWeb.PageController do
       :zk_arcade
       |> :code.priv_dir()
       |> to_string()
-      |> Path.join("merkle/merkle-proofs.json")
+      |> Path.join("merkle/merkle_proofs.json")
 
     with {:ok, bin} <- File.read(file),
         {:ok, proofs} when is_list(proofs) <- Jason.decode(bin),

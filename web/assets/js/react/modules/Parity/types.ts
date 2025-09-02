@@ -3,8 +3,7 @@ export type ParityGameState =
 	| "tutorial"
 	| "running"
 	| "after-level"
-	| "proving"
-	| "all-levels-completed";
+	| "proving";
 
 export type ParityLevel = {
 	initialPos: {
@@ -12,4 +11,9 @@ export type ParityLevel = {
 		col: number;
 	};
 	board: number[];
+};
+
+export type GameStatus = {
+	levelsBoards: number[][][];
+	userPositions: [number, number][][];
 };

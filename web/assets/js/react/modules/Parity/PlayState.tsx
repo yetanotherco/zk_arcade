@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { ParityGameState, ParityLevel } from "./types";
+import React, { useEffect } from "react";
+import { GameStatus, ParityGameState, ParityLevel } from "./types";
 import { Button } from "../../components";
 import { ParityBoard } from "./Board";
 import { useSwapTransition } from "./useSwapTransition";
@@ -43,6 +43,7 @@ export const PlayState = ({
 	hasWon,
 	setPosition,
 	setHasWon,
+	saveLevelData,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
@@ -60,6 +61,7 @@ export const PlayState = ({
 	hasWon: boolean;
 	setPosition: (position: { col: number; row: number }) => void;
 	setHasWon: (hasWon: boolean) => void;
+	saveLevelData: () => void;
 }) => {
 	const view = useSwapTransition(
 		currentLevel,
@@ -89,8 +91,9 @@ export const PlayState = ({
 
 	useEffect(() => {
 		if (hasWon) {
+			saveLevelData();
 			if (currentLevel == levels.length) {
-				setGameState("all-levels-completed");
+				setGameState("proving");
 			} else {
 				setGameState("after-level");
 			}

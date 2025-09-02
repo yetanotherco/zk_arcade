@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { Button } from "../../components";
 import { ParityTutorial } from "./Tutorial";
-import { ParityGameState } from "./types";
+import { GameStatus, ParityGameState } from "./types";
 import { PlayState } from "./PlayState";
 import { AfterLevelCompletion } from "./AfterLevelCompletion";
 import { useSwapTransition } from "./useSwapTransition";
@@ -10,6 +10,7 @@ import { Address } from "viem";
 import { Completed } from "./Completed";
 import { useAudioState } from "../../state/audio";
 import { useParityControls } from "./useParityControls";
+import { ProveAndSubmit } from "./ProveAndSubmit";
 
 type GameProps = {
 	network: string;
@@ -27,7 +28,6 @@ export const Game = ({
 	batcher_url,
 }: GameProps) => {
 	const [gameState, setGameState] = useState<ParityGameState>("home");
-	const { muted, toggleMuted } = useAudioState();
 	const {
 		currentLevel,
 		levels,
@@ -63,10 +63,48 @@ export const Game = ({
 				: [0, 0, 0, 0, 0, 0, 0, 0, 0],
 	});
 
+	const saveLevelData = useCallback(() => {
+		const stored = localStorage.getItem("parity-game-data");
+		const gameData: { [key: string]: GameStatus } = stored
+			? JSON.parse(stored)
+			: {};
+
+		const currentLevelReached: GameStatus = gameData[currentGameConfig] || {
+			levelsBoards: [],
+			userPositions: [],
+		};
+
+		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
+		if (
+			currentLevel &&
+			currentLevelReached.levelsBoards.length > currentLevel
+		) {
+			currentLevelReached.levelsBoards =
+				currentLevelReached.levelsBoards.slice(0, currentLevel);
+			currentLevelReached.userPositions =
+				currentLevelReached.userPositions.slice(0, currentLevel);
+		}
+
+		// If the current level is equal to the levels reached length, then erase the current level data
+		if (
+			currentLevel &&
+			currentLevelReached.levelsBoards.length === currentLevel
+		) {
+			currentLevelReached.levelsBoards.pop();
+			currentLevelReached.userPositions.pop();
+		}
+
+		currentLevelReached.levelsBoards.push(levelBoards);
+		currentLevelReached.userPositions.push(userPositions);
+
+		gameData[currentGameConfig] = currentLevelReached;
+		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
+	}, [currentLevel, currentGameConfig, levelBoards, userPositions]);
+
 	const goToNextLevel = useCallback(() => {
 		setCurrentLevel(prev => {
 			if (prev === levels.length) {
-				setGameState("all-levels-completed");
+				setGameState("proving");
 				return prev;
 			}
 			const next = prev == null ? 0 : prev + 1;
@@ -103,31 +141,20 @@ export const Game = ({
 				<Button
 					variant="arcade"
 					className="max-w-[300px] w-full"
-					onClick={() => setGameState("tutorial")}
+					onClick={() => setGameState("proving")}
 				>
-					Tutorial
+					Submit Proof
 				</Button>
 				<Button
 					variant="arcade"
 					className="max-w-[300px] w-full"
-					onClick={toggleMuted}
+					onClick={() => setGameState("tutorial")}
 				>
-					{muted ? "Unmute" : "Mute"}
+					Tutorial
 				</Button>
 			</div>
 		),
-		tutorial: (
-			<ParityTutorial
-				setGameState={setGameState}
-				gameProps={{
-					network,
-					payment_service_address,
-					user_address,
-					leaderboard_address,
-					batcher_url,
-				}}
-			/>
-		),
+		tutorial: <ParityTutorial setGameState={setGameState} />,
 		running: (
 			<PlayState
 				levels={levels}
@@ -143,31 +170,22 @@ export const Game = ({
 				setValues={setValues}
 				setPosition={setPosition}
 				setHasWon={setHasWon}
+				saveLevelData={saveLevelData}
 			/>
 		),
 		"after-level": (
 			<AfterLevelCompletion
 				goToNextLevel={goToNextLevel}
-				levelBoards={levelBoards}
-				userPositions={userPositions}
-				batcher_url={batcher_url}
-				leaderboard_address={leaderboard_address}
-				payment_service_address={payment_service_address}
-				user_address={user_address}
-				currentGameConfig={currentGameConfig}
-				currentLevel={currentLevel}
 				setGameState={setGameState}
 			/>
 		),
-		proving: <></>,
-		"all-levels-completed": (
-			<Completed
-				timeRemaining={timeRemaining}
-				currentGameConfig={currentGameConfig}
-				user_address={user_address}
-				payment_service_address={payment_service_address}
+		proving: (
+			<ProveAndSubmit
 				batcher_url={batcher_url}
 				leaderboard_address={leaderboard_address}
+				payment_service_address={payment_service_address}
+				user_address={user_address}
+				currentGameConfig={currentGameConfig}
 				setGameState={setGameState}
 			/>
 		),

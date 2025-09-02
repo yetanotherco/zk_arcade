@@ -38,7 +38,7 @@ fn encode_parity_levels(levels: Vec<ParityLevel>) -> [u8; 32] {
     let mut bytes: [u8; 32] = [0; 32];
     // Because each level takes 10 bytes we use a total of 30 bytes
     // we pad the bytes with two leading zeroes
-    // this is to maintain the consitency with the way circom prover commits the public inpu
+    // this is to maintain the consistency with the way circom prover commits the public inputs
     let offset_bytes = 2;
 
     for (i, level) in levels.iter().enumerate() {

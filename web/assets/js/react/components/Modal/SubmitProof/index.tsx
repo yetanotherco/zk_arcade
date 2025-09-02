@@ -6,6 +6,7 @@ import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentServic
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
+import { useNftContract } from "../../../hooks/useNftContract";
 
 type Props = {
 	modal: Omit<ModalProps, "maxWidth">;
@@ -206,6 +207,13 @@ export const SubmitProofModal = ({
 		}
 	}, [step, depositStatus, submissionStatus]);
 
+	const { balance: userNftBalance } = useNftContract({
+		userAddress: user_address,
+		contractAddress: nft_contract_address,
+		tokenURI: "",
+		proof: [],
+	});
+
 	return (
 		<Modal
 			maxWidth={800}
@@ -247,10 +255,20 @@ export const SubmitProofModal = ({
 					</div>
 				</div>
 				<div className="w-full h-full max-h-[500px] overflow-scroll">
-					{step ? (
-						modalBasedOnStep[step]()
+					{userNftBalance?.data !== undefined && userNftBalance.data === 0n ? (
+						<>
+							<p className="rounded p-2 text-red">
+								You need to have the Aligned NFT to submit your proofs.
+							</p>
+						</>
 					) : (
-						<p className="text-center">Loading...</p>
+						<>
+							{step ? (
+								modalBasedOnStep[step]()
+							) : (
+								<p className="text-center">Loading...</p>
+							)}
+						</>
 					)}
 				</div>
 			</div>

@@ -126,6 +126,6 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
         claimNft,
         receipt,
         tx: { hash: txHash, ...txRest },
-        disabled: !userAddress || balanceMoreThanZero,
+        disabled: balanceMoreThanZero,
     };
 }

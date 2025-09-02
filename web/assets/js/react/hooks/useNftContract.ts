@@ -16,39 +16,29 @@ type HookArgs = {
     proof: `0x${string}`[] | `0x${string}` | string;
 };
 
-function normalizeBytes32Array(input: HookArgs["proof"]): `0x${string}`[] {
-    const toBytes32 = (h: string): `0x${string}` => {
-        if (!/^0x[0-9a-fA-F]{64}$/.test(h)) throw new Error(`Element is not bytes32: ${h}`);
-        return h as `0x${string}`;
-    };
-
+// This function normalizes the proof input into an array of bytes32 strings.
+function processRawMerkleProof(input: HookArgs["proof"]): `0x${string}`[] {
     if (Array.isArray(input)) {
-        return (input as string[]).map(toBytes32);
+        return input as `0x${string}`[];
     }
 
     if (typeof input === "string") {
-        const s = input.trim();
-        if (!s) throw new Error("Proof is empty");
+        const trimmed = input.trim();
+        if (!trimmed) throw new Error("Proof is empty");
 
-        if (/^0x[0-9a-fA-F]{64}$/.test(s)) return [s as `0x${string}`];
-
-        const count0x = (s.match(/0x/gi) || []).length;
-        if (count0x > 1) {
-        return s
-            .split(/0x/gi)
-            .filter(Boolean)
-            .map((h) => toBytes32(("0x" + h) as `0x${string}`));
+        // Remove all 0x internal prefixes
+        const hex = trimmed.replace(/0x/gi, "");
+        
+        if (hex.length % 64 !== 0) {
+            throw new Error("Invalid length for concatenated bytes32");
         }
 
-        const stripped = s.startsWith("0x") ? s.slice(2) : s;
-        if (stripped.length % 64 !== 0)
-        throw new Error("Invalid length for concatenated bytes32");
-
-        const out: `0x${string}`[] = [];
-        for (let i = 0; i < stripped.length; i += 64) {
-        out.push(toBytes32(("0x" + stripped.slice(i, i + 64)) as `0x${string}`));
+        // Gets each bytes32 chunk and pushes it into the vec
+        const result: `0x${string}`[] = [];
+        for (let i = 0; i < hex.length; i += 64) {
+            result.push(`0x${hex.slice(i, i + 64)}` as `0x${string}`);
         }
-        return out;
+        return result;
     }
 
     throw new Error("Unsupported proof format");
@@ -72,9 +62,9 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
     const claimNft = useCallback(async () => {
         if (!userAddress) throw new Error("Wallet not connected");
 
-        let proofArray: `0x${string}`[];
+        let merkleProofArray: `0x${string}`[];
         try {
-            proofArray = normalizeBytes32Array(proof);
+            merkleProofArray = processRawMerkleProof(proof);
         } catch (e: any) {
             addToast({ title: "Invalid merkle proof", desc: String(e?.message || e), type: "error" });
             return;
@@ -84,7 +74,7 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
             address: contractAddress,
             abi: zkArcadeNftAbi,
             functionName: "claimNFT",
-            args: [proofArray, tokenURI],
+            args: [merkleProofArray, tokenURI],
             account: userAddress,
             chainId,
         });

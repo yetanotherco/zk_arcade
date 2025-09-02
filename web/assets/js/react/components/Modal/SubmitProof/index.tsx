@@ -172,7 +172,6 @@ export const SubmitProofModal = ({
 					user_address={user_address}
 					leaderboard_address={leaderboard_address}
 					proofStatus={proofStatus}
-					nft_contract_address={nft_contract_address}
 				/>
 			),
 	};

@@ -90,7 +90,7 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
         });
 
         return hash;
-    }, [userAddress, proof, tokenURI, contractAddress, writeContractAsync, chainId, addToast]);
+    }, [userAddress, proof, tokenURI, contractAddress, writeContractAsync, chainId]);
 
     useEffect(() => {
         if (txRest.isError) {
@@ -117,7 +117,7 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
                 type: "success",
             });
         }
-    }, [receipt.isLoading, receipt.isError, receipt.isSuccess, addToast]);
+    }, [receipt.isLoading, receipt.isError, receipt.isSuccess]);
 
     const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
 

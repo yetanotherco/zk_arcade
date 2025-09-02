@@ -117,11 +117,14 @@ export const PlayState = ({
 
 			{currentLevel === null &&
 				(timeRemaining ? (
-					<span className="text-accent-100">
-						{timeRemaining.hours > 0
-							? `${timeRemaining.hours} hours`
-							: `${timeRemaining.minutes} minutes`}
-					</span>
+					<p>
+						Levels renew in{" "}
+						<span className="text-accent-100">
+							{timeRemaining.hours > 0
+								? `${timeRemaining.hours} hours`
+								: `${timeRemaining.minutes} minutes`}
+						</span>
+					</p>
 				) : (
 					<span className="text-accent-100">loading...</span>
 				))}

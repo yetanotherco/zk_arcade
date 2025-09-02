@@ -21,7 +21,6 @@ type GameProps = {
 };
 
 export const Game = ({
-	network,
 	payment_service_address,
 	user_address,
 	leaderboard_address,
@@ -36,6 +35,7 @@ export const Game = ({
 		setCurrentLevel,
 		currentGameConfig,
 		timeRemaining,
+		currentGameLevelCompleted,
 	} = useParityGames({
 		leaderBoardContractAddress: leaderboard_address,
 		userAddress: user_address,
@@ -187,6 +187,8 @@ export const Game = ({
 				user_address={user_address}
 				currentGameConfig={currentGameConfig}
 				setGameState={setGameState}
+				submittedLevelOnChain={Number(currentGameLevelCompleted.data)}
+				timeRemaining={timeRemaining}
 			/>
 		),
 	};

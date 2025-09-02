@@ -18,10 +18,11 @@ export const useParityGames = ({
 	leaderBoardContractAddress,
 	userAddress,
 }: Args) => {
-	const { currentGame } = useParityLeaderboardContract({
-		contractAddress: leaderBoardContractAddress,
-		userAddress,
-	});
+	const { currentGame, currentGameLevelCompleted } =
+		useParityLeaderboardContract({
+			contractAddress: leaderBoardContractAddress,
+			userAddress,
+		});
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
 
 	const gameConfig = currentGame.data?.gameConfig ?? "";
@@ -91,11 +92,11 @@ export const useParityGames = ({
 		}
 		const current = gameData[gameConfig];
 
-		// TODO: do this only if the gameConfig matches the one in the contracr
 		setPlayerLevelReached((current?.levelsBoards?.length ?? 0) + 1);
 	}, [gameConfig]);
 
 	return {
+		currentGameLevelCompleted,
 		playerLevelReached,
 		setPlayerLevelReached,
 		currentLevel,

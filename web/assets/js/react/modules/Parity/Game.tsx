@@ -3,7 +3,7 @@ import { Button } from "../../components";
 import { ParityTutorial } from "./Tutorial";
 import { ParityGameState } from "./types";
 import { PlayState } from "./PlayState";
-import { ProveAndSubmit } from "./ProveAndSubmit";
+import { AfterLevelCompletion } from "./AfterLevelCompletion";
 import { useSwapTransition } from "./useSwapTransition";
 import { useParityGames } from "./useParityGames";
 import { Address } from "viem";
@@ -145,8 +145,8 @@ export const Game = ({
 				setHasWon={setHasWon}
 			/>
 		),
-		proving: (
-			<ProveAndSubmit
+		"after-level": (
+			<AfterLevelCompletion
 				goToNextLevel={goToNextLevel}
 				levelBoards={levelBoards}
 				userPositions={userPositions}
@@ -156,8 +156,10 @@ export const Game = ({
 				user_address={user_address}
 				currentGameConfig={currentGameConfig}
 				currentLevel={currentLevel}
+				setGameState={setGameState}
 			/>
 		),
+		proving: <></>,
 		"all-levels-completed": (
 			<Completed
 				timeRemaining={timeRemaining}
@@ -166,6 +168,7 @@ export const Game = ({
 				payment_service_address={payment_service_address}
 				batcher_url={batcher_url}
 				leaderboard_address={leaderboard_address}
+				setGameState={setGameState}
 			/>
 		),
 	};

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ParityGameState, ParityLevel } from "./types";
 import { Button } from "../../components";
 import { ParityBoard } from "./Board";
@@ -89,7 +89,11 @@ export const PlayState = ({
 
 	useEffect(() => {
 		if (hasWon) {
-			setGameState("proving");
+			if (currentLevel == levels.length) {
+				setGameState("all-levels-completed");
+			} else {
+				setGameState("after-level");
+			}
 			setHasWon(false);
 		}
 	}, [hasWon, setHasWon]);

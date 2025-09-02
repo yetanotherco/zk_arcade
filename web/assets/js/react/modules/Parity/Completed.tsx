@@ -18,6 +18,7 @@ export const Completed = ({
 	payment_service_address,
 	batcher_url,
 	leaderboard_address,
+	setGameState,
 }: {
 	timeRemaining: {
 		hours: number;
@@ -28,6 +29,7 @@ export const Completed = ({
 	payment_service_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
+	setGameState: (state: ParityGameState) => void;
 }) => {
 	const [proofVerificationData, setProofVerificationData] =
 		useState<VerificationData | null>(null);
@@ -77,12 +79,17 @@ export const Completed = ({
 					for new levels!
 				</p>
 			</div>
-			<Button
-				variant="arcade"
-				onClick={() => generateproofVerificationData()}
-			>
-				Generate Proof
-			</Button>
+			<div className="flex flex-col gap-5 w-full max-w-[300px]">
+				<Button
+					variant="arcade"
+					onClick={() => generateproofVerificationData()}
+				>
+					Generate Proof
+				</Button>
+				<Button variant="arcade" onClick={() => setGameState("home")}>
+					Home
+				</Button>
+			</div>
 			<SubmitProofModal
 				modal={{ open, setOpen }}
 				batcher_url={batcher_url}

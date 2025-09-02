@@ -2,6 +2,7 @@ export type ParityGameState =
 	| "home"
 	| "tutorial"
 	| "running"
+	| "after-level"
 	| "proving"
 	| "all-levels-completed";
 

@@ -4,13 +4,14 @@ import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
 import { Address } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
+import { ParityGameState } from "./types";
 
 type GameStatus = {
 	levelsBoards: number[][][];
 	userPositions: [number, number][][];
 };
 
-export const ProveAndSubmit = ({
+export const AfterLevelCompletion = ({
 	goToNextLevel,
 	levelBoards,
 	userPositions,
@@ -20,6 +21,7 @@ export const ProveAndSubmit = ({
 	leaderboard_address,
 	currentGameConfig,
 	currentLevel,
+	setGameState,
 }: {
 	goToNextLevel: () => void;
 	levelBoards: number[][];
@@ -30,6 +32,7 @@ export const ProveAndSubmit = ({
 	leaderboard_address: Address;
 	currentGameConfig: string;
 	currentLevel: number | null;
+	setGameState: (state: ParityGameState) => void;
 }) => {
 	const [proofVerificationData, setProofVerificationData] =
 		useState<VerificationData | null>(null);
@@ -128,33 +131,34 @@ export const ProveAndSubmit = ({
 				<div className="h-full w-full flex flex-col gap-10 items-center justify-center">
 					<div>
 						<h2 className="text-2xl mb-2 font-normal text-center">
-							Prove Execution
+							Level completed
 						</h2>
 						<p className="text-text-200 text-center">
-							Prove the completion of the level and submit it to
-							Aligned to claim points
+							Continue playing or go home to continue later
 						</p>
 					</div>
-					<Button
-						variant="arcade"
-						className="max-w-[300px] w-full"
-						onClick={() => {
-							generateproofVerificationData();
-						}}
-					>
-						Generate Proof
-					</Button>
-
-					<Button
-						variant="arcade"
-						className="max-w-[300px] w-full"
-						onClick={() => {
-							saveLevelData();
-							goToNextLevel();
-						}}
-					>
-						Next Level
-					</Button>
+					<div className="flex flex-col gap-5 w-full max-w-[300px]">
+						<Button
+							variant="arcade"
+							className="w-full"
+							onClick={() => {
+								saveLevelData();
+								goToNextLevel();
+							}}
+						>
+							Next Level
+						</Button>
+						<Button
+							variant="arcade"
+							className="w-full"
+							onClick={() => {
+								saveLevelData();
+								setGameState("home");
+							}}
+						>
+							Home
+						</Button>
+					</div>
 				</div>
 			</div>
 			<SubmitProofModal

@@ -12,7 +12,6 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 
 contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 private _nextTokenId;
-    mapping(address => bool) public minters;
 
     bytes32 public merkleRoot;
     mapping(address => bool) public hasClaimed;
@@ -33,13 +32,6 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
-
-    function mint(string memory tokenURI) public onlyMinters(msg.sender) returns (uint256) {
-        uint256 tokenId = _nextTokenId++;
-        _mint(msg.sender, tokenId);
-        _setTokenURI(tokenId, tokenURI);
-        return tokenId;
-    }
 
     function claimNFT(bytes32[] calldata merkleProof, string memory tokenURI) public returns (uint256) {
         require(!hasClaimed[msg.sender], "NFT already claimed for this address");
@@ -63,20 +55,7 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         return balanceOf(user) >= 1;
     }
 
-    function authorizeMinter(address user) public onlyOwner {
-        minters[user] = true;
-    }
-
-    function revokeMinter(address user) public onlyOwner {
-        minters[user] = false;
-    }
-
     function setMerkleRoot(bytes32 _merkleRoot) public onlyOwner {
         merkleRoot = _merkleRoot;
-    }
-
-    modifier onlyMinters(address user) {
-        require(minters[user], "Only minters can call this function");
-        _;
     }
 }

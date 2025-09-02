@@ -228,13 +228,19 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert ProofNotVerifiedOnAligned();
         }
 
-        // Validate the game is available and the config is correct
+        // The prover only commits the game config up to the level it reached
+        // So we shift to compare only that part
         ParityGame memory currentGame = getCurrentParityGame();
-        if (currentGame.gameConfig != gameConfig) {
+        // Each level takes 10 bytes -> 80 bits
+        uint256 shiftAmount = 256 - (80 * (levelCompleted));
+        uint256 currentGameConfigUntil = currentGame.gameConfig >> shiftAmount;
+        uint256 gameConfigUntil = gameConfig >> shiftAmount;
+
+        if (currentGameConfigUntil != gameConfigUntil) {
             revert InvalidGame(currentGame.gameConfig, gameConfig);
         }
 
-        bytes32 key = getParityKey(msg.sender, gameConfig);
+        bytes32 key = getParityKey(msg.sender, currentGame.gameConfig);
         uint256 currentLevelCompleted = usersParityLevelCompleted[key];
         if (levelCompleted <= currentLevelCompleted) {
             revert UserHasAlreadyCompletedThisLevel(currentLevelCompleted);

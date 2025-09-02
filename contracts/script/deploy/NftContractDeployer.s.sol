@@ -35,7 +35,7 @@ contract NftContractDeployer is Script {
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);
         vm.stopBroadcast();
 
-        // Write addresses and merkle data
+        // Write addresses and Merkle Tree data
         string memory addressesObj = "addresses";
         vm.serializeAddress(addressesObj, "proxy", address(proxy));
         string memory addressOutput = vm.serializeAddress(addressesObj, "implementation", address(implementation));

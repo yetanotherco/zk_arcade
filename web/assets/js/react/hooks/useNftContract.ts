@@ -24,13 +24,13 @@ function processRawMerkleProof(input: HookArgs["proof"]): `0x${string}`[] {
 
     if (typeof input === "string") {
         const trimmed = input.trim();
-        if (!trimmed) throw new Error("Proof is empty");
+        if (!trimmed) throw new Error("The merkle proof is empty");
 
         // Remove all 0x internal prefixes
         const hex = trimmed.replace(/0x/gi, "");
         
         if (hex.length % 64 !== 0) {
-            throw new Error("Invalid length for concatenated bytes32");
+            throw new Error("Invalid format: the proof must be a multiple of 64 hexadecimal characters");
         }
 
         // Gets each bytes32 chunk and pushes it into the vec
@@ -41,7 +41,7 @@ function processRawMerkleProof(input: HookArgs["proof"]): `0x${string}`[] {
         return result;
     }
 
-    throw new Error("Unsupported proof format");
+    throw new Error("Unsupported proof format, use an array or hexadecimal string.");
 }
 
 export function useNftContract({ userAddress, contractAddress, tokenURI, proof }: HookArgs) {
@@ -66,7 +66,11 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
         try {
             merkleProofArray = processRawMerkleProof(proof);
         } catch (e: any) {
-            addToast({ title: "Invalid merkle proof", desc: String(e?.message || e), type: "error" });
+            addToast({
+                title: "Error in eligibility proof",
+                desc: `Could not validate your eligibility to claim your NFT: ${String(e?.message || e)}`,
+                type: "error"
+            });
             return;
         }
 
@@ -80,8 +84,8 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
         });
 
         addToast({
-            title: "Transaction sent. You should see your NFT in your wallet soon.",
-            desc: `Tx: ${hash.slice(0, 10)}…`,
+            title: "Transaction sent",
+            desc: `Your NFT is being minted. Hash: ${hash.slice(0, 8)}...${hash.slice(-6)}`,
             type: "success",
         });
 
@@ -101,19 +105,19 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
     useEffect(() => {
         if (receipt.isError) {
             addToast({
-                title: "Receipt error",
-                desc: "Could not retrieve transaction receipt.",
+                title: "Problem with confirmation",
+                desc: "Could not confirm the transaction status. Check your wallet or the block explorer.",
                 type: "error",
             });
         }
         if (receipt.isSuccess) {
             addToast({
-                title: "NFT minted",
-                desc: "Your claim has been confirmed on-chain, you should see your NFT in your wallet shortly.",
+                title: "NFT claimed successfully!",
+                desc: "Your NFT has been confirmed on the blockchain. It should appear in your wallet shortly.",
                 type: "success",
             });
         }
-    }, [receipt.isLoading, receipt.isError, receipt.isSuccess]);
+    }, [receipt.isLoading, receipt.isError, receipt.isSuccess, addToast]);
 
     const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
 

@@ -188,12 +188,26 @@ template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
     component levelsValidation[MAX_LEVELS];
 
     var acc = 0;
+    var byteIdx = 0;
 
-    max_level_completed <== 1;
+    var level_completed_sum = 0;
+    component level_completed[MAX_LEVELS];
+
     for (var i = 0; i < MAX_LEVELS; i++) {
         levelsValidation[i] = ValidateParityLevel(MAX_ROUNDS);
         levelsValidation[i].levelBoards <== levelsBoards[i];
         levelsValidation[i].userPositions <== userPositions[i];
+
+        // If the board sum equals 0, then a zero board was passed
+        // Which means the user has not completed the game
+        var board_sum = 0;
+        for (var k = 0; k < 9; k++) {
+            board_sum = board_sum + levelsBoards[i][0][k];
+        }
+        level_completed[i] = IsZero();
+        level_completed[i].in <-- board_sum;
+
+        level_completed_sum = level_completed_sum + 1 - level_completed[i].out;
 
         var posByte = ((userPositions[i][0][0] & 0x0F) << 4) | (userPositions[i][0][1] & 0x0F);
         acc = (acc << 8) + posByte;
@@ -204,6 +218,7 @@ template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
         }
     }
 
+    max_level_completed <== level_completed_sum;
     gameConfigPacked <-- acc;
 }
 

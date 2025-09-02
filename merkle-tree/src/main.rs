@@ -1,3 +1,4 @@
+use dotenvy::dotenv;
 use merkle_tree_rs::standard::{LeafType, StandardMerkleTree};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, postgres::PgPoolOptions};
@@ -75,8 +76,14 @@ async fn main() {
     println!("Merkle proof data written to merkle-tree/{}", out_path);
 
     println!("Connecting to database...");
+
+    dotenv().ok();
+
+    let database_url =
+        env::var("DATABASE_URL").expect("The environment variable DATABASE_URL is missing!");
+
     let pool = PgPoolOptions::new()
-        .connect("postgresql://postgres:postgres@127.0.0.1:5433/zk_arcade_dev")
+        .connect(&database_url)
         .await
         .expect("Failed to connect to the database!");
 

@@ -12,21 +12,25 @@ type GameStatus = {
 };
 
 export const Completed = ({
-	renewsIn,
+	timeRemaining,
 	currentGameConfig,
 	user_address,
 	payment_service_address,
 	batcher_url,
-	leaderboard_address
+	leaderboard_address,
 }: {
-	renewsIn: Date;
+	timeRemaining: {
+		hours: number;
+		minutes: number;
+	} | null;
 	currentGameConfig: string;
 	user_address: Address;
 	payment_service_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
 }) => {
-	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
+	const [proofVerificationData, setProofVerificationData] =
+		useState<VerificationData | null>(null);
 	const [open, setOpen] = useState(false);
 
 	const generateproofVerificationData = async () => {
@@ -60,12 +64,23 @@ export const Completed = ({
 				<p className="text-text-200 text-center">
 					You have completed the full game, come in{" "}
 					<span className="text-accent-100">
-						{renewsIn.getHours()} hours
+						{timeRemaining ? (
+							<span className="text-accent-100">
+								{timeRemaining.hours > 0
+									? `${timeRemaining.hours} hours`
+									: `${timeRemaining.minutes} minutes`}
+							</span>
+						) : (
+							<span className="text-accent-100">loading...</span>
+						)}
 					</span>{" "}
 					for new levels!
 				</p>
 			</div>
-			<Button variant="arcade" onClick={() => generateproofVerificationData()}>
+			<Button
+				variant="arcade"
+				onClick={() => generateproofVerificationData()}
+			>
 				Generate Proof
 			</Button>
 			<SubmitProofModal

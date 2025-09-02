@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Address, toBytes } from "viem";
 import { ParityLevel } from "./types";
 import { useParityLeaderboardContract } from "../../hooks/useParityLeaderboardContract";
+import { useBlock } from "wagmi";
 
 type Args = {
 	leaderBoardContractAddress: Address;
@@ -49,8 +50,32 @@ export const useParityGames = ({
 
 	const [playerLevelReached, setPlayerLevelReached] = useState(0);
 
-	// TODO: show actual renewal
-	const renewsIn = new Date();
+	// Get the block timestamp for the current block
+	const currentBlock = useBlock();
+
+	const [timeRemaining, setTimeRemaining] = useState<{
+		hours: number;
+		minutes: number;
+	} | null>(null);
+
+	useEffect(() => {
+		const endsAtTime = currentGame.data?.endsAtTime || 0;
+		const currentBlockTimestamp = currentBlock.data
+			? currentBlock.data.timestamp
+			: 0;
+
+		if (endsAtTime > 0 && currentBlockTimestamp) {
+			const timeRemaining =
+				Number(endsAtTime) - Number(currentBlockTimestamp);
+			const hours = timeRemaining / 3600;
+			const minutes = Math.floor(timeRemaining / 60);
+
+			setTimeRemaining({
+				hours: Math.floor(hours),
+				minutes,
+			});
+		}
+	}, [currentGame.data, currentBlock.data]);
 
 	useEffect(() => {
 		if (!gameConfig) {
@@ -76,7 +101,7 @@ export const useParityGames = ({
 		currentLevel,
 		setCurrentLevel,
 		levels,
-		renewsIn,
+		timeRemaining,
 		currentGameConfig: gameConfig,
 	};
 };

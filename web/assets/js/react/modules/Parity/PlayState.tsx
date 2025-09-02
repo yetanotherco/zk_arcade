@@ -35,7 +35,7 @@ export const PlayState = ({
 	playerLevelReached,
 	levels,
 	setCurrentLevel,
-	renewsIn,
+	timeRemaining,
 	values,
 	setValues,
 	positionIdx,
@@ -49,7 +49,10 @@ export const PlayState = ({
 	levels: ParityLevel[];
 	setCurrentLevel: (level: number) => void;
 	playerLevelReached: number;
-	renewsIn: Date;
+	timeRemaining: {
+		hours: number;
+		minutes: number;
+	} | null;
 	values: number[];
 	setValues: (values: number[]) => void;
 	positionIdx: number;
@@ -104,15 +107,17 @@ export const PlayState = ({
 			<div className="w-full h-full flex justify-center items-center">
 				{view}
 			</div>
-			{currentLevel === null && (
-				<p className="text-text-200 text-center">
-					Levels renew in{" "}
+
+			{currentLevel === null &&
+				(timeRemaining ? (
 					<span className="text-accent-100">
-						{renewsIn.getHours()} hours
+						{timeRemaining.hours > 0
+							? `${timeRemaining.hours} hours`
+							: `${timeRemaining.minutes} minutes`}
 					</span>
-					.
-				</p>
-			)}
+				) : (
+					<span className="text-accent-100">loading...</span>
+				))}
 		</div>
 	);
 };

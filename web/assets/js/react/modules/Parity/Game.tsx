@@ -34,8 +34,8 @@ export const Game = ({
 		playerLevelReached,
 		setPlayerLevelReached,
 		setCurrentLevel,
-		renewsIn,
 		currentGameConfig,
+		timeRemaining,
 	} = useParityGames({
 		leaderBoardContractAddress: leaderboard_address,
 		userAddress: user_address,
@@ -135,7 +135,7 @@ export const Game = ({
 				playerLevelReached={playerLevelReached}
 				setCurrentLevel={setCurrentLevel}
 				setGameState={setGameState}
-				renewsIn={renewsIn}
+				timeRemaining={timeRemaining}
 				hasWon={hasWon}
 				positionIdx={positionIdx}
 				values={values}
@@ -160,7 +160,7 @@ export const Game = ({
 		),
 		"all-levels-completed": (
 			<Completed
-				renewsIn={renewsIn}
+				timeRemaining={timeRemaining}
 				currentGameConfig={currentGameConfig}
 				user_address={user_address}
 				payment_service_address={payment_service_address}

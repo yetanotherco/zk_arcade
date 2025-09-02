@@ -9,7 +9,7 @@ cd "$parent_path"
 cd ../../merkle-tree/
 
 # Generate the merkle root and the merkle proof for each address of the whitelist
-cargo run -- --in ../contracts/script/deploy/config/devnet/nft.json --out merkle_output.json
+cargo run -- ../contracts/script/deploy/config/devnet/nft.json merkle_output.json
 
 # cd to contracts/
 cd ../contracts/

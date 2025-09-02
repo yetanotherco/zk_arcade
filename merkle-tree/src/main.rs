@@ -26,36 +26,17 @@ struct Output {
 #[tokio::main]
 async fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
-    if args.is_empty() {
-        eprintln!("Usage: merkle_json_cli --in <input.json> --out <output.json>");
+    if args.len() != 2 {
+        eprintln!("Usage: merkle_json_cli <input.json> <output.json>");
         std::process::exit(1);
     }
 
-    let mut in_path: Option<String> = None;
-    let mut out_path: Option<String> = None;
-    let mut i = 0;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--in" if i + 1 < args.len() => {
-                in_path = Some(args[i + 1].clone());
-                i += 2;
-            }
-            "--out" if i + 1 < args.len() => {
-                out_path = Some(args[i + 1].clone());
-                i += 2;
-            }
-            other => {
-                eprintln!("Unknown flag: {other}");
-                eprintln!("Usage: cargo run -- --in <input.json> --out <output.json>");
-                std::process::exit(1);
-            }
-        }
-    }
-    let in_path = in_path.expect("Missing --in <input.json>");
-    let out_path = out_path.expect("Missing --out <output.json>");
+    let in_path = &args[0];
+    let out_path = &args[1];
 
+    println!("Processing input file: {}", in_path);
     let data =
-        fs::read_to_string(&in_path).unwrap_or_else(|e| panic!("Failed to read {in_path}: {e}"));
+        fs::read_to_string(in_path).unwrap_or_else(|e| panic!("Failed to read {in_path}: {e}"));
     let parsed: WhitelistWrapper =
         serde_json::from_str(&data).unwrap_or_else(|e| panic!("Invalid JSON: {e}"));
 
@@ -90,9 +71,10 @@ async fn main() {
     let out = Output { root, proofs };
     let serialized = serde_json::to_string_pretty(&out).expect("Failed to serialize output JSON");
 
-    fs::write(&out_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {out_path}: {e}"));
+    fs::write(out_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {out_path}: {e}"));
     println!("Merkle proof data written to merkle-tree/{}", out_path);
 
+    println!("Connecting to database...");
     let pool = PgPoolOptions::new()
         .connect("postgresql://postgres:postgres@127.0.0.1:5433/zk_arcade_dev")
         .await
@@ -106,4 +88,5 @@ async fn main() {
             .push_bind(proof);
     });
     let _result = query_builder.build().execute(&pool).await.unwrap();
+    println!("Data successfully inserted into database!");
 }

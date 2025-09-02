@@ -25,10 +25,10 @@ function getParitytKey(user: `0x${string}`, game: bigint): `0x${string}` {
 		return "0x0";
 	}
 	const gameHash = keccak256(encodePacked(["uint256"], [game]));
-	const beastKey = keccak256(
+	const parityKey = keccak256(
 		encodePacked(["address", "bytes32"], [user, gameHash])
 	);
-	return beastKey;
+	return parityKey;
 }
 
 export const useParityLeaderboardContract = ({
@@ -52,7 +52,7 @@ export const useParityLeaderboardContract = ({
 	const currentGameLevelCompleted = useReadContract({
 		address: contractAddress,
 		abi: leaderboardAbi,
-		functionName: "usersBeastLevelCompleted",
+		functionName: "usersParityLevelCompleted",
 		args: [
 			getParitytKey(
 				userAddress,

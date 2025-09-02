@@ -260,6 +260,18 @@ export const SubmitProofModal = ({
 							<p className="rounded p-2 text-red">
 								You need to have the Aligned NFT to submit your proofs.
 							</p>
+
+							<p className="rounded p-2 text-red">
+								To see if you are eligible to mint the NFT, please visit{" "}
+								<a
+									href="/mint"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="underline"
+								>
+									this page
+								</a>
+							</p>
 						</>
 					) : (
 						<>

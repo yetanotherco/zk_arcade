@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Address, toBytes } from "viem";
-import { ParityLevel } from "./types";
+import { Address, encodePacked, keccak256, toBytes } from "viem";
+import { gameDataKey, ParityLevel } from "./types";
 import { useParityLeaderboardContract } from "../../hooks/useParityLeaderboardContract";
 import { useBlock } from "wagmi";
 
@@ -90,7 +90,8 @@ export const useParityGames = ({
 		} catch {
 			gameData = {};
 		}
-		const current = gameData[gameConfig];
+		const key = gameDataKey(gameConfig, userAddress);
+		const current = gameData[key];
 
 		setPlayerLevelReached((current?.levelsBoards?.length ?? 0) + 1);
 	}, [gameConfig]);

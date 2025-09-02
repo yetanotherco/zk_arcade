@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Button } from "../../components";
 import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
-import { Address } from "viem";
+import { Address, encodePacked, keccak256 } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
-import { ParityGameState } from "./types";
+import { gameDataKey, ParityGameState } from "./types";
 
 type GameStatus = {
 	levelsBoards: number[][][];
@@ -44,8 +44,9 @@ export const ProveAndSubmit = ({
 		const gameData: { [key: string]: GameStatus } = stored
 			? JSON.parse(stored)
 			: {};
+		const key = gameDataKey(currentGameConfig, user_address);
 		return (
-			gameData[currentGameConfig] || {
+			gameData[key] || {
 				levelsBoards: [],
 				userPositions: [],
 			}

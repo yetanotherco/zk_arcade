@@ -1,14 +1,12 @@
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { Button } from "../../components";
 import { ParityTutorial } from "./Tutorial";
-import { GameStatus, ParityGameState } from "./types";
+import { gameDataKey, GameStatus, ParityGameState } from "./types";
 import { PlayState } from "./PlayState";
 import { AfterLevelCompletion } from "./AfterLevelCompletion";
 import { useSwapTransition } from "./useSwapTransition";
 import { useParityGames } from "./useParityGames";
-import { Address } from "viem";
-import { Completed } from "./Completed";
-import { useAudioState } from "../../state/audio";
+import { Address, encodePacked, keccak256 } from "viem";
 import { useParityControls } from "./useParityControls";
 import { ProveAndSubmit } from "./ProveAndSubmit";
 
@@ -69,7 +67,8 @@ export const Game = ({
 			? JSON.parse(stored)
 			: {};
 
-		const currentLevelReached: GameStatus = gameData[currentGameConfig] || {
+		const key = gameDataKey(currentGameConfig, user_address);
+		const currentLevelReached: GameStatus = gameData[key] || {
 			levelsBoards: [],
 			userPositions: [],
 		};
@@ -97,7 +96,7 @@ export const Game = ({
 		currentLevelReached.levelsBoards.push(levelBoards);
 		currentLevelReached.userPositions.push(userPositions);
 
-		gameData[currentGameConfig] = currentLevelReached;
+		gameData[key] = currentLevelReached;
 		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
 	}, [currentLevel, currentGameConfig, levelBoards, userPositions]);
 

@@ -16,6 +16,9 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
     bytes32 public merkleRoot;
     mapping(address => bool) public hasClaimed;
 
+    event MerkleRootUpdated(bytes32 indexed newRoot);
+    event NFTClaimed(address indexed account);
+
     constructor() {
         _disableInitializers();
     }
@@ -48,6 +51,8 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         _mint(msg.sender, tokenId);
         _setTokenURI(tokenId, tokenURI);
 
+        emit NFTClaimed(msg.sender);
+
         return tokenId;
     }
 
@@ -57,5 +62,7 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
 
     function setMerkleRoot(bytes32 _merkleRoot) public onlyOwner {
         merkleRoot = _merkleRoot;
+
+        emit MerkleRootUpdated(_merkleRoot);
     }
 }

@@ -255,13 +255,13 @@ export const SubmitProofModal = ({
 				</div>
 				<div className="w-full h-full max-h-[500px] overflow-scroll">
 					{userNftBalance?.data !== undefined && userNftBalance.data === 0n ? (
-						<>
-							<p className="rounded p-2 text-red">
+						<div className="flex flex-col text-center bg-red/20 rounded p-3 text-red">
+							<p>
 								You need to have the Aligned NFT to submit your proofs.
 							</p>
 
-							<p className="rounded p-2 text-red">
-								To see if you are eligible to mint the NFT, please visit{" "}
+							<p className="mt-1">
+								To see if you are eligible to mint the NFT, visit{" "}
 								<a
 									href="/mint"
 									target="_blank"
@@ -270,8 +270,9 @@ export const SubmitProofModal = ({
 								>
 									this page
 								</a>
+								.
 							</p>
-						</>
+						</div>
 					) : (
 						<>
 							{step ? (

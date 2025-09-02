@@ -8,7 +8,6 @@ fs_permissions = [
     { access = "read-write", path = "./script/output" },
     { access = "read", path = "./script/deploy" },
     { access = "read-write", path = "./deployments" },
-    { access = "read", path = "./../merkle-tree" },
 ]
 
 # Enables or disables the optimizer

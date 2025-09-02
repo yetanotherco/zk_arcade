@@ -6,7 +6,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {Script} from "forge-std/Script.sol";
 
 contract NftContractDeployer is Script {
-    function run(string memory configFilePath, string memory outputFilePath, string memory merkleOutputFilePath)
+    function run(string memory configFilePath, string memory outputFilePath, bytes32 merkleRoot)
         public
         returns (address _proxy, address _implementation)
     {
@@ -18,10 +18,6 @@ contract NftContractDeployer is Script {
 
         address[] memory whitelistAddresses = 
             abi.decode(vm.parseJson(configData, ".whitelist.addresses"), (address[]));
-
-        // Read merkle root from the generated merkle proof data
-        string memory merkleData = vm.readFile(merkleOutputFilePath);
-        bytes32 merkleRoot = vm.parseJsonBytes32(merkleData, ".root");
 
         vm.startBroadcast();
         ZkArcadeNft implementation = new ZkArcadeNft();

@@ -266,7 +266,7 @@ defmodule ZkArcadeWeb.PageController do
 The goal of the game is to make each number on the board equal.
 ",
         acknowledgments: acknowledgements,
-        tags: [:cli, :risc0, :sp1]
+        tags: [:browser, :circom]
       })
       |> assign(:username, username)
       |> assign(:submitted_proofs, Jason.encode!(proofs))

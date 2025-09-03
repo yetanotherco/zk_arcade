@@ -204,6 +204,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
         }
 
+        ZkArcadeNft nftContract = ZkArcadeNft(zkArcadeNft);
+        if (useWhitelist && !nftContract.isWhitelisted(userAddress)) {
+            revert UserIsNotWhitelisted(userAddress);
+        }
+
         bytes32 pubInputCommitment = keccak256(publicInputs);
         (bool callWasSuccessful, bytes memory proofIsIncluded) = alignedServiceManager.staticcall(
             abi.encodeWithSignature(

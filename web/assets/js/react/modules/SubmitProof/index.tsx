@@ -6,10 +6,7 @@ import { Address } from "../../types/blockchain";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
-import {
-	fetchProofSubmission,
-	fetchProofVerificationData,
-} from "../../utils/aligned";
+import { fetchProofSubmission } from "../../utils/aligned";
 import { ProofSubmission } from "../../types/aligned";
 
 type Props = {
@@ -18,6 +15,7 @@ type Props = {
 	user_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
+	nft_contract_address: Address;
 	beast_submissions: string;
 };
 
@@ -27,6 +25,7 @@ const SubmitModal = ({
 	payment_service_address,
 	batcher_url,
 	beast_submissions,
+	nft_contract_address,
 }: Omit<Props, "network">) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { open: currentProofOpen, setOpen: currentProofSetOpen } = useModal();
@@ -63,6 +62,7 @@ const SubmitModal = ({
 				batcher_url={batcher_url}
 				leaderboard_address={leaderboard_address}
 				payment_service_address={payment_service_address}
+				nft_contract_address={nft_contract_address}
 				user_address={user_address}
 				userBeastSubmissions={JSON.parse(beast_submissions)}
 				proofToSubmitData={null}
@@ -77,6 +77,7 @@ const SubmitModal = ({
 					batcher_url={batcher_url}
 					leaderboard_address={leaderboard_address}
 					payment_service_address={payment_service_address}
+					nft_contract_address={nft_contract_address}
 					user_address={user_address}
 					userBeastSubmissions={JSON.parse(beast_submissions)}
 					proof={currentProof}
@@ -94,6 +95,7 @@ export default ({
 	batcher_url,
 	leaderboard_address,
 	beast_submissions,
+	nft_contract_address,
 }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -105,6 +107,7 @@ export default ({
 					batcher_url={batcher_url}
 					leaderboard_address={leaderboard_address}
 					beast_submissions={beast_submissions}
+					nft_contract_address={nft_contract_address}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

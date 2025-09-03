@@ -24,8 +24,6 @@ const ClaimLogic = ({
     const { balance, claimNft, receipt, tx, disabled } = useNftContract({
         userAddress: user_address,
         contractAddress: contract_address,
-        tokenURI,
-        proof: merkle_proof,
     });
 
     const userHasClaimed = ((balance.data as bigint | undefined) ?? 0n) > 0n;
@@ -47,7 +45,7 @@ const ClaimLogic = ({
                     <Button
                         variant="accent-fill"
                         disabled={disabled}
-                        onClick={() => claimNft()}
+                        onClick={() => claimNft(tokenURI, merkle_proof)}
                         className="mt-4"
                     >
                         {balance.isFetching

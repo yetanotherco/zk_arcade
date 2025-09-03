@@ -25,6 +25,7 @@ define(
 			"explorer_url",
 			"batcher_url",
 			"user_beast_submissions",
+			"nft_contract_address",
 		],
 	}
 );
@@ -39,6 +40,7 @@ define(
 			"batcher_url",
 			"leaderboard_address",
 			"beast_submissions",
+			"nft_contract_address",
 		],
 	}
 );
@@ -54,6 +56,7 @@ define(
 			"user_address",
 			"explorer_url",
 			"batcher_url",
+			"nft_contract_address",
 		],
 	}
 );
@@ -83,6 +86,7 @@ define(
 			"batcher_url",
 			"leaderboard_address",
 			"beast_submissions",
+			"nft_contract_address",
 		],
 	}
 );
@@ -120,7 +124,11 @@ define(
 	},
 	{
 		attributes: [
-			"network", "merkle_proof", "tokenURI", "contract_address", "user_address"
+			"network",
+			"merkle_proof",
+			"tokenURI",
+			"contract_address",
+			"user_address",
 		],
 	}
 );

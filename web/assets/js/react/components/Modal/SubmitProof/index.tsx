@@ -1,11 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Modal, ModalProps } from "../Modal";
 import { Address, formatEther } from "viem";
-import { BeastProofClaimed, ProofSubmission, VerificationData } from "../../../types/aligned";
+import {
+	BeastProofClaimed,
+	ProofSubmission,
+	VerificationData,
+} from "../../../types/aligned";
 import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentService";
+import { useNftContract } from "../../../hooks/useNftContract";
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
+import { ClaimNft } from "./ClaimNftStep";
 
 type Props = {
 	modal: Omit<ModalProps, "maxWidth">;
@@ -13,6 +19,7 @@ type Props = {
 	user_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
+	nft_contract_address: Address;
 	proof?: ProofSubmission;
 	userBeastSubmissions: BeastProofClaimed[];
 	proofToSubmitData: VerificationData | null;
@@ -54,7 +61,7 @@ const BreadCrumb = ({
 	);
 };
 
-type SubmitProofModalSteps = "deposit" | "submit" | "claim";
+type SubmitProofModalSteps = "claim-nft" | "deposit" | "submit" | "claim";
 
 export const SubmitProofModal = ({
 	modal,
@@ -65,6 +72,7 @@ export const SubmitProofModal = ({
 	leaderboard_address,
 	userBeastSubmissions,
 	proofToSubmitData,
+	nft_contract_address,
 	gameName,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
@@ -75,10 +83,17 @@ export const SubmitProofModal = ({
 	const [proofStatus, setProofStatus] = useState<
 		ProofSubmission["status"] | undefined
 	>(proof?.status);
+	const [claimNftStatus, setClaimNftStatus] =
+		useState<BreadCrumbStatus>("neutral");
 	const [depositStatus, setDepositStatus] =
 		useState<BreadCrumbStatus>("neutral");
 	const [submissionStatus, setSubmissionStatus] =
 		useState<BreadCrumbStatus>("neutral");
+
+	const { balance: nftBalance } = useNftContract({
+		contractAddress: nft_contract_address,
+		userAddress: user_address,
+	});
 
 	const updateState = useCallback(() => {
 		if (proof) {
@@ -94,24 +109,33 @@ export const SubmitProofModal = ({
 				setStep("claim");
 			}
 		} else {
+			if (Number(nftBalance.data) == 0) {
+				setStep("claim-nft");
+				return;
+			}
 			if (Number(formatEther(balance.data || BigInt(0))) >= 0.001) {
 				setStep("submit");
 			} else {
 				setStep("deposit");
 			}
 		}
-	}, [balance.data, proofStatus]);
+	}, [balance.data, nftBalance.data, proofStatus]);
 
 	const goToNextStep = useCallback(() => {
+		if (step === "claim-nft") setStep("deposit");
 		if (step === "deposit") setStep("submit");
 		if (step === "submit") setStep("claim");
 	}, [step, setStep]);
 
 	useEffect(() => {
-		if (!step && balance.data != undefined) {
+		if (
+			!step &&
+			balance.data != undefined &&
+			nftBalance.data != undefined
+		) {
 			updateState();
 		}
-	}, [balance.data, setStep]);
+	}, [balance.data, nftBalance.data, setStep]);
 
 	useEffect(() => {
 		if (proofStatus) {
@@ -119,7 +143,13 @@ export const SubmitProofModal = ({
 		}
 	}, [proofStatus]);
 
-	const headerBasedOnStep = {
+	const headerBasedOnStep: {
+		[key in SubmitProofModalSteps]: { header: string; subtitle: string };
+	} = {
+		"claim-nft": {
+			header: "Claim NFT",
+			subtitle: "You need to mint an NFT to start participating",
+		},
 		deposit: {
 			header: "Deposit into Aligned",
 			subtitle:
@@ -136,7 +166,10 @@ export const SubmitProofModal = ({
 		},
 	};
 
-	const modalBasedOnStep = {
+	const modalBasedOnStep: {
+		[key in SubmitProofModalSteps]: () => React.ReactNode;
+	} = {
+		"claim-nft": () => <ClaimNft />,
 		deposit: () => (
 			<DepositStep
 				payment_service_address={payment_service_address}
@@ -158,7 +191,7 @@ export const SubmitProofModal = ({
 				proofStatus={proofStatus}
 				setProofStatus={setProofStatus}
 				proofToSubmitData={proofToSubmitData}
-				gameName={gameName ? gameName : (proof?.game || "beast")}
+				gameName={gameName ? gameName : proof?.game || "beast"}
 			/>
 		),
 		claim: () =>
@@ -178,8 +211,16 @@ export const SubmitProofModal = ({
 			if (Number(formatEther(balance.data || BigInt(0))) < 0.001) {
 				setDepositStatus("warn");
 			}
+		} else if (step === "claim-nft") {
+			setDepositStatus("neutral");
 		} else {
 			setDepositStatus("success");
+		}
+
+		if (nftBalance.data || 0 > 0) {
+			setClaimNftStatus("success");
+		} else {
+			setClaimNftStatus("warn");
 		}
 
 		if ((step === "deposit" || step === "submit") && !proof) {
@@ -220,10 +261,15 @@ export const SubmitProofModal = ({
 					</p>
 				</div>
 				<div className="w-full">
-					<div className="flex gap-8 justify-center w-full">
+					<div className="flex overflow-scroll gap-8 justify-center w-full">
+						<BreadCrumb
+							step="Claim NFT"
+							active={true}
+							status={claimNftStatus}
+						/>
 						<BreadCrumb
 							step="Deposit"
-							active={true}
+							active={step !== "claim-nft"}
 							status={depositStatus}
 						/>
 						<BreadCrumb

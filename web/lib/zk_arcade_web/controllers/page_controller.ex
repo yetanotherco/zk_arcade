@@ -274,6 +274,7 @@ defmodule ZkArcadeWeb.PageController do
     |> assign(:beast_submissions, beast_submissions_json)
     |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
     |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
+    |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
     |> assign(:username, username)
     |> assign(:user_position, position)
     |> assign(:explorer_url, explorer_url)

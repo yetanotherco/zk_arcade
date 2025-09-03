@@ -175,6 +175,22 @@ defmodule ZkArcadeWeb.PageController do
       |> render(:home)
   end
 
+  def games(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+    {username, position} = get_username_and_position(wallet)
+
+    conn
+      |> assign(:submitted_proofs, Jason.encode!(proofs))
+      |> assign(:beast_submissions, beast_submissions_json)
+      |> assign(:wallet, wallet)
+      |> assign(:username, username)
+      |> assign(:user_position, position)
+      |> assign(:explorer_url, explorer_url)
+      |> render(:games)
+  end
+
   def game(conn, %{"name" => "beast"}) do
     wallet = get_wallet_from_session(conn)
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)

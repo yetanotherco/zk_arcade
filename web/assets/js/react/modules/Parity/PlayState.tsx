@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ParityGameState, ParityLevel } from "./types";
+import { GameStatus, ParityGameState, ParityLevel } from "./types";
 import { Button } from "../../components";
 import { ParityBoard } from "./Board";
 import { useSwapTransition } from "./useSwapTransition";
@@ -35,7 +35,7 @@ export const PlayState = ({
 	playerLevelReached,
 	levels,
 	setCurrentLevel,
-	renewsIn,
+	timeRemaining,
 	values,
 	setValues,
 	positionIdx,
@@ -43,13 +43,17 @@ export const PlayState = ({
 	hasWon,
 	setPosition,
 	setHasWon,
+	saveLevelData,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
 	levels: ParityLevel[];
 	setCurrentLevel: (level: number) => void;
 	playerLevelReached: number;
-	renewsIn: Date;
+	timeRemaining: {
+		hours: number;
+		minutes: number;
+	} | null;
 	values: number[];
 	setValues: (values: number[]) => void;
 	positionIdx: number;
@@ -57,6 +61,7 @@ export const PlayState = ({
 	hasWon: boolean;
 	setPosition: (position: { col: number; row: number }) => void;
 	setHasWon: (hasWon: boolean) => void;
+	saveLevelData: () => void;
 }) => {
 	const view = useSwapTransition(
 		currentLevel,
@@ -86,7 +91,12 @@ export const PlayState = ({
 
 	useEffect(() => {
 		if (hasWon) {
-			setGameState("proving");
+			saveLevelData();
+			if (currentLevel == levels.length) {
+				setGameState("proving");
+			} else {
+				setGameState("after-level");
+			}
 			setHasWon(false);
 		}
 	}, [hasWon, setHasWon]);
@@ -104,15 +114,20 @@ export const PlayState = ({
 			<div className="w-full h-full flex justify-center items-center">
 				{view}
 			</div>
-			{currentLevel === null && (
-				<p className="text-text-200 text-center">
-					Levels renew in{" "}
-					<span className="text-accent-100">
-						{renewsIn.getHours()} hours
-					</span>
-					.
-				</p>
-			)}
+
+			{currentLevel === null &&
+				(timeRemaining ? (
+					<p>
+						Levels renew in{" "}
+						<span className="text-accent-100">
+							{timeRemaining.hours > 0
+								? `${timeRemaining.hours} hours`
+								: `${timeRemaining.minutes} minutes`}
+						</span>
+					</p>
+				) : (
+					<span className="text-accent-100">loading...</span>
+				))}
 		</div>
 	);
 };

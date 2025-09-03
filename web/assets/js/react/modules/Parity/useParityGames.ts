@@ -93,6 +93,7 @@ export const useParityGames = ({
 		const key = gameDataKey(gameConfig, userAddress);
 		const current = gameData[key];
 
+		// TODO: do this only if the gameConfig matches the one in the contracr
 		setPlayerLevelReached((current?.levelsBoards?.length ?? 0) + 1);
 	}, [gameConfig]);
 

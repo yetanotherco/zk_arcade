@@ -130,6 +130,8 @@ export const Game = ({
 				<Button
 					variant="arcade"
 					className="max-w-[300px] w-full"
+					disabled={!user_address}
+					disabledTextOnHover="You need to connect your wallet first"
 					onClick={() => {
 						setCurrentLevel(null);
 						setGameState("running");
@@ -140,6 +142,8 @@ export const Game = ({
 				<Button
 					variant="arcade"
 					className="max-w-[300px] w-full"
+					disabled={!user_address}
+					disabledTextOnHover="You need to connect your wallet first"
 					onClick={() => setGameState("proving")}
 				>
 					Submit Proof

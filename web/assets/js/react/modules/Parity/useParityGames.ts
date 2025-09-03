@@ -79,7 +79,7 @@ export const useParityGames = ({
 	}, [currentGame.data, currentBlock.data]);
 
 	useEffect(() => {
-		if (!gameConfig) {
+		if (!gameConfig || !userAddress) {
 			setPlayerLevelReached(0);
 			return;
 		}

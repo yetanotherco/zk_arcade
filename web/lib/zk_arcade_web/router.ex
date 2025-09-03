@@ -14,7 +14,8 @@ defmodule ZkArcadeWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    get "/game/:name", PageController, :game
+    get "/games/", PageController, :games
+    get "/games/:name", PageController, :game
     get "/history", PageController, :history
     post "/wallet/sign", WalletController, :connect_wallet
     get "/wallet/disconnect", WalletController, :disconnect_wallet

@@ -102,6 +102,11 @@ upgrade_contract: submodules
 set_beast_games: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
 
+# This path is relative to the project root
+WHITELIST_PATH?=merkle_tree/whitelist.json
+create_new_campaign: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/create_new_campaign.sh "$(MERKLE_ROOT_INDEX)" "$(WHITELIST_PATH)"
+
 __INFRA__: ## ____
 ## Initial Setup
 debian_create_dirs:

@@ -63,6 +63,12 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         return balanceOf(user) >= 1;
     }
 
+    function addMerkleRoot(bytes32 _merkleRoot) external onlyOwner returns (uint256 index) {
+        merkleRoots.push(_merkleRoot);
+        index = merkleRoots.length - 1;
+        emit MerkleRootUpdated(_merkleRoot, index);
+    }
+
     function setMerkleRoot(bytes32 _merkleRoot, uint256 rootIndex) public onlyOwner {
         require(rootIndex < merkleRoots.length, "Invalid root index");
         merkleRoots[rootIndex] = _merkleRoot;

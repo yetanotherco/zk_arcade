@@ -346,11 +346,11 @@ defmodule ZkArcadeWeb.PageController do
       explorer_url = Application.get_env(:zk_arcade, :explorer_url)
       batcher_url = Application.get_env(:zk_arcade, :batcher_url)
 
-      merkle_proof = case ZkArcade.MerklePaths.get_merkle_proof_for_address(wallet_address) do
-        {:ok, proof} ->
-          proof
+      {merkle_proof, merkle_root_index} = case ZkArcade.MerklePaths.get_merkle_proof_for_address(wallet_address) do
+        {:ok, proof, root_index} ->
+          {proof, root_index}
         {:error, :proof_not_found} ->
-          []
+          {[], 0}
       end
 
       Logger.info("Merkle proof for address #{wallet_address}: #{inspect(merkle_proof)}")
@@ -368,6 +368,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:explorer_url, explorer_url)
       |> assign(:batcher_url, batcher_url)
       |> assign(:merkle_proof, merkle_proof)
+      |> assign(:merkle_root_index, merkle_root_index)
       |> render(:mint)
     else
       conn

@@ -1998,6 +1998,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a282da65faaf38286cf3be983213fcf1d2e2a58700e808f83f4ea9a4804bc0"
 
 [[package]]
+name = "merkle-tree-rs"
+version = "0.1.0"
+source = "git+https://github.com/lambdaclass/merkle-tree-rs?branch=main#e52c7aa5d0517636c7a4706e21e6e52d07266ef1"
+dependencies = [
+ "anyhow",
+ "ethers",
+ "render-tree",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "merkle_tree"
 version = "0.1.0"
 dependencies = [
@@ -2010,19 +2023,6 @@ dependencies = [
  "sqlx",
  "tokio",
  "uuid 1.18.0",
-]
-
-[[package]]
-name = "merkle-tree-rs"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/merkle-tree-rs?branch=main#e52c7aa5d0517636c7a4706e21e6e52d07266ef1"
-dependencies = [
- "anyhow",
- "ethers",
- "render-tree",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
 ]
 
 [[package]]

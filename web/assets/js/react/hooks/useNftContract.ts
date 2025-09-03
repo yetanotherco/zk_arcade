@@ -14,6 +14,7 @@ type HookArgs = {
     contractAddress: Address;
     tokenURI: string;
     proof: `0x${string}`[] | `0x${string}` | string;
+    merkleRootIndex: number;
 };
 
 // This function normalizes the proof input into an array of bytes32 strings.
@@ -44,7 +45,7 @@ function processRawMerkleProof(input: HookArgs["proof"]): `0x${string}`[] {
     throw new Error("Unsupported proof format, use an array or hexadecimal string.");
 }
 
-export function useNftContract({ userAddress, contractAddress, tokenURI, proof }: HookArgs) {
+export function useNftContract({ userAddress, contractAddress, tokenURI, proof, merkleRootIndex }: HookArgs) {
     const chainId = useChainId();
     const { addToast } = useToast();
 
@@ -78,7 +79,7 @@ export function useNftContract({ userAddress, contractAddress, tokenURI, proof }
             address: contractAddress,
             abi: zkArcadeNftAbi,
             functionName: "claimNFT",
-            args: [merkleProofArray, tokenURI],
+            args: [merkleProofArray, tokenURI, BigInt(merkleRootIndex)],
             account: userAddress,
             chainId,
         });

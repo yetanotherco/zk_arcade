@@ -92,8 +92,9 @@ gen_and_deploy_devnet: beast_gen_levels parity_gen_levels web_db
 	@$(MAKE) update_nft_address
 
 __CONTRACTS__:
+MERKLE_ROOT_INDEX ?= 0
 deploy_contract: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh $(MERKLE_ROOT_INDEX)
 
 upgrade_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_contract.sh

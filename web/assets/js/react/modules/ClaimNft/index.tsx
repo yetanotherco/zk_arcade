@@ -13,6 +13,7 @@ type ClaimNFTButtonProps = {
     user_address: Address;
     tokenURI: string;
     merkle_proof: `0x${string}`[] | `0x${string}` | string;
+    merkle_root_index: number;
 };
 
 const ClaimLogic = ({
@@ -20,12 +21,14 @@ const ClaimLogic = ({
     user_address,
     tokenURI,
     merkle_proof,
+    merkle_root_index,
 }: Omit<ClaimNFTButtonProps, "network">) => {
     const { balance, claimNft, receipt, tx, disabled } = useNftContract({
         userAddress: user_address,
         contractAddress: contract_address,
         tokenURI,
         proof: merkle_proof,
+        merkleRootIndex: merkle_root_index,
     });
 
     const userHasClaimed = ((balance.data as bigint | undefined) ?? 0n) > 0n;
@@ -70,6 +73,7 @@ export const ClaimNft = ({
     user_address,
     tokenURI,
     merkle_proof,
+    merkle_root_index,
 }: ClaimNFTButtonProps) => {
     return (
         <Web3EthProvider network={network}>
@@ -80,6 +84,7 @@ export const ClaimNft = ({
                     user_address={user_address}
                     tokenURI={tokenURI}
                     merkle_proof={merkle_proof}
+                    merkle_root_index={merkle_root_index}
                 />
             </ToastsProvider>
         </Web3EthProvider>

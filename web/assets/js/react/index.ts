@@ -120,7 +120,7 @@ define(
 	},
 	{
 		attributes: [
-			"network", "merkle_proof", "tokenURI", "contract_address", "user_address"
+			"network", "merkle_proof", "tokenURI", "contract_address", "user_address", "merkle_root_index"
 		],
 	}
 );

@@ -8,6 +8,7 @@ import {
 } from "wagmi";
 import { useToast } from "../state/toast";
 import { zkArcadeNftAbi } from "../constants/aligned";
+import { fetchMerkleProofForAddress } from "../utils/aligned";
 
 type HookArgs = {
 	userAddress: Address;
@@ -63,49 +64,50 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
-	const claimNft = useCallback(
-		async (
-			tokenURI: string,
-			proof: `0x${string}`[] | `0x${string}` | string
-		) => {
-			if (!userAddress) throw new Error("Wallet not connected");
+	const claimNft = useCallback(async () => {
+		if (!userAddress) throw new Error("Wallet not connected");
 
-			let merkleProofArray: `0x${string}`[];
-			try {
-				merkleProofArray = processRawMerkleProof(proof);
-			} catch (e: any) {
-				addToast({
-					title: "Error in eligibility proof",
-					desc: `Could not validate your eligibility to claim your NFT: ${String(
-						e?.message || e
-					)}`,
-					type: "error",
-				});
-				return;
-			}
+		// TODO: fetch merkle proof from server
+		const res = await fetchMerkleProofForAddress(userAddress);
+		if (!res) {
+			// TODO: show error
+			return;
+		}
 
-			const hash = await writeContractAsync({
-				address: contractAddress,
-				abi: zkArcadeNftAbi,
-				functionName: "claimNFT",
-				args: [merkleProofArray, tokenURI],
-				account: userAddress,
-				chainId,
-			});
-
+		let merkleProofArray: `0x${string}`[];
+		try {
+			merkleProofArray = processRawMerkleProof(res.merkle_proof);
+		} catch (e: any) {
 			addToast({
-				title: "Transaction sent",
-				desc: `Your NFT is being minted. Hash: ${hash.slice(
-					0,
-					8
-				)}...${hash.slice(-6)}`,
-				type: "success",
+				title: "Error in eligibility proof",
+				desc: `Could not validate your eligibility to claim your NFT: ${String(
+					e?.message || e
+				)}`,
+				type: "error",
 			});
+			return;
+		}
 
-			return hash;
-		},
-		[userAddress, contractAddress, writeContractAsync, chainId]
-	);
+		const hash = await writeContractAsync({
+			address: contractAddress,
+			abi: zkArcadeNftAbi,
+			functionName: "claimNFT",
+			args: [merkleProofArray, res.tokenURI],
+			account: userAddress,
+			chainId,
+		});
+
+		addToast({
+			title: "Transaction sent",
+			desc: `Your NFT is being minted. Hash: ${hash.slice(
+				0,
+				8
+			)}...${hash.slice(-6)}`,
+			type: "success",
+		});
+
+		return hash;
+	}, [userAddress, contractAddress, writeContractAsync, chainId]);
 
 	useEffect(() => {
 		if (txRest.isError) {

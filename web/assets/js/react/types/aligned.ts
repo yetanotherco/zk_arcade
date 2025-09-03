@@ -2,11 +2,19 @@ import { Address, Hex } from "viem";
 
 export type BeastProofClaimed = { level: number; game_config: string };
 
+export type NFTClaimMerkleProof = `0x${string}`[] | `0x${string}` | string;
+
 export type ProofSubmission = {
 	id: string;
 	game: string;
 	proving_system: ProvingSystem;
-	status: "submitted" | "pending" | "failed" | "claimed" | "underpriced" | "verified";
+	status:
+		| "submitted"
+		| "pending"
+		| "failed"
+		| "claimed"
+		| "underpriced"
+		| "verified";
 	inserted_at: string;
 	batch_hash: string | null;
 	verification_data_commitment: `0x${string}`;

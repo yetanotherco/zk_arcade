@@ -11,7 +11,6 @@ import { Completed } from "./Completed";
 import { useAudioState } from "../../state/audio";
 import { useParityControls } from "./useParityControls";
 
-
 type GameProps = {
 	network: string;
 	payment_service_address: Address;
@@ -20,7 +19,13 @@ type GameProps = {
 	batcher_url: string;
 };
 
-export const Game = ({ network, payment_service_address, user_address, leaderboard_address, batcher_url }: GameProps) => {
+export const Game = ({
+	network,
+	payment_service_address,
+	user_address,
+	leaderboard_address,
+	batcher_url,
+}: GameProps) => {
 	const [gameState, setGameState] = useState<ParityGameState>("home");
 	const { muted, toggleMuted } = useAudioState();
 	const {
@@ -31,19 +36,32 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 		setCurrentLevel,
 		renewsIn,
 		currentGameConfig,
-	} = useParityGames({ leaderBoardContractAddress: leaderboard_address });
+	} = useParityGames({
+		leaderBoardContractAddress: leaderboard_address,
+		userAddress: user_address,
+	});
 
-	const { hasWon, positionIdx, values, reset, setValues, userPositions, levelBoards, setPosition, setHasWon, startLevel } =
-		useParityControls({
-			initialPosition:
-				currentLevel !== null
-					? levels[currentLevel - 1].initialPos
-					: { row: 0, col: 0 },
-			initialValues:
-				currentLevel !== null
-					? levels[currentLevel - 1].board
-					: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-		});
+	const {
+		hasWon,
+		positionIdx,
+		values,
+		reset,
+		setValues,
+		userPositions,
+		levelBoards,
+		setPosition,
+		setHasWon,
+		startLevel,
+	} = useParityControls({
+		initialPosition:
+			currentLevel !== null
+				? levels[currentLevel - 1].initialPos
+				: { row: 0, col: 0 },
+		initialValues:
+			currentLevel !== null
+				? levels[currentLevel - 1].board
+				: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+	});
 
 	const goToNextLevel = useCallback(() => {
 		setCurrentLevel(prev => {
@@ -98,7 +116,18 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 				</Button>
 			</div>
 		),
-		tutorial: <ParityTutorial setGameState={setGameState} gameProps={{ network, payment_service_address, user_address, leaderboard_address, batcher_url }} />,
+		tutorial: (
+			<ParityTutorial
+				setGameState={setGameState}
+				gameProps={{
+					network,
+					payment_service_address,
+					user_address,
+					leaderboard_address,
+					batcher_url,
+				}}
+			/>
+		),
 		running: (
 			<PlayState
 				levels={levels}
@@ -130,7 +159,7 @@ export const Game = ({ network, payment_service_address, user_address, leaderboa
 			/>
 		),
 		"all-levels-completed": (
-			<Completed 
+			<Completed
 				renewsIn={renewsIn}
 				currentGameConfig={currentGameConfig}
 				user_address={user_address}

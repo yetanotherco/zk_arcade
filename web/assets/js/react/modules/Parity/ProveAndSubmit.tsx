@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Button } from "../../components";
-import { useSwapTransition } from "./useSwapTransition";
 import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
 import { Address } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
-import { ParityGameState } from "./types";
 
 type GameStatus = {
 	levelsBoards: number[][][];
@@ -33,7 +31,8 @@ export const ProveAndSubmit = ({
 	currentGameConfig: string;
 	currentLevel: number | null;
 }) => {
-	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
+	const [proofVerificationData, setProofVerificationData] =
+		useState<VerificationData | null>(null);
 	const [open, setOpen] = useState(false);
 
 	const generateproofVerificationData = async () => {
@@ -49,13 +48,21 @@ export const ProveAndSubmit = ({
 		};
 
 		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
-		if (currentLevel && currentLevelReached.levelsBoards.length > currentLevel) {
-			currentLevelReached.levelsBoards = currentLevelReached.levelsBoards.slice(0, currentLevel);
-			currentLevelReached.userPositions = currentLevelReached.userPositions.slice(0, currentLevel);
+		if (
+			currentLevel &&
+			currentLevelReached.levelsBoards.length > currentLevel
+		) {
+			currentLevelReached.levelsBoards =
+				currentLevelReached.levelsBoards.slice(0, currentLevel);
+			currentLevelReached.userPositions =
+				currentLevelReached.userPositions.slice(0, currentLevel);
 		}
 
 		// If the current level is equal to the levels reached length, then erase the current level data
-		if (currentLevel && currentLevelReached.levelsBoards.length === currentLevel) {
+		if (
+			currentLevel &&
+			currentLevelReached.levelsBoards.length === currentLevel
+		) {
 			currentLevelReached.levelsBoards.pop();
 			currentLevelReached.userPositions.pop();
 		}
@@ -89,13 +96,21 @@ export const ProveAndSubmit = ({
 		};
 
 		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
-		if (currentLevel && currentLevelReached.levelsBoards.length > currentLevel) {
-			currentLevelReached.levelsBoards = currentLevelReached.levelsBoards.slice(0, currentLevel);
-			currentLevelReached.userPositions = currentLevelReached.userPositions.slice(0, currentLevel);
+		if (
+			currentLevel &&
+			currentLevelReached.levelsBoards.length > currentLevel
+		) {
+			currentLevelReached.levelsBoards =
+				currentLevelReached.levelsBoards.slice(0, currentLevel);
+			currentLevelReached.userPositions =
+				currentLevelReached.userPositions.slice(0, currentLevel);
 		}
 
 		// If the current level is equal to the levels reached length, then erase the current level data
-		if (currentLevel && currentLevelReached.levelsBoards.length === currentLevel) {
+		if (
+			currentLevel &&
+			currentLevelReached.levelsBoards.length === currentLevel
+		) {
 			currentLevelReached.levelsBoards.pop();
 			currentLevelReached.userPositions.pop();
 		}

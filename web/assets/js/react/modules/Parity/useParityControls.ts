@@ -17,7 +17,9 @@ export const useParityControls = ({
 	const [values, setValues] = useState<number[]>(() => initialValues);
 	const [hasWon, setHasWon] = useState(false);
 
-	const [userPositions, setUserPositions] = useState<[number, number][]>(() => []);
+	const [userPositions, setUserPositions] = useState<[number, number][]>(
+		() => []
+	);
 	const [levelBoards, setLevelBoards] = useState<number[][]>(() => []);
 
 	const reset = () => {
@@ -64,6 +66,11 @@ export const useParityControls = ({
 				}
 
 				setValues(prevVals => {
+					const prevAllEqual = prevVals.every(v => v === prevVals[0]);
+					if (prevAllEqual) {
+						return prevVals;
+					}
+
 					const idx = newRow * size + newCol;
 					const next = prevVals.slice();
 					next[idx] = (next[idx] ?? 0) + 1;
@@ -72,9 +79,15 @@ export const useParityControls = ({
 					const allEqual = next.every(v => v === next[0]);
 					if (allEqual) setHasWon(true);
 
-					if (userPositions.length === 0){
-						setUserPositions(prevPos => [...prevPos, [prev.col, prev.row]]);
-						setLevelBoards(prevBoards => [...prevBoards, prevVals.slice()]);
+					if (userPositions.length === 0) {
+						setUserPositions(prevPos => [
+							...prevPos,
+							[prev.col, prev.row],
+						]);
+						setLevelBoards(prevBoards => [
+							...prevBoards,
+							prevVals.slice(),
+						]);
 					}
 
 					setUserPositions(prevPos => [...prevPos, [newCol, newRow]]);

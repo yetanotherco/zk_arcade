@@ -72,12 +72,20 @@ defmodule ZkArcadeWeb.ProofController do
     }
   end
 
-  # TODO: Replace with the proof public inputs when available
   def parse_public_input_circom(public_input) when is_list(public_input) do
+    <<level_bytes::binary-size(32), game_bytes::binary-size(32), address_bytes::binary-size(32)>> =
+      :binary.list_to_bin(public_input)
+
+    level =
+      case level_bytes do
+        <<_::binary-size(30), high, low>> -> high * 256 + low
+        _ -> raise "Invalid level format"
+      end
+
     %{
-      level: 0,
-      game: "00000000000000000000000000000000",
-      address: "0x0000000000000000000000000000000000000000"
+      level: level,
+      game: Base.encode16(game_bytes, case: :lower),
+      address: "0x" <> Base.encode16(binary_part(address_bytes, 12, 20), case: :lower)
     }
   end
 

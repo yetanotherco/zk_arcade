@@ -1,0 +1,11 @@
+<div class="w-full" style="margin-top: 150px">
+  <div class="section-width section-spacer-md">
+    <x-app-claim-nft
+        network={Application.get_env(:zk_arcade, :network)}
+        merkle_proof={@merkle_proof}
+        tokenURI={Application.fetch_env!(:zk_arcade, :nft_token_uri)}
+        contract_address={Application.fetch_env!(:zk_arcade, :nft_contract_address)}
+        user_address={@wallet}
+    />
+  </div>
+</div>

@@ -16,17 +16,37 @@ contract NftContractDeployer is Script {
         string memory name = vm.parseJsonString(configData, ".name");
         string memory symbol = vm.parseJsonString(configData, ".symbol");
 
+        address[] memory whitelistAddresses = 
+            abi.decode(vm.parseJson(configData, ".whitelist.addresses"), (address[]));
+
+        // Read merkle root from the generated merkle proof data
+        string memory merkleData = vm.readFile("../merkle_tree/merkle_output.json");
+        bytes32 merkleRoot = vm.parseJsonBytes32(merkleData, ".root");
+
         vm.startBroadcast();
         ZkArcadeNft implementation = new ZkArcadeNft();
-        bytes memory data = abi.encodeWithSignature("initialize(address,string,string)", owner, name, symbol);
+        bytes memory data = abi.encodeWithSignature(
+            "initialize(address,string,string,bytes32)", 
+            owner, 
+            name, 
+            symbol,
+            merkleRoot
+        );
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);
         vm.stopBroadcast();
 
-        // Write addresses
+        // Write addresses and Merkle Tree data
         string memory addressesObj = "addresses";
         vm.serializeAddress(addressesObj, "proxy", address(proxy));
-        string memory output = vm.serializeAddress(addressesObj, "implementation", address(implementation));
-        string memory finalJson = vm.serializeString("parent", addressesObj, output);
+        string memory addressOutput = vm.serializeAddress(addressesObj, "implementation", address(implementation));
+        
+        string memory merkleObj = "merkle";
+        vm.serializeBytes32(merkleObj, "root", merkleRoot);
+        string memory merkleOutput = vm.serializeUint(merkleObj, "whitelistCount", whitelistAddresses.length);
+        
+        string memory parentObj = "parent";
+        vm.serializeString(parentObj, "addresses", addressOutput);
+        string memory finalJson = vm.serializeString(parentObj, "merkle", merkleOutput);
 
         vm.writeFile(outputFilePath, finalJson);
 

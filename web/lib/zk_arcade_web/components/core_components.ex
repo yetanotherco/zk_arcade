@@ -176,6 +176,41 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
+  def games_game_component(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
+    ~H"""
+    <%= if @disabled == "true" do %>
+      <div class="w-full opacity-75 sm:max-w-280">
+        <.games_game_content tags={@tags} title={@title} desc={@desc} img={@img} />
+      </div>
+    <% else %>
+      <.link href={@link}>
+        <div class="cursor-pointer group w-full sm:max-w-280">
+          <.games_game_content tags={@tags} title={@title} desc={@desc} img={@img} />
+        </div>
+      </.link>
+    <% end %>
+    """
+  end
+
+  def games_game_content(assigns) do
+    ~H"""
+    <div class="w-full flex justify-between flex-wrap">
+      <div class="max-w-[500px]">
+        <img class="rounded mb-2 w-full sm:h-[170px]" src={@img} width={280} height={180}/>
+        <div class="mb-2 flex gap-2">
+          <%= for variant <- @tags do %>
+            <.tag variant={variant} />
+          <% end %>
+        </div>
+        <div>
+            <h3 class="group-hover:underline text-xl"><%= @title %></h3>
+            <p class="text-text-200"><%= @desc %></p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   attr :number, :string, required: true
   attr :question, :string, required: true
   attr :answer, :string, required: true

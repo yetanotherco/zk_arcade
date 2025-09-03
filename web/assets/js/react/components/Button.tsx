@@ -27,6 +27,7 @@ type Props = React.ComponentProps<"button"> & {
 	variant: ButtonVariant;
 	isLoading?: boolean;
 	arcadeBtnFront?: React.ComponentProps<"span">;
+	disabledTextOnHover?: string;
 };
 
 export const Button = ({
@@ -38,6 +39,7 @@ export const Button = ({
 	style,
 	onClick,
 	arcadeBtnFront = {},
+	disabledTextOnHover,
 	...props
 }: Props) => {
 	const [currentVariant, setCurrentVariant] =
@@ -66,27 +68,52 @@ export const Button = ({
 		}
 	};
 
+	const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+		if (disabledTextOnHover && (disabled || isLoading)) {
+			return (
+				<div className="relative inline-flex w-full items-center justify-center group">
+					{children}
+					<span
+						className="
+						pointer-events-none
+						absolute left-1/2 -translate-x-1/2 -top-2 -translate-y-full
+						px-2 py-1 rounded text-sm text-white bg-black
+						opacity-0 group-hover:opacity-100 transition-opacity
+						whitespace-normal break-words
+					"
+						role="tooltip"
+					>
+						{disabledTextOnHover}
+					</span>
+				</div>
+			);
+		}
+		return <>{children}</>;
+	};
+
 	if (variant === "arcade") {
 		return (
-			<button
-				className={`arcade-btn ${buttonVariantStyles[currentVariant]} ${className}`}
-				disabled={disabled || isLoading}
-				style={style}
-				onClick={e => {
-					playSound();
-					onClick && onClick(e);
-				}}
-				{...props}
-			>
-				<span className="arcade-btn-shadow"></span>
-				<span className="arcade-btn-edge"></span>
-				<span
-					{...arcadeBtnFront}
-					className={`arcade-btn-front ${arcadeBtnFront.className}`}
+			<Wrapper>
+				<button
+					className={`arcade-btn ${buttonVariantStyles[currentVariant]} ${className}`}
+					disabled={disabled || isLoading}
+					style={style}
+					onClick={e => {
+						playSound();
+						onClick && onClick(e);
+					}}
+					{...props}
 				>
-					{isLoading ? "Loading..." : children}
-				</span>
-			</button>
+					<span className="arcade-btn-shadow"></span>
+					<span className="arcade-btn-edge"></span>
+					<span
+						{...arcadeBtnFront}
+						className={`arcade-btn-front ${arcadeBtnFront.className}`}
+					>
+						{isLoading ? "Loading..." : children}
+					</span>
+				</button>
+			</Wrapper>
 		);
 	}
 

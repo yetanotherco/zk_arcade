@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Address, toBytes } from "viem";
-import { ParityLevel } from "./types";
+import { Address, encodePacked, keccak256, toBytes } from "viem";
+import { gameDataKey, ParityLevel } from "./types";
 import { useParityLeaderboardContract } from "../../hooks/useParityLeaderboardContract";
+import { useBlock } from "wagmi";
 
 type Args = {
 	leaderBoardContractAddress: Address;
@@ -17,10 +18,11 @@ export const useParityGames = ({
 	leaderBoardContractAddress,
 	userAddress,
 }: Args) => {
-	const { currentGame } = useParityLeaderboardContract({
-		contractAddress: leaderBoardContractAddress,
-		userAddress,
-	});
+	const { currentGame, currentGameLevelCompleted } =
+		useParityLeaderboardContract({
+			contractAddress: leaderBoardContractAddress,
+			userAddress,
+		});
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
 
 	const gameConfig = currentGame.data?.gameConfig ?? "";
@@ -49,11 +51,35 @@ export const useParityGames = ({
 
 	const [playerLevelReached, setPlayerLevelReached] = useState(0);
 
-	// TODO: show actual renewal
-	const renewsIn = new Date();
+	// Get the block timestamp for the current block
+	const currentBlock = useBlock();
+
+	const [timeRemaining, setTimeRemaining] = useState<{
+		hours: number;
+		minutes: number;
+	} | null>(null);
 
 	useEffect(() => {
-		if (!gameConfig) {
+		const endsAtTime = currentGame.data?.endsAtTime || 0;
+		const currentBlockTimestamp = currentBlock.data
+			? currentBlock.data.timestamp
+			: 0;
+
+		if (endsAtTime > 0 && currentBlockTimestamp) {
+			const timeRemaining =
+				Number(endsAtTime) - Number(currentBlockTimestamp);
+			const hours = timeRemaining / 3600;
+			const minutes = Math.floor(timeRemaining / 60);
+
+			setTimeRemaining({
+				hours: Math.floor(hours),
+				minutes,
+			});
+		}
+	}, [currentGame.data, currentBlock.data]);
+
+	useEffect(() => {
+		if (!gameConfig || !userAddress) {
 			setPlayerLevelReached(0);
 			return;
 		}
@@ -64,19 +90,20 @@ export const useParityGames = ({
 		} catch {
 			gameData = {};
 		}
-		const current = gameData[gameConfig];
+		const key = gameDataKey(gameConfig, userAddress);
+		const current = gameData[key];
 
-		// TODO: do this only if the gameConfig matches the one in the contracr
 		setPlayerLevelReached((current?.levelsBoards?.length ?? 0) + 1);
 	}, [gameConfig]);
 
 	return {
+		currentGameLevelCompleted,
 		playerLevelReached,
 		setPlayerLevelReached,
 		currentLevel,
 		setCurrentLevel,
 		levels,
-		renewsIn,
+		timeRemaining,
 		currentGameConfig: gameConfig,
 	};
 };

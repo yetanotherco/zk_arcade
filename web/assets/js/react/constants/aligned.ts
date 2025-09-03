@@ -150,6 +150,13 @@ export const leaderboardAbi = [
 		],
 		stateMutability: "view",
 	},
+	{
+		type: "function",
+		name: "usersParityLevelCompleted",
+		inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+		stateMutability: "view",
+	},
 	{ type: "error", name: "NoActiveBeastGame", inputs: [] },
 	{ type: "error", name: "NoActiveParityGame", inputs: [] },
 ];

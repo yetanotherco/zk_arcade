@@ -50,7 +50,7 @@ defmodule ZkArcadeWeb.CoreComponents do
             </p>
           </.link>
           <div class="lg:flex hidden w-full gap-10">
-              <.link href="/game/beast" class="transition hover:text-accent-100 hover:underline">Games</.link>
+              <.link href="/games" class="transition hover:text-accent-100 hover:underline">Games</.link>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
               <button class="transition hover:text-accent-100 hover:underline" id="how-it-works-nav-btn">
@@ -60,17 +60,6 @@ defmodule ZkArcadeWeb.CoreComponents do
         </div>
 
         <div class="flex gap-6 items-center">
-          <div class="hidden sm:block">
-            <x-app-submit-proof
-                network={@network}
-                payment_service_address={@payment_service_address}
-                user_address={@wallet}
-                batcher_url={@batcher_url}
-                leaderboard_address={@leaderboard_address}
-                beast_submissions={@beast_submissions}
-            />
-          </div>
-
           <x-app-user-wallet
               network={@network}
               payment_service_address={@payment_service_address}
@@ -133,7 +122,7 @@ defmodule ZkArcadeWeb.CoreComponents do
           >
             <div class="h-dvh flex flex-col gap-y-10 text-2xl justify-end items-center p-12">
                 <.link href="/" class="text-text-100 transition hover:text-accent-100 hover:underline">Home</.link>
-                <.link href="/game/beast" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link>
+                <.link href="/games" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link>
                 <.link href="/leaderboard" class="text-text-100 transition hover:text-accent-100 hover:underline">Leaderboard</.link>
                 <.link href="/history" class="text-text-100 transition hover:text-accent-100 hover:underline">Profile</.link>
                 <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">Tutorial</p>
@@ -184,6 +173,41 @@ defmodule ZkArcadeWeb.CoreComponents do
         </div>
       </.link>
     <% end %>
+    """
+  end
+
+  def games_game_component(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
+    ~H"""
+    <%= if @disabled == "true" do %>
+      <div class="w-full opacity-75 sm:max-w-280">
+        <.games_game_content tags={@tags} title={@title} desc={@desc} img={@img} />
+      </div>
+    <% else %>
+      <.link href={@link}>
+        <div class="cursor-pointer group w-full sm:max-w-280">
+          <.games_game_content tags={@tags} title={@title} desc={@desc} img={@img} />
+        </div>
+      </.link>
+    <% end %>
+    """
+  end
+
+  def games_game_content(assigns) do
+    ~H"""
+    <div class="w-full flex justify-between flex-wrap">
+      <div class="max-w-[500px]">
+        <img class="rounded mb-2 w-full sm:h-[170px]" src={@img} width={280} height={180}/>
+        <div class="mb-2 flex gap-2">
+          <%= for variant <- @tags do %>
+            <.tag variant={variant} />
+          <% end %>
+        </div>
+        <div>
+            <h3 class="group-hover:underline text-xl"><%= @title %></h3>
+            <p class="text-text-200"><%= @desc %></p>
+        </div>
+      </div>
+    </div>
     """
   end
 

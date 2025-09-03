@@ -175,6 +175,22 @@ defmodule ZkArcadeWeb.PageController do
       |> render(:home)
   end
 
+  def games(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+    {username, position} = get_username_and_position(wallet)
+
+    conn
+      |> assign(:submitted_proofs, Jason.encode!(proofs))
+      |> assign(:beast_submissions, beast_submissions_json)
+      |> assign(:wallet, wallet)
+      |> assign(:username, username)
+      |> assign(:user_position, position)
+      |> assign(:explorer_url, explorer_url)
+      |> render(:games)
+  end
+
   def game(conn, %{"name" => "beast"}) do
     wallet = get_wallet_from_session(conn)
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
@@ -233,8 +249,8 @@ defmodule ZkArcadeWeb.PageController do
     wallet = get_wallet_from_session(conn)
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
     acknowledgements = [
-      %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
-      %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
+      %{text: "Original Parity game repository", link: "https://github.com/abejfehr/parity/"},
+      %{text: "Original Parity game author", link: "https://github.com/abejfehr"}
     ]
     {username, position} = get_username_and_position(wallet)
     {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
@@ -244,10 +260,13 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:game, %{
         image: "/images/parity.jpg",
         name: "Parity",
-        desc: "Survive across waves of enemies",
-        full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
+        desc: "Daily parity puzzles in your browser. Simple rules, tricky patterns. Test your logic and stay sharp as difficulty builds.",
+        full_desc: "The game is played by moving a cursor with WASD around the board to select different squares in a grid. Each time you select a select a cell by moving the cursor with the arrow keys, the number inside that cell increases by one.
+
+The goal of the game is to make each number on the board equal.
+",
         acknowledgments: acknowledgements,
-        tags: [:cli, :risc0, :sp1]
+        tags: [:browser, :circom]
       })
       |> assign(:username, username)
       |> assign(:submitted_proofs, Jason.encode!(proofs))

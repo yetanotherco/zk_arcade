@@ -1,111 +1,115 @@
 import React, { useState } from "react";
 import { Button } from "../../components";
-import { useSwapTransition } from "./useSwapTransition";
 import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
-import { Address } from "viem";
+import { Address, encodePacked, keccak256 } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
-import { ParityGameState } from "./types";
+import { gameDataKey, ParityGameState } from "./types";
 
 type GameStatus = {
 	levelsBoards: number[][][];
 	userPositions: [number, number][][];
 };
 
+type TimeRemaining = {
+	hours: number;
+	minutes: number;
+};
+
 export const ProveAndSubmit = ({
-	goToNextLevel,
-	levelBoards,
-	userPositions,
 	user_address,
 	payment_service_address,
 	batcher_url,
 	leaderboard_address,
 	currentGameConfig,
-	currentLevel,
+	setGameState,
+	submittedLevelOnChain,
+	timeRemaining,
 }: {
-	goToNextLevel: () => void;
-	levelBoards: number[][];
-	userPositions: [number, number][];
 	user_address: Address;
 	payment_service_address: Address;
 	batcher_url: string;
 	leaderboard_address: Address;
 	currentGameConfig: string;
-	currentLevel: number | null;
+	setGameState: (state: ParityGameState) => void;
+	submittedLevelOnChain: number;
+	timeRemaining?: TimeRemaining | null;
 }) => {
-	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
 	const [open, setOpen] = useState(false);
+	const [proofVerificationData, setProofVerificationData] =
+		useState<VerificationData | null>(null);
 
-	const generateproofVerificationData = async () => {
+	const [userGameData, _setUserGameData] = useState<GameStatus>(() => {
 		const stored = localStorage.getItem("parity-game-data");
-
 		const gameData: { [key: string]: GameStatus } = stored
 			? JSON.parse(stored)
 			: {};
+		const key = gameDataKey(currentGameConfig, user_address);
+		return (
+			gameData[key] || {
+				levelsBoards: [],
+				userPositions: [],
+			}
+		);
+	});
 
-		const currentLevelReached: GameStatus = gameData[currentGameConfig] || {
-			levelsBoards: [],
-			userPositions: [],
-		};
-
-		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
-		if (currentLevel && currentLevelReached.levelsBoards.length > currentLevel) {
-			currentLevelReached.levelsBoards = currentLevelReached.levelsBoards.slice(0, currentLevel);
-			currentLevelReached.userPositions = currentLevelReached.userPositions.slice(0, currentLevel);
-		}
-
-		// If the current level is equal to the levels reached length, then erase the current level data
-		if (currentLevel && currentLevelReached.levelsBoards.length === currentLevel) {
-			currentLevelReached.levelsBoards.pop();
-			currentLevelReached.userPositions.pop();
-		}
-
-		currentLevelReached.levelsBoards.push(levelBoards);
-		currentLevelReached.userPositions.push(userPositions);
-
-		// Save the data in local storage to use this level data for higher level proofs
-		gameData[currentGameConfig] = currentLevelReached;
-		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
-
+	const generateproofVerificationData = async () => {
 		const submitproofVerificationData = await generateCircomParityProof({
 			user_address,
-			userPositions: currentLevelReached.userPositions,
-			levelsBoards: currentLevelReached.levelsBoards,
+			userPositions: userGameData.userPositions,
+			levelsBoards: userGameData.levelsBoards,
 		});
 
 		setProofVerificationData(submitproofVerificationData);
 		setOpen(true);
 	};
 
-	const saveLevelData = () => {
-		const stored = localStorage.getItem("parity-game-data");
-		const gameData: { [key: string]: GameStatus } = stored
-			? JSON.parse(stored)
-			: {};
+	const currentLevel = userGameData.levelsBoards.length;
 
-		const currentLevelReached: GameStatus = gameData[currentGameConfig] || {
-			levelsBoards: [],
-			userPositions: [],
-		};
+	const alreadySubmittedUpToOrBeyond =
+		currentLevel > 0 && submittedLevelOnChain >= currentLevel;
+	const hasSubmittedThree = submittedLevelOnChain === 3;
 
-		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
-		if (currentLevel && currentLevelReached.levelsBoards.length > currentLevel) {
-			currentLevelReached.levelsBoards = currentLevelReached.levelsBoards.slice(0, currentLevel);
-			currentLevelReached.userPositions = currentLevelReached.userPositions.slice(0, currentLevel);
-		}
+	const disableGenerate =
+		currentLevel === 0 || alreadySubmittedUpToOrBeyond || hasSubmittedThree;
 
-		// If the current level is equal to the levels reached length, then erase the current level data
-		if (currentLevel && currentLevelReached.levelsBoards.length === currentLevel) {
-			currentLevelReached.levelsBoards.pop();
-			currentLevelReached.userPositions.pop();
-		}
-
-		currentLevelReached.levelsBoards.push(levelBoards);
-		currentLevelReached.userPositions.push(userPositions);
-
-		gameData[currentGameConfig] = currentLevelReached;
-		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
-	};
+	if (currentLevel === 3 && hasSubmittedThree) {
+		return (
+			<div className="w-full h-full flex flex-col gap-10 justify-center items-center">
+				<div>
+					<h2 className="text-2xl mb-2 font-normal text-center">
+						Game completed
+					</h2>
+					<p className="text-text-200 text-center">
+						You have completed the full game, come in{" "}
+						<span className="text-accent-100">
+							{timeRemaining ? (
+								<span className="text-accent-100">
+									{timeRemaining.hours > 0
+										? `${timeRemaining.hours} hours`
+										: `${timeRemaining.minutes} minutes`}
+								</span>
+							) : (
+								<span className="text-accent-100">
+									loading...
+								</span>
+							)}
+						</span>{" "}
+						for new levels!
+					</p>
+				</div>
+				<Button
+					variant="arcade"
+					className="w-full max-w-[300px]"
+					onClick={() => {
+						setGameState("home");
+					}}
+				>
+					Home
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<div>
@@ -113,35 +117,78 @@ export const ProveAndSubmit = ({
 				<div className="h-full w-full flex flex-col gap-10 items-center justify-center">
 					<div>
 						<h2 className="text-2xl mb-2 font-normal text-center">
-							Prove Execution
+							Prove your playthrough
 						</h2>
 						<p className="text-text-200 text-center">
-							Prove the completion of the level and submit it to
-							Aligned to claim points
+							{currentLevel
+								? `Prove you have completed up to level ${currentLevel}`
+								: `No levels completed yet`}
 						</p>
 					</div>
-					<Button
-						variant="arcade"
-						className="max-w-[300px] w-full"
-						onClick={() => {
-							generateproofVerificationData();
-						}}
-					>
-						Generate Proof
-					</Button>
 
-					<Button
-						variant="arcade"
-						className="max-w-[300px] w-full"
-						onClick={() => {
-							saveLevelData();
-							goToNextLevel();
-						}}
-					>
-						Next Level
-					</Button>
+					<div className="w-full max-w-[500px] space-y-2">
+						{currentLevel === 0 && (
+							<div className="bg-red/20 text-red border border-red text-center p-2 rounded">
+								You haven’t completed any levels yet. There’s
+								nothing to generate.
+							</div>
+						)}
+
+						{alreadySubmittedUpToOrBeyond && !hasSubmittedThree && (
+							<div className="bg-red/20 text-red border border-red text-center p-2 rounded">
+								You have already submitted a proof up to level{" "}
+								{submittedLevelOnChain} on-chain. Complete at
+								least one more level before submitting again.
+							</div>
+						)}
+
+						{currentLevel > 0 &&
+							currentLevel < 3 &&
+							!alreadySubmittedUpToOrBeyond &&
+							!hasSubmittedThree && (
+								<div className="bg-yellow/20 text-yellow border border-yellow text-center p-2 rounded">
+									The full game wasn’t completed — you are
+									missing {3 - currentLevel}{" "}
+									{3 - currentLevel === 1
+										? "level"
+										: "levels"}
+									. If you submit a proof now, you’ll need to
+									prove the remaining levels later.
+								</div>
+							)}
+
+						{currentLevel === 3 && !hasSubmittedThree && (
+							<div className="bg-accent-100/20 text-accent-100 border border-accent-100 text-center p-2 rounded">
+								Great job! You’ve completed the game — generate
+								and submit your proof now.
+							</div>
+						)}
+					</div>
+
+					<div className="flex flex-col gap-5 w-full max-w-[300px]">
+						<Button
+							variant="arcade"
+							className="w-full"
+							onClick={() => {
+								generateproofVerificationData();
+							}}
+							disabled={disableGenerate}
+						>
+							Generate Proof
+						</Button>
+						<Button
+							variant="arcade"
+							className="w-full"
+							onClick={() => {
+								setGameState("home");
+							}}
+						>
+							Home
+						</Button>
+					</div>
 				</div>
 			</div>
+
 			<SubmitProofModal
 				modal={{ open, setOpen }}
 				batcher_url={batcher_url}

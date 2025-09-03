@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Address, toBytes } from "viem";
-import { ParityLevel } from "./types";
+import { Address, encodePacked, keccak256, toBytes } from "viem";
+import { gameDataKey, ParityLevel } from "./types";
 import { useParityLeaderboardContract } from "../../hooks/useParityLeaderboardContract";
+import { useBlock } from "wagmi";
 
 type Args = {
 	leaderBoardContractAddress: Address;
+	userAddress;
 };
 
 type GameStatus = {
@@ -12,10 +14,15 @@ type GameStatus = {
 	userPositions: [number, number][][];
 };
 
-export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
-	const { currentGame } = useParityLeaderboardContract({
-		contractAddress: leaderBoardContractAddress,
-	});
+export const useParityGames = ({
+	leaderBoardContractAddress,
+	userAddress,
+}: Args) => {
+	const { currentGame, currentGameLevelCompleted } =
+		useParityLeaderboardContract({
+			contractAddress: leaderBoardContractAddress,
+			userAddress,
+		});
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
 
 	const gameConfig = currentGame.data?.gameConfig ?? "";
@@ -27,9 +34,9 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 
 		for (let i = 0; i < gameConfigBytes.length / 10; i++) {
 			let byte_idx = i * 10;
-			let initialPos: ParityLevel["initialPos"] = { 
+			let initialPos: ParityLevel["initialPos"] = {
 				col: gameConfigBytes[byte_idx] >> 4,
-				row: gameConfigBytes[byte_idx] & 0xf,
+				row: gameConfigBytes[byte_idx] & 0x0f,
 			};
 			byte_idx += 1;
 			let board: number[] = [];
@@ -44,10 +51,35 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 
 	const [playerLevelReached, setPlayerLevelReached] = useState(0);
 
-	const renewsIn = new Date();
+	// Get the block timestamp for the current block
+	const currentBlock = useBlock();
+
+	const [timeRemaining, setTimeRemaining] = useState<{
+		hours: number;
+		minutes: number;
+	} | null>(null);
 
 	useEffect(() => {
-		if (!gameConfig) {
+		const endsAtTime = currentGame.data?.endsAtTime || 0;
+		const currentBlockTimestamp = currentBlock.data
+			? currentBlock.data.timestamp
+			: 0;
+
+		if (endsAtTime > 0 && currentBlockTimestamp) {
+			const timeRemaining =
+				Number(endsAtTime) - Number(currentBlockTimestamp);
+			const hours = timeRemaining / 3600;
+			const minutes = Math.floor(timeRemaining / 60);
+
+			setTimeRemaining({
+				hours: Math.floor(hours),
+				minutes,
+			});
+		}
+	}, [currentGame.data, currentBlock.data]);
+
+	useEffect(() => {
+		if (!gameConfig || !userAddress) {
 			setPlayerLevelReached(0);
 			return;
 		}
@@ -58,19 +90,20 @@ export const useParityGames = ({ leaderBoardContractAddress }: Args) => {
 		} catch {
 			gameData = {};
 		}
-		const current = gameData[gameConfig];
+		const key = gameDataKey(gameConfig, userAddress);
+		const current = gameData[key];
 
 		setPlayerLevelReached((current?.levelsBoards?.length ?? 0) + 1);
 	}, [gameConfig]);
 
-
 	return {
+		currentGameLevelCompleted,
 		playerLevelReached,
 		setPlayerLevelReached,
 		currentLevel,
 		setCurrentLevel,
 		levels,
-		renewsIn,
+		timeRemaining,
 		currentGameConfig: gameConfig,
 	};
 };

@@ -63,6 +63,21 @@ export const leaderboardAbi = [
 	},
 	{
 		type: "function",
+		name: "submitParitySolution",
+		stateMutability: "nonpayable",
+		inputs: [
+			{ name: "proofCommitment", type: "bytes32" },
+			{ name: "publicInputs", type: "bytes" },
+			{ name: "provingSystemAuxDataCommitment", type: "bytes32" },
+			{ name: "proofGeneratorAddr", type: "bytes20" },
+			{ name: "batchMerkleRoot", type: "bytes32" },
+			{ name: "merkleProof", type: "bytes" },
+			{ name: "verificationDataBatchIndex", type: "uint256" },
+		],
+		outputs: [],
+	},
+	{
+		type: "function",
 		name: "getUserScore",
 		stateMutability: "view",
 		inputs: [{ name: "user", type: "address" }],
@@ -122,8 +137,8 @@ export const leaderboardAbi = [
 					},
 					{
 						name: "gameConfig",
-						type: "bytes",
-						internalType: "bytes",
+						type: "uint256",
+						internalType: "uint256",
 					},
 					{
 						name: "startsAtTime",
@@ -133,6 +148,13 @@ export const leaderboardAbi = [
 				],
 			},
 		],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
+		name: "usersParityLevelCompleted",
+		inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
 		stateMutability: "view",
 	},
 	{ type: "error", name: "NoActiveBeastGame", inputs: [] },

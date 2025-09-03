@@ -46,10 +46,10 @@ const GAMES: Game[] = [
 		id: "Sudoku",
 		name: "Sudoku",
 		cover: "/images/sudoku.jpg",
-	}
+	},
 ];
 
-const getGameData = (id: GameId) => GAMES.find((game) => game.id === id);
+const getGameData = (id: GameId) => GAMES.find(game => game.id === id);
 
 type GameId = (typeof GAMES)[number]["id"];
 
@@ -130,11 +130,10 @@ export const SubmitProofStep = ({
 			: undefined
 	);
 
-	const { currentGame, currentGameLevelCompleted } =
-		useBeastLeaderboardContract({
-			contractAddress: leaderboard_address,
-			userAddress: user_address,
-		});
+	const { currentGame } = useBeastLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address,
+	});
 
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_addr,
@@ -303,54 +302,56 @@ export const SubmitProofStep = ({
 		nonce,
 	]);
 
-	const handleSend = useCallback(async (proofToSubmitData: VerificationData) => {
-		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-		if (!maxFee) {
-			alert("Could not estimate max fee");
-			return;
-		}
+	const handleSend = useCallback(
+		async (proofToSubmitData: VerificationData) => {
+			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
+			if (!maxFee) {
+				alert("Could not estimate max fee");
+				return;
+			}
 
-		if (nonce == null) {
-			alert("Nonce is still loading or failed");
-			return;
-		}
+			if (nonce == null) {
+				alert("Nonce is still loading or failed");
+				return;
+			}
 
-		const noncedVerificationdata: NoncedVerificationdata = {
-			maxFee: toHex(maxFee, { size: 32 }),
-			nonce: toHex(nonce, { size: 32 }),
-			chain_id: toHex(chainId, { size: 32 }),
+			const noncedVerificationdata: NoncedVerificationdata = {
+				maxFee: toHex(maxFee, { size: 32 }),
+				nonce: toHex(nonce, { size: 32 }),
+				chain_id: toHex(chainId, { size: 32 }),
+				payment_service_addr,
+				verificationData: proofToSubmitData,
+			};
+
+			const { r, s, v } = await signVerificationData(
+				noncedVerificationdata,
+				payment_service_addr
+			);
+
+			const submitProofMessage: SubmitProof = {
+				verificationData: noncedVerificationdata,
+				signature: {
+					r,
+					s,
+					v: Number(v),
+				},
+			};
+
+			setSubmitProofMessage(JSON.stringify(submitProofMessage));
+			setSubmissionIsLoading(true);
+			window.setTimeout(() => {
+				formRef.current?.submit();
+			}, 100);
+		},
+		[
+			setSubmitProofMessage,
+			estimateMaxFeeForBatchOfProofs,
+			signVerificationData,
 			payment_service_addr,
-			verificationData: proofToSubmitData,
-		};
-
-		const { r, s, v } = await signVerificationData(
-			noncedVerificationdata,
-			payment_service_addr
-		);
-
-		const submitProofMessage: SubmitProof = {
-			verificationData: noncedVerificationdata,
-			signature: {
-				r,
-				s,
-				v: Number(v),
-			},
-		};
-
-		setSubmitProofMessage(JSON.stringify(submitProofMessage));
-		setSubmissionIsLoading(true);
-		window.setTimeout(() => {
-			formRef.current?.submit();
-		}, 100);
-
-	}, [
-		setSubmitProofMessage,
-		estimateMaxFeeForBatchOfProofs,
-		signVerificationData,
-		payment_service_addr,
-		chainId,
-		nonce,
-	]);
+			chainId,
+			nonce,
+		]
+	);
 
 	const [bumpLoading, setBumpLoading] = useState(false);
 	const formRetryRef = useRef<HTMLFormElement>(null);
@@ -493,7 +494,7 @@ export const SubmitProofStep = ({
 					</div>
 				)}
 
-				{(!bumpFeeOpen && proofStatus !== "submitted") && (
+				{!bumpFeeOpen && proofStatus !== "submitted" && (
 					<Button
 						className=""
 						variant="text-accent"
@@ -577,19 +578,22 @@ export const SubmitProofStep = ({
 							className="w-[150px] h-[100px] object-cover rounded border-2"
 						/>
 					</div>
-					<div className="text-center">
-					{gameData?.name}
-					</div>
+					<div className="text-center">{gameData?.name}</div>
 				</div>
 				<div>
-					{proofToSubmitData ? 
+					{proofToSubmitData ? (
 						<div>
 							<p className="text-xl mb-2">Proof data:</p>
-							<p className="mb-1">Proof size: {proofToSubmitData.proof.length} bytes</p>
-							<p>Public Input size: {proofToSubmitData.publicInput?.length} bytes</p>
+							<p className="mb-1">
+								Proof size: {proofToSubmitData.proof.length}{" "}
+								bytes
+							</p>
+							<p>
+								Public Input size:{" "}
+								{proofToSubmitData.publicInput?.length} bytes
+							</p>
 						</div>
-
-					: 
+					) : (
 						<div>
 							<div className="mb-2">
 								<p>Proof file</p>
@@ -607,7 +611,7 @@ export const SubmitProofStep = ({
 								/>
 							</div>
 						</div>
-					}
+					)}
 				</div>
 				<div className="flex flex-col gap-2">
 					{provingSystem && <p>Prover: {provingSystem}</p>}
@@ -663,7 +667,11 @@ export const SubmitProofStep = ({
 				method="post"
 				className="hidden"
 			>
-				<input type="hidden" name="submit_proof_message" value={submitProofMessage} />
+				<input
+					type="hidden"
+					name="submit_proof_message"
+					value={submitProofMessage}
+				/>
 				<input type="hidden" name="_csrf_token" value={csrfToken} />
 				<input type="hidden" name="game" value={gameData?.name} />
 			</form>
@@ -689,16 +697,16 @@ export const SubmitProofStep = ({
 						disabled={
 							!proof ||
 							!proofId ||
-						!publicInputs ||
-						(balance.data || 0) < maxFee ||
-						nonceLoading ||
-						nonce == null
-					}
-					isLoading={submissionIsLoading}
-					onClick={handleSubmission}
-				>
-					Confirm
-				</Button>
+							!publicInputs ||
+							(balance.data || 0) < maxFee ||
+							nonceLoading ||
+							nonce == null
+						}
+						isLoading={submissionIsLoading}
+						onClick={handleSubmission}
+					>
+						Confirm
+					</Button>
 				) : (
 					<Button
 						variant="accent-fill"

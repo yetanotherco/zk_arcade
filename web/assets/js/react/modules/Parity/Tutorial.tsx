@@ -4,11 +4,6 @@ import { Button } from "../../components";
 import { useParityControls } from "./useParityControls";
 import { ParityGameState } from "./types";
 import { useSwapTransition } from "./useSwapTransition";
-import { generateCircomParityProof } from "./GenerateProof";
-import { SubmitProofModal } from "../../components/Modal/SubmitProof";
-import { useModal } from "../../hooks/useModal";
-import { Address } from "viem";
-import { VerificationData } from "../../types/aligned";
 
 const tutorialText = [
 	{
@@ -49,63 +44,22 @@ const TutorialText = ({
 
 const BoardTutorial = ({
 	setGameState,
-	gameProps
 }: {
 	setGameState: (state: ParityGameState) => void;
-		gameProps: GameProps;
 }) => {
-	const { positionIdx, values, hasWon, reset, userPositions, levelBoards } = useParityControls({
+	const { positionIdx, values, hasWon, reset } = useParityControls({
 		initialPosition: { col: 0, row: 0 },
 		initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
 	});
-	const { open, setOpen, toggleOpen } = useModal();
-	const [proofVerificationData, setProofVerificationData] = useState<VerificationData | null>(null);
-
-	const generateproofVerificationData = async () => {
-		const totalLevelBoards = [[...levelBoards]];
-		const totalUserPositions = [[...userPositions]];
-
-		const submitproofVerificationData = await generateCircomParityProof({
-			user_address: gameProps.user_address,
-			userPositions: totalUserPositions,
-			levelsBoards: totalLevelBoards,
-		});
-
-		setProofVerificationData(submitproofVerificationData);
-		setOpen(true);
-	};
 
 	const view = useSwapTransition(hasWon, (_, won) =>
 		won ? (
-
-			<div className="flex flex-col gap-2">
-				<TutorialText
-					header="End of tutorial"
-					text="You have completed the tutorial. Now that you understand how the game works, you are ready to prove it to others and climb the leaderboard."
-					button="Let's go!"
-					onClick={() => setGameState("home")}
-				/>				
-
-				{/* TODO: Remove the proof generation from tutorial once we have it available for normal levels */}
-				<Button
-					onClick={generateproofVerificationData}
-					variant="arcade"
-				>
-					Generate Proof
-				</Button>
-
-				<SubmitProofModal
-					modal={{ open, setOpen }}
-					batcher_url={gameProps.batcher_url}
-					leaderboard_address={gameProps.leaderboard_address}
-					payment_service_address={gameProps.payment_service_address}
-					user_address={gameProps.user_address}
-					userBeastSubmissions={[]}
-					proofToSubmitData={proofVerificationData}
-					gameName="parity"
-				/>
-
-			</div>
+			<TutorialText
+				header="End of tutorial"
+				text="You have completed the tutorial. Now that you understand how the game works, you are ready to prove it to others and climb the leaderboard."
+				button="Let's go!"
+				onClick={() => setGameState("home")}
+			/>
 		) : (
 			<ParityBoard
 				values={values}
@@ -121,20 +75,10 @@ const BoardTutorial = ({
 	return view;
 };
 
-type GameProps = {
-	network: string;
-	payment_service_address: Address;
-	user_address: Address;
-	leaderboard_address: Address;
-	batcher_url: string;
-};
-
 export const ParityTutorial = ({
 	setGameState,
-	gameProps
 }: {
 	setGameState: (state: ParityGameState) => void;
-	gameProps: GameProps;
 }) => {
 	const [step, setStep] = useState(0);
 
@@ -153,7 +97,7 @@ export const ParityTutorial = ({
 						onClick={goToNextStep}
 					/>
 				) : (
-					<BoardTutorial setGameState={setGameState} gameProps={gameProps} />
+					<BoardTutorial setGameState={setGameState} />
 				)}
 			</div>
 		</div>

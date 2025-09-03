@@ -34,17 +34,20 @@ struct ParityLevel {
     solution: Vec<Movement>,
 }
 
-fn encode_parity_levels(levels: Vec<ParityLevel>) -> Vec<u8> {
-    let mut bytes: Vec<u8> = vec![];
+fn encode_parity_levels(levels: Vec<ParityLevel>) -> [u8; 32] {
+    let mut bytes: [u8; 32] = [0; 32];
+    // Because each level takes 10 bytes we use a total of 30 bytes
+    // we pad the bytes with two leading zeroes
+    // this is to maintain the consistency with the way circom prover commits the public inputs
+    let offset_bytes = 2;
 
-    for level in levels {
+    for (i, level) in levels.iter().enumerate() {
         let initial_pos: u8 = (level.initial_pos_x << 4) | (level.initial_pos_y & 0x0F);
-        bytes.push(initial_pos);
-        let mut board_bytes: Vec<u8> = vec![];
-        for tile in level.board {
-            board_bytes.push(tile);
+        let i = i * 10 + offset_bytes;
+        bytes[i] = initial_pos;
+        for (j, tile) in level.board.iter().enumerate() {
+            bytes[i + j + 1] = *tile;
         }
-        bytes.extend_from_slice(&board_bytes);
     }
 
     bytes

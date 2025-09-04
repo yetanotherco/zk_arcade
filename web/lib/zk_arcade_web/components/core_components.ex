@@ -588,14 +588,14 @@ defmodule ZkArcadeWeb.CoreComponents do
     ~H"""
     <div class="flex gap-x-2 items-center justify-center min-w-full">
       <%= if @pagination.current_page >= 2 do %>
-        <.link href={"/leaderboard?page=#{1}"}>
+        <.link href={"#{@base_path}?page=#{1}"}>
           <.button>
             First
           </.button>
         </.link>
       <% end %>
       <%= if @pagination.current_page > 1 do %>
-        <.link href={"/leaderboard?page=#{@pagination.current_page - 1}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.current_page - 1}"}>
           <.button>
             <.icon
               name="hero-arrow-left-solid"
@@ -614,7 +614,7 @@ defmodule ZkArcadeWeb.CoreComponents do
         />
       </form>
       <%= if @pagination.current_page != @pagination.total_pages do %>
-        <.link href={"/leaderboard?page=#{@pagination.current_page + 1}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.current_page + 1}"}>
           <.button>
             <.icon
               name="hero-arrow-right-solid"
@@ -622,7 +622,7 @@ defmodule ZkArcadeWeb.CoreComponents do
             />
           </.button>
         </.link>
-        <.link href={"/leaderboard?page=#{@pagination.total_pages}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.total_pages}"}>
           <.button>
             Last
           </.button>

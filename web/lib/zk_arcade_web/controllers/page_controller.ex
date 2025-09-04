@@ -276,9 +276,21 @@ The goal of the game is to make each number on the board equal.
       |> render(:parity_game)
   end
 
-  def history(conn, _params) do
+  def history(conn, params) do
     wallet = get_wallet_from_session(conn)
-    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 10)
+
+    entries_per_page = 5
+
+    page = String.to_integer(params["page"] || "1")
+    offset = (page - 1) * entries_per_page
+
+    total_proofs = length(ZkArcade.Proofs.get_proofs_by_address(wallet, %{page: 1, page_size: 100}))
+
+    total_pages = ceil(total_proofs / entries_per_page)
+    has_prev = page > 1
+    has_next = page < total_pages
+
+    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, page, entries_per_page)
 
     {username, position} = get_username_and_position(wallet)
 
@@ -297,6 +309,14 @@ The goal of the game is to make each number on the board equal.
     |> assign(:user_position, position)
     |> assign(:explorer_url, explorer_url)
     |> assign(:batcher_url, batcher_url)
+    |> assign(:pagination, %{
+      current_page: page,
+      total_pages: total_pages,
+      has_prev: has_prev,
+      has_next: has_next,
+      total_users: total_proofs,
+      items_per_page: entries_per_page
+    })
     |> render(:history)
   end
 
@@ -349,7 +369,8 @@ The goal of the game is to make each number on the board equal.
       total_pages: total_pages,
       has_prev: has_prev,
       has_next: has_next,
-      total_users: total_users
+      total_users: total_users,
+      items_per_page: entries_per_page
     })
     |> render(:leaderboard)
   end

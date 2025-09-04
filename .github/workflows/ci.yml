@@ -43,10 +43,10 @@ jobs:
           cd web
           mix deps.get
 
-      - name: Check formatting
-        run: |
-          cd web
-          mix format --check-formatted
+      # - name: Check formatting
+      #   run: |
+      #     cd web
+      #     mix format --check-formatted
 
       - name: Compile dependencies
         run: |

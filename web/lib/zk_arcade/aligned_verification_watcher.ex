@@ -2,10 +2,11 @@ defmodule ZkArcade.AlignedVerificationWatcher do
   require Logger
 
   defp bin(v) when is_binary(v), do: v
-  defp bin(v) when is_list(v),   do: :erlang.iolist_to_binary(v)
+  defp bin(v) when is_list(v), do: :erlang.iolist_to_binary(v)
   defp bin(nil), do: nil
 
   defp hex_to_bytes("0x" <> rest), do: hex_to_bytes(rest)
+
   defp hex_to_bytes(hex) when is_binary(hex) do
     hex
     |> even_length_hex()
@@ -25,7 +26,9 @@ defmodule ZkArcade.AlignedVerificationWatcher do
     verification_data = submit_proof_message["verificationData"]["verificationData"]
 
     with {:ok, commitment} <-
-          ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(verification_data) do
+           ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(
+             verification_data
+           ) do
       proof_commitment_bin = hex_to_bytes(commitment.proof_commitment)
       pub_input_commitment_bin = hex_to_bytes(commitment.pub_input_commitment)
       ps_aux_commitment_bin = hex_to_bytes(commitment.proving_system_aux_data_commitment)
@@ -42,6 +45,7 @@ defmodule ZkArcade.AlignedVerificationWatcher do
           if byte_size(chunk) != 32 do
             Logger.warning("Merkle proof chunk has size #{byte_size(chunk)}, expected 32")
           end
+
           chunk
         end)
         |> :erlang.iolist_to_binary()
@@ -79,10 +83,12 @@ defmodule ZkArcade.AlignedVerificationWatcher do
   end
 
   defp retry_with_backoff(_fun, []), do: false
+
   defp retry_with_backoff(fun, [delay | rest]) do
     case fun.() do
       true ->
         true
+
       false ->
         Logger.info("Verification failed, retrying in #{delay} seconds...")
         :timer.sleep(:timer.seconds(delay))

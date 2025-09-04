@@ -11,6 +11,7 @@ defmodule ZkArcade.EthPrice do
     case init_fallback_price() do
       {:ok, fallback_price} ->
         Agent.start_link(fn -> fallback_price end, name: __MODULE__)
+
       {:error, reason} ->
         Logger.error("Failed to initialize ETH price fallback: #{reason}")
         {:error, "Cannot start application without valid ETH price"}
@@ -37,10 +38,12 @@ defmodule ZkArcade.EthPrice do
     case fetch_from_coingecko() do
       {:ok, price} ->
         {:ok, price}
+
       {:error, _reason} ->
         case fetch_from_cryptoprices() do
           {:ok, price} ->
             {:ok, price}
+
           {:error, reason} ->
             {:error, reason}
         end
@@ -48,7 +51,7 @@ defmodule ZkArcade.EthPrice do
   end
 
   defp get_fallback_price do
-    Agent.get(__MODULE__, &(&1))
+    Agent.get(__MODULE__, & &1)
   end
 
   def get_eth_price_usd do
@@ -95,6 +98,7 @@ defmodule ZkArcade.EthPrice do
           {:ok, price} ->
             Logger.info("Successfully fetched ETH price from CoinGecko: #{price}")
             {:ok, price}
+
           {:error, reason} ->
             Logger.error("Failed to parse CoinGecko response: #{reason}")
             {:error, reason}
@@ -117,6 +121,7 @@ defmodule ZkArcade.EthPrice do
           {:ok, price} ->
             Logger.info("Successfully fetched ETH price from cryptoprices: #{price}")
             {:ok, price}
+
           {:error, reason} ->
             Logger.error("Failed to parse cryptoprices response: #{reason}")
             {:error, reason}
@@ -131,7 +136,6 @@ defmodule ZkArcade.EthPrice do
         {:error, "Cryptoprices request failed: #{reason}"}
     end
   end
-
 
   defp parse_coingecko_response(body) do
     case Jason.decode(body) do
@@ -151,6 +155,7 @@ defmodule ZkArcade.EthPrice do
     |> case do
       {price, ""} when is_float(price) and price > 0 ->
         {:ok, price}
+
       _ ->
         {:error, "Invalid price format from cryptoprices API"}
     end

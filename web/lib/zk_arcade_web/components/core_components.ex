@@ -706,6 +706,19 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
+  attr :pagination, :map, default: nil
+  attr :show_pagination, :boolean, default: false
+  def history_section(assigns) do
+    ~H"""
+      <%= if @show_pagination && @pagination do %>
+        <div class="mt-8">
+          <.pagination_controls pagination={@pagination} base_path="/history" />
+          <.pagination_info pagination={@pagination} paginated_item_name={"proofs"} />
+        </div>
+      <% end %>
+    """
+  end
+
   attr :users, :list, required: true
   attr :current_wallet, :string, default: nil
   attr :user_data, :map, default: nil

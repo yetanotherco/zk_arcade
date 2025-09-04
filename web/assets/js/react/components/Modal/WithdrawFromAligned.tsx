@@ -145,18 +145,6 @@ export const WithdrawFromAlignedModal = ({
 				</h3>
 				
 				<div className="w-full">
-					<div className="flex justify-between items-center mb-2">
-						<span className="text-sm">
-							Available balance: {Number(availableBalance).toFixed(6)} ETH
-						</span>
-						<Button
-							variant="contrast"
-							className="text-sm px-2 py-1"
-							onClick={handleMaxClick}
-						>
-							Max
-						</Button>
-					</div>
 					<div className="mb-4 p-3 rounded">
 						{unlockBlockTime === 0 && (
 							<div className="text-sm">
@@ -230,6 +218,19 @@ export const WithdrawFromAlignedModal = ({
 						)}{" "}
 						USD
 					</p>
+
+					<div className="flex justify-between items-center mb-2">
+						<span className="text-sm">
+							Balance: {Number(availableBalance).toFixed(6)} ETH
+						</span>
+						<Button
+							variant="contrast"
+							className="text-sm px-2 py-1"
+							onClick={handleMaxClick}
+						>
+							Max
+						</Button>
+					</div>
 					
 					{Number(withdrawValue) > maxWithdrawAmount && (
 						<p className="mt-1 text-red-500 text-sm">

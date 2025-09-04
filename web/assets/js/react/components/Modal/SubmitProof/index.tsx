@@ -231,10 +231,14 @@ export const SubmitProofModal = ({
 			setDepositStatus("success");
 		}
 
-		if (nftBalance.data || 0 > 0) {
-			setClaimNftStatus("success");
+		if (step === "claim-nft") {
+			if (nftBalance.data || 0 > 0) {
+				setClaimNftStatus("success");
+			} else {
+				setClaimNftStatus("warn");
+			}
 		} else {
-			setClaimNftStatus("warn");
+			setClaimNftStatus("success");
 		}
 
 		if ((step === "deposit" || step === "submit") && !proof) {

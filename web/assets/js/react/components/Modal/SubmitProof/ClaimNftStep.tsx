@@ -133,14 +133,14 @@ export const ClaimNft: React.FC<Props> = ({
 				pass.
 			</p>
 
+			{(status === "eligible" || status === "claiming") && (
+				<p className="bg-accent-100/20 rounded p-2 text-accent-100">
+					Your wallet is eligible to claim this NFT and participate.
+				</p>
+			)}
 			{status === "ineligible" && (
 				<p className="bg-red/20 rounded p-2 text-red">
 					Your wallet isn't eligible to claim this NFT.
-				</p>
-			)}
-			{status === "claimed" && (
-				<p className="bg-green/20 rounded p-2 text-green">
-					Your NFT was claimed successfully.
 				</p>
 			)}
 			{status === "error" && (

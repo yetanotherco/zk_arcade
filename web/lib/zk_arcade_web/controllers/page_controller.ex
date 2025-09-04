@@ -57,6 +57,24 @@ defmodule ZkArcadeWeb.PageController do
     {proofs, beast_submissions_json}
   end
 
+  defp build_redirect_url(conn, message) do
+    referer = get_req_header(conn, "referer") |> List.first() || "/"
+    uri = URI.parse(referer)
+
+    query_params =
+      case uri.query do
+        nil -> %{}
+        q -> URI.decode_query(q)
+      end
+
+    new_query =
+      query_params
+      |> Map.put("message", message)
+      |> URI.encode_query()
+
+    uri.path <> "?" <> new_query
+  end
+
   def home(conn, _params) do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
@@ -277,47 +295,51 @@ The goal of the game is to make each number on the board equal.
   end
 
   def history(conn, params) do
-    wallet = get_wallet_from_session(conn)
+    case get_wallet_from_session(conn) do
+      nil -> conn |> redirect(to: build_redirect_url(conn, "user-not-connected"))
+      wallet ->
+        wallet = get_wallet_from_session(conn)
 
-    entries_per_page = 5
+        entries_per_page = 5
 
-    page = String.to_integer(params["page"] || "1")
-    offset = (page - 1) * entries_per_page
+        page = String.to_integer(params["page"] || "1")
+        offset = (page - 1) * entries_per_page
 
-    total_proofs = ZkArcade.Proofs.get_total_proofs_by_address(wallet)
+        total_proofs = ZkArcade.Proofs.get_total_proofs_by_address(wallet)
 
-    total_pages = ceil(total_proofs / entries_per_page)
-    has_prev = page > 1
-    has_next = page < total_pages
+        total_pages = ceil(total_proofs / entries_per_page)
+        has_prev = page > 1
+        has_next = page < total_pages
 
-    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, page, entries_per_page)
+        {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, page, entries_per_page)
 
-    {username, position} = get_username_and_position(wallet)
+      {username, position} = get_username_and_position(wallet)
 
-    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
-    batcher_url = Application.get_env(:zk_arcade, :batcher_url)
+      explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+      batcher_url = Application.get_env(:zk_arcade, :batcher_url)
 
-    conn
-    |> assign(:wallet, wallet)
-    |> assign(:network, Application.get_env(:zk_arcade, :network))
-    |> assign(:proofs_sent_total, length(proofs))
-    |> assign(:submitted_proofs, Jason.encode!(proofs))
-    |> assign(:beast_submissions, beast_submissions_json)
-    |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
-    |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
-    |> assign(:username, username)
-    |> assign(:user_position, position)
-    |> assign(:explorer_url, explorer_url)
-    |> assign(:batcher_url, batcher_url)
-    |> assign(:pagination, %{
-      current_page: page,
-      total_pages: total_pages,
-      has_prev: has_prev,
-      has_next: has_next,
-      total_users: total_proofs,
-      items_per_page: entries_per_page
-    })
-    |> render(:history)
+      conn
+      |> assign(:wallet, wallet)
+      |> assign(:network, Application.get_env(:zk_arcade, :network))
+      |> assign(:proofs_sent_total, length(proofs))
+      |> assign(:submitted_proofs, Jason.encode!(proofs))
+      |> assign(:beast_submissions, beast_submissions_json)
+      |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
+      |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
+      |> assign(:username, username)
+      |> assign(:user_position, position)
+      |> assign(:explorer_url, explorer_url)
+      |> assign(:batcher_url, batcher_url)
+      |> assign(:pagination, %{
+        current_page: page,
+        total_pages: total_pages,
+        has_prev: has_prev,
+        has_next: has_next,
+        total_users: total_proofs,
+        items_per_page: entries_per_page
+      })
+      |> render(:history)
+    end
   end
 
   def leaderboard(conn, params) do

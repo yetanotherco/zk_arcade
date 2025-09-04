@@ -313,32 +313,32 @@ The goal of the game is to make each number on the board equal.
 
         {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, page, entries_per_page)
 
-      {username, position} = get_username_and_position(wallet)
+        {username, position} = get_username_and_position(wallet)
 
-      explorer_url = Application.get_env(:zk_arcade, :explorer_url)
-      batcher_url = Application.get_env(:zk_arcade, :batcher_url)
+        explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+        batcher_url = Application.get_env(:zk_arcade, :batcher_url)
 
-      conn
-      |> assign(:wallet, wallet)
-      |> assign(:network, Application.get_env(:zk_arcade, :network))
-      |> assign(:proofs_sent_total, length(proofs))
-      |> assign(:submitted_proofs, Jason.encode!(proofs))
-      |> assign(:beast_submissions, beast_submissions_json)
-      |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
-      |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
-      |> assign(:username, username)
-      |> assign(:user_position, position)
-      |> assign(:explorer_url, explorer_url)
-      |> assign(:batcher_url, batcher_url)
-      |> assign(:pagination, %{
-        current_page: page,
-        total_pages: total_pages,
-        has_prev: has_prev,
-        has_next: has_next,
-        total_users: total_proofs,
-        items_per_page: entries_per_page
-      })
-      |> render(:history)
+        conn
+        |> assign(:wallet, wallet)
+        |> assign(:network, Application.get_env(:zk_arcade, :network))
+        |> assign(:proofs_sent_total, length(proofs))
+        |> assign(:submitted_proofs, Jason.encode!(proofs))
+        |> assign(:beast_submissions, beast_submissions_json)
+        |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
+        |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
+        |> assign(:username, username)
+        |> assign(:user_position, position)
+        |> assign(:explorer_url, explorer_url)
+        |> assign(:batcher_url, batcher_url)
+        |> assign(:pagination, %{
+          current_page: page,
+          total_pages: total_pages,
+          has_prev: has_prev,
+          has_next: has_next,
+          total_users: total_proofs,
+          items_per_page: entries_per_page
+        })
+        |> render(:history)
     end
   end
 

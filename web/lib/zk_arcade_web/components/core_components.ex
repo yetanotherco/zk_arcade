@@ -633,12 +633,12 @@ defmodule ZkArcadeWeb.CoreComponents do
   end
 
   attr :pagination, :map, required: true
-  attr :items_per_page, :integer, default: 10
+  attr :paginated_item_name, :string, default: "users"
   def pagination_info(assigns) do
     ~H"""
     <div class="text-center mt-4 text-text-200">
-      Showing <%= (@pagination.current_page - 1) * @items_per_page + 1 %>-<%= min(@pagination.current_page * @items_per_page, @pagination.total_users) %>
-      of <%= @pagination.total_users %> users
+      Showing <%= (@pagination.current_page - 1) * @pagination.items_per_page + 1 %>-<%= min(@pagination.current_page * @pagination.items_per_page, @pagination.total_users) %>
+      of <%= @pagination.total_users %> <%= @paginated_item_name %>
     </div>
     """
   end

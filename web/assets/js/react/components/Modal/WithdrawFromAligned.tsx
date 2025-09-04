@@ -145,21 +145,32 @@ export const WithdrawFromAlignedModal = ({
 				</h3>
 				
 				<div className="w-full">
-					<div className="mb-4 p-3 rounded">
+					<div className="mb-4 p-3 rounded flex justify-center">
 						{unlockBlockTime === 0 && (
 							<div className="text-sm">
-								<p className="mb-2">
-									Funds are locked. You need to unlock them first and wait 1 hour before withdrawing.
-								</p>
-								<Button
-									variant="text-accent"
-									onClick={handleUnlock}
-									isLoading={unlockFunds.receipt.isLoading}
-									disabled={maxWithdrawAmount === 0}
-									className="w-full"
-								>
-									{(Number(availableBalance) === 0) ? "No funds available" : "Unlock Funds"}
-								</Button>
+								<div className="flex items-center gap-4">
+									<Button
+										variant="text-accent"
+										onClick={handleUnlock}
+										isLoading={unlockFunds.receipt.isLoading}
+										disabled={maxWithdrawAmount === 0}
+										className=""
+									>
+										{(Number(availableBalance) === 0) ? "No funds available" : "Unlock Funds"}
+									</Button>
+
+									<div className="relative group">
+										<span className="text-accent-200 text-sm underline cursor-help">
+											Why?
+										</span>
+										<div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block">
+											<div className="bg-accent-200 text-black text-xs rounded py-2 px-3 whitespace-nowrap shadow-lg">
+											Funds are locked. You need to unlock them first and wait 1 hour before withdrawing.
+											<div className="absolute top-full left-1/2 transform -translate-x-1/2"></div>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						)}
 						

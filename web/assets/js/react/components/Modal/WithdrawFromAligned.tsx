@@ -224,7 +224,7 @@ export const WithdrawFromAlignedModal = ({
 							Balance: {Number(availableBalance).toFixed(6)} ETH
 						</span>
 						<Button
-							variant="contrast"
+							variant="text"
 							className="text-sm px-2 py-1"
 							onClick={handleMaxClick}
 						>

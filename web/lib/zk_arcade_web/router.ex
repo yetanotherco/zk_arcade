@@ -36,6 +36,7 @@ defmodule ZkArcadeWeb.Router do
     get "/api/wallet/:address/agreement-status", ApiController, :check_agreement_status
     get "/api/ethprice", ApiController, :get_eth_price
     get "/api/nft/proof", ApiController, :get_nft_claim_merkle_proof
+    get "/api/nft/eligibility", ApiController, :get_nft_eligibility
   end
 
   # Enable LiveDashboard in development

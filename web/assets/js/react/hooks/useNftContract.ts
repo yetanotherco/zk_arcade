@@ -65,12 +65,22 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
 	const claimNft = useCallback(async () => {
-		if (!userAddress) throw new Error("Wallet not connected");
+		if (!userAddress) {
+			addToast({
+				title: "Wallet not connected",
+				desc: "Please connect your wallet to continue.",
+				type: "error",
+			});
+			throw new Error("Wallet not connected");
+		}
 
-		// TODO: fetch merkle proof from server
 		const res = await fetchMerkleProofForAddress(userAddress);
 		if (!res) {
-			// TODO: show error
+			addToast({
+				title: "Eligibility check failed",
+				desc: "We couldn’t fetch your eligibility proof. Please try again.",
+				type: "error",
+			});
 			return;
 		}
 

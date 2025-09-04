@@ -48,21 +48,39 @@ defmodule ZkArcadeWeb.ApiController do
     end
   end
 
-  def get_nft_claim_merkle_proof(conn, %{"address" => address}) do
-    merkle_proof = case get_merkle_proof(address) do
-        {:ok, proof} ->
-          proof
-        {:error, :proof_not_found} ->
-          []
-      end
+  def get_nft_eligibility(conn, %{"address" => address}) do
+    case query_eligibility(address) do
+      {:ok, eligible} ->
+        conn |> json(%{eligible: eligible})
+      {:error, _} ->
+         conn
+          |> put_status(:internal_server_error)
+          |> json(%{error: "Failed to fetch eligibility"})
+    end
+  end
 
-     case merkle_proof do
+  defp query_eligibility(wallet_address) do
+    case get_merkle_proof(wallet_address) do
+      {:ok, _proof} ->
+        {:ok, true}
+
+      {:error, :proof_not_found} ->
+        {:ok, false}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+
+  def get_nft_claim_merkle_proof(conn, %{"address" => address}) do
+    case get_merkle_proof(address) do
       {:ok, proof} ->
         conn |> json(%{merkle_proof: proof, tokenURI: ""})
       {:error, _} ->
          conn
           |> put_status(:internal_server_error)
-          |> json(%{error: "Failed to fetch ETH price"})
+          |> json(%{error: "Failed to fetch merkle proof"})
     end
   end
 

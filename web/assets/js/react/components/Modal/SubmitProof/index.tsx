@@ -122,7 +122,14 @@ export const SubmitProofModal = ({
 	}, [balance.data, nftBalance.data, proofStatus]);
 
 	const goToNextStep = useCallback(() => {
-		if (step === "claim-nft") setStep("deposit");
+		if (step === "claim-nft") {
+			setClaimNftStatus("success");
+			if (Number(formatEther(balance.data || BigInt(0))) >= 0.001) {
+				setStep("submit");
+			} else {
+				setStep("deposit");
+			}
+		}
 		if (step === "deposit") setStep("submit");
 		if (step === "submit") setStep("claim");
 	}, [step, setStep]);
@@ -169,7 +176,14 @@ export const SubmitProofModal = ({
 	const modalBasedOnStep: {
 		[key in SubmitProofModalSteps]: () => React.ReactNode;
 	} = {
-		"claim-nft": () => <ClaimNft />,
+		"claim-nft": () => (
+			<ClaimNft
+				nft_contract_address={nft_contract_address}
+				user_address={user_address}
+				setOpen={modal.setOpen}
+				updateState={goToNextStep}
+			/>
+		),
 		deposit: () => (
 			<DepositStep
 				payment_service_address={payment_service_address}

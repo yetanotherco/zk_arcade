@@ -711,7 +711,7 @@ defmodule ZkArcadeWeb.CoreComponents do
   def history_section(assigns) do
     ~H"""
       <%= if @show_pagination && @pagination do %>
-        <div class="mt-8">
+        <div>
           <.pagination_controls pagination={@pagination} base_path="/history" />
           <.pagination_info pagination={@pagination} paginated_item_name={"proofs"} />
         </div>

@@ -139,7 +139,7 @@ export const WithdrawFromAlignedModal = ({
 
 	return (
 		<Modal maxWidth={500} open={open} setOpen={setOpen}>
-			<div className="bg-contrast-100 w-full p-10 rounded flex flex-col items-center gap-6">
+			<div className="bg-contrast-100 w-full p-10 py-12 rounded flex flex-col items-center gap-3">
 				<h3 className="text-md font-bold mb-2">
 					Withdraw from Aligned Batcher
 				</h3>

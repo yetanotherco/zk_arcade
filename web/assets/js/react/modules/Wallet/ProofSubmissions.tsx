@@ -71,7 +71,7 @@ type Props = {
 	leaderboard_address: Address;
 	user_address: Address;
 	payment_service_address: Address;
-	ntf_contract_address: Address;
+	nft_contract_address: Address;
 	explorer_url: string;
 	batcher_url: string;
 };
@@ -81,7 +81,7 @@ export const ProofSubmissions = ({
 	batcher_url,
 	explorer_url,
 	leaderboard_address,
-	ntf_contract_address,
+	nft_contract_address,
 	user_address,
 	payment_service_address,
 }: Props) => {
@@ -132,7 +132,7 @@ export const ProofSubmissions = ({
 											}
 											user_address={user_address}
 											nft_contract_address={
-												ntf_contract_address
+												nft_contract_address
 											}
 										/>
 									);

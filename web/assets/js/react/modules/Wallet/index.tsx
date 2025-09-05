@@ -98,6 +98,7 @@ const WalletContent = ({
 					user_position={user_position}
 					explorer_url={explorer_url}
 					batcher_url={batcher_url}
+					nft_contract_address={nft_contract_address}
 				/>
 			</div>
 		);

@@ -60,6 +60,15 @@ defmodule ZkArcadeWeb.CoreComponents do
         </div>
 
         <div class="flex gap-6 items-center">
+          <x-app-submit-proof
+              network={@network}
+              payment_service_address={@payment_service_address}
+              user_address={@wallet}
+              batcher_url={@batcher_url}
+              leaderboard_address={@leaderboard_address}
+              beast_submissions={@beast_submissions}
+          />
+
           <x-app-user-wallet
               network={@network}
               payment_service_address={@payment_service_address}

@@ -27,7 +27,6 @@ const SubmitModal = ({
 	beast_submissions,
 	nft_contract_address,
 }: Omit<Props, "network">) => {
-	const { open, setOpen, toggleOpen } = useModal();
 	const { open: currentProofOpen, setOpen: currentProofSetOpen } = useModal();
 
 	const [currentProof, setCurrentProof] = useState<ProofSubmission | null>(
@@ -54,20 +53,6 @@ const SubmitModal = ({
 	if (!user_address) return null;
 	return (
 		<>
-			<Button variant="icon" onClick={toggleOpen}>
-				<span className="hero-plus h-[20px] w-[20px]"></span>
-			</Button>
-			<SubmitProofModal
-				modal={{ open, setOpen }}
-				batcher_url={batcher_url}
-				leaderboard_address={leaderboard_address}
-				payment_service_address={payment_service_address}
-				nft_contract_address={nft_contract_address}
-				user_address={user_address}
-				userBeastSubmissions={JSON.parse(beast_submissions)}
-				proofToSubmitData={null}
-				gameName="beast"
-			/>
 			{currentProof && (
 				<SubmitProofModal
 					modal={{

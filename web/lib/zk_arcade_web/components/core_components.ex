@@ -588,14 +588,14 @@ defmodule ZkArcadeWeb.CoreComponents do
     ~H"""
     <div class="flex gap-x-2 items-center justify-center min-w-full">
       <%= if @pagination.current_page >= 2 do %>
-        <.link href={"/leaderboard?page=#{1}"}>
+        <.link href={"#{@base_path}?page=#{1}"}>
           <.button>
             First
           </.button>
         </.link>
       <% end %>
       <%= if @pagination.current_page > 1 do %>
-        <.link href={"/leaderboard?page=#{@pagination.current_page - 1}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.current_page - 1}"}>
           <.button>
             <.icon
               name="hero-arrow-left-solid"
@@ -614,7 +614,7 @@ defmodule ZkArcadeWeb.CoreComponents do
         />
       </form>
       <%= if @pagination.current_page != @pagination.total_pages do %>
-        <.link href={"/leaderboard?page=#{@pagination.current_page + 1}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.current_page + 1}"}>
           <.button>
             <.icon
               name="hero-arrow-right-solid"
@@ -622,7 +622,7 @@ defmodule ZkArcadeWeb.CoreComponents do
             />
           </.button>
         </.link>
-        <.link href={"/leaderboard?page=#{@pagination.total_pages}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.total_pages}"}>
           <.button>
             Last
           </.button>
@@ -633,12 +633,12 @@ defmodule ZkArcadeWeb.CoreComponents do
   end
 
   attr :pagination, :map, required: true
-  attr :items_per_page, :integer, default: 10
+  attr :paginated_item_name, :string, default: "users"
   def pagination_info(assigns) do
     ~H"""
     <div class="text-center mt-4 text-text-200">
-      Showing <%= (@pagination.current_page - 1) * @items_per_page + 1 %>-<%= min(@pagination.current_page * @items_per_page, @pagination.total_users) %>
-      of <%= @pagination.total_users %> users
+      Showing <%= (@pagination.current_page - 1) * @pagination.items_per_page + 1 %>-<%= min(@pagination.current_page * @pagination.items_per_page, @pagination.total_users) %>
+      of <%= @pagination.total_users %> <%= @paginated_item_name %>
     </div>
     """
   end
@@ -703,6 +703,19 @@ defmodule ZkArcadeWeb.CoreComponents do
     <% else %>
       <p class="text-text-200 text-md">No users found in the leaderboard.</p>
     <% end %>
+    """
+  end
+
+  attr :pagination, :map, default: nil
+  attr :show_pagination, :boolean, default: false
+  def history_section(assigns) do
+    ~H"""
+      <%= if @show_pagination && @pagination do %>
+        <div>
+          <.pagination_controls pagination={@pagination} base_path="/history" />
+          <.pagination_info pagination={@pagination} paginated_item_name={"proofs"} />
+        </div>
+      <% end %>
     """
   end
 

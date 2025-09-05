@@ -8,7 +8,6 @@ defmodule ZkArcade.MerklePaths.MerklePath do
     field :address, :string
     field :merkle_proof, {:array, :string}
     field :merkle_root_index, :integer
-    timestamps()
   end
 
   def changeset(merkle_path, attrs) do

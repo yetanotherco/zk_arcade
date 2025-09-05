@@ -45,12 +45,8 @@ defmodule ZkArcade.MerklePaths do
   end
 
   def get_merkle_proof_for_address(address) do
-    query = from(mp in MerklePath,
-      where: mp.address == ^address,
-      order_by: [desc: mp.id],
-      limit: 1
-    )
-    Logger.info("Querying last Merkle proof for address: #{address} with query: #{inspect(query)}")
+    query = from(mp in MerklePath, where: mp.address == ^address)
+    Logger.info("Querying Merkle proof for address: #{address} with query: #{inspect(query)}")
 
     case Repo.one(query) do
       nil -> {:error, :proof_not_found}

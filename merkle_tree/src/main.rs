@@ -3,7 +3,6 @@ use merkle_tree_rs::standard::{LeafType, StandardMerkleTree};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, postgres::PgPoolOptions};
 use std::{env, fs};
-use chrono::{NaiveDateTime, Utc};
 
 #[derive(Deserialize)]
 struct WhitelistWrapper {
@@ -95,19 +94,13 @@ async fn main() {
         .await
         .expect("Failed to connect to the database!");
 
-    let mut query_builder = sqlx::QueryBuilder::<Postgres>::new(
-        "INSERT INTO merkle_paths (id, address, merkle_proof, merkle_root_index, inserted_at, updated_at)"
-    );
-
-    let now: NaiveDateTime = Utc::now().naive_utc();
-
+    let mut query_builder =
+        sqlx::QueryBuilder::<Postgres>::new("INSERT INTO merkle_paths (id, address, merkle_proof, merkle_root_index)");
     query_builder.push_values(out.proofs.iter(), |mut b, ProofEntry { address, proof }| {
         b.push_bind(uuid::Uuid::new_v4())
             .push_bind(address)
             .push_bind(proof)
-            .push_bind(merkle_root_index)
-            .push_bind(now)
-            .push_bind(now);
+            .push_bind(merkle_root_index);
     });
     let _result = query_builder.build().execute(&pool).await.unwrap();
     println!("Data successfully inserted into database!");

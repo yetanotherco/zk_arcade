@@ -79,6 +79,23 @@ fn is_board_valid(board: &[u8], movements: u8) -> bool {
     !(max_val - min_val > movements)
 }
 
+fn calculate_movements_for_level(
+    level_index: u8,
+    total_levels: u8,
+    min_movements: u8,
+    max_movements: u8,
+) -> u8 {
+    if total_levels <= 1 {
+        return min_movements;
+    }
+
+    let movement_range = max_movements - min_movements;
+    let progression_step = movement_range as f32 / (total_levels - 1) as f32;
+    let level_movements = min_movements as f32 + (level_index as f32 * progression_step);
+    
+    level_movements.round() as u8
+}
+
 fn gen_levels(
     num_levels: u8,
     min_end_of_level: u8,
@@ -102,7 +119,7 @@ fn gen_levels(
         let mut solution: Vec<Movement> = vec![];
         board[selected as usize] = board[selected as usize].saturating_sub(1);
 
-        let moves = random_number_between(min_movements, max_movements);
+        let moves = calculate_movements_for_level(i, num_levels, min_movements, max_movements);
 
         for j in 0..moves {
             let mut roll = -1;

@@ -24,6 +24,14 @@ export const useProofSentMessageReader = () => {
 			});
 		}
 
+		if (message == "user-not-connected") {
+			addToast({
+				title: "User not connected",
+				desc: "You must be connected to a wallet to view your profile.",
+				type: "error",
+			});
+		}
+
 		// Remove the message param from the URL without reloading the page
 		// this prevents showing the message again when the user refreshes the page
 		if (message) {

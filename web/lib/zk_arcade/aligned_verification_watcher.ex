@@ -78,7 +78,7 @@ defmodule ZkArcade.AlignedVerificationWatcher do
     end
   end
 
-  defp retry_with_backoff(fun, []), do: false
+  defp retry_with_backoff(_fun, []), do: false
   defp retry_with_backoff(fun, [delay | rest]) do
     case fun.() do
       true ->

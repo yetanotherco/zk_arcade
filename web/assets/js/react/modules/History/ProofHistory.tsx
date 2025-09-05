@@ -43,6 +43,8 @@ const Entry = ({
 }) => {
 	const { open, setOpen, toggleOpen } = useModal();
 
+	const levelsNumber = proof.game === "Beast" ? 8 : 3;
+
 	return (
 		<>
 			<tr
@@ -55,7 +57,7 @@ const Entry = ({
 						className="group/tooltip flex flex-row gap-0.5 items-center"
 						style={{ maxWidth: 50 }}
 					>
-						{[...Array(8)].map((_, index) => {
+						{[...Array(levelsNumber)].map((_, index) => {
 							return (
 								<div
 									key={index}
@@ -63,7 +65,7 @@ const Entry = ({
 									w-full h-[10px] mb-2
 									${index < proof.level_reached ? "bg-accent-100" : "bg-contrast-100"}
 									${index === 0 ? "rounded-l-[3px]" : ""}
-									${index === 7 ? "rounded-r-[3px]" : ""}
+									${index === levelsNumber - 1 ? "rounded-r-[3px]" : ""}
 									`}
 								></div>
 							);

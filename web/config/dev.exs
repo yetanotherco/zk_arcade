@@ -82,8 +82,8 @@ config :phoenix_live_view,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
 
-config :zk_arcade, :payment_service_address, "0x7969c5ed335650692bc04293b07f5bf2e7a673c0"
-config :zk_arcade, :service_manager_address, "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
+config :zk_arcade, :payment_service_address, "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+config :zk_arcade, :service_manager_address, "0x851356ae760d987E095750cCeb3bC6014560891C"
 # Deploy the contract with `make deploy_contract NETWORK=devnet` and put the address here
 config :zk_arcade, :leaderboard_address, "0x4C2F7092C2aE51D986bEFEe378e50BD4dB99C901"
 config :ethereumex,
@@ -101,5 +101,5 @@ config :zk_arcade, :feedback_form_url, "http://localhost:4000/batches"
 
 config :zk_arcade, :beast_windows_download_url, "https://github.com/yetanotherco/zk_arcade/releases/download/v0.3.0/beast.exe"
 
-config :zk_arcade, :nft_contract_address, "0x5c74c94173F05dA1720953407cbb920F3DF9f887"
+config :zk_arcade, :nft_contract_address, "0x51A1ceB83B83F1985a81C295d1fF28Afef186E02"
 config :zk_arcade, :nft_token_uri, "<NFT_TOKEN_URI>"

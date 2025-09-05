@@ -102,7 +102,7 @@ export const useParityControls = ({
 
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [size]);
+	}, [size, userPositions.length, levelBoards.length]);
 
 	return {
 		values,

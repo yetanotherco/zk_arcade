@@ -30,6 +30,11 @@ export const HowItWorksModal = () => {
 				"Link your crypto wallet to start playing. This ensures your rewards and transactions are tied securely to your account.",
 		},
 		{
+			title: "Check eligibility",
+			description:
+				"Start by minting a special NFT to participate. Important: only eligible addresses can mint.",
+		},
+		{
 			title: "Deposit money on Aligned",
 			description:
 				"Add funds to Aligned so you can submit and verify your proofs.",

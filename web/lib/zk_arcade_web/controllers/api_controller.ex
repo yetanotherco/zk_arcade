@@ -60,7 +60,7 @@ defmodule ZkArcadeWeb.ApiController do
   end
 
   defp query_eligibility(wallet_address) do
-    case get_merkle_proof(wallet_address) do
+    case ZkArcade.MerklePaths.get_merkle_proof_for_address(wallet_address) do
       {:ok, _proof} ->
         {:ok, true}
 
@@ -74,33 +74,13 @@ defmodule ZkArcadeWeb.ApiController do
 
 
   def get_nft_claim_merkle_proof(conn, %{"address" => address}) do
-    case get_merkle_proof(address) do
+    case ZkArcade.MerklePaths.get_merkle_proof_for_address(address) do
       {:ok, proof} ->
         conn |> json(%{merkle_proof: proof, tokenURI: ""})
       {:error, _} ->
          conn
           |> put_status(:internal_server_error)
           |> json(%{error: "Failed to fetch merkle proof"})
-    end
-  end
-
-  defp get_merkle_proof(wallet_address) do
-    file =
-      :zk_arcade
-      |> :code.priv_dir()
-      |> to_string()
-      |> Path.join("merkle/merkle_proofs.json")
-
-    with {:ok, bin} <- File.read(file),
-        {:ok, proofs} when is_list(proofs) <- Jason.decode(bin),
-        norm <- String.downcase(wallet_address),
-        %{"proof" => proof} <- Enum.find(proofs, fn %{"address" => a} ->
-          String.downcase(a) == norm
-        end) do
-      {:ok, proof}
-    else
-      {:error, _} = err -> err
-      _ -> {:error, :proof_not_found}
     end
   end
 end

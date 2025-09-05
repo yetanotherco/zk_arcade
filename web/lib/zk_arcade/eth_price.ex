@@ -70,9 +70,10 @@ defmodule ZkArcade.EthPrice do
                 {:ok, price}
 
               {:error, reason} ->
-                # Both APIs failed, return fallback price from Agent
+                # Both APIs failed, log the error and return fallback price from Agent
+                Logger.error("Cryptoprices API also failed: #{reason}")
                 fallback_price = get_fallback_price()
-                Logger.warn("Both API sources failed, using fallback price: #{fallback_price}")
+                Logger.warning("Both API sources failed, using fallback price: #{fallback_price}")
                 {:ok, fallback_price}
             end
         end

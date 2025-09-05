@@ -142,7 +142,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-    def section_header(%{header: header, subtitle: subtitle} = assigns) do
+    def section_header(%{subtitle: _subtitle} = assigns) do
     ~H"""
       <div class="mb-10 size-fit">
         <h2 class="font-normal text-2xl size-fit" style="padding-right: 60px"><%= @header %></h2>
@@ -152,7 +152,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def section_header(%{header: header} = assigns) do
+  def section_header(assigns) do
     ~H"""
       <div class="mb-10 size-fit">
         <h2 class="mb-2 font-normal text-2xl size-fit" style="padding-right: 60px"><%= @header %></h2>
@@ -161,7 +161,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def home_game_component(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
+  def home_game_component(assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
       <div class="w-full sm:max-w-280">
@@ -177,7 +177,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def games_game_component(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
+  def games_game_component(assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
       <div class="w-full opacity-75 sm:max-w-280">
@@ -311,7 +311,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def step_component(%{number: number, title: title, desc: desc, show_line: show_line} = assigns) do
+  def step_component(assigns) do
     ~H"""
     <div class="w-full">
 
@@ -343,7 +343,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def home_game_component_hero(%{title: title, desc: desc, img: img, link: link, tags: tags, disabled: disabled} = assigns) do
+  def home_game_component_hero(assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
       <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
@@ -378,22 +378,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
-  def step_component(%{number: number, title: title, desc: desc, show_line: show_line} = assigns) do
-    ~H"""
-    <div class="w-full">
-
-      <div class="flex flex-col w-full justify-center items-center">
-        <div class="mb-2 h-[100px] w-[100px] rounded-full bg-accent-100/20 border border-accent-100 flex items-center justify-center">
-          <p class="text-2xl text-text-100"><%= @number %></p>
-        </div>
-        <h3 class="text-text-100 text-xl"><%= @title %></h3>
-        <p class="text-text-200 text-md text-center" style="min-width: 220px;"><%= @desc %></p>
-      </div>
-    </div>
-    """
-  end
-
-  def home_statistic(%{label: label, value: value, desc: desc} = assigns) do
+  def home_statistic(assigns) do
     ~H"""
       <div class="bg-contrast-300 p-2 flex flex-col justify-between rounded h-full w-full">
         <div>
@@ -551,13 +536,13 @@ defmodule ZkArcadeWeb.CoreComponents do
         <:col :let={user} label={if @show_labels, do: "Position", else: ""}>
           <%= user.position %>
           <%= case user.position do %>
-            <%= 1 -> %>
+            <% 1 -> %>
             <.icon name="hero-trophy" color="#FFD700" class="" />
-            <%= 2 -> %>
+            <% 2 -> %>
             <.icon name="hero-trophy" color="#6a697a" class="" />
-            <%= 3 -> %>
+            <% 3 -> %>
             <.icon name="hero-trophy" color="#b36839" class="" />
-            <%= _ ->  %>
+            <% _ ->  %>
           <% end %>
         </:col>
         <:col :let={user} label={if @show_labels, do: "Username", else: ""}>
@@ -589,14 +574,14 @@ defmodule ZkArcadeWeb.CoreComponents do
     ~H"""
     <div class="flex gap-x-2 items-center justify-center min-w-full">
       <%= if @pagination.current_page >= 2 do %>
-        <.link href={"/leaderboard?page=#{1}"}>
+        <.link href={"#{@base_path}?page=#{1}"}>
           <.button>
             First
           </.button>
         </.link>
       <% end %>
       <%= if @pagination.current_page > 1 do %>
-        <.link href={"/leaderboard?page=#{@pagination.current_page - 1}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.current_page - 1}"}>
           <.button>
             <.icon
               name="hero-arrow-left-solid"
@@ -615,7 +600,7 @@ defmodule ZkArcadeWeb.CoreComponents do
         />
       </form>
       <%= if @pagination.current_page != @pagination.total_pages do %>
-        <.link href={"/leaderboard?page=#{@pagination.current_page + 1}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.current_page + 1}"}>
           <.button>
             <.icon
               name="hero-arrow-right-solid"
@@ -623,7 +608,7 @@ defmodule ZkArcadeWeb.CoreComponents do
             />
           </.button>
         </.link>
-        <.link href={"/leaderboard?page=#{@pagination.total_pages}"}>
+        <.link href={"#{@base_path}?page=#{@pagination.total_pages}"}>
           <.button>
             Last
           </.button>
@@ -634,12 +619,12 @@ defmodule ZkArcadeWeb.CoreComponents do
   end
 
   attr :pagination, :map, required: true
-  attr :items_per_page, :integer, default: 10
+  attr :paginated_item_name, :string, default: "users"
   def pagination_info(assigns) do
     ~H"""
     <div class="text-center mt-4 text-text-200">
-      Showing <%= (@pagination.current_page - 1) * @items_per_page + 1 %>-<%= min(@pagination.current_page * @items_per_page, @pagination.total_users) %>
-      of <%= @pagination.total_users %> users
+      Showing <%= (@pagination.current_page - 1) * @pagination.items_per_page + 1 %>-<%= min(@pagination.current_page * @pagination.items_per_page, @pagination.total_users) %>
+      of <%= @pagination.total_users %> <%= @paginated_item_name %>
     </div>
     """
   end
@@ -707,6 +692,19 @@ defmodule ZkArcadeWeb.CoreComponents do
     """
   end
 
+  attr :pagination, :map, default: nil
+  attr :show_pagination, :boolean, default: false
+  def history_section(assigns) do
+    ~H"""
+      <%= if @show_pagination && @pagination do %>
+        <div>
+          <.pagination_controls pagination={@pagination} base_path="/history" />
+          <.pagination_info pagination={@pagination} paginated_item_name={"proofs"} />
+        </div>
+      <% end %>
+    """
+  end
+
   attr :users, :list, required: true
   attr :current_wallet, :string, default: nil
   attr :user_data, :map, default: nil
@@ -748,13 +746,13 @@ defmodule ZkArcadeWeb.CoreComponents do
         <:col :let={user} label={if @show_labels, do: "Score", else: ""} class="pr-0 w-20 text-right">
           <%= user.score %>
           <%= case user.position do %>
-            <%= 1 -> %>
+            <% 1 -> %>
             <.icon name="hero-trophy" color="#FFD700" class="" />
-            <%= 2 -> %>
+            <% 2 -> %>
             <.icon name="hero-trophy" color="#6a697a" class="" />
-            <%= 3 -> %>
+            <% 3 -> %>
             <.icon name="hero-trophy" color="#b36839" class="" />
-            <%= _ ->  %>
+            <% _ ->  %>
           <% end %>
         </:col>
       </.table>

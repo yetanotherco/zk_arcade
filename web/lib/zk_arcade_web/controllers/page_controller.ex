@@ -30,7 +30,6 @@ defmodule ZkArcadeWeb.PageController do
       wallet
   end
 
-  defp get_proofs(nil, page, size), do: []
 
   defp get_proofs_and_submissions(address, page, size) do
     proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})
@@ -55,6 +54,24 @@ defmodule ZkArcadeWeb.PageController do
     beast_submissions_json = Jason.encode!(beast_submissions)
 
     {proofs, beast_submissions_json}
+  end
+
+  defp build_redirect_url(conn, message) do
+    referer = get_req_header(conn, "referer") |> List.first() || "/"
+    uri = URI.parse(referer)
+
+    query_params =
+      case uri.query do
+        nil -> %{}
+        q -> URI.decode_query(q)
+      end
+
+    new_query =
+      query_params
+      |> Map.put("message", message)
+      |> URI.encode_query()
+
+    uri.path <> "?" <> new_query
   end
 
   def home(conn, _params) do
@@ -276,29 +293,50 @@ The goal of the game is to make each number on the board equal.
       |> render(:parity_game)
   end
 
-  def history(conn, _params) do
-    wallet = get_wallet_from_session(conn)
-    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 10)
+  def history(conn, params) do
+    case get_wallet_from_session(conn) do
+      nil -> conn |> redirect(to: build_redirect_url(conn, "user-not-connected"))
+      wallet ->
+        entries_per_page = 5
 
-    {username, position} = get_username_and_position(wallet)
+        page = String.to_integer(params["page"] || "1")
 
-    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
-    batcher_url = Application.get_env(:zk_arcade, :batcher_url)
+        total_proofs = ZkArcade.Proofs.get_total_proofs_by_address(wallet)
 
-    conn
-    |> assign(:wallet, wallet)
-    |> assign(:network, Application.get_env(:zk_arcade, :network))
-    |> assign(:proofs_sent_total, length(proofs))
-    |> assign(:submitted_proofs, Jason.encode!(proofs))
-    |> assign(:beast_submissions, beast_submissions_json)
-    |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
-    |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
-    |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
-    |> assign(:username, username)
-    |> assign(:user_position, position)
-    |> assign(:explorer_url, explorer_url)
-    |> assign(:batcher_url, batcher_url)
-    |> render(:history)
+        total_pages = ceil(total_proofs / entries_per_page)
+        has_prev = page > 1
+        has_next = page < total_pages
+
+        {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, page, entries_per_page)
+
+        {username, position} = get_username_and_position(wallet)
+
+        explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+        batcher_url = Application.get_env(:zk_arcade, :batcher_url)
+
+        conn
+        |> assign(:wallet, wallet)
+        |> assign(:network, Application.get_env(:zk_arcade, :network))
+        |> assign(:proofs_sent_total, length(proofs))
+        |> assign(:submitted_proofs, Jason.encode!(proofs))
+        |> assign(:beast_submissions, beast_submissions_json)
+        |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
+        |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+        |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
+        |> assign(:username, username)
+        |> assign(:user_position, position)
+        |> assign(:explorer_url, explorer_url)
+        |> assign(:batcher_url, batcher_url)
+        |> assign(:pagination, %{
+          current_page: page,
+          total_pages: total_pages,
+          has_prev: has_prev,
+          has_next: has_next,
+          total_users: total_proofs,
+          items_per_page: entries_per_page
+        })
+        |> render(:history)
+    end
   end
 
   def leaderboard(conn, params) do
@@ -350,7 +388,8 @@ The goal of the game is to make each number on the board equal.
       total_pages: total_pages,
       has_prev: has_prev,
       has_next: has_next,
-      total_users: total_users
+      total_users: total_users,
+      items_per_page: entries_per_page
     })
     |> render(:leaderboard)
   end

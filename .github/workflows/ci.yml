@@ -1,0 +1,56 @@
+name: Elixir Web Application CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  MIX_ENV: test
+
+jobs:
+  test:
+    name: Test Elixir Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.17.3' # Specify your desired Elixir version
+          otp-version: '27.x'     # Specify your desired Erlang/OTP version
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            web/deps
+            web/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: |
+          cd web
+          mix deps.get
+
+      # - name: Check formatting
+      #   run: |
+      #     cd web
+      #     mix format --check-formatted
+
+      - name: Compile dependencies
+        run: |
+          cd web
+          mix deps.compile
+
+      - name: Compile application (warnings as errors)
+        run: |
+          cd web
+          mix compile --warnings-as-errors
+          

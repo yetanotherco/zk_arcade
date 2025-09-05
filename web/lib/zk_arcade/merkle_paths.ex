@@ -50,7 +50,7 @@ defmodule ZkArcade.MerklePaths do
 
     case Repo.one(query) do
       nil -> {:error, :proof_not_found}
-      merkle_path -> {:ok, merkle_path.merkle_proof}
+      merkle_path -> {:ok, merkle_path.merkle_proof, merkle_path.merkle_root_index}
     end
   end
 end

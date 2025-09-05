@@ -102,7 +102,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 			address: contractAddress,
 			abi: zkArcadeNftAbi,
 			functionName: "claimNFT",
-			args: [merkleProofArray, res.tokenURI],
+			args: [merkleProofArray, res.tokenURI, BigInt(res.merkleRootIndex)],
 			account: userAddress,
 			chainId,
 		});

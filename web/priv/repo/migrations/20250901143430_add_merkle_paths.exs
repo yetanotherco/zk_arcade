@@ -7,8 +7,10 @@ defmodule ZkArcade.Repo.Migrations.AddMerklePaths do
       add :address, :string, null: false
       add :merkle_proof, {:array, :string}, null: false
       add :merkle_root_index, :integer, null: false
+
+      timestamps()
     end
 
-    create unique_index(:merkle_paths, :address, name: :merkle_paths_address_index)
+    create index(:merkle_paths, :address, name: :merkle_paths_address_index)
   end
 end

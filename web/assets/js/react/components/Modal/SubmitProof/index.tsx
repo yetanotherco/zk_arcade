@@ -236,7 +236,8 @@ export const SubmitProofModal = ({
 		}
 
 		if (step === "claim-nft") {
-			if (nftBalance.data || 0 > 0) {
+             // This is true if data exists and is non zero
+			if (nftBalance.data) {
 				setClaimNftStatus("success");
 			} else {
 				setClaimNftStatus("warn");

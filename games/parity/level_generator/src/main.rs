@@ -151,14 +151,6 @@ fn gen_levels(
             // Get the solution
             solution.reverse();
 
-            println!(
-                "Level {}: end {}, moves {}",
-                i + 1,
-                end,
-                moves
-            );
-            println!("Board: {:?}", board);
-
             levels.push(ParityLevel {
                 number: i + 1,
                 board,

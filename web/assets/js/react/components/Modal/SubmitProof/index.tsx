@@ -26,7 +26,7 @@ type Props = {
 	gameName?: string;
 };
 
-type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
+export type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
 
 const BreadCrumb = ({
 	active,
@@ -114,6 +114,7 @@ export const SubmitProofModal = ({
 				return;
 			}
 			if (Number(formatEther(balance.data || BigInt(0))) >= 0.001) {
+				setDepositStatus("success");
 				setStep("submit");
 			} else {
 				setStep("deposit");
@@ -125,8 +126,10 @@ export const SubmitProofModal = ({
 		if (step === "claim-nft") {
 			setClaimNftStatus("success");
 			if (Number(formatEther(balance.data || BigInt(0))) >= 0.001) {
+				setDepositStatus("success");
 				setStep("submit");
 			} else {
+				setDepositStatus("warn");
 				setStep("deposit");
 			}
 		}
@@ -190,6 +193,7 @@ export const SubmitProofModal = ({
 				user_address={user_address}
 				setOpen={modal.setOpen}
 				updateState={goToNextStep}
+				setDepositStatus={setDepositStatus}
 			/>
 		),
 		submit: () => (

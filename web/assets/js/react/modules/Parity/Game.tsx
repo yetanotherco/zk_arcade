@@ -98,6 +98,9 @@ export const Game = ({
 
 		gameData[key] = currentLevelReached;
 		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
+
+		// Reset levelBoards and userPositions to avoid overlapping data
+		reset();
 	}, [currentLevel, currentGameConfig, levelBoards, userPositions]);
 
 	const goToNextLevel = useCallback(() => {

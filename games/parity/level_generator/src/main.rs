@@ -77,8 +77,12 @@ fn gen_levels(
     max_movements: u8,
 ) -> Vec<ParityLevel> {
     let mut levels: Vec<ParityLevel> = vec![];
+    
+    let safe_min_end = min_end_of_level.max(max_movements + 1);
+    let safe_max_end = max_end_of_level.min(u8::MAX - 1);
+
     for i in 0..num_levels {
-        let end = random_number_between(min_end_of_level, max_end_of_level);
+        let end = random_number_between(safe_min_end, safe_max_end);
         let mut board = vec![];
         for _ in 0..9 {
             board.push(end);

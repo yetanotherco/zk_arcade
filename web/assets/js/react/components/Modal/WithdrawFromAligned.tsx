@@ -163,7 +163,7 @@ export const WithdrawFromAlignedModal = ({
 										<span className="text-white text-sm underline cursor-help">
 											Why?
 										</span>
-										<div className="absolute left-1/2 top-full transform -translate-x-1/2 translate-y-2 hidden group-hover:block z-10">
+										<div className="absolute left-1/2 top-full transform -translate-x-[70%] translate-y-2 hidden group-hover:block z-10">
 											<div className="bg-white text-black text-xs rounded shadow-lg px-2 py-1 
 															opacity-0 group-hover:opacity-100 transition-opacity duration-200 
 															break-words whitespace-normal max-w-sm min-w-[400px] pointer-events-none">

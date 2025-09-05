@@ -11,6 +11,8 @@ cd "$parent_path"
 # cd to merkle_tree/
 cd ../../merkle_tree/
 
+# TODO: Check if any of the addresses in the whitelist ir already in the database
+
 # Generate the merkle root and the merkle proof for each address of the whitelist
 cargo run -- ../$WHITELIST_PATH merkle_output.json $MERKLE_ROOT_INDEX
 

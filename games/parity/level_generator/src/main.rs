@@ -69,6 +69,16 @@ fn possible(roll: i16, selected: u8) -> bool {
     }
 }
 
+// Verify that the board is valid, checking if the difference between the max and min value is not greater
+// than the amount of movements.
+// Note: This could be improved even more, since the user cannot move all the times to the same board position.
+fn is_board_valid(board: &[u8], movements: u8) -> bool {
+    let max_val = *board.iter().max().unwrap_or(&0);
+    let min_val = *board.iter().min().unwrap_or(&0);
+
+    !(max_val - min_val > movements)
+}
+
 fn gen_levels(
     num_levels: u8,
     min_end_of_level: u8,
@@ -134,19 +144,29 @@ fn gen_levels(
             }
         }
 
-        let x = selected % 3;
-        let y = selected / 3;
+        if is_board_valid(&board, moves) {
+            let x = selected % 3;
+            let y = selected / 3;
 
-        // Get the solution
-        solution.reverse();
+            // Get the solution
+            solution.reverse();
 
-        levels.push(ParityLevel {
-            number: i + 1,
-            board,
-            solution,
-            initial_pos_x: x,
-            initial_pos_y: y,
-        })
+            println!(
+                "Level {}: end {}, moves {}",
+                i + 1,
+                end,
+                moves
+            );
+            println!("Board: {:?}", board);
+
+            levels.push(ParityLevel {
+                number: i + 1,
+                board,
+                solution,
+                initial_pos_x: x,
+                initial_pos_y: y,
+            });
+        }
     }
 
     levels

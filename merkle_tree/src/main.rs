@@ -1,4 +1,4 @@
-use dotenvy::dotenv;
+use dotenvy::{dotenv, from_filename};
 use merkle_tree_rs::standard::{LeafType, StandardMerkleTree};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, postgres::PgPoolOptions};
@@ -81,7 +81,10 @@ async fn main() {
 
     println!("Connecting to database...");
 
-    dotenv().ok();
+    if dotenv().is_err() {
+        println!("Warning: No .env file found. Attempting to load .env.example");
+        let _ = from_filename(".env.example");
+    }
 
     let database_url =
         env::var("DATABASE_URL").expect("The environment variable DATABASE_URL is missing!");

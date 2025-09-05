@@ -169,6 +169,16 @@ defmodule ZkArcadeWeb.PageController do
       },
     ]
 
+    eligible = case wallet do
+      nil -> "false"
+      address ->
+        case ZkArcade.MerklePaths.get_merkle_proof_for_address(address) do
+          {:ok, _proof} -> "true"
+          {:error, :proof_not_found} -> "false"
+          _ -> "false"
+        end
+    end
+
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:beast_submissions, beast_submissions_json)
@@ -189,6 +199,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:faqs, faqs)
+      |> assign(:eligible, eligible)
       |> render(:home)
   end
 

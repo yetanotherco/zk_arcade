@@ -7,7 +7,7 @@ import UpdateUsernameBtn from "./modules/History/UpdateUsernameBtn";
 import { CurrentBeastGame, SubmitBeastGameBtn } from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
-import EncourageDepositing from "./modules/EncourageDepositing";
+import InitialModals from "./modules/InitialModals";
 import { ParityGame } from "./modules/Parity";
 import { ClaimNft } from "./modules/ClaimNft";
 
@@ -95,8 +95,15 @@ define(
 define({ "x-app-how-it-works-modal": HowItWorksModal });
 
 define(
-	{ "x-app-encourage-depositing-modal": EncourageDepositing },
-	{ attributes: ["network", "payment_service_address", "user_address"] }
+	{ "x-app-initial-modals": InitialModals },
+	{
+		attributes: [
+			"network",
+			"payment_service_address",
+			"user_address",
+			"eligible",
+		],
+	}
 );
 
 define(
@@ -120,7 +127,11 @@ define(
 	},
 	{
 		attributes: [
-			"network", "merkle_proof", "tokenURI", "contract_address", "user_address"
+			"network",
+			"merkle_proof",
+			"tokenURI",
+			"contract_address",
+			"user_address",
 		],
 	}
 );

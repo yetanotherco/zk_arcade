@@ -297,12 +297,9 @@ The goal of the game is to make each number on the board equal.
     case get_wallet_from_session(conn) do
       nil -> conn |> redirect(to: build_redirect_url(conn, "user-not-connected"))
       wallet ->
-        wallet = get_wallet_from_session(conn)
-
         entries_per_page = 5
 
         page = String.to_integer(params["page"] || "1")
-        offset = (page - 1) * entries_per_page
 
         total_proofs = ZkArcade.Proofs.get_total_proofs_by_address(wallet)
 

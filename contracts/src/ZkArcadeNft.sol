@@ -40,7 +40,8 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         require(!hasClaimed[msg.sender], "NFT already claimed for this address");
 
         // Verify that the address is whitelisted using Merkle Proof
-        bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
+        bytes32 inner = keccak256(abi.encode(msg.sender));
+        bytes32 leaf  = keccak256(abi.encode(inner));
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
 
         // Mark as claimed

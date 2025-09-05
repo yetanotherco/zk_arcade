@@ -30,7 +30,6 @@ defmodule ZkArcadeWeb.PageController do
       wallet
   end
 
-  defp get_proofs(nil, page, size), do: []
 
   defp get_proofs_and_submissions(address, page, size) do
     proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})
@@ -294,30 +293,48 @@ The goal of the game is to make each number on the board equal.
       |> render(:parity_game)
   end
 
-  def history(conn, _params) do
+  def history(conn, params) do
     case get_wallet_from_session(conn) do
       nil -> conn |> redirect(to: build_redirect_url(conn, "user-not-connected"))
       wallet ->
-        {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 10)
+        entries_per_page = 5
 
-      {username, position} = get_username_and_position(wallet)
+        page = String.to_integer(params["page"] || "1")
 
-      explorer_url = Application.get_env(:zk_arcade, :explorer_url)
-      batcher_url = Application.get_env(:zk_arcade, :batcher_url)
+        total_proofs = ZkArcade.Proofs.get_total_proofs_by_address(wallet)
 
-      conn
-      |> assign(:wallet, wallet)
-      |> assign(:network, Application.get_env(:zk_arcade, :network))
-      |> assign(:proofs_sent_total, length(proofs))
-      |> assign(:submitted_proofs, Jason.encode!(proofs))
-      |> assign(:beast_submissions, beast_submissions_json)
-      |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
-      |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
-      |> assign(:username, username)
-      |> assign(:user_position, position)
-      |> assign(:explorer_url, explorer_url)
-      |> assign(:batcher_url, batcher_url)
-      |> render(:history)
+        total_pages = ceil(total_proofs / entries_per_page)
+        has_prev = page > 1
+        has_next = page < total_pages
+
+        {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, page, entries_per_page)
+
+        {username, position} = get_username_and_position(wallet)
+
+        explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+        batcher_url = Application.get_env(:zk_arcade, :batcher_url)
+
+        conn
+        |> assign(:wallet, wallet)
+        |> assign(:network, Application.get_env(:zk_arcade, :network))
+        |> assign(:proofs_sent_total, length(proofs))
+        |> assign(:submitted_proofs, Jason.encode!(proofs))
+        |> assign(:beast_submissions, beast_submissions_json)
+        |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
+        |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
+        |> assign(:username, username)
+        |> assign(:user_position, position)
+        |> assign(:explorer_url, explorer_url)
+        |> assign(:batcher_url, batcher_url)
+        |> assign(:pagination, %{
+          current_page: page,
+          total_pages: total_pages,
+          has_prev: has_prev,
+          has_next: has_next,
+          total_users: total_proofs,
+          items_per_page: entries_per_page
+        })
+        |> render(:history)
     end
   end
 
@@ -370,7 +387,8 @@ The goal of the game is to make each number on the board equal.
       total_pages: total_pages,
       has_prev: has_prev,
       has_next: has_next,
-      total_users: total_users
+      total_users: total_users,
+      items_per_page: entries_per_page
     })
     |> render(:leaderboard)
   end
@@ -386,7 +404,7 @@ The goal of the game is to make each number on the board equal.
       explorer_url = Application.get_env(:zk_arcade, :explorer_url)
       batcher_url = Application.get_env(:zk_arcade, :batcher_url)
 
-      merkle_proof = case get_merkle_proof(wallet_address) do
+      merkle_proof = case ZkArcade.MerklePaths.get_merkle_proof_for_address(wallet_address) do
         {:ok, proof} ->
           proof
         {:error, :proof_not_found} ->
@@ -413,26 +431,6 @@ The goal of the game is to make each number on the board equal.
       conn
       |> assign(:error, "No wallet connected")
       |> render(:home)
-    end
-  end
-
-  defp get_merkle_proof(wallet_address) do
-    file =
-      :zk_arcade
-      |> :code.priv_dir()
-      |> to_string()
-      |> Path.join("merkle/merkle_proofs.json")
-
-    with {:ok, bin} <- File.read(file),
-        {:ok, proofs} when is_list(proofs) <- Jason.decode(bin),
-        norm <- String.downcase(wallet_address),
-        %{"proof" => proof} <- Enum.find(proofs, fn %{"address" => a} ->
-          String.downcase(a) == norm
-        end) do
-      {:ok, proof}
-    else
-      {:error, _} = err -> err
-      _ -> {:error, :proof_not_found}
     end
   end
 end

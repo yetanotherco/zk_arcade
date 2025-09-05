@@ -9,10 +9,9 @@ cd "$parent_path"
 cd ../../merkle_tree/
 
 # Generate the merkle root and the merkle proof for each address of the whitelist
-cargo run -- --in ../contracts/script/deploy/config/devnet/nft.json --out merkle_output.json
+cargo run -- ../contracts/script/deploy/config/devnet/nft.json merkle_output.json
 
-# Copy the merkle proofs from the file and paste them into ../web/priv/merkle/merkle_proofs.json using jq
-jq '.proofs' ./merkle_output.json > ../web/priv/merkle/merkle_proofs.json
+merkle_root=$(jq -r '.root' merkle_output.json)
 
 # cd to contracts/
 cd ../contracts/
@@ -21,10 +20,11 @@ cd ../contracts/
 CMD="forge script script/deploy/NftContractDeployer.s.sol:NftContractDeployer \
     $NFT_CONFIG_PATH \
     $NFT_OUTPUT_PATH \
+    $merkle_root \
     --rpc-url $RPC_URL \
     --private-key $DEPLOYER_PRIVATE_KEY \
     --broadcast \
-    --sig \"run(string memory configPath, string memory outputPath)\""
+    --sig \"run(string memory configPath, string memory outputPath, bytes32 merkleRoot)\""
 
 if [ -n "$ETHERSCAN_API_KEY" ]; then
     CMD+=" --etherscan-api-key $ETHERSCAN_API_KEY --verify"

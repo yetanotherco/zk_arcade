@@ -16,6 +16,12 @@ cd ../../merkle_tree/
 # Generate the merkle root and the merkle proof for each address of the whitelist
 cargo run -- ../$WHITELIST_PATH merkle_output.json $MERKLE_ROOT_INDEX
 
+# Check if the merkle paths generation program failed
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to generate merkle root. Exiting script."
+    exit 1
+fi
+
 merkle_root=$(jq -r '.root' merkle_output.json)
 
 # cd to contracts/

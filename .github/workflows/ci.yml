@@ -3,12 +3,8 @@ name: Elixir Web Application CI
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'web/**'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'web/**'
 
 env:
   MIX_ENV: test

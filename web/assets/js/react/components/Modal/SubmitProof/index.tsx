@@ -157,7 +157,7 @@ export const SubmitProofModal = ({
 		[key in SubmitProofModalSteps]: { header: string; subtitle: string };
 	} = {
 		"claim-nft": {
-			header: "Claim NFT",
+			header: "Mint NFT",
 			subtitle: "You need to mint an NFT to start participating",
 		},
 		deposit: {
@@ -236,7 +236,7 @@ export const SubmitProofModal = ({
 		}
 
 		if (step === "claim-nft") {
-             // This is true if data exists and is non zero
+			// This is true if data exists and is non zero
 			if (nftBalance.data) {
 				setClaimNftStatus("success");
 			} else {
@@ -286,7 +286,7 @@ export const SubmitProofModal = ({
 				<div className="w-full">
 					<div className="flex overflow-scroll gap-8 justify-center w-full">
 						<BreadCrumb
-							step="Claim NFT"
+							step="Mint NFT"
 							active={true}
 							status={claimNftStatus}
 						/>
@@ -296,12 +296,12 @@ export const SubmitProofModal = ({
 							status={depositStatus}
 						/>
 						<BreadCrumb
-							step="Submission"
+							step="Submit Proof"
 							active={step === "submit" || step === "claim"}
 							status={submissionStatus}
 						/>
 						<BreadCrumb
-							step="Claim"
+							step="Claim Points"
 							// Check if the game is outdated and not claimed and mark as failed
 							active={step === "claim"}
 							status={

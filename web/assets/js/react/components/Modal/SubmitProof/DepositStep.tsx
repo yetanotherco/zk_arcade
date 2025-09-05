@@ -5,6 +5,7 @@ import { Address } from "../../../types/blockchain";
 import { Button } from "../../Button";
 import { formatEther } from "viem";
 import { useToast } from "../../../state/toast";
+import { BreadCrumbStatus } from ".";
 
 const ALIGNED_DEPOSIT_LIMIT = 0.01;
 
@@ -13,11 +14,13 @@ export const DepositStep = ({
 	user_address,
 	setOpen,
 	updateState,
+	setDepositStatus,
 }: {
 	payment_service_address: Address;
 	user_address: Address;
 	setOpen: (prev: boolean) => void;
 	updateState: () => void;
+	setDepositStatus: (status: BreadCrumbStatus) => void;
 }) => {
 	const { price } = useEthPrice();
 	const { sendFunds, balance } = useBatcherPaymentService({
@@ -162,7 +165,9 @@ export const DepositStep = ({
 				<Button
 					variant="accent-fill"
 					onClick={async () => {
-						await sendFunds.send(balanceValue);
+						await sendFunds
+							.send(balanceValue)
+							.then(() => setDepositStatus("success"));
 					}}
 					isLoading={sendFunds.receipt.isLoading}
 					disabled={Number(balanceValue) == 0 || !isValidAmount()}

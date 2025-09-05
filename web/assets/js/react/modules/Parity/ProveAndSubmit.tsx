@@ -25,6 +25,7 @@ export const ProveAndSubmit = ({
 	setGameState,
 	submittedLevelOnChain,
 	timeRemaining,
+	nft_contract_address,
 }: {
 	user_address: Address;
 	payment_service_address: Address;
@@ -34,6 +35,7 @@ export const ProveAndSubmit = ({
 	setGameState: (state: ParityGameState) => void;
 	submittedLevelOnChain: number;
 	timeRemaining?: TimeRemaining | null;
+	nft_contract_address: Address;
 }) => {
 	const [open, setOpen] = useState(false);
 	const [proofVerificationData, setProofVerificationData] =
@@ -198,6 +200,7 @@ export const ProveAndSubmit = ({
 				userBeastSubmissions={[]}
 				proofToSubmitData={proofVerificationData}
 				gameName="parity"
+				nft_contract_address={nft_contract_address}
 			/>
 		</div>
 	);

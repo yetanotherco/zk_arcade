@@ -113,6 +113,13 @@ defmodule ZkArcade.Proofs do
       end)
   end
 
+  def get_total_proofs_by_address(nil), do: 0
+  def get_total_proofs_by_address(address) do
+    downcased_addr = String.downcase(address)
+    from(p in Proof, where: p.wallet_address == ^downcased_addr)
+    |> Repo.aggregate(:count, :id)
+  end
+
   def get_proof_submission(proof_id) do
     query =
       from p in Proof,
@@ -163,7 +170,6 @@ defmodule ZkArcade.Proofs do
       })
       |> Repo.one()
   end
-
 
   def get_proof_verification_data(proof_id) do
     Proof

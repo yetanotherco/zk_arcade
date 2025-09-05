@@ -160,13 +160,14 @@ export const WithdrawFromAlignedModal = ({
 									</Button>
 
 									<div className="relative group">
-										<span className="text-accent-200 text-sm underline cursor-help">
+										<span className="text-white text-sm underline cursor-help">
 											Why?
 										</span>
-										<div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block">
-											<div className="bg-accent-200 text-black text-xs rounded py-2 px-3 whitespace-nowrap shadow-lg">
-											Funds are locked. You need to unlock them first and wait 1 hour before withdrawing.
-											<div className="absolute top-full left-1/2 transform -translate-x-1/2"></div>
+										<div className="absolute left-1/2 top-full transform -translate-x-1/2 translate-y-2 hidden group-hover:block z-10">
+											<div className="bg-white text-black text-xs rounded shadow-lg px-2 py-1 
+															opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+															break-words whitespace-normal max-w-sm min-w-[400px] pointer-events-none">
+											Funds are locked for security. You need to unlock them first and wait 1 hour before withdrawing.
 											</div>
 										</div>
 									</div>

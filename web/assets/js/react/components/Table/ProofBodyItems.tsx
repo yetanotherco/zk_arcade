@@ -16,26 +16,6 @@ const colorBasedOnStatus: {
 	underpriced: "bg-orange/20 text-orange",
 };
 
-const tooltipStyleBasedOnStatus: {
-	[key in KeysForStatus]: string;
-} = {
-	verified: "bg-accent-100 text-black",
-	submitted: "bg-accent-200 text-black",
-	pending: "bg-yellow text-black",
-	claimed: "bg-blue text-white",
-	failed: "bg-red text-white",
-	underpriced: "bg-orange text-black",
-};
-
-const tooltipText: { [key in KeysForStatus]: string } = {
-	verified: "Solution verified and ready to be claimed",
-	submitted: "Solution submitted and waiting for verification",
-	claimed: "Already submitted to leaderboard",
-	pending: "You need to wait until its verified before submitting the solution",
-	failed: "The proof failed to be verified, you have to re-send it",
-	underpriced: "The proof is underpriced, we suggest bumping the fee",
-};
-
 const statusText: { [key in KeysForStatus]: string } = {
 	claimed: "Claimed",
 	verified: "Ready",
@@ -62,17 +42,6 @@ export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
 			>
 				<span className="hero-information-circle solid size-5"></span>
 				<p>{statusText[proof.status]}</p>
-
-				<div
-					className={`${
-						tooltipStyleBasedOnStatus[proof.status]
-					} rounded absolute mt-2 rounded -left-1/2 top-full mb-2 text-sm rounded px-2 py-1 opacity-0 group-hover/tooltip:opacity-100 transition pointer-events-none`}
-					style={{ width: 300, zIndex: 10000 }}
-				>
-					<p className="text-center text-xs">
-						{tooltipText[proof.status]}
-					</p>
-				</div>
 			</div>
 		</td>
 	);

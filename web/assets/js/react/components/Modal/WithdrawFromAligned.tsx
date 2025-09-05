@@ -139,39 +139,39 @@ export const WithdrawFromAlignedModal = ({
 
 	return (
 		<Modal maxWidth={500} open={open} setOpen={setOpen}>
-			<div className="bg-contrast-100 w-full p-10 rounded flex flex-col items-center gap-6">
+			<div className="bg-contrast-100 w-full p-10 py-12 rounded flex flex-col items-center gap-3">
 				<h3 className="text-md font-bold mb-2">
 					Withdraw from Aligned Batcher
 				</h3>
 				
 				<div className="w-full">
-					<div className="flex justify-between items-center mb-2">
-						<span className="text-sm">
-							Available balance: {Number(availableBalance).toFixed(6)} ETH
-						</span>
-						<Button
-							variant="contrast"
-							className="text-sm px-2 py-1"
-							onClick={handleMaxClick}
-						>
-							Max
-						</Button>
-					</div>
-					<div className="mb-4 p-3 rounded">
+					<div className="mb-4 p-3 rounded flex justify-center">
 						{unlockBlockTime === 0 && (
 							<div className="text-sm">
-								<p className="mb-2">
-									Funds are locked. You need to unlock them first and wait 1 hour before withdrawing.
-								</p>
-								<Button
-									variant="text-accent"
-									onClick={handleUnlock}
-									isLoading={unlockFunds.receipt.isLoading}
-									disabled={maxWithdrawAmount === 0}
-									className="w-full"
-								>
-									{(Number(availableBalance) === 0) ? "No funds available" : "Unlock Funds"}
-								</Button>
+								<div className="flex items-center gap-4">
+									<Button
+										variant="text-accent"
+										onClick={handleUnlock}
+										isLoading={unlockFunds.receipt.isLoading}
+										disabled={maxWithdrawAmount === 0}
+										className=""
+									>
+										{(Number(availableBalance) === 0) ? "No funds available" : "Unlock Funds"}
+									</Button>
+
+									<div className="relative group">
+										<span className="text-white text-sm underline cursor-help">
+											Why?
+										</span>
+										<div className="absolute left-1/2 top-full transform -translate-x-[70%] translate-y-2 hidden group-hover:block z-10">
+											<div className="bg-white text-black text-xs rounded shadow-lg px-2 py-1 
+															opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+															break-words whitespace-normal max-w-sm min-w-[400px] pointer-events-none">
+											Funds are locked for security. You need to unlock them first and wait 1 hour before withdrawing.
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						)}
 						
@@ -230,6 +230,19 @@ export const WithdrawFromAlignedModal = ({
 						)}{" "}
 						USD
 					</p>
+
+					<div className="flex justify-between items-center mb-2">
+						<span className="text-sm">
+							Balance: {Number(availableBalance).toFixed(6)} ETH
+						</span>
+						<Button
+							variant="text"
+							className="text-sm px-2 py-1"
+							onClick={handleMaxClick}
+						>
+							Max
+						</Button>
+					</div>
 					
 					{Number(withdrawValue) > maxWithdrawAmount && (
 						<p className="mt-1 text-red-500 text-sm">

@@ -7,11 +7,12 @@ defmodule ZkArcade.MerklePaths.MerklePath do
   schema "merkle_paths" do
     field :address, :string
     field :merkle_proof, {:array, :string}
+    field :merkle_root_index, :integer
   end
 
   def changeset(merkle_path, attrs) do
     merkle_path
-    |> cast(attrs, [:address, :merkle_proof])
-    |> validate_required([:address, :merkle_proof])
+    |> cast(attrs, [:address, :merkle_proof, :merkle_root_index])
+    |> validate_required([:address, :merkle_proof, :merkle_root_index])
   end
 end

@@ -55,13 +55,29 @@ beast_gen_levels:
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Difficulty / campaign parameters (annotated)
+# Growth model (per game):
+#   steps      := max(PARITY_LEVELS_PER_GAME - 1, 1)
+#   step_size  := ceil((PARITY_MAX_MOVEMENTS - PARITY_MIN_MOVEMENTS) / steps)
+#   level_i    := min(PARITY_MIN_MOVEMENTS + i * step_size, PARITY_MAX_MOVEMENTS)
+# With defaults (levels=3, min=15, max=45): levels → [15, 30, 45]
+# ─────────────────────────────────────────────────────────────────────────────
+# Total number of games in the campaign (pattern repeats per game).
 PARITY_NUM_GAMES ?= 10
-# This number can be up to 3 (to fit in 32 bytes)
+# Levels per game (indexes 0..L-1). Can be up to 3 (fits proof data in 32 bytes).
 PARITY_LEVELS_PER_GAME ?= 3
-PARITY_MIN_END_OF_LEVEL ?= 0
-PARITY_MAX_END_OF_LEVEL ?= 30
-PARITY_MIN_MOVEMENTS ?= 5
-PARITY_MAX_MOVEMENTS ?= 12
+# UI-only: lower bound for numbers shown at the end of a level on the board.
+# Does NOT affect difficulty or movement calculations.
+PARITY_MIN_END_OF_LEVEL ?= 8
+# UI-only: upper bound for numbers shown at the end of a level on the board.
+# Does NOT affect difficulty or movement calculations.
+PARITY_MAX_END_OF_LEVEL ?= 50
+# Movement budget at level 0 (first level). Defines the start of the ramp.
+PARITY_MIN_MOVEMENTS ?= 15
+# Movement budget at the last level. Defines the top of the ramp.
+PARITY_MAX_MOVEMENTS ?= 45
+# Number of calendar days the campaign spans (scheduling/rotation; not difficulty).
 PARITY_CAMPAIGN_DAYS ?= 1
 parity_gen_levels:
 	@cd games/parity/level_generator && \
@@ -93,14 +109,20 @@ gen_and_deploy_devnet: beast_gen_levels parity_gen_levels web_db
 	@$(MAKE) update_nft_address
 
 __CONTRACTS__:
+MERKLE_ROOT_INDEX ?= 0
 deploy_contract: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh $(MERKLE_ROOT_INDEX)
 
 upgrade_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_contract.sh
 
 set_beast_games: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
+
+# This path is relative to the project root
+WHITELIST_PATH?=merkle_tree/whitelist.json
+nft_whitelist_addresses: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/create_new_campaign.sh "$(MERKLE_ROOT_INDEX)" "$(WHITELIST_PATH)"
 
 __INFRA__: ## ____
 ## Initial Setup

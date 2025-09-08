@@ -328,7 +328,7 @@ defmodule ZkArcadeWeb.CoreComponents do
         <div class="mb-2 h-[100px] w-[100px] rounded-full bg-accent-100/20 border border-accent-100 flex items-center justify-center">
           <p class="text-2xl text-text-100"><%= @number %></p>
         </div>
-        <h3 class="text-text-100 text-xl"><%= @title %></h3>
+        <h3 class="text-text-100 text-center text-xl"><%= @title %></h3>
         <p class="text-text-200 text-md text-center" style="min-width: 220px;"><%= @desc %></p>
       </div>
     </div>

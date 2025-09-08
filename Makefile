@@ -109,14 +109,20 @@ gen_and_deploy_devnet: beast_gen_levels parity_gen_levels web_db
 	@$(MAKE) update_nft_address
 
 __CONTRACTS__:
+MERKLE_ROOT_INDEX ?= 0
 deploy_contract: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh $(MERKLE_ROOT_INDEX)
 
 upgrade_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_contract.sh
 
 set_beast_games: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
+
+# This path is relative to the project root
+WHITELIST_PATH?=merkle_tree/whitelist.json
+nft_whitelist_addresses: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/create_new_campaign.sh "$(MERKLE_ROOT_INDEX)" "$(WHITELIST_PATH)"
 
 __INFRA__: ## ____
 ## Initial Setup

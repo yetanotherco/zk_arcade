@@ -44,6 +44,7 @@ export const PlayState = ({
 	setPosition,
 	setHasWon,
 	saveLevelData,
+	user_positions,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
@@ -62,6 +63,7 @@ export const PlayState = ({
 	setPosition: (position: { col: number; row: number }) => void;
 	setHasWon: (hasWon: boolean) => void;
 	saveLevelData: () => void;
+	user_positions: [number, number][];
 }) => {
 	const view = useSwapTransition(
 		currentLevel,
@@ -84,6 +86,7 @@ export const PlayState = ({
 					totalLevels={levels.length}
 					reset={reset}
 					home={() => setGameState("home")}
+					user_positions={user_positions}
 				/>
 			),
 		{ className: "h-full w-full flex items-center justify-center" }

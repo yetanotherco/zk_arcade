@@ -179,6 +179,7 @@ export const Game = ({
 				setPosition={setPosition}
 				setHasWon={setHasWon}
 				saveLevelData={saveLevelData}
+				user_positions={userPositions}
 			/>
 		),
 		"after-level": (

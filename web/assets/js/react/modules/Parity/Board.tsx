@@ -9,6 +9,7 @@ type Props = {
 	levelNumber: number;
 	totalLevels: number;
 	home: () => void;
+	user_positions: [number, number][];
 };
 
 const Tile = ({
@@ -64,8 +65,12 @@ export const ParityBoard = ({
 	totalLevels,
 	home,
 	reset,
+	user_positions,
 }: Props) => {
 	const { muted, toggleMuted } = useAudioState();
+
+	const userMovements = user_positions.length > 0 ? user_positions.length - 1 : 0;
+
 	return (
 		<div className="h-full flex flex-col justify-center items-center gap-4">
 			<div className="grid grid-cols-3 grid-rows-3">
@@ -80,6 +85,9 @@ export const ParityBoard = ({
 			<div className="w-full flex justify-between items-center">
 				<p>
 					Level {levelNumber}/{totalLevels}
+				</p>
+				<p>
+					Moves {userMovements}/{31}
 				</p>
 				<Button
 					variant="arcade"

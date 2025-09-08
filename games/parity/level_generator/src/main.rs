@@ -69,6 +69,38 @@ fn possible(roll: i16, selected: u8) -> bool {
     }
 }
 
+// Verify that the board is valid, checking if the difference between the max and min value is not greater
+// than the amount of movements.
+// Note: This could be improved even more, since the user cannot move all the times to the same board position.
+fn is_board_valid(board: &[u8], movements: u8) -> bool {
+    let max_val = *board.iter().max().unwrap_or(&0);
+    let min_val = *board.iter().min().unwrap_or(&0);
+
+    !(max_val - min_val > movements)
+}
+
+fn calculate_movements_for_level(
+    level_index: u8,
+    total_levels: u8,
+    min_movements: u8,
+    max_movements: u8,
+) -> u8 {
+    if total_levels <= 1 {
+        return min_movements;
+    }
+
+    let movement_range = max_movements - min_movements;
+
+    let randomness: f32 = rand::random_range(0.0..(movement_range as f32 / total_levels as f32));
+
+    let progression_step = movement_range as f32 / (total_levels - 1) as f32;
+    let level_movements = min_movements as f32 + (level_index as f32 * progression_step);
+
+    (level_movements + randomness)
+        .round()
+        .min(max_movements as f32) as u8
+}
+
 fn gen_levels(
     num_levels: u8,
     min_end_of_level: u8,
@@ -86,9 +118,9 @@ fn gen_levels(
 
         let mut selected = random_number_between(0, 9);
         let mut solution: Vec<Movement> = vec![];
-        board[selected as usize] -= 1;
+        board[selected as usize] = board[selected as usize].saturating_sub(1);
 
-        let moves = random_number_between(min_movements, max_movements);
+        let moves = calculate_movements_for_level(i, num_levels, min_movements, max_movements);
 
         for j in 0..moves {
             let mut roll = -1;
@@ -102,47 +134,49 @@ fn gen_levels(
                     selected -= 3;
                     solution.push(Movement::Down);
                     if j + 1 != moves {
-                        board[selected as usize] -= 1;
+                        board[selected as usize] = board[selected as usize].saturating_sub(1);
                     }
                 }
                 1 => {
                     selected += 3;
                     solution.push(Movement::Up);
                     if j + 1 != moves {
-                        board[selected as usize] -= 1;
+                        board[selected as usize] = board[selected as usize].saturating_sub(1);
                     }
                 }
                 2 => {
                     selected -= 1;
                     solution.push(Movement::Right);
                     if j + 1 != moves {
-                        board[selected as usize] -= 1;
+                        board[selected as usize] = board[selected as usize].saturating_sub(1);
                     }
                 }
                 3 => {
                     selected += 1;
                     solution.push(Movement::Left);
                     if j + 1 != moves {
-                        board[selected as usize] -= 1;
+                        board[selected as usize] = board[selected as usize].saturating_sub(1);
                     }
                 }
                 _ => {}
             }
         }
 
-        let x = selected % 3;
-        let y = selected / 3;
+        if is_board_valid(&board, moves) {
+            let x = selected % 3;
+            let y = selected / 3;
 
-        // Get the solution
-        solution.reverse();
+            // Get the solution
+            solution.reverse();
 
-        levels.push(ParityLevel {
-            number: i + 1,
-            board,
-            solution,
-            initial_pos_x: x,
-            initial_pos_y: y,
-        })
+            levels.push(ParityLevel {
+                number: i + 1,
+                board,
+                solution,
+                initial_pos_x: x,
+                initial_pos_y: y,
+            });
+        }
     }
 
     levels

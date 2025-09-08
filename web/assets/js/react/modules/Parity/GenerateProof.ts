@@ -15,7 +15,7 @@ type GenerateSubmitProofParams = {
 	levelsBoards: number[][][];
 };
 
-const MaxRounds = 32;
+const MaxRounds = 55;
 const MaxLevels = 3;
 
 // We clone the positions to avoid overlapping between the round elements of each level

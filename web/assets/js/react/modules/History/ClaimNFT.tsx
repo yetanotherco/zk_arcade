@@ -28,7 +28,7 @@ const ClaimNFT = ({
 
 	const isEligible = is_eligible === "true";
 	const eligibilityClasses = isEligible
-		? "bg-green-50 border-green-300 text-green-900"
+		? "bg-accent-100/20 border-accent-100 text-accent-100"
 		: "bg-amber-50 border-amber-300 text-amber-900";
 
 	const eligibilityText = isEligible
@@ -46,7 +46,7 @@ const ClaimNFT = ({
 			<p className="text-sm leading-5">{eligibilityText} </p>
 			{isEligible && (
 				<p
-					className="text-green-600 cursor-pointer hover:underline"
+					className="text-accent-100 cursor-pointer hover:underline font-medium"
 					onClick={() => setMintModalOpen(true)}
 				>
 					Claim!

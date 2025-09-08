@@ -50,7 +50,7 @@ export const WalletInfo = ({
 	};
 
 	const eligibilityClasses = is_eligible
-		? "bg-green-50 border-green-300 text-green-900"
+		? "bg-accent-100/20 border-accent-100 text-accent-100"
 		: "bg-amber-50 border-amber-300 text-amber-900";
 
 	const eligibilityText = is_eligible
@@ -110,7 +110,7 @@ export const WalletInfo = ({
 							</p>
 							{is_eligible && (
 								<p
-									className="text-green-600 cursor-pointer hover:underline"
+									className="text-accent-100 cursor-pointer hover:underline font-medium"
 									onClick={() => setMintModalOpen(true)}
 								>
 									Claim!

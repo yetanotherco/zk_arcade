@@ -106,9 +106,27 @@ export const PlayState = ({
 
 	return (
 		<div className="w-full h-full flex flex-col gap-4 items-center">
-			<h2 className="text-2xl font-normal text-center">
-				{currentLevel !== null ? "Parity" : "Select level"}
-			</h2>
+			<div className="relative w-full flex justify-center items-center max-w-[450px]">
+				<h2 className="text-2xl font-normal text-center">
+					{currentLevel !== null ? "Parity" : "Select level"}
+				</h2>
+
+				{currentLevel !== null && (
+					<div className="absolute right-0 top-0 flex items-center">
+						<span className="font-medium relative group border rounded-full px-1">
+							?
+							<div
+							className="absolute top-full right-0 mt-2 px-2 py-1 text-xs bg-black text-white rounded 
+										opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words 
+										whitespace-normal max-w-sm z-10 pointer-events-none transform translate-y-2"
+							style={{ minWidth: "450px" }}
+							>
+								Use W, A, S or D to slide the tiles. To restart, press R.
+							</div>
+						</span>
+					</div>
+				)}
+			</div>
 			{currentLevel === null && (
 				<p className="text-text-200 text-center">
 					Select a level to play. New levels unlock as you progress!

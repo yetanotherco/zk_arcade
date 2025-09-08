@@ -23,8 +23,6 @@ defmodule ZkArcadeWeb.Router do
 
     get "/leaderboard", PageController, :leaderboard
 
-    get "/mint", PageController, :mint
-
     get "/proof/verification-data", ProofController, :get_proof_verification_data
     get "/proof/:proof_id", ProofController, :get_proof_submission
     get "/proof/status/:proof_id", ProofController, :get_proof_status
@@ -35,6 +33,8 @@ defmodule ZkArcadeWeb.Router do
     # API endpoint for wallet agreement status check
     get "/api/wallet/:address/agreement-status", ApiController, :check_agreement_status
     get "/api/ethprice", ApiController, :get_eth_price
+    get "/api/nft/proof", ApiController, :get_nft_claim_merkle_proof
+    get "/api/nft/eligibility", ApiController, :get_nft_eligibility
   end
 
   # Enable LiveDashboard in development

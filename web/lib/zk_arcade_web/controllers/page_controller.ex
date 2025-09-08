@@ -154,31 +154,36 @@ defmodule ZkArcadeWeb.PageController do
       },
       %{
         number: "05",
+        question: "Can I transfer or sell the NFT?",
+        answer: "No. The NFT is non-transferable (soulbound). It’s permanently tied to the wallet that minted it to preserve fair participation and prevent selling or lending access."
+      },
+      %{
+        number: "06",
         question: "Why do I need to verify my proofs?",
         answer: "Verification guarantees that your results are valid and are not tampered with. It ensures the leaderboard reflects the player's real skills, and not manipulated outcomes."
       },
       %{
-        number: "06",
+        number: "07",
         question: "Can I resubmit a proof for a lower level?",
         answer: "No. You can only submit one proof per level, and each new proof must be for a higher level than the last one submitted for the daily game."
       },
       %{
-        number: "07",
+        number: "08",
         question: "What happens if my proof submission fails?",
         answer: "If a proof fails verification, it won’t count toward your score. You can generate a new valid proof and resubmit."
       },
       %{
-        number: "08",
+        number: "09",
         question: "How do I earn points on the leaderboard?",
         answer: "Points are awarded per verified level on each day. The higher the level you submit a valid proof for, the more points you receive for it."
       },
       %{
-        number: "09",
+        number: "10",
         question: "Is my gameplay data public?",
         answer: "No. Only your proof and score are submitted. Zero-knowledge proofs allow verification without exposing your full gameplay data."
       },
       %{
-        number: "10",
+        number: "11",
         question: "How often are new challenges released?",
         answer: "There is available a new challenge everyday for each game!"
       },

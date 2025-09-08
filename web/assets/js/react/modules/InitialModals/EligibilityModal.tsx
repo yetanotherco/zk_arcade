@@ -82,7 +82,7 @@ export const ShowEligibilityModal = ({
 			window.removeEventListener("storage", handleStorageChange);
 			clearInterval(interval);
 		};
-	}, [setOpen, user_address]);
+	}, [setOpen, user_address, balance]);
 
 	const dismiss = () => {
 		setUserViewed("eligibility-viewed", user_address, true);

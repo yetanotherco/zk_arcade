@@ -6,7 +6,7 @@ import { PlayState } from "./PlayState";
 import { AfterLevelCompletion } from "./AfterLevelCompletion";
 import { useSwapTransition } from "./useSwapTransition";
 import { useParityGames } from "./useParityGames";
-import { Address, encodePacked, keccak256 } from "viem";
+import { Address } from "viem";
 import { useParityControls } from "./useParityControls";
 import { ProveAndSubmit } from "./ProveAndSubmit";
 
@@ -15,6 +15,7 @@ type GameProps = {
 	payment_service_address: Address;
 	user_address: Address;
 	leaderboard_address: Address;
+	nft_contract_address: Address;
 	batcher_url: string;
 };
 
@@ -22,6 +23,7 @@ export const Game = ({
 	payment_service_address,
 	user_address,
 	leaderboard_address,
+	nft_contract_address,
 	batcher_url,
 }: GameProps) => {
 	const [gameState, setGameState] = useState<ParityGameState>("home");
@@ -192,6 +194,7 @@ export const Game = ({
 				setGameState={setGameState}
 				submittedLevelOnChain={Number(currentGameLevelCompleted.data)}
 				timeRemaining={timeRemaining}
+				nft_contract_address={nft_contract_address}
 			/>
 		),
 	};

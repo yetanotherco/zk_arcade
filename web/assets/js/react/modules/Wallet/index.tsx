@@ -23,6 +23,7 @@ type Props = {
 	explorer_url: string;
 	batcher_url: string;
 	user_beast_submissions: string;
+	is_eligible: string;
 };
 
 const WalletContent = ({
@@ -36,6 +37,7 @@ const WalletContent = ({
 	explorer_url,
 	batcher_url,
 	user_beast_submissions,
+	is_eligible,
 }: Omit<Props, "needs_agreement">) => {
 	const { address, isConnected } = useAccount();
 	const [needsAgreement, setNeedsAgreement] = useState(false);
@@ -95,6 +97,7 @@ const WalletContent = ({
 					user_position={user_position}
 					explorer_url={explorer_url}
 					batcher_url={batcher_url}
+					is_eligible={is_eligible === "true"}
 				/>
 			</div>
 		);
@@ -120,6 +123,7 @@ export default ({
 	explorer_url,
 	batcher_url,
 	user_beast_submissions,
+	is_eligible,
 }: Omit<Props, "needs_agreement">) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -136,6 +140,7 @@ export default ({
 					explorer_url={explorer_url}
 					batcher_url={batcher_url}
 					user_beast_submissions={user_beast_submissions}
+					is_eligible={is_eligible}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

@@ -96,7 +96,7 @@ export const ProofSubmissions = ({
 			</div>
 			<div
 				className="overflow-scroll"
-				style={{ maxHeight: 150, minHeight: 100 }}
+				style={{ maxHeight: 100, minHeight: 50 }}
 			>
 				{proofs.length > 0 ? (
 					<div>

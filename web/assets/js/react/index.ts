@@ -25,6 +25,7 @@ define(
 			"explorer_url",
 			"batcher_url",
 			"user_beast_submissions",
+			"is_eligible",
 		],
 	}
 );

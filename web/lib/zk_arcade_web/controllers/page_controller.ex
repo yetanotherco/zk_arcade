@@ -150,7 +150,7 @@ defmodule ZkArcadeWeb.PageController do
       %{
         number: "04",
         question: "Do I need to mint a new NFT for each challenge?",
-        answer: "No. You only need to mint the NFT once. After that, it continues to serve as your participation pass for new challenges."
+        answer: "No. You only need to mint the NFT once. After that, it continues to serve as your participation ticket for new challenges."
       },
       %{
         number: "05",

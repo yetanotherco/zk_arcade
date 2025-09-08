@@ -42,6 +42,11 @@ export const useParityControls = ({
 		const onKeyDown = (e: KeyboardEvent) => {
 			const k = e.key.toLowerCase();
 
+			if (k === "r") {
+				reset();
+				return;
+			}
+
 			const keyToDelta: Record<string, [number, number]> = {
 				w: [-1, 0],
 				s: [1, 0],

@@ -15,9 +15,11 @@ type Props = {
 const Tile = ({
 	value,
 	currentPos,
+	gameEnded,
 }: {
 	value: number | string;
 	currentPos: boolean;
+	gameEnded: boolean;
 }) => {
 	const prev = React.useRef(value);
 	const { muted } = useAudioState();
@@ -41,15 +43,18 @@ const Tile = ({
 			className={[
 				"h-[100px] sm:h-[150px] w-[100px] sm:w-[150px] flex items-center justify-center text-xl",
 				"border transition-all duration-300 ease-out will-change-transform",
-				"border-accent-100 bg-accent-100/20",
-				currentPos ? "bg-accent-200/50" : "",
-				changed ? "scale-102 ring-2 ring-accent-100" : "ring-0",
+				gameEnded
+				? "border-gray-400 bg-gray-200 opacity-70"
+				: "border-accent-100 bg-accent-100/20",
+				currentPos && !gameEnded ? "bg-accent-200/50" : "",
+				changed && !gameEnded ? "scale-102 ring-2 ring-accent-100" : "ring-0",
 			].join(" ")}
 		>
 			<p
 				className={[
 					"text-4xl transition-transform duration-300",
-					changed ? "scale-105" : "scale-100",
+					gameEnded ? "text-gray-500" : "",
+					changed && !gameEnded ? "scale-105" : "scale-100",
 				].join(" ")}
 			>
 				{value}
@@ -80,6 +85,7 @@ export const ParityBoard = ({
 						key={idx}
 						value={val}
 						currentPos={positionIdx === idx}
+						gameEnded={remainingMovements <= 0}
 					/>
 				))}
 			</div>

@@ -65,6 +65,10 @@ export const useParityControls = ({
 					return prev; // invalid move
 				}
 
+				if (userPositions.length >= 32) {
+					return prev; // max moves reached
+				}
+
 				setValues(prevVals => {
 					const prevAllEqual = prevVals.every(v => v === prevVals[0]);
 					if (prevAllEqual) {

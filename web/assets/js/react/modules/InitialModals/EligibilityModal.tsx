@@ -1,12 +1,15 @@
 // src/pages/EncourageDepositing/EligibilityModal.tsx
 import React, { useEffect } from "react";
 import { useModal } from "../../hooks";
+import { useNftContract } from "../../hooks/useNftContract";
 import { Modal } from "../../components/Modal";
 import { Button } from "../../components";
 import { Address } from "../../types/blockchain";
+import { EligibilityModal } from "../../components/Modal/EligibilityModal";
 
 type Props = {
 	user_address: Address;
+	nft_contract_address: Address;
 	isEligible: boolean;
 };
 
@@ -33,10 +36,23 @@ const hasUserViewed = (key: string, userAddress: string): boolean => {
 	return viewedMap[userAddress] === true;
 };
 
-export const EligibilityModal = ({ user_address, isEligible }: Props) => {
+export const ShowEligibilityModal = ({
+	user_address,
+	nft_contract_address,
+	isEligible,
+}: Props) => {
 	const { open, setOpen } = useModal();
+	const { balance } = useNftContract({
+		userAddress: user_address,
+		contractAddress: nft_contract_address,
+	});
 
 	useEffect(() => {
+		// if undefined, wait until it is loaded
+		if (balance.data === undefined) {
+			return;
+		}
+
 		const checkAndOpenModal = () => {
 			const viewedHowItWorks = JSON.parse(
 				localStorage.getItem("how-it-works-viewed") || "false"
@@ -46,7 +62,7 @@ export const EligibilityModal = ({ user_address, isEligible }: Props) => {
 				user_address
 			);
 
-			if (viewedHowItWorks && !viewedEligibility) {
+			if (viewedHowItWorks && !viewedEligibility && balance.data === 0n) {
 				setOpen(true);
 			}
 		};
@@ -70,58 +86,16 @@ export const EligibilityModal = ({ user_address, isEligible }: Props) => {
 
 	const dismiss = () => {
 		setUserViewed("eligibility-viewed", user_address, true);
-		setOpen(false);
 	};
 
 	return (
-		<Modal
+		<EligibilityModal
+			isEligible={isEligible}
+			nft_contract_address={nft_contract_address}
+			user_address={user_address}
 			open={open}
 			setOpen={setOpen}
-			maxWidth={560}
-			shouldCloseOnEsc={false}
-			shouldCloseOnOutsideClick={false}
-			showCloseButton={false}
-		>
-			<div className="bg-contrast-100 p-10 rounded flex flex-col gap-6">
-				{isEligible ? (
-					<>
-						<h3 className="text-xl font-semibold text-center">
-							You’re eligible 🎉
-						</h3>
-						<p className="text-text-100 text-center">
-							Your wallet is eligible to play and claim rewards.
-							Have fun!
-						</p>
-						<div className="text-center">
-							<Button
-								variant="accent-fill"
-								onClick={dismiss}
-								className="mt-4"
-							>
-								Let’s go
-							</Button>
-						</div>
-					</>
-				) : (
-					<>
-						<h3 className="text-xl font-semibold text-center">
-							Not eligible yet
-						</h3>
-						<p className="text-text-100 text-center">
-							This wallet isn’t eligible to participate right now.
-						</p>
-						<div className="text-center">
-							<Button
-								variant="accent-fill"
-								onClick={dismiss}
-								className="mt-4"
-							>
-								Ok
-							</Button>
-						</div>
-					</>
-				)}
-			</div>
-		</Modal>
+			onClose={dismiss}
+		/>
 	);
 };

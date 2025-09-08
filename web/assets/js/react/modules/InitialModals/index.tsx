@@ -5,11 +5,12 @@ import Web3EthProvider from "../../providers/web3-eth-provider";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { EncourageDepositingModal } from "./EncourageDepositingModal";
-import { EligibilityModal } from "./EligibilityModal";
+import { ShowEligibilityModal } from "./EligibilityModal";
 
 type Props = {
 	network: string;
 	payment_service_address: Address;
+	nft_contract_address: Address;
 	user_address: Address;
 	eligible: string;
 };
@@ -30,6 +31,7 @@ const hasUserViewed = (key: string, userAddress: string): boolean => {
 const InitialModals = ({
 	network,
 	payment_service_address,
+	nft_contract_address,
 	user_address,
 	eligible,
 }: Props) => {
@@ -55,9 +57,10 @@ const InitialModals = ({
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
 				<ToastContainer />
-				<EligibilityModal
+				<ShowEligibilityModal
 					user_address={user_address}
 					isEligible={isEligible}
+					nft_contract_address={nft_contract_address}
 				/>
 				<EncourageDepositingModal
 					payment_service_address={payment_service_address}

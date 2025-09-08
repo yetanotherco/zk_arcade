@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BalanceScoreInAligned } from "./BalanceScoreInAligned";
 import { Address } from "../../types/blockchain";
 import { ProofSubmissions } from "./ProofSubmissions";
@@ -6,6 +6,8 @@ import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
 import { useNftContract } from "../../hooks/useNftContract";
+import { EligibilityModal } from "../../components/Modal/EligibilityModal";
+import { useModal } from "../../hooks";
 
 type Props = {
 	network: string;
@@ -34,6 +36,7 @@ export const WalletInfo = ({
 	is_eligible,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
+	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
 	const { balance } = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
@@ -48,10 +51,6 @@ export const WalletInfo = ({
 	const eligibilityClasses = is_eligible
 		? "bg-green-50 border-green-300 text-green-900"
 		: "bg-amber-50 border-amber-300 text-amber-900";
-
-	const eligibilityIcon = is_eligible
-		? "hero-badge-check"
-		: "hero-exclamation-triangle";
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
@@ -103,14 +102,27 @@ export const WalletInfo = ({
 
 					{balance.data === 0n && (
 						<div
-							className={`flex items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
+							className={`flex flex-col items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
 						>
-							<span
-								className={`${eligibilityIcon} shrink-0 mt-0.5`}
-							/>
 							<p className="text-sm leading-5">
-								{eligibilityText}
+								{eligibilityText}{" "}
 							</p>
+							<p
+								className="text-green-600 cursor-pointer hover:underline"
+								onClick={() => setMintModalOpen(true)}
+							>
+								Claim!
+							</p>
+							<EligibilityModal
+								isEligible={is_eligible}
+								nft_contract_address={nft_contract_address}
+								open={mintModalOpen}
+								setOpen={setMintModalOpen}
+								user_address={user_address}
+								onClose={() =>
+									balance.refetch({ cancelRefetch: false })
+								}
+							/>
 						</div>
 					)}
 

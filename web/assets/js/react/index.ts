@@ -104,6 +104,7 @@ define(
 		attributes: [
 			"network",
 			"payment_service_address",
+			"nft_contract_address",
 			"user_address",
 			"eligible",
 		],

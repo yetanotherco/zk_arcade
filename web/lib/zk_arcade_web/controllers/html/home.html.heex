@@ -6,6 +6,7 @@
     <x-app-initial-modals
       network={Application.get_env(:zk_arcade, :network)}
       payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+      nft_contract_address={Application.get_env(:zk_arcade, :nft_contract_address)}
       user_address={@conn.assigns.wallet} 
       eligible={@eligible}
     />

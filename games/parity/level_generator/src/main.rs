@@ -91,12 +91,14 @@ fn calculate_movements_for_level(
 
     let movement_range = max_movements - min_movements;
 
-    let randomness: f32 = rand::thread_rng().gen_range(0.0..(movement_range as f32 / total_levels as f32));
+    let randomness: f32 = rand::random_range(0.0..(movement_range as f32 / total_levels as f32));
 
     let progression_step = movement_range as f32 / (total_levels - 1) as f32;
     let level_movements = min_movements as f32 + (level_index as f32 * progression_step);
 
-    (level_movements + randomness).round() as u8
+    (level_movements + randomness)
+        .round()
+        .min(max_movements as f32) as u8
 }
 
 fn gen_levels(

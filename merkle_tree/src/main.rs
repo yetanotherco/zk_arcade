@@ -27,13 +27,17 @@ struct Output {
 #[tokio::main]
 async fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
-    if args.len() != 2 {
-        eprintln!("Usage: merkle_json_cli <input.json> <output.json>");
+    if args.len() != 3 {
+        eprintln!("Usage: merkle_json_cli <input.json> <output.json> <merkle_root_index>");
         std::process::exit(1);
     }
 
     let in_path = &args[0];
     let out_path = &args[1];
+    let merkle_root_index: i32 = args[2].parse().unwrap_or_else(|e| {
+        eprintln!("Invalid merkle_root_index: {e}");
+        std::process::exit(1);
+    });
 
     println!("Processing input file: {}", in_path);
     let data =
@@ -91,11 +95,12 @@ async fn main() {
         .expect("Failed to connect to the database!");
 
     let mut query_builder =
-        sqlx::QueryBuilder::<Postgres>::new("INSERT INTO merkle_paths (id, address, merkle_proof)");
+        sqlx::QueryBuilder::<Postgres>::new("INSERT INTO merkle_paths (id, address, merkle_proof, merkle_root_index)");
     query_builder.push_values(out.proofs.iter(), |mut b, ProofEntry { address, proof }| {
         b.push_bind(uuid::Uuid::new_v4())
             .push_bind(address)
-            .push_bind(proof);
+            .push_bind(proof)
+            .push_bind(merkle_root_index);
     });
     let _result = query_builder.build().execute(&pool).await.unwrap();
     println!("Data successfully inserted into database!");

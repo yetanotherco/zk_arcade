@@ -133,39 +133,59 @@ defmodule ZkArcadeWeb.PageController do
         answer: "Your wallet is your identity in ZK Arcade. It allows you to deposit ETH into Aligned to pay for proof verification, claim your points on the leaderboard, and keep all your progress securely tied to your address."
       },
       %{
+        number: "01",
+        question: "Why do I need to mint an NFT?",
+        answer: "Minting the NFT proves your eligibility and grants access to participate in ZK Arcade. Without it, you cannot submit proofs or earn points on the leaderboard."
+      },
+      %{
         number: "02",
+        question: "Do I need to be eligible to mint?",
+        answer: "Yes. Only addresses that meet the eligibility requirements can mint the NFT. Make sure your address qualifies before trying to mint."
+      },
+      %{
+        number: "03",
+        question: "What does the NFT do after I mint it?",
+        answer: "The NFT acts as your participation ticket. It ties your identity to the game, allowing you to claim points in the global leaderboard."
+      },
+      %{
+        number: "04",
+        question: "Do I need to mint a new NFT for each challenge?",
+        answer: "No. You only need to mint the NFT once. After that, it continues to serve as your participation ticket for new challenges."
+      },
+      %{
+        number: "05",
+        question: "Can I transfer or sell the NFT?",
+        answer: "No. The NFT is non-transferable. It’s permanently tied to the wallet that minted it to preserve fair participation and prevent selling or lending access."
+      },
+      %{
+        number: "06",
         question: "Why do I need to verify my proofs?",
         answer: "Verification guarantees that your results are valid and are not tampered with. It ensures the leaderboard reflects the player's real skills, and not manipulated outcomes."
       },
       %{
-        number: "03",
+        number: "07",
         question: "Can I resubmit a proof for a lower level?",
         answer: "No. You can only submit one proof per level, and each new proof must be for a higher level than the last one submitted for the daily game."
       },
       %{
-        number: "04",
+        number: "08",
         question: "What happens if my proof submission fails?",
         answer: "If a proof fails verification, it won’t count toward your score. You can generate a new valid proof and resubmit."
       },
       %{
-        number: "05",
+        number: "09",
         question: "How do I earn points on the leaderboard?",
         answer: "Points are awarded per verified level on each day. The higher the level you submit a valid proof for, the more points you receive for it."
       },
       %{
-        number: "06",
+        number: "10",
         question: "Is my gameplay data public?",
         answer: "No. Only your proof and score are submitted. Zero-knowledge proofs allow verification without exposing your full gameplay data."
       },
       %{
-        number: "07",
+        number: "11",
         question: "How often are new challenges released?",
         answer: "There is available a new challenge everyday for each game!"
-      },
-      %{
-        number: "08",
-        question: "Can I play on mobile?",
-        answer: "Browser-based games will be mobile-friendly, but Beast 1984 game requires a desktop environment with a bash terminal."
       },
     ]
 

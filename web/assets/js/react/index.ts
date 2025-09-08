@@ -4,6 +4,7 @@ import SubmitProof from "./modules/SubmitProof/";
 import History from "./modules/History/";
 import DepositOnAlignedBtn from "./modules/History/DepositOnAlignedBtn";
 import UpdateUsernameBtn from "./modules/History/UpdateUsernameBtn";
+import HistoryClaimNFT from "./modules/History/ClaimNFT";
 import { CurrentBeastGame, SubmitBeastGameBtn } from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
@@ -74,6 +75,19 @@ define(
 define(
 	{ "x-app-history-update-username-btn": UpdateUsernameBtn },
 	{ attributes: ["network", "username"] }
+);
+
+define(
+	{ "x-app-history-claim-nft": HistoryClaimNFT },
+	{
+		attributes: [
+			"network",
+			"payment_service_address",
+			"user_address",
+			"nft_contract_address",
+			"is_eligible",
+		],
+	}
 );
 
 define(

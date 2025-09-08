@@ -10,7 +10,7 @@ type Props = {
 	isEligible: boolean;
 	open: boolean;
 	setOpen: (open: boolean) => void;
-	onClose: () => void;
+	onClose?: () => void;
 };
 
 export const EligibilityModal = ({
@@ -28,7 +28,7 @@ export const EligibilityModal = ({
 
 	const dismiss = () => {
 		setOpen(false);
-		onClose();
+		onClose && onClose();
 	};
 
 	return (

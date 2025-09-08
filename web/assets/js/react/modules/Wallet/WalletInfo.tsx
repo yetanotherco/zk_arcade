@@ -36,6 +36,7 @@ export const WalletInfo = ({
 	is_eligible,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
+	const [claimed, setClaimed] = useState(false);
 	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
 	const { balance } = useNftContract({
 		contractAddress: nft_contract_address,
@@ -54,7 +55,7 @@ export const WalletInfo = ({
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: "You are not currently eligible to mint the NFT or participate in the contest.";
+		: "You are not currently eligible to mint the NFT and participate in the contest.";
 
 	return (
 		<div className="sm:relative group">
@@ -100,28 +101,28 @@ export const WalletInfo = ({
 						</div>
 					</div>
 
-					{balance.data === 0n && (
+					{!claimed && balance.data === 0n && (
 						<div
 							className={`flex flex-col items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
 						>
 							<p className="text-sm leading-5">
 								{eligibilityText}{" "}
 							</p>
-							<p
-								className="text-green-600 cursor-pointer hover:underline"
-								onClick={() => setMintModalOpen(true)}
-							>
-								Claim!
-							</p>
+							{is_eligible && (
+								<p
+									className="text-green-600 cursor-pointer hover:underline"
+									onClick={() => setMintModalOpen(true)}
+								>
+									Claim!
+								</p>
+							)}
 							<EligibilityModal
 								isEligible={is_eligible}
 								nft_contract_address={nft_contract_address}
 								open={mintModalOpen}
 								setOpen={setMintModalOpen}
 								user_address={user_address}
-								onClose={() =>
-									balance.refetch({ cancelRefetch: false })
-								}
+								onClose={() => setClaimed(true)}
 							/>
 						</div>
 					)}

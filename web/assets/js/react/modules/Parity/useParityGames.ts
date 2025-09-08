@@ -6,7 +6,7 @@ import { useBlock } from "wagmi";
 
 type Args = {
 	leaderBoardContractAddress: Address;
-	userAddress;
+	userAddress: Address;
 };
 
 type GameStatus = {

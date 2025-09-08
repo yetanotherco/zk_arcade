@@ -13,6 +13,7 @@ type Props = {
 	proofs: string;
 	explorer_url: string;
 	batcher_url: string;
+	nft_contract_address: Address;
 };
 
 export default ({
@@ -23,6 +24,7 @@ export default ({
 	proofs,
 	explorer_url,
 	batcher_url,
+	nft_contract_address,
 }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -35,6 +37,7 @@ export default ({
 					user_address={user_address}
 					explorer_url={explorer_url}
 					batcher_url={batcher_url}
+					nft_contract_address={nft_contract_address}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

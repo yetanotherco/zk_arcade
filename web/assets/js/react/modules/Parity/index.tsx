@@ -11,6 +11,7 @@ type Props = {
 	payment_service_address: Address;
 	user_address: Address;
 	leaderboard_address: Address;
+	nft_contract_address: Address;
 	batcher_url: string;
 };
 
@@ -19,6 +20,7 @@ export const ParityGame = ({
 	payment_service_address,
 	user_address,
 	leaderboard_address,
+	nft_contract_address,
 	batcher_url,
 }: Props) => {
 	return (
@@ -32,6 +34,7 @@ export const ParityGame = ({
 						user_address={user_address}
 						leaderboard_address={leaderboard_address}
 						batcher_url={batcher_url}
+						nft_contract_address={nft_contract_address}
 					/>
 				</AudioProvider>
 			</ToastsProvider>

@@ -24,6 +24,7 @@ type Props = {
 	proofs: ProofSubmission[];
 	explorer_url: string;
 	batcher_url: string;
+	nft_contract_address: Address;
 };
 
 const Entry = ({
@@ -33,9 +34,11 @@ const Entry = ({
 	proof,
 	batcher_url,
 	explorer_url,
+	nft_contract_address,
 }: {
 	payment_service_address: Address;
 	leaderboard_address: Address;
+	nft_contract_address: Address;
 	user_address: Address;
 	proof: ProofSubmission;
 	batcher_url: string;
@@ -106,6 +109,7 @@ const Entry = ({
 				user_address={user_address}
 				proof={proof}
 				proofToSubmitData={null}
+				nft_contract_address={nft_contract_address}
 			/>
 		</>
 	);
@@ -117,6 +121,7 @@ export const ProofHistory = ({
 	user_address,
 	payment_service_address,
 	explorer_url,
+	nft_contract_address,
 }: Props) => {
 	useProofSentMessageReader();
 
@@ -165,6 +170,7 @@ export const ProofHistory = ({
 						explorer_url={explorer_url}
 						leaderboard_address={leaderboard_address}
 						payment_service_address={payment_service_address}
+						nft_contract_address={nft_contract_address}
 						proof={proof}
 						user_address={user_address}
 					/>

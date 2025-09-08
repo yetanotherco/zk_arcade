@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Button } from "../../components";
 import { useAudioState } from "../../state/audio";
+import { PARITY_MAX_MOVEMENTS } from "../../constants/parity";
 
 type Props = {
 	values: number[];
@@ -44,10 +45,12 @@ const Tile = ({
 				"h-[100px] sm:h-[150px] w-[100px] sm:w-[150px] flex items-center justify-center text-xl",
 				"border transition-all duration-300 ease-out will-change-transform",
 				gameEnded
-				? "border-gray-400 bg-gray-200 opacity-70"
-				: "border-accent-100 bg-accent-100/20",
+					? "border-gray-400 bg-gray-200 opacity-70"
+					: "border-accent-100 bg-accent-100/20",
 				currentPos && !gameEnded ? "bg-accent-200/50" : "",
-				changed && !gameEnded ? "scale-102 ring-2 ring-accent-100" : "ring-0",
+				changed && !gameEnded
+					? "scale-102 ring-2 ring-accent-100"
+					: "ring-0",
 			].join(" ")}
 		>
 			<p
@@ -74,8 +77,9 @@ export const ParityBoard = ({
 }: Props) => {
 	const { muted, toggleMuted } = useAudioState();
 
-	const userMovements = user_positions.length > 0 ? user_positions.length - 1 : 0;
-	const remainingMovements = 31 - userMovements;
+	const userMovements =
+		user_positions.length > 0 ? user_positions.length - 1 : 0;
+	const remainingMovements = PARITY_MAX_MOVEMENTS - userMovements;
 
 	return (
 		<div className="h-full flex flex-col justify-center items-center gap-4">
@@ -90,25 +94,28 @@ export const ParityBoard = ({
 				))}
 			</div>
 			<div className="max-w-[450px] text-sm mx-auto">
-			{remainingMovements <= 0 && (
-				<p className="mb-1 text-red text-center">
-					You've reached the maximum number of moves. You can reset the level or return home.
-				</p>
-			)}
+				{remainingMovements <= 0 && (
+					<p className="mb-1 text-red text-center">
+						You've reached the maximum number of moves. Reset reset
+						the level to try again.
+					</p>
+				)}
 			</div>
 			<div className="w-full flex justify-between items-center">
 				<p>
 					Level {levelNumber}/{totalLevels}
 				</p>
-				<div className={`${
-					remainingMovements <= 5
-					? "text-red"
-					: remainingMovements <= 10
-					? "text-orange"
-					: ""
-				}`}>
+				<div
+					className={`${
+						remainingMovements <= 5
+							? "text-red"
+							: remainingMovements <= 10
+							? "text-orange"
+							: ""
+					}`}
+				>
 					<p>
-						Moves {userMovements}/{31}
+						Moves {userMovements}/{PARITY_MAX_MOVEMENTS}
 					</p>
 				</div>
 				<Button

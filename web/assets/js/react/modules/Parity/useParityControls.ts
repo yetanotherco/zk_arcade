@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PARITY_MAX_MOVEMENTS } from "../../constants/parity";
 
 type Position = { row: number; col: number };
 
@@ -70,7 +71,7 @@ export const useParityControls = ({
 					return prev; // invalid move
 				}
 
-				if (userPositions.length >= 32) {
+				if (userPositions.length > PARITY_MAX_MOVEMENTS) {
 					return prev; // max moves reached
 				}
 

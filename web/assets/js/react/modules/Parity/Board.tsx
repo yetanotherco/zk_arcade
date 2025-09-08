@@ -89,6 +89,13 @@ export const ParityBoard = ({
 					/>
 				))}
 			</div>
+			<div className="max-w-[450px] text-sm mx-auto">
+			{remainingMovements <= 0 && (
+				<p className="mb-1 text-red text-center">
+					You've reached the maximum number of moves. You can reset the level or return home.
+				</p>
+			)}
+			</div>
 			<div className="w-full flex justify-between items-center">
 				<p>
 					Level {levelNumber}/{totalLevels}

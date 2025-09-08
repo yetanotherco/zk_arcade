@@ -210,7 +210,7 @@ export const Game = ({
 	);
 
 	return (
-		<div className="bg-contrast-300 h-[600px] py-10 w-full rounded">
+		<div className="bg-contrast-300 h-[675px] py-10 w-full rounded">
 			{view}
 		</div>
 	);

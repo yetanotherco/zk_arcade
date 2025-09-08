@@ -70,6 +70,7 @@ export const ParityBoard = ({
 	const { muted, toggleMuted } = useAudioState();
 
 	const userMovements = user_positions.length > 0 ? user_positions.length - 1 : 0;
+	const remainingMovements = 31 - userMovements;
 
 	return (
 		<div className="h-full flex flex-col justify-center items-center gap-4">
@@ -86,9 +87,17 @@ export const ParityBoard = ({
 				<p>
 					Level {levelNumber}/{totalLevels}
 				</p>
-				<p>
-					Moves {userMovements}/{31}
-				</p>
+				<div className={`${
+					remainingMovements <= 5
+					? "text-red"
+					: remainingMovements <= 10
+					? "text-orange"
+					: ""
+				}`}>
+					<p>
+						Moves {userMovements}/{31}
+					</p>
+				</div>
 				<Button
 					variant="arcade"
 					className="cursor-pointer"

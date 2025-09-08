@@ -145,7 +145,7 @@ defmodule ZkArcadeWeb.PageController do
       %{
         number: "03",
         question: "What does the NFT do after I mint it?",
-        answer: "The NFT acts as your participation pass. It ties your identity to the game, allowing you to claim points in the global leaderboard."
+        answer: "The NFT acts as your participation ticket. It ties your identity to the game, allowing you to claim points in the global leaderboard."
       },
       %{
         number: "04",

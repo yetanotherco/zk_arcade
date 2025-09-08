@@ -9,7 +9,6 @@ import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
 import InitialModals from "./modules/InitialModals";
 import { ParityGame } from "./modules/Parity";
-import { ClaimNft } from "./modules/ClaimNft";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -26,6 +25,7 @@ define(
 			"batcher_url",
 			"user_beast_submissions",
 			"is_eligible",
+			"nft_contract_address",
 		],
 	}
 );
@@ -40,6 +40,7 @@ define(
 			"batcher_url",
 			"leaderboard_address",
 			"beast_submissions",
+			"nft_contract_address",
 		],
 	}
 );
@@ -55,6 +56,7 @@ define(
 			"user_address",
 			"explorer_url",
 			"batcher_url",
+			"nft_contract_address",
 		],
 	}
 );
@@ -84,6 +86,7 @@ define(
 			"batcher_url",
 			"leaderboard_address",
 			"beast_submissions",
+			"nft_contract_address",
 		],
 	}
 );
@@ -118,21 +121,7 @@ define(
 			"user_address",
 			"batcher_url",
 			"leaderboard_address",
-		],
-	}
-);
-
-define(
-	{
-		"x-app-claim-nft": ClaimNft,
-	},
-	{
-		attributes: [
-			"network",
-			"merkle_proof",
-			"tokenURI",
-			"contract_address",
-			"user_address",
+			"nft_contract_address",
 		],
 	}
 );

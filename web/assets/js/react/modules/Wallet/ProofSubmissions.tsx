@@ -16,6 +16,7 @@ type ProofProps = {
 	payment_service_address: Address;
 	user_address: Address;
 	explorer_url: string;
+	nft_contract_address: Address;
 };
 
 const Proof = ({
@@ -24,6 +25,7 @@ const Proof = ({
 	batcher_url,
 	leaderboard_address,
 	payment_service_address,
+	nft_contract_address,
 	user_address,
 }: ProofProps) => {
 	const { open, setOpen, toggleOpen } = useModal();
@@ -58,6 +60,7 @@ const Proof = ({
 				user_address={user_address}
 				userBeastSubmissions={[]}
 				proofToSubmitData={null}
+				nft_contract_address={nft_contract_address}
 			/>
 		</>
 	);
@@ -68,6 +71,7 @@ type Props = {
 	leaderboard_address: Address;
 	user_address: Address;
 	payment_service_address: Address;
+	nft_contract_address: Address;
 	explorer_url: string;
 	batcher_url: string;
 };
@@ -77,6 +81,7 @@ export const ProofSubmissions = ({
 	batcher_url,
 	explorer_url,
 	leaderboard_address,
+	nft_contract_address,
 	user_address,
 	payment_service_address,
 }: Props) => {
@@ -126,6 +131,9 @@ export const ProofSubmissions = ({
 												payment_service_address
 											}
 											user_address={user_address}
+											nft_contract_address={
+												nft_contract_address
+											}
 										/>
 									);
 								})}

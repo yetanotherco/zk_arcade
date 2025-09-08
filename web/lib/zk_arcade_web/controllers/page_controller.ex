@@ -155,7 +155,7 @@ defmodule ZkArcadeWeb.PageController do
       %{
         number: "05",
         question: "Can I transfer or sell the NFT?",
-        answer: "No. The NFT is non-transferable (soulbound). It’s permanently tied to the wallet that minted it to preserve fair participation and prevent selling or lending access."
+        answer: "No. The NFT is non-transferable. It’s permanently tied to the wallet that minted it to preserve fair participation and prevent selling or lending access."
       },
       %{
         number: "06",

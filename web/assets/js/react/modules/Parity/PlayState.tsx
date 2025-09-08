@@ -106,22 +106,21 @@ export const PlayState = ({
 
 	return (
 		<div className="w-full h-full flex flex-col gap-4 items-center">
-			<div className="relative w-full flex justify-center items-center max-w-[450px]">
+			<div className="w-full flex justify-center items-center max-w-[450px]">
 				<h2 className="text-2xl font-normal text-center">
 					{currentLevel !== null ? "Parity" : "Select level"}
 				</h2>
 
 				{currentLevel !== null && (
-					<div className="absolute right-0 top-0 flex items-center">
-						<span className="font-medium relative group border rounded-full px-1">
+					<div className="ml-5 relative self-end relative">
+						<span className="font-medium text-left group border rounded-full px-1">
 							?
 							<div
-							className="absolute top-full right-0 mt-2 px-2 py-1 text-xs bg-black text-white rounded 
-										opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words 
-										whitespace-normal max-w-sm z-10 pointer-events-none transform translate-y-2"
-							style={{ minWidth: "450px" }}
+								className="absolute left-1/2 -translate-x-1/2 px-2 mt-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity break-words z-10"
+								style={{ width: "300px" }}
 							>
-								Use W, A, S or D to slide the tiles. To restart, press R.
+								Use W, A, S or D to slide the tiles. To restart,
+								press R.
 							</div>
 						</span>
 					</div>

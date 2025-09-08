@@ -101,7 +101,7 @@ export const ParityBoard = ({
 					</p>
 				)}
 			</div>
-			<div className="w-full flex justify-between items-center">
+			<div className="w-full flex sm:flex-row sm:gap-0 flex-wrap gap-5 sm:justify-between justify-center items-center">
 				<p>
 					Level {levelNumber}/{totalLevels}
 				</p>
@@ -118,6 +118,7 @@ export const ParityBoard = ({
 						Moves {userMovements}/{PARITY_MAX_MOVEMENTS}
 					</p>
 				</div>
+
 				<Button
 					variant="arcade"
 					className="cursor-pointer"

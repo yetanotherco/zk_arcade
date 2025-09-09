@@ -80,6 +80,7 @@ defmodule ZkArcadeWeb.CoreComponents do
               explorer_url={@explorer_url}
               batcher_url={@batcher_url}
               beast_submissions={@beast_submissions}
+              is_eligible={@eligible}
               nft_contract_address={@nft_contract_address}
           />
 

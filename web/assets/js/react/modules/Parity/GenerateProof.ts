@@ -2,6 +2,7 @@ import { getAddress, pad, toBytes, toHex } from "viem";
 import { VerificationData } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import * as snarkjs from "snarkjs";
+import { PARITY_MAX_MOVEMENTS } from "../../constants/parity";
 
 const toBytesFromJSON = (obj: unknown) =>
 	new TextEncoder().encode(JSON.stringify(obj));
@@ -15,7 +16,6 @@ type GenerateSubmitProofParams = {
 	levelsBoards: number[][][];
 };
 
-const MaxRounds = 55;
 const MaxLevels = 3;
 
 // We clone the positions to avoid overlapping between the round elements of each level
@@ -34,8 +34,8 @@ function fillLevelElements(
 	const lastPos: [number, number] = pos[pos.length - 1] ?? [0, 0];
 	const lastBrd: number[] = brd[brd.length - 1] ?? Array(9).fill(0);
 
-	while (pos.length < MaxRounds) pos.push(clonePos(lastPos));
-	while (brd.length < MaxRounds) brd.push([...lastBrd]);
+	while (pos.length < PARITY_MAX_MOVEMENTS) pos.push(clonePos(lastPos));
+	while (brd.length < PARITY_MAX_MOVEMENTS) brd.push([...lastBrd]);
 
 	return { positions: pos, boards: brd };
 }
@@ -47,8 +47,12 @@ function makeEmptyLevel(): {
 	const zeroPos: [number, number] = [0, 0];
 	const zeroBoard = Array(9).fill(0);
 	return {
-		positions: Array.from({ length: MaxRounds }, () => clonePos(zeroPos)),
-		boards: Array.from({ length: MaxRounds }, () => [...zeroBoard]),
+		positions: Array.from({ length: PARITY_MAX_MOVEMENTS }, () =>
+			clonePos(zeroPos)
+		),
+		boards: Array.from({ length: PARITY_MAX_MOVEMENTS }, () => [
+			...zeroBoard,
+		]),
 	};
 }
 

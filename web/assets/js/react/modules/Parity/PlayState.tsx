@@ -44,6 +44,7 @@ export const PlayState = ({
 	setPosition,
 	setHasWon,
 	saveLevelData,
+	user_positions,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
@@ -62,6 +63,7 @@ export const PlayState = ({
 	setPosition: (position: { col: number; row: number }) => void;
 	setHasWon: (hasWon: boolean) => void;
 	saveLevelData: () => void;
+	user_positions: [number, number][];
 }) => {
 	const view = useSwapTransition(
 		currentLevel,
@@ -84,6 +86,7 @@ export const PlayState = ({
 					totalLevels={levels.length}
 					reset={reset}
 					home={() => setGameState("home")}
+					user_positions={user_positions}
 				/>
 			),
 		{ className: "h-full w-full flex items-center justify-center" }
@@ -103,9 +106,26 @@ export const PlayState = ({
 
 	return (
 		<div className="w-full h-full flex flex-col gap-4 items-center">
-			<h2 className="text-2xl font-normal text-center">
-				{currentLevel !== null ? "Parity" : "Select level"}
-			</h2>
+			<div className="w-full flex justify-center items-center max-w-[450px]">
+				<h2 className="text-2xl font-normal text-center">
+					{currentLevel !== null ? "Parity" : "Select level"}
+				</h2>
+
+				{currentLevel !== null && (
+					<div className="ml-5 relative self-end relative">
+						<span className="font-medium text-left group border rounded-full px-1">
+							?
+							<div
+								className="absolute left-1/2 -translate-x-1/2 px-2 mt-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity break-words z-10"
+								style={{ width: "300px" }}
+							>
+								Use W, A, S or D to slide the tiles. To restart,
+								press R.
+							</div>
+						</span>
+					</div>
+				)}
+			</div>
 			{currentLevel === null && (
 				<p className="text-text-200 text-center">
 					Select a level to play. New levels unlock as you progress!

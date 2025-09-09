@@ -222,4 +222,4 @@ template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
     gameConfigPacked <-- acc;
 }
 
-component main {public [userAddress]}  = ValidateParityGame(3, 32);
+component main {public [userAddress]}  = ValidateParityGame(3, 55);

@@ -1,7 +1,7 @@
 .PHONY: all compile ptau setup vkey artifacts fullprove clean
 
 PUB_DIR      := public/artifacts
-PTAU_POW     := 14
+PTAU_POW     := 16
 
 all: compile ptau setup vkey artifacts
 

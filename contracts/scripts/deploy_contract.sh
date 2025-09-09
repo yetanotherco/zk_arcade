@@ -1,5 +1,7 @@
 #!/bin/bash
 
+MERKLE_ROOT_INDEX=$1
+
 # cd to the directory of this script so that this can be run from anywhere
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # At this point we are in scripts/contracts/
@@ -9,7 +11,7 @@ cd "$parent_path"
 cd ../../merkle_tree/
 
 # Generate the merkle root and the merkle proof for each address of the whitelist
-cargo run -- ../contracts/script/deploy/config/devnet/nft.json merkle_output.json
+cargo run -- ../contracts/script/deploy/config/devnet/nft.json merkle_output.json $MERKLE_ROOT_INDEX
 
 merkle_root=$(jq -r '.root' merkle_output.json)
 

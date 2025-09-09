@@ -26,7 +26,8 @@ struct Output {
     proofs: Vec<ProofEntry>,
 }
 
-async fn filter_addresses(addresses: Vec<String>) -> Result<Vec<String>, sqlx::Error> {
+async fn filter_addresses(addresses: Vec<String>) -> Result<(), sqlx::Error> {
+    // TODO: Read the addresses from the previous filtered_addresses_{merkle_root_index}.json files
     if dotenv().is_err() {
         println!("Warning: No .env file found. Attempting to load .env.example");
         let _ = from_filename(".env.example");
@@ -61,10 +62,15 @@ async fn filter_addresses(addresses: Vec<String>) -> Result<Vec<String>, sqlx::E
         .filter(|a| !existing.contains(&a.to_lowercase()))
         .collect();
 
-    println!("Already in DB: {existing:?}");
-    println!("New to insert: {to_insert:?}");
+    println!("The filtered addresses are:");
+    for addr in &existing {
+        println!("{:?}", addr);
+    }
 
-    Ok(to_insert)
+    // write the filtered addresses to a filtered_addresses_{merkle_root_index}.json file
+
+
+    Ok()
 }
 
 #[tokio::main]
@@ -86,7 +92,7 @@ async fn main() {
             .map(|a| a.to_lowercase().trim().to_string())
             .collect::<Vec<_>>();
 
-        let filtered = filter_addresses(addresses.clone()).await.expect("Failed to filter addresses");
+        let _ = filter_addresses(addresses.clone()).await.expect("Failed to filter addresses");
 
         return;
     }

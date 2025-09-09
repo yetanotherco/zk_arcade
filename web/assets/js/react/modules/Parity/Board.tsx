@@ -43,7 +43,7 @@ const Tile = ({
 		<div
 			className={[
 				"h-[100px] sm:h-[150px] w-[100px] sm:w-[150px] flex items-center justify-center text-xl",
-				"border transition-all duration-300 ease-out will-change-transform",
+				"border transition-all",
 				gameEnded
 					? "border-gray-400 bg-gray-200 opacity-70"
 					: "border-accent-100 bg-accent-100/20",

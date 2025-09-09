@@ -44,6 +44,7 @@ const WalletContent = ({
 	const { address, isConnected } = useAccount();
 	const [needsAgreement, setNeedsAgreement] = useState(false);
 	const [isCheckingAgreement, setIsCheckingAgreement] = useState(false);
+	const [musicMuted, setMusicMuted] = useState(true);
 	useProofSentMessageReader();
 
 	// Check if connected wallet needs agreement
@@ -72,11 +73,33 @@ const WalletContent = ({
 		}
 	}, [isConnected, address, user_address]);
 
+	useEffect(() => {
+		const audio = document.getElementById('bg-music');
+		if (audio) {
+			audio.muted = musicMuted;
+		}
+
+		setMusicMuted(audio?.muted ?? true);
+	}, [musicMuted, setMusicMuted]);
+
 	// Case 1: User has completed session (signed agreement)
 	if (user_address) {
 		const decodedProofs: ProofSubmission[] = JSON.parse(proofs);
 		return (
 			<div className="flex flex-row items-center gap-8">
+				<div
+					className="cursor-pointer"
+					onClick={() => {
+						const audio = document.getElementById('bg-music');
+						if (audio) {
+							audio.muted = !audio.muted;
+							setMusicMuted(audio.muted);
+						}
+					}}
+					title={musicMuted ? "Unmute background music" : "Mute background music"}
+				>
+					{musicMuted ? (<span className="hero-speaker-wave size-7"></span>) : (<span className="hero-speaker-x-mark size-7"></span>)}
+				</div>
 				<div className="md:block hidden">
 					<NotificationBell
 						proofs={decodedProofs}

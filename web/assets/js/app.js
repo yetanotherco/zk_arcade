@@ -28,3 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", copy);
     });
 });
+
+function changeMuteState() {
+    const audio = document.getElementById('bg-music');
+    if (audio) {
+        audio.muted = !audio.muted;
+    }
+}
+
+window.changeMuteState = changeMuteState

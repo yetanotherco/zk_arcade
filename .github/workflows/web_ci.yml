@@ -11,6 +11,7 @@ env:
 
 jobs:
   release:
+    name: Build Elixir Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

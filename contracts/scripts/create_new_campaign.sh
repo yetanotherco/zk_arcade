@@ -11,7 +11,7 @@ cd "$parent_path"
 # cd to merkle_tree/
 cd ../../merkle_tree/
 
-# TODO: Check if any of the addresses in the whitelist ir already in the database
+# Check if any of the addresses in the whitelist ir already in the database
 cargo run -- ../$WHITELIST_PATH
 
 # Check if the address filtering program failed

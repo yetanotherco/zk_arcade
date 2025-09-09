@@ -17,7 +17,7 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
     bytes32[] public merkleRoots;
     mapping(address => bool) public hasClaimed;
     bool transfersPaused = true;
-    bool claimsPaused = true;
+    bool claimsPaused = false;
 
     event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event NFTClaimed(address indexed account);

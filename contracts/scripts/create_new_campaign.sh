@@ -14,6 +14,12 @@ cd ../../merkle_tree/
 # TODO: Check if any of the addresses in the whitelist ir already in the database
 cargo run -- ../$WHITELIST_PATH $MERKLE_ROOT_INDEX
 
+# Check if the address filtering program failed
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to filter addresses. Exiting script."
+    exit 1
+fi
+
 # # Generate the merkle root and the merkle proof for each address of the whitelist
 # cargo run -- ../$WHITELIST_PATH merkle_output.json $MERKLE_ROOT_INDEX
 

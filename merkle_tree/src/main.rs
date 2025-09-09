@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, postgres::PgPoolOptions};
 use std::{env, fs};
 use std::collections::HashSet;
-use sqlx::Row;
 
 #[derive(Serialize, Deserialize)]
 struct WhitelistWrapper {
@@ -26,58 +25,59 @@ struct Output {
     proofs: Vec<ProofEntry>,
 }
 
-async fn filter_addresses(addresses: Vec<String>, merkle_root_index: i32) -> Result<(), sqlx::Error> {
-    // TODO: Read the addresses from the previous filtered_{merkle_root_index}.json files
-    if dotenv().is_err() {
-        println!("Warning: No .env file found. Attempting to load .env.example");
-        let _ = from_filename(".env.example");
+fn read_addresses_from_file(path: &str) -> Vec<String> {
+    let data = fs::read_to_string(path).unwrap_or_else(|e| panic!("Failed to read {path}: {e}"));
+    let parsed: WhitelistWrapper =
+        serde_json::from_str(&data).unwrap_or_else(|e| panic!("Invalid JSON: {e}"));
+    parsed.whitelist.addresses
+}
+
+fn read_previous_filtered_addresses() -> HashSet<String> {
+    let previous_filtered_path = "whitelisted_addresses/";
+    let paths = fs::read_dir(previous_filtered_path).unwrap_or_else(|e| panic!("Failed to read directory {}: {e}", previous_filtered_path));
+
+    let mut existing: HashSet<String> = HashSet::new();
+    for path in paths {
+        let path = path.unwrap().path();
+        if path.is_file() {
+            if let Some(file_name) = path.file_name() {
+                if let Some(file_name_str) = file_name.to_str() {
+                    if file_name_str.starts_with("filtered_") && file_name_str.ends_with(".json") {
+                        let file_addresses: Vec<String> = read_addresses_from_file(path.to_str().unwrap());
+                        for addr in file_addresses {
+                            existing.insert(addr.to_lowercase());
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    let database_url =
-        env::var("DATABASE_URL").expect("The environment variable DATABASE_URL is missing!");
+    existing
+}
 
-    let pool = PgPoolOptions::new()
-        .connect(&database_url)
-        .await
-        .expect("Failed to connect to the database!");
-    
-    let rows = sqlx::query(
-        r#"
-        SELECT address
-        FROM merkle_paths
-        WHERE lower(address) = ANY($1)
-        "#,
-    )
-    .bind(&addresses)
-    .fetch_all(&pool)
-    .await?;
+fn filter_addresses(addresses: Vec<String>, merkle_root_index: i32) {
+    let previous_filtered_addresses = read_previous_filtered_addresses();
 
-    let existing: HashSet<String> = rows
-        .into_iter()
-        .map(|r| r.get::<String, _>("address").to_lowercase())
-        .collect();
+    let new_addresses: HashSet<String> = addresses.into_iter().collect();
 
-    let to_insert: Vec<String> = addresses
-        .into_iter()
-        .filter(|a| !existing.contains(&a.to_lowercase()))
-        .collect();
+    let filtered: Vec<String> = new_addresses.difference(&previous_filtered_addresses).cloned().collect();
+    let intersection: HashSet<_> = new_addresses.intersection(&previous_filtered_addresses).collect();
 
-    println!("The filtered addresses are:");
-    for addr in &existing {
+    println!("The removed addresses are:");
+    for addr in &intersection {
         println!("{:?}", addr);
     }
 
     // Write the filtered addresses to filtered_{merkle_root_index}.json
     let filtered = WhitelistWrapper {
         whitelist: Whitelist {
-            addresses: to_insert.into_iter().collect(),
+            addresses: filtered.into_iter().collect(),
         },
     };
     let serialized = serde_json::to_string_pretty(&filtered).expect("Failed to serialize output JSON");
     fs::write(format!("whitelisted_addresses/filtered_{}.json", merkle_root_index), &serialized).unwrap_or_else(|e| panic!("Failed to write filtered_addresses.json: {e}"));
     println!("Filtered addresses written to whitelisted_addresses/filtered_{}.json", merkle_root_index);
-
-    Ok(())
 }
 
 #[tokio::main]
@@ -103,7 +103,7 @@ async fn main() {
             .map(|a| a.to_lowercase().trim().to_string())
             .collect::<Vec<_>>();
 
-        let _ = filter_addresses(addresses.clone(), merkle_root_index).await.expect("Failed to filter addresses");
+        let _ = filter_addresses(addresses.clone(), merkle_root_index);
 
         return;
     }

@@ -4,10 +4,11 @@ import SubmitProof from "./modules/SubmitProof/";
 import History from "./modules/History/";
 import DepositOnAlignedBtn from "./modules/History/DepositOnAlignedBtn";
 import UpdateUsernameBtn from "./modules/History/UpdateUsernameBtn";
+import HistoryClaimNFT from "./modules/History/ClaimNFT";
 import { CurrentBeastGame, SubmitBeastGameBtn } from "./modules/BeastGame/";
 import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
-import EncourageDepositing from "./modules/EncourageDepositing";
+import InitialModals from "./modules/InitialModals";
 import { ParityGame } from "./modules/Parity";
 
 define(
@@ -24,6 +25,7 @@ define(
 			"explorer_url",
 			"batcher_url",
 			"user_beast_submissions",
+			"is_eligible",
 			"nft_contract_address",
 		],
 	}
@@ -76,6 +78,19 @@ define(
 );
 
 define(
+	{ "x-app-history-claim-nft": HistoryClaimNFT },
+	{
+		attributes: [
+			"network",
+			"payment_service_address",
+			"user_address",
+			"nft_contract_address",
+			"is_eligible",
+		],
+	}
+);
+
+define(
 	{ "x-app-submit-beast-solution-btn": SubmitBeastGameBtn },
 	{
 		attributes: [
@@ -98,8 +113,16 @@ define(
 define({ "x-app-how-it-works-modal": HowItWorksModal });
 
 define(
-	{ "x-app-encourage-depositing-modal": EncourageDepositing },
-	{ attributes: ["network", "payment_service_address", "user_address"] }
+	{ "x-app-initial-modals": InitialModals },
+	{
+		attributes: [
+			"network",
+			"payment_service_address",
+			"nft_contract_address",
+			"user_address",
+			"eligible",
+		],
+	}
 );
 
 define(

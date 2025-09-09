@@ -32,6 +32,12 @@
                 <p class="text-lg text-text-200">Score: <span class="text-text-100" id="history-score">...</span></p>
                 <p class="text-lg text-text-200">Proofs sent: <span class="text-text-100"><%= @proofs_sent_total %></span></p>
             </div>
+            <x-app-history-claim-nft 
+                network={@network}
+                user_address={@wallet}
+                nft_contract_address={@nft_contract_address}
+                is_eligible={@eligible}
+            />
         </div>
     </div>
 

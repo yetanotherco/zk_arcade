@@ -23,6 +23,7 @@ type Props = {
 	explorer_url: string;
 	batcher_url: string;
 	user_beast_submissions: string;
+	is_eligible: string;
 	nft_contract_address: Address;
 };
 
@@ -37,6 +38,7 @@ const WalletContent = ({
 	explorer_url,
 	batcher_url,
 	user_beast_submissions,
+	is_eligible,
 	nft_contract_address,
 }: Omit<Props, "needs_agreement">) => {
 	const { address, isConnected } = useAccount();
@@ -98,6 +100,7 @@ const WalletContent = ({
 					user_position={user_position}
 					explorer_url={explorer_url}
 					batcher_url={batcher_url}
+					is_eligible={is_eligible === "true"}
 					nft_contract_address={nft_contract_address}
 				/>
 			</div>
@@ -124,6 +127,7 @@ export default ({
 	explorer_url,
 	batcher_url,
 	user_beast_submissions,
+	is_eligible,
 	nft_contract_address,
 }: Omit<Props, "needs_agreement">) => {
 	return (
@@ -141,6 +145,7 @@ export default ({
 					explorer_url={explorer_url}
 					batcher_url={batcher_url}
 					user_beast_submissions={user_beast_submissions}
+					is_eligible={is_eligible}
 					nft_contract_address={nft_contract_address}
 				/>
 			</ToastsProvider>

@@ -8,7 +8,7 @@ on:
     paths:
       - 'contracts/**'
       - 'foundry.toml'
-      - '.github/workflows/contract_ci.yml'
+      - '.github/workflows/contracts_ci.yml'
 
 jobs:
   build:

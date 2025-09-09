@@ -74,7 +74,7 @@ const WalletContent = ({
 	}, [isConnected, address, user_address]);
 
 	useEffect(() => {
-		const audio = document.getElementById('bg-music');
+		const audio = document.getElementById('bg-music') as HTMLAudioElement | null;
 		if (audio) {
 			audio.muted = musicMuted;
 		}
@@ -91,7 +91,7 @@ const WalletContent = ({
 					className="cursor-pointer"
 					onClick={() => {
 						const audio = document.getElementById('bg-music');
-						if (audio) {
+						if (audio instanceof HTMLAudioElement) {
 							audio.muted = !audio.muted;
 							setMusicMuted(audio.muted);
 						}

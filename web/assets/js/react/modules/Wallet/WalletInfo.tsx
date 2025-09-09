@@ -51,7 +51,7 @@ export const WalletInfo = ({
 
 	const eligibilityClasses = is_eligible
 		? "bg-accent-100/20 border-accent-100 text-accent-100"
-		: "bg-amber-50 border-amber-300 text-amber-900";
+		: "bg-yellow/20 border-yellow text-yellow";
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."

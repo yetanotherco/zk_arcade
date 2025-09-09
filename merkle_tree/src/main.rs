@@ -6,11 +6,11 @@ use std::{env, fs};
 use std::collections::HashSet;
 use sqlx::Row;
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct WhitelistWrapper {
     whitelist: Whitelist,
 }
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct Whitelist {
     addresses: Vec<String>,
 }
@@ -26,8 +26,8 @@ struct Output {
     proofs: Vec<ProofEntry>,
 }
 
-async fn filter_addresses(addresses: Vec<String>) -> Result<(), sqlx::Error> {
-    // TODO: Read the addresses from the previous filtered_addresses_{merkle_root_index}.json files
+async fn filter_addresses(addresses: Vec<String>, merkle_root_index: i32) -> Result<(), sqlx::Error> {
+    // TODO: Read the addresses from the previous filtered_{merkle_root_index}.json files
     if dotenv().is_err() {
         println!("Warning: No .env file found. Attempting to load .env.example");
         let _ = from_filename(".env.example");
@@ -67,17 +67,28 @@ async fn filter_addresses(addresses: Vec<String>) -> Result<(), sqlx::Error> {
         println!("{:?}", addr);
     }
 
-    // write the filtered addresses to a filtered_addresses_{merkle_root_index}.json file
+    // Write the filtered addresses to filtered_{merkle_root_index}.json
+    let filtered = WhitelistWrapper {
+        whitelist: Whitelist {
+            addresses: to_insert.into_iter().collect(),
+        },
+    };
+    let serialized = serde_json::to_string_pretty(&filtered).expect("Failed to serialize output JSON");
+    fs::write(format!("whitelisted_addresses/filtered_{}.json", merkle_root_index), &serialized).unwrap_or_else(|e| panic!("Failed to write filtered_addresses.json: {e}"));
+    println!("Filtered addresses written to whitelisted_addresses/filtered_{}.json", merkle_root_index);
 
-
-    Ok()
+    Ok(())
 }
 
 #[tokio::main]
 async fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
-    if args.len() == 1 {
+    if args.len() == 2 {
         let in_path = &args[0];
+        let merkle_root_index: i32 = args[1].parse().unwrap_or_else(|e| {
+            eprintln!("Invalid merkle_root_index: {e}");
+            std::process::exit(1);
+        });
 
         println!("Processing input file: {}", in_path);
         let data =
@@ -92,7 +103,7 @@ async fn main() {
             .map(|a| a.to_lowercase().trim().to_string())
             .collect::<Vec<_>>();
 
-        let _ = filter_addresses(addresses.clone()).await.expect("Failed to filter addresses");
+        let _ = filter_addresses(addresses.clone(), merkle_root_index).await.expect("Failed to filter addresses");
 
         return;
     }

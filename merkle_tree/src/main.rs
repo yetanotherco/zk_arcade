@@ -69,7 +69,7 @@ fn filter_addresses(addresses: Vec<String>) {
         println!("{:?}", addr);
     }
 
-    // Write the filtered addresses to filtered.json
+    // Write the filtered addresses to filtered.json and the repeated ones to repeated.json
     let filtered = WhitelistWrapper {
         whitelist: Whitelist {
             addresses: filtered.into_iter().collect(),
@@ -78,6 +78,15 @@ fn filter_addresses(addresses: Vec<String>) {
     let serialized = serde_json::to_string_pretty(&filtered).expect("Failed to serialize output JSON");
     fs::write("filtered.json", &serialized).unwrap_or_else(|e| panic!("Failed to write filtered.json: {e}"));
     println!("Filtered addresses written to filtered.json");
+
+    let repeated = WhitelistWrapper {
+        whitelist: Whitelist {
+            addresses: intersection.into_iter().cloned().collect(),
+        },
+    };
+    let serialized = serde_json::to_string_pretty(&repeated).expect("Failed to serialize output JSON");
+    fs::write("repeated.json", &serialized).unwrap_or_else(|e| panic!("Failed to write repeated.json: {e}"));
+    println!("Repeated addresses written to repeated.json");
 }
 
 #[tokio::main]
@@ -132,6 +141,11 @@ async fn main() {
     let values: Vec<Vec<String>> = addresses.iter().map(|a| vec![a.clone()]).collect();
 
     println!("Building Merkle tree for {:?} addresses...", addresses);
+
+    if addresses.is_empty() {
+        eprintln!("No new addresses found for whitelisting.");
+        std::process::exit(1);
+    }
 
     let tree = StandardMerkleTree::of(&values, &["address"]).expect("Failed to build Merkle tree");
 

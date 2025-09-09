@@ -137,12 +137,12 @@ async fn setup_database_connection() -> sqlx::Pool<Postgres> {
 // Inserts Merkle proofs into the database
 async fn insert_merkle_proofs(
     pool: &sqlx::Pool<Postgres>,
-    output: &Output,
+    merkle_proofs: &Vec<ProofEntry>,
     merkle_root_index: i32,
 ) {
     let mut query_builder =
         sqlx::QueryBuilder::<Postgres>::new("INSERT INTO merkle_paths (id, address, merkle_proof, merkle_root_index)");
-    query_builder.push_values(output.proofs.iter(), |mut b, ProofEntry { address, proof }| {
+    query_builder.push_values(merkle_proofs.iter(), |mut b, ProofEntry { address, proof }| {
         b.push_bind(uuid::Uuid::new_v4())
             .push_bind(address)
             .push_bind(proof)
@@ -169,7 +169,7 @@ async fn handle_merkle_processing(
 
     println!("Connecting to database...");
     let pool = setup_database_connection().await;
-    insert_merkle_proofs(&pool, &output, merkle_root_index).await;
+    insert_merkle_proofs(&pool, &output.proofs, merkle_root_index).await;
 }
 
 fn load_and_normalize_addresses(path: &str) -> Vec<String> {

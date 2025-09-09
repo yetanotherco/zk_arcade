@@ -56,7 +56,7 @@ fn read_previous_filtered_addresses() -> HashSet<String> {
     existing
 }
 
-fn filter_addresses(addresses: Vec<String>, merkle_root_index: i32) {
+fn filter_addresses(addresses: Vec<String>) {
     let previous_filtered_addresses = read_previous_filtered_addresses();
 
     let new_addresses: HashSet<String> = addresses.into_iter().collect();
@@ -69,26 +69,22 @@ fn filter_addresses(addresses: Vec<String>, merkle_root_index: i32) {
         println!("{:?}", addr);
     }
 
-    // Write the filtered addresses to filtered_{merkle_root_index}.json
+    // Write the filtered addresses to filtered.json
     let filtered = WhitelistWrapper {
         whitelist: Whitelist {
             addresses: filtered.into_iter().collect(),
         },
     };
     let serialized = serde_json::to_string_pretty(&filtered).expect("Failed to serialize output JSON");
-    fs::write(format!("whitelisted_addresses/filtered_{}.json", merkle_root_index), &serialized).unwrap_or_else(|e| panic!("Failed to write filtered_addresses.json: {e}"));
-    println!("Filtered addresses written to whitelisted_addresses/filtered_{}.json", merkle_root_index);
+    fs::write("filtered.json", &serialized).unwrap_or_else(|e| panic!("Failed to write filtered.json: {e}"));
+    println!("Filtered addresses written to filtered.json");
 }
 
 #[tokio::main]
 async fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
-    if args.len() == 2 {
+    if args.len() == 1 {
         let in_path = &args[0];
-        let merkle_root_index: i32 = args[1].parse().unwrap_or_else(|e| {
-            eprintln!("Invalid merkle_root_index: {e}");
-            std::process::exit(1);
-        });
 
         println!("Processing input file: {}", in_path);
         let data =
@@ -103,7 +99,7 @@ async fn main() {
             .map(|a| a.to_lowercase().trim().to_string())
             .collect::<Vec<_>>();
 
-        let _ = filter_addresses(addresses.clone(), merkle_root_index);
+        let _ = filter_addresses(addresses.clone());
 
         return;
     }
@@ -159,6 +155,14 @@ async fn main() {
 
     fs::write(out_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {out_path}: {e}"));
     println!("Merkle proof data written to merkle-tree/{}", out_path);
+
+    let wrapped = WhitelistWrapper {
+        whitelist: Whitelist {
+            addresses: addresses.into_iter().collect(),
+        },
+    };
+    let serialized = serde_json::to_string_pretty(&wrapped).expect("Failed to serialize output JSON");
+    fs::write(format!("whitelisted_addresses/filtered_{}.json", merkle_root_index), &serialized).unwrap_or_else(|e| panic!("Failed to write filtered_addresses.json: {e}"));
 
     println!("Connecting to database...");
 

@@ -17,23 +17,24 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
     bytes32[] public merkleRoots;
     mapping(address => bool) public hasClaimed;
     bool transfersPaused = true;
+    bool claimsPaused = true;
 
     event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event NFTClaimed(address indexed account);
-    event TransfersUnPaused();
+    event TransfersPausedUpdated(bool newPauseStatus);
+    event ClaimsPausedUpdated(bool newPauseStatus);
 
     error TransfersPaused();
+    error ClaimsPaused();
 
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(
-        address owner, 
-        string memory name, 
-        string memory symbol,
-        bytes32[] memory _merkleRoots
-    ) public initializer {
+    function initialize(address owner, string memory name, string memory symbol, bytes32[] memory _merkleRoots)
+        public
+        initializer
+    {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
         merkleRoots = _merkleRoots;
@@ -41,14 +42,20 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    function claimNFT(bytes32[] calldata merkleProof, string memory tokenURI, uint256 rootIndex) public returns (uint256) {
+    function claimNFT(bytes32[] calldata merkleProof, string memory tokenURI, uint256 rootIndex)
+        public
+        returns (uint256)
+    {
+        if (claimsPaused) {
+            revert ClaimsPaused();
+        }
         require(!hasClaimed[msg.sender], "NFT already claimed for this address");
 
         require(rootIndex < merkleRoots.length, "Invalid root index");
 
         // Verify that the address is whitelisted using Merkle Proof
         bytes32 inner = keccak256(abi.encode(msg.sender));
-        bytes32 leaf  = keccak256(abi.encode(inner));
+        bytes32 leaf = keccak256(abi.encode(inner));
         require(MerkleProof.verify(merkleProof, merkleRoots[rootIndex], leaf), "Invalid merkle proof");
 
         // Mark as claimed
@@ -92,8 +99,12 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
     function setTransferPaused(bool _transfersPaused) public onlyOwner {
         transfersPaused = _transfersPaused;
 
-        if (!transfersPaused) {
-            emit TransfersUnPaused();
-        }
+        emit TransfersPausedUpdated(transfersPaused);
+    }
+
+    function setClaimsPaused(bool _claimsPaused) public onlyOwner {
+        claimsPaused = _claimsPaused;
+
+        emit ClaimsPausedUpdated(claimsPaused);
     }
 }

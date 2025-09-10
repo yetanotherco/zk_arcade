@@ -4,7 +4,7 @@ import { Button } from "../../components";
 import { useSpring, animated } from "@react-spring/web";
 import { useBackgroundMusic } from "../../hooks/useBackgroundMusic";
 
-export const BackgroundMusicBtn = () => {
+export const BackgroundMusicPromptBtn = () => {
 	const [hide, setHide] = useState(false);
 	const [visible, setVisible] = useState(false);
 	const { startMusic, stopMusic, musicActive, updateMusicIsActive } =

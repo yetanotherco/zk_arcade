@@ -6,7 +6,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {Script} from "forge-std/Script.sol";
 
 contract NftContractDeployer is Script {
-    function run(string memory configFilePath, string memory outputFilePath, bytes32 merkleRoot)
+    function run(string memory configFilePath, string memory outputFilePath)
         public
         returns (address _proxy, address _implementation)
     {
@@ -16,36 +16,24 @@ contract NftContractDeployer is Script {
         string memory name = vm.parseJsonString(configData, ".name");
         string memory symbol = vm.parseJsonString(configData, ".symbol");
 
-        address[] memory whitelistAddresses = 
-            abi.decode(vm.parseJson(configData, ".whitelist.addresses"), (address[]));
-
-        bytes32[] memory merkleRoots = new bytes32[](1);
-        merkleRoots[0] = merkleRoot;
-
         vm.startBroadcast();
         ZkArcadeNft implementation = new ZkArcadeNft();
         bytes memory data = abi.encodeWithSignature(
-            "initialize(address,string,string,bytes32[])", 
+            "initialize(address,string,string)",
             owner, 
             name, 
-            symbol,
-            merkleRoots
+            symbol
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);
         vm.stopBroadcast();
 
-        // Write addresses and Merkle Tree data
+        // Write addresses
         string memory addressesObj = "addresses";
         vm.serializeAddress(addressesObj, "proxy", address(proxy));
         string memory addressOutput = vm.serializeAddress(addressesObj, "implementation", address(implementation));
         
-        string memory merkleObj = "merkle";
-        vm.serializeBytes32(merkleObj, "root", merkleRoot);
-        string memory merkleOutput = vm.serializeUint(merkleObj, "whitelistCount", whitelistAddresses.length);
-        
         string memory parentObj = "parent";
-        vm.serializeString(parentObj, "addresses", addressOutput);
-        string memory finalJson = vm.serializeString(parentObj, "merkle", merkleOutput);
+        string memory finalJson = vm.serializeString(parentObj, "addresses", addressOutput);
 
         vm.writeFile(outputFilePath, finalJson);
 

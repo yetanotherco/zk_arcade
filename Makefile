@@ -129,7 +129,7 @@ build_merkle_proof_generator:
 preprocess_whitelist:
 	cd data && python3 preprocess_addresses.py $(WHITELIST_PATH)
 
-generate_merkle_data: submodules
+generate_merkle_data: build_merkle_proof_generator
 	./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) merkle_tree/merkle_output.json $(MERKLE_ROOT_INDEX)
 
 add_merkle_root: submodules

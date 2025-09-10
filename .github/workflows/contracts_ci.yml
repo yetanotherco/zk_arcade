@@ -1,0 +1,42 @@
+name: Solidity Contracts CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'contracts/**'
+      - 'foundry.toml'
+      - '.github/workflows/contracts_ci.yml'
+
+jobs:
+  build:
+    name: Build Solidity Contracts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.3.5
+
+      - name: Install dependencies
+        run: |
+          cd contracts
+          forge install
+
+      - name: Build contracts
+        run: |
+          cd contracts
+          forge build --via-ir
+# There are no tests yet
+#      - name: Run tests
+#        run: |
+#          cd contracts
+#          forge test

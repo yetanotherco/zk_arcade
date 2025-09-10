@@ -1,0 +1,71 @@
+name: Elixir Web Application Build CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  MIX_ENV: prod
+
+jobs:
+  release:
+    name: Build Elixir Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.17.3'
+          otp-version: '27.x'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '23.4.0'
+          
+      - name: Install Hex and Rebar
+        run: |
+          cd web
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Get dependencies
+        run: |
+          cd web
+          mix deps.get --only ${{ env.MIX_ENV }}
+
+      - name: Compile dependencies
+        run: |
+          cd web
+          mix deps.compile
+
+      - name: Compile application (warnings as errors)
+        run: |
+          cd web
+          mix compile --warnings-as-errors
+
+      - name: Install npm dependencies
+        run: |
+          cd web
+          npm --prefix assets ci
+
+      - name: Digest assets
+        run: |
+          cd web
+          mix phx.digest
+
+      - name: Deploy assets
+        run: |
+          cd web
+          mix assets.deploy
+
+      - name: Create release
+        run: |
+          cd web
+          mix release
+

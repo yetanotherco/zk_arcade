@@ -3,21 +3,7 @@ use merkle_tree_rs::standard::{LeafType, StandardMerkleTree};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, postgres::PgPoolOptions};
 use std::{env, fs};
-use std::collections::HashSet;
-
-const FILTERED_DIR_PATH: &str = "whitelisted_addresses/";
-const FILTERED_FILE: &str = "filtered.json";
-const REPEATED_FILE: &str = "repeated.json";
-
-#[derive(Serialize, Deserialize)]
-struct WhitelistWrapper {
-    whitelist: Whitelist,
-}
-
-#[derive(Serialize, Deserialize)]
-struct Whitelist {
-    addresses: Vec<String>,
-}
+use csv;
 
 #[derive(Serialize)]
 struct ProofEntry {
@@ -33,57 +19,25 @@ struct Output {
 
 fn read_addresses_from_file(path: &str) -> Vec<String> {
     let data = fs::read_to_string(path).unwrap_or_else(|e| panic!("Failed to read {path}: {e}"));
-    let parsed: WhitelistWrapper =
-        serde_json::from_str(&data).unwrap_or_else(|e| panic!("Invalid JSON: {e}"));
-    parsed.whitelist.addresses
+
+    let mut csv_reader = csv::Reader::from_reader(data.as_bytes());
+    let mut addresses = Vec::new();
+    for result in csv_reader.records() {
+        let record = result.expect("Failed to read CSV record");
+        if let Some(address) = record.get(1) {
+            addresses.push(address.to_string());
+        }
+    }
+    return addresses;
 }
 
 fn write_whitelist_to_file(addresses: Vec<String>, path: &str) {
-    let wrapper = WhitelistWrapper {
-        whitelist: Whitelist { addresses },
-    };
-    
-    let serialized = serde_json::to_string_pretty(&wrapper).expect("Failed to serialize");
-    fs::write(path, &serialized).unwrap_or_else(|e| panic!("Failed to write {}: {}", path, e));
-}
-
-fn read_previous_filtered_addresses() -> HashSet<String> {
-    let paths = fs::read_dir(FILTERED_DIR_PATH).unwrap_or_else(|e| panic!("Failed to read directory {}: {}", FILTERED_DIR_PATH, e));
-
-    let mut existing: HashSet<String> = HashSet::new();
-    for path in paths {
-        let path = path.unwrap().path();
-        if path.is_file() {
-            if let Some(file_name) = path.file_name() {
-                if let Some(file_name_str) = file_name.to_str() {
-                    if file_name_str.starts_with("filtered_") && file_name_str.ends_with(".json") {
-                        let file_addresses: Vec<String> = read_addresses_from_file(path.to_str().unwrap());
-                        for addr in file_addresses {
-                            existing.insert(addr.to_lowercase());
-                        }
-                    }
-                }
-            }
-        }
+    let mut wtr = csv::Writer::from_path(path).unwrap();
+    wtr.write_record(&["address"]).unwrap();
+    for address in addresses {
+        wtr.write_record(&[address]).unwrap();
     }
-
-    existing
-}
-
-// Filters new addresses against previously filtered ones and writes the filtered and deleted ones to separate files
-fn filter_addresses(addresses: Vec<String>) {
-    let previous_filtered_addresses = read_previous_filtered_addresses();
-
-    let new_addresses: HashSet<String> = addresses.into_iter().collect();
-
-    let filtered: Vec<String> = new_addresses.difference(&previous_filtered_addresses).cloned().collect();
-    let intersection: Vec<String> = new_addresses.intersection(&previous_filtered_addresses).cloned().collect();
-
-    write_whitelist_to_file(filtered, FILTERED_FILE);
-    println!("Filtered addresses written to {}", FILTERED_FILE);
-
-    write_whitelist_to_file(intersection, REPEATED_FILE);
-    println!("Repeated addresses written to {}", REPEATED_FILE);
+    wtr.flush().unwrap();
 }
 
 // Builds the Merkle tree and generates proofs for each address, returning the root and proofs
@@ -96,6 +50,8 @@ fn build_tree_and_proofs(addresses: &[String]) -> Output {
         .iter()
         .map(|a| vec![a.clone()])
         .collect();
+
+    println!("Values for Merkle tree: {:?}", values);
 
     println!("Building Merkle tree for {} addresses...", addresses.len());
 
@@ -164,7 +120,7 @@ async fn handle_merkle_processing(
     fs::write(output_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {}: {}", output_path, e));
     println!("Merkle proof data written to merkle_tree/{}", output_path);
 
-    let filtered_path = format!("whitelisted_addresses/filtered_{}.json", merkle_root_index);
+    let filtered_path = format!("../data/inserted/inserted_{}.csv", merkle_root_index);
     write_whitelist_to_file(addresses, &filtered_path);
 
     println!("Connecting to database...");
@@ -172,33 +128,24 @@ async fn handle_merkle_processing(
     insert_merkle_proofs(&pool, &output.proofs, merkle_root_index).await;
 }
 
-fn load_and_normalize_addresses(path: &str) -> Vec<String> {
-    let addresses = read_addresses_from_file(path);
-    addresses
-        .into_iter()
-        .map(|a| a.to_lowercase().trim().to_string())
-        .collect()
-}
-
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
-    
-    if args.len() == 1 {
-        let input_path = &args[0];
 
-        let addresses = load_and_normalize_addresses(input_path);
-
-        filter_addresses(addresses);
-    } else if args.len() == 3 {
+    if args.len() == 3 {
         let input_path = &args[0];
         let output_path = &args[1];
+        println!("Input path: {:?}", args[2]);
         let merkle_root_index: i32 = args[2].parse().unwrap_or_else(|e| {
             eprintln!("Invalid merkle_root_index: {}", e);
             std::process::exit(1);
         });
-        
-        let addresses = load_and_normalize_addresses(input_path);
+
+        let addresses: Vec<String> = read_addresses_from_file(input_path)
+            .into_iter()
+            .map(|a| a.to_lowercase().trim().to_string())
+            .collect();
+
         if addresses.is_empty() {
             eprintln!("No new addresses found for whitelisting.");
             std::process::exit(1);

@@ -27,7 +27,7 @@ const ClaimNFT = ({
 	});
 
 	const isEligible = is_eligible === "true";
-	const eligibilityClasses = is_eligible
+	const eligibilityClasses = isEligible
 		? "bg-accent-100/20 border-accent-100 text-accent-100"
 		: "bg-yellow/20 border-yellow text-yellow";
 

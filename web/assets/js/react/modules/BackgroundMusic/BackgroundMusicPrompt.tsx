@@ -65,7 +65,7 @@ export const BackgroundMusicPromptBtn = () => {
 	if (!visible) return null;
 
 	return createPortal(
-		<div className="fixed inset-x-0 bottom-[8%] z-50 flex w-full justify-center">
+		<div className="fixed inset-x-0 bottom-[8%] z-10 flex w-full justify-center">
 			<div className="absolute bottom-[6%] h-40 w-[80%] max-w-md rounded-full bg-accent-100/30 blur-3xl pointer-events-none" />
 			<animated.div
 				className="relative rounded p-5 bg-contrast-100/90 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/40 ring-1 ring-black/10 max-w-[90vw] sm:max-w-md"

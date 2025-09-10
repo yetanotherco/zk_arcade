@@ -47,10 +47,11 @@ const BoardTutorial = ({
 }: {
 	setGameState: (state: ParityGameState) => void;
 }) => {
-	const { positionIdx, values, hasWon, reset } = useParityControls({
-		initialPosition: { col: 0, row: 0 },
-		initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
-	});
+	const { positionIdx, values, userPositions, hasWon, reset } =
+		useParityControls({
+			initialPosition: { col: 0, row: 0 },
+			initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
+		});
 
 	const view = useSwapTransition(hasWon, (_, won) =>
 		won ? (
@@ -67,6 +68,7 @@ const BoardTutorial = ({
 				levelNumber={1}
 				totalLevels={1}
 				reset={reset}
+				user_positions={userPositions}
 				home={() => setGameState("home")}
 			/>
 		)

@@ -10,6 +10,7 @@ import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
 import InitialModals from "./modules/InitialModals";
 import { ParityGame } from "./modules/Parity";
+import { BackgroundMusicBtn } from "./modules/BackgroundMusic";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -138,5 +139,12 @@ define(
 			"leaderboard_address",
 			"nft_contract_address",
 		],
+	}
+);
+
+define(
+	{ "x-app-background-music": BackgroundMusicBtn },
+	{
+		attributes: [],
 	}
 );

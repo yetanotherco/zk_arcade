@@ -24,7 +24,7 @@ fn read_addresses_from_file(path: &str) -> Vec<String> {
     let mut addresses = Vec::new();
     for result in csv_reader.records() {
         let record = result.expect("Failed to read CSV record");
-        if let Some(address) = record.get(1) {
+        if let Some(address) = record.get(0) {
             addresses.push(address.to_string());
         }
     }
@@ -50,8 +50,6 @@ fn build_tree_and_proofs(addresses: &[String]) -> Output {
         .iter()
         .map(|a| vec![a.clone()])
         .collect();
-
-    println!("Values for Merkle tree: {:?}", values);
 
     println!("Building Merkle tree for {} addresses...", addresses.len());
 
@@ -135,7 +133,6 @@ async fn main() {
     if args.len() == 3 {
         let input_path = &args[0];
         let output_path = &args[1];
-        println!("Input path: {:?}", args[2]);
         let merkle_root_index: i32 = args[2].parse().unwrap_or_else(|e| {
             eprintln!("Invalid merkle_root_index: {}", e);
             std::process::exit(1);

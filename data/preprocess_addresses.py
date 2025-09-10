@@ -28,6 +28,15 @@ def read_ofac_addresses():
     except Exception as e:
         logging.warning(f"Error reading ofac.csv: {e}")
         return set()
+    
+def print_stats(whitelist_df, df_filtered, df_removed):
+    print()
+    print(f"Total addresses in original whitelist: {len(whitelist_df)}")
+    print(f"Addresses after filtering: {len(df_filtered)}")
+    print(f"Addresses removed: {len(df_removed)}")
+    print(f" - Due to previous campaigns: {len(df_removed[df_removed['reason'] == 'repeated'])}")
+    print(f" - Due to OFAC list: {len(df_removed[df_removed['reason'] == 'ofac'])}")
+    print()
 
 # Filters out addresses that are either in previous campaigns or in the OFAC list. Saves the filtered addresses
 # to new_addresses.csv and the removed addresses to removed_addresses.csv with a reason column.
@@ -44,9 +53,13 @@ def filter_repeated_and_ofac_addresses(whitelist_path):
         lambda x: 'ofac' if x in ofac_addresses else 'repeated'
     )
 
+    print_stats(whitelist_df, df_filtered, df_removed)
+
     df_filtered.to_csv("new_addresses.csv", index=False)
     df_removed.to_csv("removed_addresses.csv", index=False)
 
+    print(f"Not filtered addresses saved to new_addresses.csv")
+    print(f"Removed addresses saved to removed_addresses.csv")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

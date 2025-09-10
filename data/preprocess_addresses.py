@@ -9,7 +9,7 @@ def read_previously_filtered():
 
     # Read all files in the /inserted folder and gets the addresses column of each file
     addresses = set()
-    for file_path in Path("data/inserted").glob("*.csv"):
+    for file_path in Path("inserted").glob("*.csv"):
         print(f"Processing {file_path}...")
         try:
             df = pd.read_csv(file_path)
@@ -23,7 +23,7 @@ def read_previously_filtered():
 def read_ofac_addresses():
     print(f"Reading OFAC addresses from ofac.csv...")
     try:
-        df = pd.read_csv("data/ofac.csv")
+        df = pd.read_csv("ofac.csv")
         return set(df['address'].str.lower())
     except Exception as e:
         logging.warning(f"Error reading ofac.csv: {e}")
@@ -44,8 +44,8 @@ def filter_repeated_and_ofac_addresses(whitelist_path):
         lambda x: 'ofac' if x in ofac_addresses else 'repeated'
     )
 
-    df_filtered.to_csv("data/new_addresses.csv", index=False)
-    df_removed.to_csv("data/removed_addresses.csv", index=False)
+    df_filtered.to_csv("new_addresses.csv", index=False)
+    df_removed.to_csv("removed_addresses.csv", index=False)
 
 
 if __name__ == "__main__":

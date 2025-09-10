@@ -1,6 +1,6 @@
 use dotenvy::{dotenv, from_filename};
 use merkle_tree_rs::standard::{LeafType, StandardMerkleTree};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::{Postgres, postgres::PgPoolOptions};
 use std::{env, fs};
 use csv;
@@ -78,7 +78,7 @@ fn build_tree_and_proofs(addresses: &[String]) -> Output {
 async fn setup_database_connection() -> sqlx::Pool<Postgres> {
     if dotenv().is_err() {
         println!("Warning: No .env file found. Attempting to load .env.example");
-        let _ = from_filename(".env.example");
+        let _ = from_filename("merkle_tree/.env.example");
     }
 
     let database_url =
@@ -120,7 +120,7 @@ async fn handle_merkle_processing(
     fs::write(output_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {}: {}", output_path, e));
     println!("Merkle proof data written to merkle_tree/{}", output_path);
 
-    let filtered_path = format!("../data/inserted/inserted_{}.csv", merkle_root_index);
+    let filtered_path = format!("data/inserted/inserted_{}.csv", merkle_root_index);
     write_whitelist_to_file(addresses, &filtered_path);
 
     println!("Connecting to database...");

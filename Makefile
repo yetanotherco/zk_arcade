@@ -123,11 +123,14 @@ __WHITELIST__:
 # This path is relative to the project root
 WHITELIST_PATH?=merkle_tree/whitelist.json
 
+build_merkle_proof_generator:
+	cd merkle_tree && cargo build --release
+
 preprocess_whitelist:
-	@python3 data/preprocess_addresses.py $(WHITELIST_PATH)
+	cd data && python3 preprocess_addresses.py $(WHITELIST_PATH)
 
 generate_merkle_data: submodules
-	@. contracts/scripts/.$(NETWORK).env && cd merkle_tree && cargo run -- $(WHITELIST_PATH) merkle_output.json $(MERKLE_ROOT_INDEX)
+	./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) merkle_tree/merkle_output.json $(MERKLE_ROOT_INDEX)
 
 add_merkle_root: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_campaign_merkle_root.sh

@@ -20,10 +20,4 @@ CMD="cast send $nft_proxy_address \
     --rpc-url $RPC_URL \
     --private-key $DEPLOYER_PRIVATE_KEY"
 
-if [ -n "$ETHERSCAN_API_KEY" ]; then
-    CMD+=" --etherscan-api-key $ETHERSCAN_API_KEY --verify"
-else
-    echo "Warning: ETHERSCAN_API_KEY not set. Skipping contract verification."
-fi
-
 eval $CMD

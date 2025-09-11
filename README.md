@@ -153,7 +153,8 @@ To run the preprocessing:
    ```shell
    make generate_merkle_data MERKLE_ROOT_INDEX=<campaign_number> WHITELIST_PATH=data/new_addresses.csv
    ```  
-   (We use `new_addresses.csv`, produced by the preprocessing step, as the final whitelist.)
+   We use `new_addresses.csv`, produced by the preprocessing step, as the final whitelist.
+   Note: The campaign number must match the index the merkle root will take in the contract, i.e. the current length of the merkleRoots array.
 3. This command generates the Merkle proof data, stores the Merkle paths in the backend database, and writes the campaign Merkle root to `merkle_output.json`. That Merkle root will be used when updating the NFT contract.
 4. Add the new campaign Merkle root to the NFT contract by running:  
    ```shell

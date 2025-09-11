@@ -137,13 +137,12 @@ export const BumpFee = ({
 	};
 
 	useEffect(() => {
-		if (!open) return;
 		if (hasEstimatedOnce) {
 			setChoice("default");
 			setCustomEth("");
 		}
 		estimateFees();
-	}, [open, estimateMaxFeeForBatchOfProofs, hasEstimatedOnce]);
+	}, [estimateMaxFeeForBatchOfProofs, hasEstimatedOnce]);
 
 	const handleConfirm = async () => {
 		let chosenWei: bigint | null = null;

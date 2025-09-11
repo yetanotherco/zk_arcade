@@ -284,7 +284,7 @@ export const SubmitProofModal = ({
 					</p>
 				</div>
 
-				<div className="flex overflow-scroll gap-8 w-full">
+				<div className="flex gap-8 w-full">
 					<BreadCrumb
 						step="Mint NFT"
 						active={true}

@@ -10,7 +10,7 @@ cd "$parent_path"
 # cd to root
 cd ../../
 
-make generate_merkle_data MERKLE_ROOT_INDEX=0 WHITELIST_PATH=data/new_addresses.csv
+make generate_merkle_data MERKLE_ROOT_INDEX=0 WHITELIST_PATH=data/whitelist_addresses.csv
 
 # cd to contracts/
 cd contracts/

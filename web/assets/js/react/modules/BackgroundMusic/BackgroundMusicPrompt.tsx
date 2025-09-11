@@ -90,7 +90,7 @@ export const BackgroundMusicPromptBtn = () => {
 							Enable background music?
 						</h3>
 						<p className="mb-4 text-sm opacity-80">
-							We’ve got a smooth casino playlist to set the mood.
+							We’ve got a smooth playlist to set the mood.
 						</p>
 
 						<div className="flex gap-3">

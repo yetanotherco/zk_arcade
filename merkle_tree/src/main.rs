@@ -20,26 +20,15 @@ struct Output {
 fn read_addresses_from_file(path: &str) -> Vec<String> {
     let data = fs::read_to_string(path).unwrap_or_else(|e| panic!("Failed to read {path}: {e}"));
 
-    if path.ends_with(".csv") {
-        let mut csv_reader = csv::Reader::from_reader(data.as_bytes());
-        let mut addresses = Vec::new();
-        for result in csv_reader.records() {
-            let record = result.expect("Failed to read CSV record");
-            if let Some(address) = record.get(0) {
-                addresses.push(address.to_string());
-            }
+    let mut csv_reader = csv::Reader::from_reader(data.as_bytes());
+    let mut addresses = Vec::new();
+    for result in csv_reader.records() {
+        let record = result.expect("Failed to read CSV record");
+        if let Some(address) = record.get(0) {
+            addresses.push(address.to_string());
         }
-        return addresses;
-    } else if path.ends_with(".json") {
-        let json_data: serde_json::Value = serde_json::from_str(&data).expect("Failed to parse JSON");
-        if let Some(addresses) = json_data.get("whitelist").and_then(|w| w.get("addresses")).and_then(|a| a.as_array()) {
-            return addresses.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect();
-        } else {
-            panic!("JSON file does not contain an array of addresses");
-        }
-    } else {
-        panic!("Unsupported file format. Please provide a .csv or .json file.");
     }
+    return addresses;
 }
 
 fn write_whitelist_to_file(addresses: Vec<String>, path: &str) {
@@ -163,7 +152,7 @@ async fn main() {
 
         handle_merkle_processing(addresses, output_path, merkle_root_index).await;
     } else {
-        eprintln!("Usage: merkle_json_cli <input.json> [<output.json> <merkle_root_index>]");
+        eprintln!("Usage: merkle_json_cli <input.csv> [<output.json> <merkle_root_index>]");
         std::process::exit(1);
     }
 }

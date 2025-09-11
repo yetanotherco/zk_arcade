@@ -116,7 +116,13 @@ deploy_nft_contract: submodules
 deploy_leaderboard_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_leaderboard_contract.sh
 
-gen_levels_and_deploy_contracts_devnet: beast_gen_levels parity_gen_levels
+generate_merkle_tree:
+	@cd merkle_tree && cargo run --release -- $(WHITELIST_PATH) $(OUTPUT_PATH) $(MERKLE_ROOT_INDEX)
+
+add_merkle_root: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
+
+gen_levels_and_deploy_contracts_devnet: beast_gen_levels parity_gen_levels web_db
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
@@ -130,7 +136,8 @@ gen_levels_and_deploy_contracts_devnet: beast_gen_levels parity_gen_levels
 	@$(MAKE) deploy_leaderboard_contract NETWORK=devnet
 	@$(MAKE) update_leaderboard_address
 	@$(MAKE) update_nft_address
-	## TODO: Generate new merkle root and add merkle root to NFT contract
+	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./whitelist_devnet.json OUTPUT_PATH=./merkle_output_devnet.json MERKLE_ROOT_INDEX=0
+	@$(MAKE) add_merkle_root NETWORK=devnet
 
 upgrade_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_contract.sh
@@ -141,7 +148,7 @@ upgrade_nft_contract: submodules
 set_beast_games: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
 
-set_parity_games: submodules
+set_parity_games:
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_parity_games.sh
 
 # This path is relative to the project root

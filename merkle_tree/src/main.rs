@@ -113,17 +113,19 @@ async fn handle_merkle_processing(
     merkle_root_index: i32,
 ) {
     let output = build_tree_and_proofs(&addresses);
-    
+
+    // Insert the merkle proofs into the database
+    println!("Connecting to database...");
+    let pool = setup_database_connection().await;
+    insert_merkle_proofs(&pool, &output.proofs, merkle_root_index).await;
+
+    // Write the output to a JSON file
     let serialized = serde_json::to_string_pretty(&output).expect("Failed to serialize output");
     fs::write(output_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {}: {}", output_path, e));
     println!("Merkle proof data written to merkle_tree/{}", output_path);
 
     let filtered_path = format!("data/inserted/inserted_{}.csv", merkle_root_index);
     write_whitelist_to_file(addresses, &filtered_path);
-
-    println!("Connecting to database...");
-    let pool = setup_database_connection().await;
-    insert_merkle_proofs(&pool, &output.proofs, merkle_root_index).await;
 }
 
 #[tokio::main]

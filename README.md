@@ -141,7 +141,7 @@ To run the preprocessing:
    make preprocess_whitelist WHITELIST_PATH=<whitelist_path>
    ```
    (Where `WHITELIST_PATH` is the path to the CSV file containing the addresses to whitelist)
-3. Removed addresses will be written to `removed_addresses.csv`, and the addresses used to generate Merkle proof data will be written to `new_addresses.csv`.
+3. Removed addresses will be written to `removed_addresses.csv`, and the addresses to generate Merkle proof data will be written to `new_addresses.csv` into `data` directory.
 
 ### Merkle Proof Data Generation
 

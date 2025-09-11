@@ -127,7 +127,7 @@ build_merkle_proof_generator:
 	cd merkle_tree && cargo build --release
 
 preprocess_whitelist:
-	cd data && python3 preprocess_addresses.py $(WHITELIST_PATH)
+	cd data && pip3 install -r requirements.txt && python3 preprocess_addresses.py $(WHITELIST_PATH)
 
 generate_merkle_data: build_merkle_proof_generator
 	./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) merkle_tree/merkle_output.json $(MERKLE_ROOT_INDEX)

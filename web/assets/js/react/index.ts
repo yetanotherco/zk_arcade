@@ -10,6 +10,8 @@ import WithdrawFromAlignedBtn from "./modules/History/WithdrawFromAlignedBtn";
 import { HowItWorksModal } from "./modules/HowItWorksModal";
 import InitialModals from "./modules/InitialModals";
 import { ParityGame } from "./modules/Parity";
+import { BackgroundMusicPromptBtn } from "./modules/BackgroundMusic/BackgroundMusicPrompt";
+import { MuteBackgroundBtn } from "./modules/BackgroundMusic/MuteBtn";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -139,4 +141,16 @@ define(
 			"nft_contract_address",
 		],
 	}
+);
+
+define(
+	{ "x-app-background-music-prompt": BackgroundMusicPromptBtn },
+	{
+		attributes: [],
+	}
+);
+
+define(
+	{ "x-app-background-music-mute-btn": MuteBackgroundBtn },
+	{ attributes: [] }
 );

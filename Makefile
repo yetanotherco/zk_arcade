@@ -141,6 +141,9 @@ upgrade_nft_contract: submodules
 set_beast_games: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
 
+set_parity_games: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_parity_games.sh
+
 # This path is relative to the project root
 WHITELIST_PATH?=merkle_tree/whitelist.json
 nft_whitelist_addresses: submodules

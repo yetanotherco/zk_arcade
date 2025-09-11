@@ -14,8 +14,8 @@ CMD="forge script script/deploy/NftContractDeployer.s.sol:NftContractDeployer \
     $NFT_OUTPUT_PATH \
     --rpc-url $RPC_URL \
     --private-key $DEPLOYER_PRIVATE_KEY \
-    --broadcast \
-    --sig \"run(string memory configPath, string memory outputPath)\""
+    --broadcast --slow \
+    --sig \"run(string memory configPath, string memory outputPath) \""
 
 if [ -n "$ETHERSCAN_API_KEY" ]; then
     CMD+=" --etherscan-api-key $ETHERSCAN_API_KEY --verify"

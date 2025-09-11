@@ -122,6 +122,14 @@ export const useBackgroundMusic = () => {
 		} else {
 			setMusicActive(null);
 		}
+		const audio = ensureAudio();
+		audio.addEventListener("play", () => {
+			setMusicActive(true);
+		});
+
+		audio.addEventListener("pause", () => {
+			setMusicActive(false);
+		});
 	}, []);
 
 	return {

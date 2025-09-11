@@ -182,7 +182,6 @@ export const zkArcadeNftAbi = [
         name: "claimNFT",
         inputs: [
             { name: "merkleProof", type: "bytes32[]" },
-            { name: "tokenURI", type: "string" },
 			{ name: "rootIndex", type: "uint256" }
         ],
         outputs: [],

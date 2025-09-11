@@ -18,6 +18,7 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
     mapping(address => bool) public hasClaimed;
     bool transfersPaused;
     bool claimsPaused;
+    string private _tokenURI;
 
     event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event NFTClaimed(address indexed account);
@@ -31,23 +32,24 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         _disableInitializers();
     }
 
-    function initialize(address owner, string memory name, string memory symbol, bytes32[] memory _merkleRoots)
-        public
-        initializer
-    {
+    function initialize(
+        address owner,
+        string memory name,
+        string memory symbol,
+        string memory __tokenURI,
+        bytes32[] memory _merkleRoots
+    ) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
         merkleRoots = _merkleRoots;
         transfersPaused = true;
         claimsPaused = false;
+        _tokenURI = __tokenURI;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    function claimNFT(bytes32[] calldata merkleProof, string memory tokenURI, uint256 rootIndex)
-        public
-        returns (uint256)
-    {
+    function claimNFT(bytes32[] calldata merkleProof, uint256 rootIndex) public returns (uint256) {
         if (claimsPaused) {
             revert ClaimsPaused();
         }
@@ -66,7 +68,7 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         // Mint the NFT
         uint256 tokenId = _nextTokenId++;
         _mint(msg.sender, tokenId);
-        _setTokenURI(tokenId, tokenURI);
+        _setTokenURI(tokenId, _tokenURI);
 
         emit NFTClaimed(msg.sender);
 
@@ -108,5 +110,9 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         claimsPaused = _claimsPaused;
 
         emit ClaimsPausedUpdated(claimsPaused);
+    }
+
+    function setTokenURI(string memory newTokenURI) onlyOwner {
+        _tokenURI = newTokenURI;
     }
 }

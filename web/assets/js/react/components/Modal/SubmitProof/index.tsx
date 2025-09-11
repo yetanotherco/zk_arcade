@@ -265,7 +265,7 @@ export const SubmitProofModal = ({
 		if (proofStatus === "verified" || proofStatus === "claimed") {
 			setSubmissionStatus("success");
 		}
-	}, [step, depositStatus, submissionStatus]);
+	}, [step, proofStatus, balance.data, nftBalance.data]);
 
 	return (
 		<Modal

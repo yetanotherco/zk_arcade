@@ -68,6 +68,14 @@ export const useBeastLeaderboardContract = ({
 		chainId,
 	});
 
+	const allBeastGames = useReadContract({
+		address: contractAddress,
+		abi: leaderboardAbi,
+		functionName: "getAllBeastGames",
+		args: [],
+		chainId,
+	});
+
 	const { addToast } = useToast();
 
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
@@ -106,7 +114,28 @@ export const useBeastLeaderboardContract = ({
 				);
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
 
+			const gameConfig = BigInt(
+				"0x" +
+					Buffer.from(
+						[...(verificationData.publicInput || [])].splice(32, 32)
+					).toString("hex")
+			);
+
+			const gameIndex = allBeastGames.data
+				? allBeastGames.data.findIndex(
+						game => game.gameConfig === gameConfig
+				  )
+				: null;
+
+			if (gameIndex === null) {
+				alert(
+					"There was a problem while sending the proof, please try again"
+				);
+				return;
+			}
+
 			const args = [
+				gameIndex,
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
 				bytesToHex(commitment.provingSystemAuxDataCommitment, {

@@ -62,6 +62,14 @@ export const useParityLeaderboardContract = ({
 		chainId,
 	});
 
+	const allParityGames = useReadContract({
+		address: contractAddress,
+		abi: leaderboardAbi,
+		functionName: "getAllParityGames",
+		args: [],
+		chainId,
+	});
+
 	const { addToast } = useToast();
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
@@ -98,6 +106,27 @@ export const useParityLeaderboardContract = ({
 					p => `${Buffer.from(p).toString("hex")}`
 				);
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
+
+			const gameConfig = BigInt(
+				"0x" +
+					Buffer.from(
+						[...(verificationData.publicInput || [])].splice(32, 32)
+					).toString("hex")
+			);
+
+			const gameIndex = allParityGames.data
+				? allParityGames.data.findIndex(
+						game => game.gameConfig === gameConfig
+				  )
+				: null;
+
+			if (gameIndex === null) {
+				alert(
+					"There was a problem while sending the proof, please try again"
+				);
+				return;
+			}
+
 			const args = [
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),

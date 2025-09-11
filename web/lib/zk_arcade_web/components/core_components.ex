@@ -113,6 +113,7 @@ defmodule ZkArcadeWeb.CoreComponents do
                 >
                   Give us Feedback
                 </.link>
+                <x-app-background-music-mute-btn />
               </div>
             </div>
           </div>
@@ -139,6 +140,7 @@ defmodule ZkArcadeWeb.CoreComponents do
                 <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">Tutorial</p>
                 <.link href="#faq" class="text-text-100 transition hover:text-accent-100 hover:underline">FAQ</.link>
                 <.link href={Application.get_env(:zk_arcade, :feedback_form_url)} target="_blank" rel="noopener noreferrer" class="text-text-100 transition hover:text-accent-100 hover:underline">Give us Feedback</.link>
+                <x-app-background-music-mute-btn />
             </div>
           </div>
         </div>

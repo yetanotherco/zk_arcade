@@ -66,6 +66,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
      * Events
      */
     event NewSolutionSubmitted(address user, uint256 level, uint256 score);
+    event BeastProgramIdUpdated(bytes32 newProgramId);
+    event ParityProgramIdUpdated(bytes32 newProgramId);
 
     constructor() {
         _disableInitializers();
@@ -340,9 +342,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function setBeastVkCommitment(bytes32 vkCommitment) public onlyOwner {
         beastVkCommitment = vkCommitment;
+        emit BeastProgramIdUpdated(beastVkCommitment);
     }
 
     function setParityVkCommitment(bytes32 vkCommitment) public onlyOwner {
         parityVkCommitment = vkCommitment;
+        emit ParityProgramIdUpdated(beastVkCommitment);
     }
 }

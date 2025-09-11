@@ -97,17 +97,6 @@ update_nft_address: ## Set the NFT contract address in web config for DEV enviro
 		| grep -Eo "0x[0-9a-fA-F]{40}" | head -n1); \
 	sed -E -i '' "s|(^[[:space:]]*config :zk_arcade, :nft_contract_address, \")[^\"]+(\".*)|\1$$addr\2|" "web/config/dev.exs";
 
-gen_and_deploy_devnet: beast_gen_levels parity_gen_levels web_db ## TODO delete. replaced by gen_levels_and_deploy_contracts_devnet
-	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
-		contracts/script/deploy/config/devnet/leaderboard.json \
-		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
-	@jq ".parityGames = $$(jq '.games' games/parity/level_generator/levels/parity_devnet.json)" \
-		contracts/script/deploy/config/devnet/leaderboard.json \
-		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
-	@$(MAKE) deploy_contract NETWORK=devnet
-	@$(MAKE) update_leaderboard_address
-	@$(MAKE) update_nft_address
-
 __CONTRACTS__:
 
 deploy_nft_contract: submodules

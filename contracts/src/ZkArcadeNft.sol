@@ -112,7 +112,7 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         emit ClaimsPausedUpdated(claimsPaused);
     }
 
-    function setTokenURI(string memory newTokenURI) onlyOwner {
+    function setTokenURI(string memory newTokenURI) public onlyOwner {
         _tokenURI = newTokenURI;
     }
 }

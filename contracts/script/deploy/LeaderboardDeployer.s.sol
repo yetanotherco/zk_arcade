@@ -17,8 +17,8 @@ contract LeaderboardDeployer is Script {
         address alignedServiceManagerAddress = vm.parseJsonAddress(configData, ".alignedServiceManager");
         address alignedBatcherPaymentAddress = vm.parseJsonAddress(configData, ".alignedBatcherPaymentService");
         address zkArcadeNftContract = vm.parseJsonAddress(configData, ".zkArcadeNftContract");
-        bytes32 beastVkCommitment = vm.parseBytes32(configData, "beastVKCommitment");
-        bytes32 parityVKCommitment = vm.parseBytes32(configData, "parityVKCommitment");
+        bytes32 beastVkCommitment = vm.parseJsonBytes32(configData, ".beastVKCommitment");
+        bytes32 parityVKCommitment = vm.parseJsonBytes32(configData, ".parityVKCommitment");
 
         Leaderboard.BeastGame[] memory beastGames =
             abi.decode(vm.parseJson(configData, ".games"), (Leaderboard.BeastGame[]));

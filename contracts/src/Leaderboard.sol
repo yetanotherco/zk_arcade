@@ -343,6 +343,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function setParityVkCommitment(bytes32 vkCommitment) public onlyOwner {
-        parityVkCommitment = vkCommitment
+        parityVkCommitment = vkCommitment;
     }
 }

@@ -1,7 +1,6 @@
 use aligned_sdk::common::types::ProvingSystemId;
 use alloy::{hex::hex, primitives::Keccak256};
 use serde_json::json;
-use sp1_sdk::{HashableKey, Prover, ProverClient};
 use std::{fs, path::Path};
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
@@ -13,12 +12,9 @@ fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     info!("About to write programs vk commitment");
-    let prover = ProverClient::builder().cpu().build();
-    let (_, vk) = prover.setup(ELF);
-    let program_vk_bytes = vk.bytes32_raw();
 
     let mut hasher = Keccak256::new();
-    hasher.update(program_vk_bytes);
+    hasher.update(ELF);
     hasher.update([ProvingSystemId::SP1 as u8]);
     let vk_commitment_bytes = hasher.finalize().0;
 

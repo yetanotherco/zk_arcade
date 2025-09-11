@@ -10,6 +10,8 @@ cd ../
 
 merkle_root=$(jq -r '.root' ../merkle_tree/merkle_output.json)
 
+echo "Adding Merkle Root: $merkle_root"
+
 # Get ZkArcadeNft proxy contract address from deployment output
 nft_proxy_address=$(jq -r '.addresses.proxy' script/output/devnet/nft.json)
 

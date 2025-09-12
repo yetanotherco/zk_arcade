@@ -55,6 +55,9 @@ beast_gen_levels:
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
 
+beast_write_program_vk:
+	@cd games/beast/beast1984/ && cargo run --release --bin write_program_vk
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Difficulty / campaign parameters (annotated)
 # Growth model (per game):
@@ -83,6 +86,9 @@ parity_gen_levels:
 	@cd games/parity/level_generator && \
 	cargo run --release $(PARITY_NUM_GAMES) $(PARITY_LEVELS_PER_GAME) $(PARITY_MIN_END_OF_LEVEL) $(PARITY_MAX_END_OF_LEVEL) \
 	$(PARITY_MIN_MOVEMENTS) $(PARITY_MAX_MOVEMENTS) $(PARITY_CAMPAIGN_DAYS) $(NETWORK)
+
+parity_write_program_vk:
+	@cd games/parity/circuits/cmd && cargo run --release
 
 # Note: this target requires sed, which makes it only available on MacOS
 update_leaderboard_address:

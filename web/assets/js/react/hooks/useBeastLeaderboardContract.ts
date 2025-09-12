@@ -138,9 +138,6 @@ export const useBeastLeaderboardContract = ({
 				gameIndex,
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
-				bytesToHex(commitment.provingSystemAuxDataCommitment, {
-					size: 32,
-				}),
 				verificationData.proofGeneratorAddress,
 				merkleRoot,
 				encodedMerkleProof,

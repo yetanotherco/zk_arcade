@@ -8,13 +8,11 @@ import {ZkArcadePublicNft} from "./ZkArcadePublicNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     // ======== Storage ========
-    // == General ==
     address public alignedServiceManager;
     address public alignedBatcherPaymentService;
     address[10] public top10Score;
     mapping(address => uint256) public usersScore;
-
-    // == Beast storages ==
+    
     struct BeastGame {
         uint256 endsAtTime;
         uint256 gameConfig;

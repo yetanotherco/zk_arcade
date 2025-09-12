@@ -69,6 +69,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     event NewSolutionSubmitted(address user, uint256 level, uint256 score);
     event BeastProgramIdUpdated(bytes32 newProgramId);
     event ParityProgramIdUpdated(bytes32 newProgramId);
+    event WhitelistEnabled();
+    event WhitelistDisabled();
 
     constructor() {
         _disableInitializers();
@@ -105,10 +107,16 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         beastGames = _beastGames;
     }
 
-    /// @notice Sets whether to use the whitelist or not
-    /// @param _useWhitelist The new whitelist status
-    function setUseWhitelist(bool _useWhitelist) public onlyOwner {
-        useWhitelist = _useWhitelist;
+    /// @notice Enables the whitelist requirement
+    function enableWhitelist() public onlyOwner {
+        useWhitelist = true;
+        emit WhitelistEnabled();
+    }
+
+    /// @notice Disables the whitelist requirement
+    function disableWhitelist() public onlyOwner {
+        useWhitelist = false;
+        emit WhitelistDisabled();
     }
 
     /// @notice Sets the zkArcadeNft address

@@ -130,7 +130,6 @@ export const fetchMerkleProofForAddress = async (
 	address: Address
 ): Promise<{
 	merkle_proof: NFTClaimMerkleProof;
-	tokenURI: string;
 	merkleRootIndex: number;
 } | null> => {
 	try {

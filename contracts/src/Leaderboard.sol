@@ -7,6 +7,7 @@ import {ZkArcadeNft} from "./ZkArcadeNft.sol";
 import {ZkArcadePublicNft} from "./ZkArcadePublicNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
+
     // ======== Storage ========
 
     address public alignedServiceManager;
@@ -70,7 +71,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         address _alignedServiceManager,
         address _alignedBatcherPaymentService,
         address _zkArcadeNft,
-        address _zkArcadePublicNft,
         BeastGame[] calldata _beastGames,
         ParityGame[] calldata _parityGames,
         bool _useWhitelist,

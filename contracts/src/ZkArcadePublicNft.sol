@@ -12,16 +12,24 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     bool public transfersEnabled;
     string private _baseTokenURI;
 
+    /**
+     * Events
+     */
     event MintingEnabled();
     event MintingDisabled();
     event TransfersEnabled();
     event TransfersDisabled();
     event NFTMinted(address indexed account, uint256 tokenId);
 
+    /**
+     * Errors
+     */
     error MintingNotEnabled();
     error MaxSupplyExceeded();
     error AlreadyOwnsNFT();
     error TransfersPaused();
+
+    // ======== Initialization & Upgrades ========
 
     constructor() {
         _disableInitializers();
@@ -44,6 +52,8 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+    // ======== Core NFT Functions ========
+
     function mint() public returns (uint256) {
         if (!mintingIsEnabled) {
             revert MintingNotEnabled();
@@ -63,6 +73,25 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         emit NFTMinted(msg.sender, tokenId);
         return tokenId;
     }
+
+    function transferFrom(address from, address to, uint256 tokenId) public override {
+        if (!transfersEnabled) {
+            revert TransfersPaused();
+        }
+        super.transferFrom(from, to, tokenId);
+    }
+
+    // ======== View Functions ========
+
+    function totalSupply() external view returns (uint256) {
+        return _nextTokenId;
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return _baseTokenURI;
+    }
+
+    // ======== Admin Functions ========
 
     function enableMinting() external onlyOwner {
         mintingIsEnabled = true;
@@ -84,22 +113,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         emit TransfersDisabled();
     }
 
-    function transferFrom(address from, address to, uint256 tokenId) public override {
-        if (!transfersEnabled) {
-            revert TransfersPaused();
-        }
-        super.transferFrom(from, to, tokenId);
-    }
-
     function setBaseURI(string memory newBaseURI) external onlyOwner {
         _baseTokenURI = newBaseURI;
-    }
-
-    function _baseURI() internal view override returns (string memory) {
-        return _baseTokenURI;
-    }
-
-    function totalSupply() external view returns (uint256) {
-        return _nextTokenId;
     }
 }

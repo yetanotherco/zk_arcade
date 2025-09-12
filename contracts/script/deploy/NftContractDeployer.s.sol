@@ -15,6 +15,7 @@ contract NftContractDeployer is Script {
         address owner = vm.parseJsonAddress(configData, ".permissions.owner");
         string memory name = vm.parseJsonString(configData, ".name");
         string memory symbol = vm.parseJsonString(configData, ".symbol");
+        string memory tokenURI = vm.parseJsonString(configData, ".tokenURI");
 
         address[] memory whitelistAddresses = 
             abi.decode(vm.parseJson(configData, ".whitelist.addresses"), (address[]));
@@ -25,10 +26,11 @@ contract NftContractDeployer is Script {
         vm.startBroadcast();
         ZkArcadeNft implementation = new ZkArcadeNft();
         bytes memory data = abi.encodeWithSignature(
-            "initialize(address,string,string,bytes32[])", 
+            "initialize(address,string,string,string,bytes32[])", 
             owner, 
             name, 
             symbol,
+            tokenURI,
             merkleRoots
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);

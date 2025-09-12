@@ -89,7 +89,6 @@ if config_env() == :prod do
   config :zk_arcade, :leaderboard_address, System.get_env("ZK_ARCADE_LEADERBOARD_ADDRESS")
 
   config :zk_arcade, :nft_contract_address, System.get_env("ZK_ARCADE_NFT_CONTRACT_ADDRESS")
-  config :zk_arcade, :nft_token_uri, System.get_env("ZK_ARCADE_NFT_TOKEN_URI")
 
   config :ethereumex, url: System.get_env("RPC_URL")
 

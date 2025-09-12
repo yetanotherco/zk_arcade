@@ -4,8 +4,10 @@ pragma solidity ^0.8.28;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ZkArcadeNft} from "./ZkArcadeNft.sol";
+import {ZkArcadePublicNft} from "./ZkArcadePublicNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
+
     // ======== Storage ========
 
     address public alignedServiceManager;
@@ -35,6 +37,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     bytes32 internal parityVkCommitment;
 
     address public zkArcadeNft;
+    address public zkArcadePublicNft;
     bool public useWhitelist;
 
     event NewSolutionSubmitted(address user, uint256 level, uint256 score);
@@ -43,6 +46,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     event WhitelistEnabled();
     event WhitelistDisabled();
     event ZkArcadeNftAddressUpdated(address nftContractAddress);
+    event ZkArcadePublicNftAddressUpdated(address nftContractAddress);
     event BeastProgramIdUpdated(bytes32 newProgramId);
     event ParityProgramIdUpdated(bytes32 newProgramId);
 
@@ -77,6 +81,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
         zkArcadeNft = _zkArcadeNft;
+        zkArcadePublicNft = address(0);
         useWhitelist = _useWhitelist;
         parityGames = _parityGames;
         beastVkCommitment = _beastVkCommitment;
@@ -107,8 +112,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
         }
 
-        ZkArcadeNft nftContract = ZkArcadeNft(zkArcadeNft);
-        if (useWhitelist && !nftContract.isWhitelisted(userAddress)) {
+        if (useWhitelist && !isUserWhitelisted(userAddress)) {
             revert UserIsNotWhitelisted(userAddress);
         }
 
@@ -177,8 +181,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
         }
 
-        ZkArcadeNft nftContract = ZkArcadeNft(zkArcadeNft);
-        if (useWhitelist && !nftContract.isWhitelisted(userAddress)) {
+        if (useWhitelist && !isUserWhitelisted(userAddress)) {
             revert UserIsNotWhitelisted(userAddress);
         }
 
@@ -319,6 +322,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         emit ZkArcadeNftAddressUpdated(nftContractAddress);
     }
 
+    function setZkArcadePublicNftAddress(address nftContractAddress) public onlyOwner {
+        zkArcadePublicNft = nftContractAddress;
+        emit ZkArcadePublicNftAddressUpdated(nftContractAddress);
+    }
+
     function setBeastVkCommitment(bytes32 vkCommitment) public onlyOwner {
         beastVkCommitment = vkCommitment;
         emit BeastProgramIdUpdated(beastVkCommitment);
@@ -381,5 +389,23 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
 
         top10Score[uint256(insertIndex)] = user;
+    }
+
+    function isUserWhitelisted(address user) public view returns (bool) {
+        if (zkArcadeNft != address(0)) {
+            ZkArcadeNft nftContract = ZkArcadeNft(zkArcadeNft);
+            if (nftContract.balanceOf(user) > 0) {
+                return true;
+            }
+        }
+        
+        if (zkArcadePublicNft != address(0)) {
+            ZkArcadePublicNft publicNftContract = ZkArcadePublicNft(zkArcadePublicNft);
+            if (publicNftContract.balanceOf(user) > 0) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

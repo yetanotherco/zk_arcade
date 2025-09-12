@@ -1,1 +1,6 @@
-{"addresses":{"implementation":"0x162A433068F51e18b7d13932F27e66a3f99E6890","proxy":"0x922D6956C99E12DFeB3224DEA977D0939758A1Fe"},"merkle":{"root":"0x4aaf544a75363b13ac830ba3bf62cb99716d814e61f335f13b88653ec3c0d507","whitelistCount":11}}
+{
+  "addresses": {
+    "implementation": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
+    "proxy": "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe"
+  }
+}

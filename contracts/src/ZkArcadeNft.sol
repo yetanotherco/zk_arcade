@@ -43,13 +43,11 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
         address owner,
         string memory name,
         string memory symbol,
-        string memory baseURI,
-        bytes32[] memory _merkleRoots
+        string memory baseURI
     ) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
         _baseTokenURI = baseURI;
-        merkleRoots = _merkleRoots;
         transfersEnabled = false;
         claimsEnabled = true;
     }

@@ -246,8 +246,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert ProofNotVerifiedOnAligned();
         }
 
-        ParityGame memory game = parityGames[gameIndex];
-        if (block.timestamp >= game.endsAtTime) {
+        ParityGame memory currentGame = parityGames[gameIndex];
+        if (block.timestamp >= currentGame.endsAtTime) {
             revert GameOutOfDate();
         }
 
@@ -255,14 +255,14 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         // So we shift to compare only that part
         // Each level takes 10 bytes -> 80 bits
         uint256 shiftAmount = 256 - (80 * (levelCompleted));
-        uint256 currentGameConfigUntil = game.gameConfig >> shiftAmount;
+        uint256 currentGameConfigUntil = currentGame.gameConfig >> shiftAmount;
         uint256 gameConfigUntil = gameConfig >> shiftAmount;
 
         if (currentGameConfigUntil != gameConfigUntil) {
-            revert InvalidGame(game.gameConfig, gameConfig);
+            revert InvalidGame(currentGame.gameConfig, gameConfig);
         }
 
-        bytes32 key = getParityKey(msg.sender, game.gameConfig);
+        bytes32 key = getParityKey(msg.sender, currentGame.gameConfig);
         uint256 currentLevelCompleted = usersParityLevelCompleted[key];
         if (levelCompleted <= currentLevelCompleted) {
             revert UserHasAlreadyCompletedThisLevel(currentLevelCompleted);

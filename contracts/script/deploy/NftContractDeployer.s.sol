@@ -17,8 +17,7 @@ contract NftContractDeployer is Script {
         string memory symbol = vm.parseJsonString(configData, ".symbol");
         string memory tokenURI = vm.parseJsonString(configData, ".tokenURI");
 
-        address[] memory whitelistAddresses = 
-            abi.decode(vm.parseJson(configData, ".whitelist.addresses"), (address[]));
+        address[] memory whitelistAddresses = abi.decode(vm.parseJson(configData, ".whitelist.addresses"), (address[]));
 
         bytes32[] memory merkleRoots = new bytes32[](1);
         merkleRoots[0] = merkleRoot;
@@ -26,12 +25,7 @@ contract NftContractDeployer is Script {
         vm.startBroadcast();
         ZkArcadeNft implementation = new ZkArcadeNft();
         bytes memory data = abi.encodeWithSignature(
-            "initialize(address,string,string,string,bytes32[])", 
-            owner, 
-            name, 
-            symbol,
-            tokenURI,
-            merkleRoots
+            "initialize(address,string,string,string,bytes32[])", owner, name, symbol, tokenURI, merkleRoots
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);
         vm.stopBroadcast();
@@ -40,11 +34,11 @@ contract NftContractDeployer is Script {
         string memory addressesObj = "addresses";
         vm.serializeAddress(addressesObj, "proxy", address(proxy));
         string memory addressOutput = vm.serializeAddress(addressesObj, "implementation", address(implementation));
-        
+
         string memory merkleObj = "merkle";
         vm.serializeBytes32(merkleObj, "root", merkleRoot);
         string memory merkleOutput = vm.serializeUint(merkleObj, "whitelistCount", whitelistAddresses.length);
-        
+
         string memory parentObj = "parent";
         vm.serializeString(parentObj, "addresses", addressOutput);
         string memory finalJson = vm.serializeString(parentObj, "merkle", merkleOutput);

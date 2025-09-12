@@ -34,6 +34,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     /// See `getParityKey` to see the key implementation
     mapping(bytes32 => uint256) public usersParityLevelCompleted;
 
+    bytes32 beastVkCommitment;
+    bytes32 parityVkCommitment;
+
     function getBeastKey(address user, uint256 game) internal pure returns (bytes32) {
         bytes32 gameHash = keccak256(abi.encodePacked(game));
         return keccak256(abi.encodePacked(user, gameHash));
@@ -67,6 +70,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     event ParityGamesUpdated(uint256 totalGames);
     event UseWhitelistUpdated(bool useWhitelist);
     event ZkArcadeNftAddressUpdated(address nftContractAddress);
+    event BeastProgramIdUpdated(bytes32 newProgramId);
+    event ParityProgramIdUpdated(bytes32 newProgramId);
 
     constructor() {
         _disableInitializers();
@@ -79,7 +84,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         address _zkArcadeNft,
         BeastGame[] calldata _beastGames,
         ParityGame[] calldata _parityGames,
-        bool _useWhitelist
+        bool _useWhitelist,
+        bytes32 _beastVkCommitment,
+        bytes32 _parityVkCommitment
     ) public initializer {
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
@@ -87,6 +94,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         zkArcadeNft = _zkArcadeNft;
         useWhitelist = _useWhitelist;
         parityGames = _parityGames;
+        beastVkCommitment = _beastVkCommitment;
+        parityVkCommitment = _parityVkCommitment;
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
     }
@@ -134,7 +143,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     function submitBeastSolution(
         bytes32 proofCommitment,
         bytes calldata publicInputs,
-        bytes32 provingSystemAuxDataCommitment,
         bytes20 proofGeneratorAddr,
         bytes32 batchMerkleRoot,
         bytes memory merkleProof,
@@ -158,7 +166,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
                 "verifyBatchInclusion(bytes32,bytes32,bytes32,bytes20,bytes32,bytes,uint256,address)",
                 proofCommitment,
                 pubInputCommitment,
-                provingSystemAuxDataCommitment,
+                beastVkCommitment,
                 proofGeneratorAddr,
                 batchMerkleRoot,
                 merkleProof,
@@ -199,7 +207,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     function submitParitySolution(
         bytes32 proofCommitment,
         bytes calldata publicInputs,
-        bytes32 provingSystemAuxDataCommitment,
         bytes20 proofGeneratorAddr,
         bytes32 batchMerkleRoot,
         bytes memory merkleProof,
@@ -225,7 +232,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
                 "verifyBatchInclusion(bytes32,bytes32,bytes32,bytes20,bytes32,bytes,uint256,address)",
                 proofCommitment,
                 pubInputCommitment,
-                provingSystemAuxDataCommitment,
+                parityVkCommitment,
                 proofGeneratorAddr,
                 batchMerkleRoot,
                 merkleProof,
@@ -341,5 +348,15 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
 
         top10Score[uint256(insertIndex)] = user;
+    }
+
+    function setBeastVkCommitment(bytes32 vkCommitment) public onlyOwner {
+        beastVkCommitment = vkCommitment;
+        emit BeastProgramIdUpdated(beastVkCommitment);
+    }
+
+    function setParityVkCommitment(bytes32 vkCommitment) public onlyOwner {
+        parityVkCommitment = vkCommitment;
+        emit ParityProgramIdUpdated(beastVkCommitment);
     }
 }

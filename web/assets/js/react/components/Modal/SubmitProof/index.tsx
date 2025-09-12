@@ -265,7 +265,7 @@ export const SubmitProofModal = ({
 		if (proofStatus === "verified" || proofStatus === "claimed") {
 			setSubmissionStatus("success");
 		}
-	}, [step, depositStatus, submissionStatus]);
+	}, [step, proofStatus, balance.data, nftBalance.data]);
 
 	return (
 		<Modal
@@ -284,7 +284,7 @@ export const SubmitProofModal = ({
 					</p>
 				</div>
 
-				<div className="flex overflow-scroll gap-8 w-full">
+				<div className="flex overflow-x-scroll gap-8 w-full">
 					<BreadCrumb
 						step="Mint NFT"
 						active={true}

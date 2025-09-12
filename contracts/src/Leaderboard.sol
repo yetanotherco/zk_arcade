@@ -61,7 +61,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error InvalidGame(uint256 expected, uint256 provided);
     error NoActiveBeastGame();
     error NoActiveParityGame();
-    error GameOutOfDate();
+    error GameEnded();
 
     /**
      * Events
@@ -179,7 +179,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         // Validate the game is available and the config is correct
         BeastGame memory game = beastGames[gameIndex];
         if (block.timestamp >= game.endsAtTime) {
-            revert GameOutOfDate();
+            revert GameEnded();
         }
         if (game.gameConfig != gameConfig) {
             revert InvalidGame(game.gameConfig, gameConfig);
@@ -248,7 +248,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         ParityGame memory currentGame = parityGames[gameIndex];
         if (block.timestamp >= currentGame.endsAtTime) {
-            revert GameOutOfDate();
+            revert GameEnded();
         }
 
         // The prover only commits the game config up to the level it reached

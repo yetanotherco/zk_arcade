@@ -13,6 +13,7 @@ export type FetchProofVerificationDataResponse = {
 	id: string;
 	verification_data: NoncedVerificationdata;
 	batch_data: BatchInclusionData | null;
+	game_idx: number;
 };
 
 export const fetchProofSubmission = async (
@@ -127,7 +128,11 @@ function hexStringToBytes(hex: string): Uint8Array {
 
 export const fetchMerkleProofForAddress = async (
 	address: Address
-): Promise<{ merkle_proof: NFTClaimMerkleProof; tokenURI: string; merkleRootIndex: number } | null> => {
+): Promise<{
+	merkle_proof: NFTClaimMerkleProof;
+	tokenURI: string;
+	merkleRootIndex: number;
+} | null> => {
 	try {
 		const response = await fetch(`/api/nft/proof?address=${address}`, {
 			method: "GET",

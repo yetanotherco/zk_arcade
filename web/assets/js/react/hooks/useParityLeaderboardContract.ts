@@ -56,17 +56,9 @@ export const useParityLeaderboardContract = ({
 		args: [
 			getParitytKey(
 				userAddress,
-				currentGame.data?.gameConfig || BigInt(0)
+				currentGame.data ? currentGame.data[0].gameConfig : BigInt(0)
 			),
 		],
-		chainId,
-	});
-
-	const allParityGames = useReadContract({
-		address: contractAddress,
-		abi: leaderboardAbi,
-		functionName: "getAllParityGames",
-		args: [],
 		chainId,
 	});
 
@@ -89,6 +81,7 @@ export const useParityLeaderboardContract = ({
 			const {
 				verification_data: { verificationData },
 				batch_data,
+				game_idx,
 			} = res;
 
 			if (!batch_data) {
@@ -107,38 +100,8 @@ export const useParityLeaderboardContract = ({
 				);
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
 
-			const gameConfig = BigInt(
-				"0x" +
-					Buffer.from(
-						[...(verificationData.publicInput || [])].splice(32, 32)
-					).toString("hex")
-			);
-			const levelCompleted = BigInt(
-				"0x" +
-					Buffer.from(
-						[...(verificationData.publicInput || [])].splice(0, 32)
-					).toString("hex")
-			);
-
-			const gameIndex = allParityGames.data
-				? allParityGames.data.findIndex(game => {
-						const shiftAmount = 256n - 80n * levelCompleted;
-						const currentGameConfigUntil =
-							game.gameConfig >> shiftAmount;
-						const gameConfigUntil = gameConfig >> shiftAmount;
-						return currentGameConfigUntil === gameConfigUntil;
-				  })
-				: null;
-
-			if (gameIndex === null || gameIndex === -1) {
-				alert(
-					"There was a problem while sending the proof, please try again"
-				);
-				return;
-			}
-
 			const args = [
-				gameIndex,
+				game_idx,
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
 				verificationData.proofGeneratorAddress,
@@ -196,6 +159,8 @@ export const useParityLeaderboardContract = ({
 	return {
 		currentGame: {
 			...currentGame,
+			game: currentGame.data ? currentGame.data[0] : null,
+			gameIdx: currentGame.data ? currentGame.data[1] : null,
 			gamesHaveFinished:
 				currentGame.error?.message?.includes("NoActiveParityGame"),
 		},

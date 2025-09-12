@@ -91,124 +91,74 @@ export const leaderboardAbi = [
 		stateMutability: "view",
 	},
 	{
-		type: "function",
+		inputs: [],
 		name: "getCurrentBeastGame",
-		inputs: [],
 		outputs: [
 			{
+				components: [
+					{
+						internalType: "uint256",
+						name: "endsAtTime",
+						type: "uint256",
+					},
+					{
+						internalType: "uint256",
+						name: "gameConfig",
+						type: "uint256",
+					},
+					{
+						internalType: "uint256",
+						name: "startsAtTime",
+						type: "uint256",
+					},
+				],
+				internalType: "struct BeastGame",
 				name: "",
 				type: "tuple",
-				internalType: "struct Leaderboard.BeastGame",
-				components: [
-					{
-						name: "endsAtTime",
-						type: "uint256",
-						internalType: "uint256",
-					},
-					{
-						name: "gameConfig",
-						type: "uint256",
-						internalType: "uint256",
-					},
-					{
-						name: "startsAtTime",
-						type: "uint256",
-						internalType: "uint256",
-					},
-				],
 			},
-		],
-		stateMutability: "view",
-	},
-	{
-		type: "function",
-		inputs: [],
-		name: "getAllBeastGames",
-		outputs: [
 			{
-				components: [
-					{
-						internalType: "uint256",
-						name: "endsAtTime",
-						type: "uint256",
-					},
-					{
-						internalType: "uint256",
-						name: "gameConfig",
-						type: "uint256",
-					},
-					{
-						internalType: "uint256",
-						name: "startsAtTime",
-						type: "uint256",
-					},
-				],
-				internalType: "struct Leaderboard.BeastGame[]",
-				name: "",
-				type: "tuple[]",
+				internalType: "uint256",
+				name: "idx",
+				type: "uint256",
 			},
 		],
 		stateMutability: "view",
+		type: "function",
 	},
 	{
-		type: "function",
 		inputs: [],
-		name: "getAllParityGames",
-		outputs: [
-			{
-				components: [
-					{
-						internalType: "uint256",
-						name: "endsAtTime",
-						type: "uint256",
-					},
-					{
-						internalType: "uint256",
-						name: "gameConfig",
-						type: "uint256",
-					},
-					{
-						internalType: "uint256",
-						name: "startsAtTime",
-						type: "uint256",
-					},
-				],
-				internalType: "struct Leaderboard.Parity[]",
-				name: "",
-				type: "tuple[]",
-			},
-		],
-		stateMutability: "view",
-	},
-	{
-		type: "function",
 		name: "getCurrentParityGame",
-		inputs: [],
 		outputs: [
 			{
-				name: "",
-				type: "tuple",
-				internalType: "struct Leaderboard.ParityGame",
 				components: [
 					{
+						internalType: "uint256",
 						name: "endsAtTime",
 						type: "uint256",
-						internalType: "uint256",
 					},
 					{
+						internalType: "uint256",
 						name: "gameConfig",
 						type: "uint256",
-						internalType: "uint256",
 					},
 					{
+						internalType: "uint256",
 						name: "startsAtTime",
 						type: "uint256",
-						internalType: "uint256",
 					},
 				],
+				internalType: "struct ParityGame",
+				name: "",
+				type: "tuple",
+			},
+			{
+				internalType: "uint256",
+				name: "idx",
+				type: "uint256",
 			},
 		],
 		stateMutability: "view",
+		type: "function",
 	},
 	{
 		type: "function",

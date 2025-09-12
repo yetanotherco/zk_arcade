@@ -63,16 +63,11 @@ export const useBeastLeaderboardContract = ({
 		abi: leaderboardAbi,
 		functionName: "usersBeastLevelCompleted",
 		args: [
-			getBeastKey(userAddress, currentGame.data?.gameConfig || BigInt(0)),
+			getBeastKey(
+				userAddress,
+				currentGame.data ? currentGame.data[0].gameConfig : 0n
+			),
 		],
-		chainId,
-	});
-
-	const allBeastGames = useReadContract({
-		address: contractAddress,
-		abi: leaderboardAbi,
-		functionName: "getAllBeastGames",
-		args: [],
 		chainId,
 	});
 
@@ -96,6 +91,7 @@ export const useBeastLeaderboardContract = ({
 			const {
 				verification_data: { verificationData },
 				batch_data,
+				game_idx,
 			} = res;
 
 			if (!batch_data) {
@@ -114,28 +110,8 @@ export const useBeastLeaderboardContract = ({
 				);
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
 
-			const gameConfig = BigInt(
-				"0x" +
-					Buffer.from(
-						[...(verificationData.publicInput || [])].splice(32, 32)
-					).toString("hex")
-			);
-
-			const gameIndex = allBeastGames.data
-				? allBeastGames.data.findIndex(
-						game => game.gameConfig === gameConfig
-				  )
-				: null;
-
-			if (gameIndex === null || gameIndex === -1) {
-				alert(
-					"There was a problem while sending the proof, please try again"
-				);
-				return;
-			}
-
 			const args = [
-				gameIndex,
+				game_idx,
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
 				verificationData.proofGeneratorAddress,
@@ -204,6 +180,8 @@ export const useBeastLeaderboardContract = ({
 		currentGameLevelCompleted,
 		currentGame: {
 			...currentGame,
+			game: currentGame.data ? currentGame.data[0] : null,
+			gameIdx: currentGame.data ? currentGame.data[1] : null,
 			gamesHaveFinished:
 				currentGame.error?.message?.includes("NoActiveBeastGame"),
 		},

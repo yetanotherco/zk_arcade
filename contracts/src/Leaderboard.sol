@@ -61,6 +61,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error InvalidGame(uint256 expected, uint256 provided);
     error NoActiveBeastGame();
     error NoActiveParityGame();
+    error GameEnded();
 
     /**
      * Events
@@ -131,6 +132,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function submitBeastSolution(
+        uint256 gameIndex,
         bytes32 proofCommitment,
         bytes calldata publicInputs,
         bytes20 proofGeneratorAddr,
@@ -175,9 +177,12 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
 
         // Validate the game is available and the config is correct
-        BeastGame memory currentGame = getCurrentBeastGame();
-        if (currentGame.gameConfig != gameConfig) {
-            revert InvalidGame(currentGame.gameConfig, gameConfig);
+        BeastGame memory game = beastGames[gameIndex];
+        if (block.timestamp >= game.endsAtTime) {
+            revert GameEnded();
+        }
+        if (game.gameConfig != gameConfig) {
+            revert InvalidGame(game.gameConfig, gameConfig);
         }
 
         bytes32 key = getBeastKey(msg.sender, gameConfig);
@@ -195,6 +200,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function submitParitySolution(
+        uint256 gameIndex,
         bytes32 proofCommitment,
         bytes calldata publicInputs,
         bytes20 proofGeneratorAddr,
@@ -240,9 +246,13 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert ProofNotVerifiedOnAligned();
         }
 
+        ParityGame memory currentGame = parityGames[gameIndex];
+        if (block.timestamp >= currentGame.endsAtTime) {
+            revert GameEnded();
+        }
+
         // The prover only commits the game config up to the level it reached
         // So we shift to compare only that part
-        ParityGame memory currentGame = getCurrentParityGame();
         // Each level takes 10 bytes -> 80 bits
         uint256 shiftAmount = 256 - (80 * (levelCompleted));
         uint256 currentGameConfigUntil = currentGame.gameConfig >> shiftAmount;
@@ -274,20 +284,20 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         return usersBeastLevelCompleted[key];
     }
 
-    function getCurrentBeastGame() public view returns (BeastGame memory) {
-        for (uint256 i = 0; i < beastGames.length; i++) {
+    function getCurrentBeastGame() public view returns (BeastGame memory, uint256 idx) {
+        for (uint256 i = beastGames.length - 1; i >= 0; i--) {
             if (block.timestamp >= beastGames[i].startsAtTime && block.timestamp < beastGames[i].endsAtTime) {
-                return beastGames[i];
+                return (beastGames[i], i);
             }
         }
 
         revert NoActiveBeastGame();
     }
 
-    function getCurrentParityGame() public view returns (ParityGame memory) {
-        for (uint256 i = 0; i < parityGames.length; i++) {
+    function getCurrentParityGame() public view returns (ParityGame memory, uint256 idx) {
+        for (uint256 i = parityGames.length - 1; i >= 0; i--) {
             if (block.timestamp >= parityGames[i].startsAtTime && block.timestamp < parityGames[i].endsAtTime) {
-                return parityGames[i];
+                return (parityGames[i], i);
             }
         }
 

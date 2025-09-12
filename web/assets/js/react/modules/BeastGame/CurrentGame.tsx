@@ -60,7 +60,7 @@ const CurrentBeastGameComponent = ({
 		minutes: number;
 	} | null>(null);
 
-	const endsAtTime = currentGame.data?.endsAtTime || 0;
+	const endsAtTime = currentGame.game?.endsAtTime || 0;
 
 	useEffect(() => {
 		if (endsAtTime > 0 && currentBlockTimestamp) {

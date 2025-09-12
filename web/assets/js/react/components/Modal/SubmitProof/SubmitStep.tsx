@@ -78,6 +78,7 @@ export const SubmitProofStep = ({
 	setProofStatus,
 	proofToSubmitData,
 	gameName,
+	initialGameIdx,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -91,6 +92,7 @@ export const SubmitProofStep = ({
 	setProofStatus: (status: ProofSubmission["status"]) => void;
 	proofToSubmitData: VerificationData | null;
 	gameName: string;
+	initialGameIdx?: number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
@@ -113,6 +115,7 @@ export const SubmitProofStep = ({
 	);
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
+	const [gameIdx, setGameIdx] = useState(initialGameIdx);
 	const { price: ethPrice } = useEthPrice();
 
 	const [parsedPublicInputs, setParsedPublicInputs] = useState<
@@ -193,7 +196,7 @@ export const SubmitProofStep = ({
 
 		const parsedGameConfigBigInt = BigInt("0x" + parsed.game_config);
 		const currentGameConfigBigInt = BigInt(
-			currentGame.data?.gameConfig || 0n
+			currentGame.game?.gameConfig || 0n
 		);
 
 		if (parsedGameConfigBigInt !== currentGameConfigBigInt) {
@@ -220,6 +223,7 @@ export const SubmitProofStep = ({
 		setProof(proof);
 		setProofId(proofId);
 		setPublicInputs(publicInputs);
+		setGameIdx(currentGame.gameIdx);
 	};
 
 	const handleSubmission = useCallback(async () => {
@@ -674,6 +678,7 @@ export const SubmitProofStep = ({
 				/>
 				<input type="hidden" name="_csrf_token" value={csrfToken} />
 				<input type="hidden" name="game" value={gameData?.name} />
+				<input type="hidden" name="game_idx" value={Number(gameIdx)} />
 			</form>
 			<Button
 				variant="text"

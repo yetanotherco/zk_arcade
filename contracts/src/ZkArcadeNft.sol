@@ -26,7 +26,6 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
     event NFTClaimed(address indexed account);
     event TransfersPausedUpdated(bool newPauseStatus);
     event ClaimsPausedUpdated(bool newPauseStatus);
-    event TokenTransferred(address indexed from, address indexed to, uint256 indexed tokenId);
 
     /**
      * Errors
@@ -103,8 +102,6 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         }
 
         super.transferFrom(from, to, tokenId);
-
-        emit TokenTransferred(from, to, tokenId);
     }
 
     function setTransferPaused(bool _transfersPaused) public onlyOwner {

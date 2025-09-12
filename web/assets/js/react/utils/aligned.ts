@@ -130,7 +130,7 @@ export const fetchMerkleProofForAddress = async (
 	address: Address
 ): Promise<{
 	merkle_proof: NFTClaimMerkleProof;
-	merkleRootIndex: number;
+	merkle_root_index: number;
 } | null> => {
 	try {
 		const response = await fetch(`/api/nft/proof?address=${address}`, {

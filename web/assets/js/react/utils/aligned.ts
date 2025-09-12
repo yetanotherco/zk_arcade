@@ -127,7 +127,10 @@ function hexStringToBytes(hex: string): Uint8Array {
 
 export const fetchMerkleProofForAddress = async (
 	address: Address
-): Promise<{ merkle_proof: NFTClaimMerkleProof; tokenURI: string; merkleRootIndex: number } | null> => {
+): Promise<{
+	merkle_proof: NFTClaimMerkleProof;
+	merkle_root_index: number;
+} | null> => {
 	try {
 		const response = await fetch(`/api/nft/proof?address=${address}`, {
 			method: "GET",

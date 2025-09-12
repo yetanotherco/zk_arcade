@@ -284,28 +284,20 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         return usersBeastLevelCompleted[key];
     }
 
-    function getAllBeastGames() external view returns (BeastGame[] memory) {
-        return beastGames;
-    }
-
-    function getCurrentBeastGame() public view returns (BeastGame memory) {
-        for (uint256 i = 0; i < beastGames.length; i++) {
+    function getCurrentBeastGame() public view returns (BeastGame memory, uint256 idx) {
+        for (uint256 i = beastGames.length - 1; i >= 0; i--) {
             if (block.timestamp >= beastGames[i].startsAtTime && block.timestamp < beastGames[i].endsAtTime) {
-                return beastGames[i];
+                return (beastGames[i], i);
             }
         }
 
         revert NoActiveBeastGame();
     }
 
-    function getAllParityGames() external view returns (ParityGame[] memory) {
-        return parityGames;
-    }
-
-    function getCurrentParityGame() public view returns (ParityGame memory) {
-        for (uint256 i = 0; i < parityGames.length; i++) {
+    function getCurrentParityGame() public view returns (ParityGame memory, uint256 idx) {
+        for (uint256 i = parityGames.length - 1; i >= 0; i--) {
             if (block.timestamp >= parityGames[i].startsAtTime && block.timestamp < parityGames[i].endsAtTime) {
-                return parityGames[i];
+                return (parityGames[i], i);
             }
         }
 

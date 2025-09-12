@@ -67,6 +67,7 @@ export const leaderboardAbi = [
 		name: "submitParitySolution",
 		stateMutability: "nonpayable",
 		inputs: [
+			{ name: "gameIndex", type: "uint256" },
 			{ name: "proofCommitment", type: "bytes32" },
 			{ name: "publicInputs", type: "bytes" },
 			{ name: "provingSystemAuxDataCommitment", type: "bytes32" },

@@ -127,7 +127,7 @@ export const useBeastLeaderboardContract = ({
 				  )
 				: null;
 
-			if (gameIndex === null) {
+			if (gameIndex === null || gameIndex === -1) {
 				alert(
 					"There was a problem while sending the proof, please try again"
 				);

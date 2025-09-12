@@ -113,14 +113,24 @@ export const useParityLeaderboardContract = ({
 						[...(verificationData.publicInput || [])].splice(32, 32)
 					).toString("hex")
 			);
+			const levelCompleted = BigInt(
+				"0x" +
+					Buffer.from(
+						[...(verificationData.publicInput || [])].splice(0, 32)
+					).toString("hex")
+			);
 
 			const gameIndex = allParityGames.data
-				? allParityGames.data.findIndex(
-						game => game.gameConfig === gameConfig
-				  )
+				? allParityGames.data.findIndex(game => {
+						const shiftAmount = 256n - 80n * levelCompleted;
+						const currentGameConfigUntil =
+							game.gameConfig >> shiftAmount;
+						const gameConfigUntil = gameConfig >> shiftAmount;
+						return currentGameConfigUntil === gameConfigUntil;
+				  })
 				: null;
 
-			if (gameIndex === null) {
+			if (gameIndex === null || gameIndex === -1) {
 				alert(
 					"There was a problem while sending the proof, please try again"
 				);
@@ -128,6 +138,7 @@ export const useParityLeaderboardContract = ({
 			}
 
 			const args = [
+				gameIndex,
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
 				bytesToHex(commitment.provingSystemAuxDataCommitment, {

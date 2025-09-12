@@ -38,10 +38,13 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     bool public useWhitelist;
 
     event NewSolutionSubmitted(address user, uint256 level, uint256 score);
-    event BeastProgramIdUpdated(bytes32 newProgramId);
-    event ParityProgramIdUpdated(bytes32 newProgramId);
+    event BeastGamesUpdated(BeastGame[] beastGames);
+    event ParityGamesUpdated(ParityGame[] parityGames);
     event WhitelistEnabled();
     event WhitelistDisabled();
+    event ZkArcadeNftAddressUpdated(address nftContractAddress);
+    event BeastProgramIdUpdated(bytes32 newProgramId);
+    event ParityProgramIdUpdated(bytes32 newProgramId);
 
     error CallToAlignedContractFailed();
     error ProofNotVerifiedOnAligned();
@@ -52,17 +55,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error NoActiveBeastGame();
     error NoActiveParityGame();
     error GameEnded();
-
-    /**
-     * Events
-     */
-    event NewSolutionSubmitted(address user, uint256 level, uint256 score);
-    event BeastGamesUpdated(BeastGame[] beastGames);
-    event ParityGamesUpdated(ParityGame[] parityGames);
-    event UseWhitelistUpdated(bool useWhitelist);
-    event ZkArcadeNftAddressUpdated(address nftContractAddress);
-    event BeastProgramIdUpdated(bytes32 newProgramId);
-    event ParityProgramIdUpdated(bytes32 newProgramId);
 
     // ======== Initialization & Upgrades ========
 
@@ -324,6 +316,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function setZkArcadeNftAddress(address nftContractAddress) public onlyOwner {
         zkArcadeNft = nftContractAddress;
+        emit ZkArcadeNftAddressUpdated(nftContractAddress);
     }
 
     function setBeastVkCommitment(bytes32 vkCommitment) public onlyOwner {

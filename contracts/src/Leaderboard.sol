@@ -81,7 +81,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
         zkArcadeNft = _zkArcadeNft;
-        zkArcadePublicNft = _zkArcadePublicNft;
+        zkArcadePublicNft = address(0);
         useWhitelist = _useWhitelist;
         parityGames = _parityGames;
         beastVkCommitment = _beastVkCommitment;
@@ -112,7 +112,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
         }
 
-        if (useWhitelist && !_isUserWhitelisted(userAddress)) {
+        if (useWhitelist && !isUserWhitelisted(userAddress)) {
             revert UserIsNotWhitelisted(userAddress);
         }
 
@@ -181,7 +181,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert UserAddressMismatch({expected: userAddress, actual: msg.sender});
         }
 
-        if (useWhitelist && !_isUserWhitelisted(userAddress)) {
+        if (useWhitelist && !isUserWhitelisted(userAddress)) {
             revert UserIsNotWhitelisted(userAddress);
         }
 
@@ -391,7 +391,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         top10Score[uint256(insertIndex)] = user;
     }
 
-    function _isUserWhitelisted(address user) internal view returns (bool) {
+    function isUserWhitelisted(address user) public view returns (bool) {
         if (zkArcadeNft != address(0)) {
             ZkArcadeNft nftContract = ZkArcadeNft(zkArcadeNft);
             if (nftContract.balanceOf(user) > 0) {

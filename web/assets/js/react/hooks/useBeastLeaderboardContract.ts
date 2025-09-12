@@ -63,7 +63,10 @@ export const useBeastLeaderboardContract = ({
 		abi: leaderboardAbi,
 		functionName: "usersBeastLevelCompleted",
 		args: [
-			getBeastKey(userAddress, currentGame.data?.gameConfig || BigInt(0)),
+			getBeastKey(
+				userAddress,
+				currentGame.data ? currentGame.data[0].gameConfig : 0n
+			),
 		],
 		chainId,
 	});
@@ -88,6 +91,7 @@ export const useBeastLeaderboardContract = ({
 			const {
 				verification_data: { verificationData },
 				batch_data,
+				game_idx,
 			} = res;
 
 			if (!batch_data) {
@@ -107,11 +111,9 @@ export const useBeastLeaderboardContract = ({
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
 
 			const args = [
+				game_idx,
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
-				bytesToHex(commitment.provingSystemAuxDataCommitment, {
-					size: 32,
-				}),
 				verificationData.proofGeneratorAddress,
 				merkleRoot,
 				encodedMerkleProof,
@@ -178,6 +180,8 @@ export const useBeastLeaderboardContract = ({
 		currentGameLevelCompleted,
 		currentGame: {
 			...currentGame,
+			game: currentGame.data ? currentGame.data[0] : null,
+			gameIdx: currentGame.data ? currentGame.data[1] : null,
 			gamesHaveFinished:
 				currentGame.error?.message?.includes("NoActiveBeastGame"),
 		},

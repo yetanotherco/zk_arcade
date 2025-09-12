@@ -34,6 +34,7 @@ export const Game = ({
 		setPlayerLevelReached,
 		setCurrentLevel,
 		currentGameConfig,
+		currentGameIdx,
 		timeRemaining,
 		currentGameLevelCompleted,
 	} = useParityGames({
@@ -203,6 +204,7 @@ export const Game = ({
 				submittedLevelOnChain={Number(currentGameLevelCompleted.data)}
 				timeRemaining={timeRemaining}
 				nft_contract_address={nft_contract_address}
+				gameIdx={currentGameIdx}
 			/>
 		),
 	};

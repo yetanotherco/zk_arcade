@@ -4,7 +4,6 @@ pragma solidity ^0.8.28;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
@@ -14,8 +13,8 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
 
     bytes32[] public merkleRoots;
     mapping(address => bool) public hasClaimed;
-    bool transfersPaused;
-    bool claimsPaused;
+    bool internal transfersEnabled;
+    bool internal claimsEnabled;
     string private _baseTokenURI;
 
     /**
@@ -23,14 +22,18 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
      */
     event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event NFTClaimed(address indexed account);
-    event TransfersPausedUpdated(bool newPauseStatus);
-    event ClaimsPausedUpdated(bool newPauseStatus);
+    event TransfersEnabled();
+    event TransfersDisabled();
+    event ClaimsEnabled();
+    event ClaimsDisabled();
 
     /**
      * Errors
      */
     error TransfersPaused();
     error ClaimsPaused();
+
+    // ======== Initialization & Upgrades ========
 
     constructor() {
         _disableInitializers();
@@ -47,14 +50,16 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
         __Ownable_init(owner);
         _baseTokenURI = baseURI;
         merkleRoots = _merkleRoots;
-        transfersPaused = true;
-        claimsPaused = false;
+        transfersEnabled = false;
+        claimsEnabled = true;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+    // ======== Core NFT Functions ========
+
     function claimNFT(bytes32[] calldata merkleProof, uint256 rootIndex) public returns (uint256) {
-        if (claimsPaused) {
+        if (!claimsEnabled) {
             revert ClaimsPaused();
         }
         require(!hasClaimed[msg.sender], "NFT already claimed for this address");
@@ -78,6 +83,20 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
         return tokenId;
     }
 
+    function transferFrom(address from, address to, uint256 tokenId) public override {
+        if (!transfersEnabled) {
+            revert TransfersPaused();
+        }
+
+        super.transferFrom(from, to, tokenId);
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return _baseTokenURI;
+    }
+
+    // ======== Whitelist & Merkle Management ========
+
     function isWhitelisted(address user) public view returns (bool) {
         return balanceOf(user) >= 1;
     }
@@ -95,31 +114,36 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
         emit MerkleRootUpdated(_merkleRoot, rootIndex);
     }
 
-    function transferFrom(address from, address to, uint256 tokenId) public override {
-        if (transfersPaused) {
-            revert TransfersPaused();
-        }
+    // ======== Admin Controls ========
 
-        super.transferFrom(from, to, tokenId);
+    function enableTransfers() public onlyOwner {
+        transfersEnabled = true;
+        emit TransfersEnabled();
     }
 
-    function setTransferPaused(bool _transfersPaused) public onlyOwner {
-        transfersPaused = _transfersPaused;
-
-        emit TransfersPausedUpdated(transfersPaused);
+    function disableTransfers() public onlyOwner {
+        transfersEnabled = false;
+        emit TransfersDisabled();
     }
 
-    function setClaimsPaused(bool _claimsPaused) public onlyOwner {
-        claimsPaused = _claimsPaused;
+    function enableClaims() public onlyOwner {
+        claimsEnabled = true;
+        emit ClaimsEnabled();
+    }
 
-        emit ClaimsPausedUpdated(claimsPaused);
+    function disableClaims() public onlyOwner {
+        claimsEnabled = false;
+        emit ClaimsDisabled();
+    }
+
+    function endSeason() public onlyOwner {
+        claimsEnabled = false;
+        transfersEnabled = true;
+        emit ClaimsDisabled();
+        emit TransfersEnabled();
     }
 
     function setBaseURI(string memory newBaseURI) public onlyOwner {
         _baseTokenURI = newBaseURI;
-    }
-
-    function _baseURI() internal view override returns (string memory) {
-        return _baseTokenURI;
     }
 }

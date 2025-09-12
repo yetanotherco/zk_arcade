@@ -8,7 +8,7 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 private _nextTokenId;
     uint256 public maxSupply;
-    bool public mintingIsEnabled;
+    bool public mintingEnabled;
     bool public transfersEnabled;
     string private _baseTokenURI;
 
@@ -46,7 +46,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         __Ownable_init(owner);
         _baseTokenURI = baseURI;
         maxSupply = _maxSupply;
-        mintingIsEnabled = false;
+        mintingEnabled = false;
         transfersEnabled = false;
     }
 
@@ -55,7 +55,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     // ======== Core NFT Functions ========
 
     function mint() public returns (uint256) {
-        if (!mintingIsEnabled) {
+        if (!mintingEnabled) {
             revert MintingNotEnabled();
         }
         
@@ -94,12 +94,12 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     // ======== Admin Functions ========
 
     function enableMinting() external onlyOwner {
-        mintingIsEnabled = true;
+        mintingEnabled = true;
         emit MintingEnabled();
     }
 
     function disableMinting() external onlyOwner {
-        mintingIsEnabled = false;
+        mintingEnabled = false;
         emit MintingDisabled();
     }
 

@@ -24,7 +24,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     /**
      * Errors
      */
-    error MintingNotEnabled();
+    error MintingPaused();
     error MaxSupplyExceeded();
     error AlreadyOwnsNFT();
     error TransfersPaused();
@@ -56,7 +56,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
     function mint() public returns (uint256) {
         if (!mintingEnabled) {
-            revert MintingNotEnabled();
+            revert MintingPaused();
         }
         
         if (balanceOf(msg.sender) > 0) {

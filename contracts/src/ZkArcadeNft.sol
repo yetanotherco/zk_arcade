@@ -4,21 +4,19 @@ pragma solidity ^0.8.28;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import {ERC721URIStorageUpgradeable} from
-    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpgradeable {
+contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 private _nextTokenId;
 
     bytes32[] public merkleRoots;
     mapping(address => bool) public hasClaimed;
     bool transfersPaused;
     bool claimsPaused;
-    string private _tokenURI;
+    string private _baseTokenURI;
 
     event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event NFTClaimed(address indexed account);
@@ -36,15 +34,15 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         address owner,
         string memory name,
         string memory symbol,
-        string memory __tokenURI,
+        string memory baseURI,
         bytes32[] memory _merkleRoots
     ) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
+        _baseTokenURI = baseURI;
         merkleRoots = _merkleRoots;
         transfersPaused = true;
         claimsPaused = false;
-        _tokenURI = __tokenURI;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -68,7 +66,6 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         // Mint the NFT
         uint256 tokenId = _nextTokenId++;
         _mint(msg.sender, tokenId);
-        _setTokenURI(tokenId, _tokenURI);
 
         emit NFTClaimed(msg.sender);
 
@@ -92,7 +89,7 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         emit MerkleRootUpdated(_merkleRoot, rootIndex);
     }
 
-    function transferFrom(address from, address to, uint256 tokenId) public override(ERC721Upgradeable, IERC721) {
+    function transferFrom(address from, address to, uint256 tokenId) public override {
         if (transfersPaused) {
             revert TransfersPaused();
         }
@@ -112,7 +109,11 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         emit ClaimsPausedUpdated(claimsPaused);
     }
 
-    function setTokenURI(string memory newTokenURI) public onlyOwner {
-        _tokenURI = newTokenURI;
+    function setBaseURI(string memory newBaseURI) public onlyOwner {
+        _baseTokenURI = newBaseURI;
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return _baseTokenURI;
     }
 }

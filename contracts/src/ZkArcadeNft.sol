@@ -17,6 +17,9 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     bool internal claimsEnabled;
     string private _baseTokenURI;
 
+    /**
+     * Events
+     */
     event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event NFTClaimed(address indexed account);
     event TransfersEnabled();
@@ -24,6 +27,9 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     event ClaimsEnabled();
     event ClaimsDisabled();
 
+    /**
+     * Errors
+     */
     error TransfersPaused();
     error ClaimsPaused();
 

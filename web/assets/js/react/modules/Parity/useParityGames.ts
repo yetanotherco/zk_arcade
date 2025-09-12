@@ -25,7 +25,7 @@ export const useParityGames = ({
 		});
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
 
-	const gameConfig = currentGame.data?.gameConfig ?? "";
+	const gameConfig = currentGame.game?.gameConfig ?? "";
 
 	const levels: ParityLevel[] = useMemo(() => {
 		if (!gameConfig) return [];
@@ -60,7 +60,7 @@ export const useParityGames = ({
 	} | null>(null);
 
 	useEffect(() => {
-		const endsAtTime = currentGame.data?.endsAtTime || 0;
+		const endsAtTime = currentGame.game?.endsAtTime || 0;
 		const currentBlockTimestamp = currentBlock.data
 			? currentBlock.data.timestamp
 			: 0;
@@ -105,5 +105,6 @@ export const useParityGames = ({
 		levels,
 		timeRemaining,
 		currentGameConfig: gameConfig,
+		currentGameIdx: currentGame.gameIdx,
 	};
 };

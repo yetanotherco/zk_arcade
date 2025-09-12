@@ -13,6 +13,7 @@ export type FetchProofVerificationDataResponse = {
 	id: string;
 	verification_data: NoncedVerificationdata;
 	batch_data: BatchInclusionData | null;
+	game_idx: number;
 };
 
 export const fetchProofSubmission = async (

@@ -67,6 +67,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
      * Events
      */
     event NewSolutionSubmitted(address user, uint256 level, uint256 score);
+    event BeastGamesUpdated(BeastGame[] beastGames);
+    event ParityGamesUpdated(ParityGame[] parityGames);
+    event UseWhitelistUpdated(bool useWhitelist);
+    event ZkArcadeNftAddressUpdated(address nftContractAddress);
     event BeastProgramIdUpdated(bytes32 newProgramId);
     event ParityProgramIdUpdated(bytes32 newProgramId);
 
@@ -95,6 +99,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         parityVkCommitment = _parityVkCommitment;
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
+        emit BeastGamesUpdated(_beastGames);
+        emit ParityGamesUpdated(_parityGames);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -103,24 +109,37 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     /// @param _beastGames The new beast games configuration
     function setBeastGames(BeastGame[] calldata _beastGames) public onlyOwner {
         beastGames = _beastGames;
+        emit BeastGamesUpdated(_beastGames);
+    }
+
+    /// @notice Adds new beast games configuration
+    /// @param _newBeastGames The new beast games configuration to add
+    function addBeastGames(BeastGame[] calldata _newBeastGames) public onlyOwner {
+        for (uint256 i = 0; i < _newBeastGames.length; i++) {
+            beastGames.push(_newBeastGames[i]);
+        }
+        emit BeastGamesUpdated(_newBeastGames);
     }
 
     /// @notice Sets whether to use the whitelist or not
     /// @param _useWhitelist The new whitelist status
     function setUseWhitelist(bool _useWhitelist) public onlyOwner {
         useWhitelist = _useWhitelist;
+        emit UseWhitelistUpdated(_useWhitelist);
     }
 
     /// @notice Sets the zkArcadeNft address
     /// @param nftContractAddress The new zkArcadeNft address
     function setZkArcadeNftAddress(address nftContractAddress) public onlyOwner {
         zkArcadeNft = nftContractAddress;
+        emit ZkArcadeNftAddressUpdated(nftContractAddress);
     }
 
     /// @notice Sets the parity games configuration
     /// @param _parityGames The new parity games configuration
     function setParityGames(ParityGame[] calldata _parityGames) public onlyOwner {
         parityGames = _parityGames;
+        emit ParityGamesUpdated(parityGames);
     }
 
     /// @notice Adds new parity games configuration
@@ -129,6 +148,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         for (uint256 i = 0; i < _newParityGames.length; i++) {
             parityGames.push(_newParityGames[i]);
         }
+        emit ParityGamesUpdated(_newParityGames);
     }
 
     function submitBeastSolution(
@@ -357,6 +377,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function setParityVkCommitment(bytes32 vkCommitment) public onlyOwner {
         parityVkCommitment = vkCommitment;
-        emit ParityProgramIdUpdated(beastVkCommitment);
+        emit ParityProgramIdUpdated(parityVkCommitment);
     }
 }

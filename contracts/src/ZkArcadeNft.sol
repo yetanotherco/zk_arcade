@@ -18,11 +18,17 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     bool claimsPaused;
     string private _baseTokenURI;
 
+    /**
+     * Events
+     */
     event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event NFTClaimed(address indexed account);
     event TransfersPausedUpdated(bool newPauseStatus);
     event ClaimsPausedUpdated(bool newPauseStatus);
 
+    /**
+     * Errors
+     */
     error TransfersPaused();
     error ClaimsPaused();
 

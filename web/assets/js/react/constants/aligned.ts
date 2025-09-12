@@ -53,7 +53,6 @@ export const leaderboardAbi = [
 		inputs: [
 			{ name: "proofCommitment", type: "bytes32" },
 			{ name: "publicInputs", type: "bytes" },
-			{ name: "provingSystemAuxDataCommitment", type: "bytes32" },
 			{ name: "proofGeneratorAddr", type: "bytes20" },
 			{ name: "batchMerkleRoot", type: "bytes32" },
 			{ name: "merkleProof", type: "bytes" },
@@ -68,7 +67,6 @@ export const leaderboardAbi = [
 		inputs: [
 			{ name: "proofCommitment", type: "bytes32" },
 			{ name: "publicInputs", type: "bytes" },
-			{ name: "provingSystemAuxDataCommitment", type: "bytes32" },
 			{ name: "proofGeneratorAddr", type: "bytes20" },
 			{ name: "batchMerkleRoot", type: "bytes32" },
 			{ name: "merkleProof", type: "bytes" },

@@ -125,10 +125,21 @@ upgrade_contract: submodules
 set_beast_games: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
 
+__WHITELIST__:
 # This path is relative to the project root
 WHITELIST_PATH?=merkle_tree/whitelist.json
-nft_whitelist_addresses: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/create_new_campaign.sh "$(MERKLE_ROOT_INDEX)" "$(WHITELIST_PATH)"
+
+build_merkle_proof_generator:
+	cd merkle_tree && cargo build --release
+
+preprocess_whitelist:
+	cd data && pip3 install -r requirements.txt && python3 preprocess_addresses.py $(WHITELIST_PATH)
+
+generate_merkle_data: build_merkle_proof_generator
+	./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) merkle_tree/merkle_output.json $(MERKLE_ROOT_INDEX)
+
+add_merkle_root: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_campaign_merkle_root.sh
 
 __INFRA__: ## ____
 ## Initial Setup

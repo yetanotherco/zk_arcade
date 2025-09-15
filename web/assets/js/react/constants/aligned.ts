@@ -48,7 +48,7 @@ export const batcherPaymentServiceAbi = [
 export const leaderboardAbi = [
 	{
 		type: "function",
-		name: "submitBeastSolution",
+		name: "claimBeastPoints",
 		stateMutability: "nonpayable",
 		inputs: [
 			{ name: "proofCommitment", type: "bytes32" },
@@ -62,7 +62,7 @@ export const leaderboardAbi = [
 	},
 	{
 		type: "function",
-		name: "submitParitySolution",
+		name: "claimParityPoints",
 		stateMutability: "nonpayable",
 		inputs: [
 			{ name: "proofCommitment", type: "bytes32" },

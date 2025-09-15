@@ -53,7 +53,7 @@ async fn send_solution_to_leaderboard(
     );
 
     let res = leaderboard
-        .submitBeastSolution(
+        .claimBeastPoints(
             aligned_verification_data
                 .verification_data_commitment
                 .proof_commitment

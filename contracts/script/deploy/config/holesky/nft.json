@@ -3,5 +3,6 @@
 		"owner": "0x97aEC5F28181abe5d2aD40dBe7FbaEe014529b7D"
 	},
 	"name": "ZK Arcade NFTs",
-	"symbol": "ZKA"
+	"symbol": "ZKA",
+	"tokenURI": "ipfs://bafkreifhkee23fhenp2x3uk6kwbzlpccofwqd74hyc7xftn4dblkr6wnay/"
 }

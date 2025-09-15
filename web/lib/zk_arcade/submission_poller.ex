@@ -4,13 +4,13 @@ defmodule ZkArcade.SubmissionPoller do
 
   @beastTopic "0x" <>
            Base.encode16(
-             ExKeccak.hash_256("NewBeastPointsClaimed(address,uint256,uint256)"),
+             ExKeccak.hash_256("BeastPointsClaimed(address,uint256,uint256)"),
              case: :lower
            )
 
   @parityTopic "0x" <>
            Base.encode16(
-             ExKeccak.hash_256("NewParityPointsClaimed(address,uint256,uint256)"),
+             ExKeccak.hash_256("ParityPointsClaimed(address,uint256,uint256)"),
              case: :lower
            )
 

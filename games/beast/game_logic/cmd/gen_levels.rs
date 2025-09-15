@@ -205,7 +205,7 @@ fn main() {
         .as_secs();
 
     let time_in_seconds = time_days * 24 * 3600;
-    let seconds_per_game = (time_in_seconds / num_games as u64) + submission_offset_secs;
+    let seconds_per_game = time_in_seconds / num_games as u64;
 
     let mut rng = rand::rng();
     let games: Vec<GameJson> = (0..num_games)
@@ -217,7 +217,7 @@ fn main() {
 
             GameJson {
                 from_time: from_time,
-                to_time: to_time,
+                to_time: to_time + submission_offset_secs,
                 game_config: hex::encode(encode_game_config(&levels)),
                 levels,
             }

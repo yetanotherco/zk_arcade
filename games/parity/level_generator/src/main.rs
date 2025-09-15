@@ -199,7 +199,7 @@ fn main() {
     let min_movements = args[5].parse().expect("Invalid min movements");
     let max_movements = args[6].parse().expect("Invalid max movements");
     let time_days: u64 = args[7].parse().expect("Invalid total campaign in days");
-    let submission_offset: u64 = args[8].parse().expect("Invalid submission offset");
+    let submission_offset_secs: u64 = args[8].parse().expect("Invalid submission offset");
     let network: String = args[9].parse().expect("Invalid network");
 
     let current_time = std::time::SystemTime::now();
@@ -209,7 +209,7 @@ fn main() {
         .as_secs();
 
     let time_in_seconds = time_days * 24 * 3600;
-    let seconds_per_game = (time_in_seconds / num_games as u64) + submission_offset;
+    let seconds_per_game = time_in_seconds / num_games as u64;
 
     let mut games: Vec<GameEntry> = vec![];
     for _ in 0..num_games {
@@ -226,7 +226,8 @@ fn main() {
         let mut start_at_time_bytes = [0u8; 32];
         let mut ends_at_time_bytes = [0u8; 32];
         U256::from(current_timestamp).to_big_endian(&mut start_at_time_bytes);
-        U256::from(current_timestamp + seconds_per_game).to_big_endian(&mut ends_at_time_bytes);
+        U256::from(current_timestamp + seconds_per_game + submission_offset_secs)
+            .to_big_endian(&mut ends_at_time_bytes);
         current_timestamp = current_timestamp + seconds_per_game;
 
         games.push(GameEntry {

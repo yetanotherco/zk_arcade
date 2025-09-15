@@ -136,7 +136,8 @@ defmodule ZkArcade.Proofs do
           wallet_address: p.wallet_address,
           level_reached: p.level_reached,
           game_config: p.game_config,
-          submitted_max_fee: p.submitted_max_fee
+          submitted_max_fee: p.submitted_max_fee,
+          game_idx: p.game_idx
         }
 
     case Repo.one(query) do
@@ -177,12 +178,13 @@ defmodule ZkArcade.Proofs do
       |> select([p], %{
         id: p.id,
         verification_data: p.verification_data,
-        batch_data: p.batch_data
+        batch_data: p.batch_data,
+        game_idx: p.game_idx
       })
     |> Repo.all()
   end
 
-  def create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee) do
+  def create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee, game_idx) do
     {:ok, verification_data_commitment} = ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(submit_proof_message["verificationData"]["verificationData"])
     proof_params = %{
       wallet_address: address,
@@ -194,7 +196,8 @@ defmodule ZkArcade.Proofs do
       proving_system: proving_system,
       game_config: gameConfig,
       level_reached: level,
-      submitted_max_fee: max_fee
+      submitted_max_fee: max_fee,
+      game_idx: game_idx
     }
 
     create_proof(proof_params)

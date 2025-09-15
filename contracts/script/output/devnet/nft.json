@@ -1,1 +1,6 @@
-{"addresses":{"implementation":"0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d","proxy":"0x46b142DD1E924FAb83eCc3c08e4D46E82f005e0E"}}
+{
+  "addresses": {
+    "implementation": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
+    "proxy": "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe"
+  }
+}

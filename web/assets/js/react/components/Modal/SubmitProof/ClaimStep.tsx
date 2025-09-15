@@ -118,7 +118,7 @@ const BeastClaim = ({
 			return;
 		}
 
-		await submitSolution.submitBeastSolution(proofSubmission);
+		await submitSolution.claimBeastPoints(proofSubmission);
 	};
 
 	useEffect(() => {
@@ -132,7 +132,7 @@ const BeastClaim = ({
 	const submittedGameConfigBigInt = BigInt(
 		"0x" + proofSubmission.game_config
 	);
-	const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
+	const currentGameConfigBigInt = BigInt(currentGame.game?.gameConfig || 0n);
 
 	const gameHasExpired =
 		submittedGameConfigBigInt !== currentGameConfigBigInt;
@@ -187,7 +187,7 @@ const ParityClaim = ({
 			return;
 		}
 
-		await submitSolution.submitParitySolution(proofSubmission);
+		await submitSolution.claimParityPoints(proofSubmission);
 	};
 
 	useEffect(() => {
@@ -199,7 +199,7 @@ const ParityClaim = ({
 	}, [submitSolution.receipt]);
 
 	const currentGameConfigBigInt = readLeftmost(
-		currentGame.data?.gameConfig || 0n,
+		currentGame.game?.gameConfig || 0n,
 		proofSubmission.level_reached
 	);
 

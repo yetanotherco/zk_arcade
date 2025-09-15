@@ -21,6 +21,7 @@ export type ProofSubmission = {
 	level_reached: number;
 	game_config: string;
 	submitted_max_fee: `0x${string}`;
+	game_idx: number;
 };
 
 export type SubmitProof = {

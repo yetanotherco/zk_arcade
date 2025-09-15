@@ -40,7 +40,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     address public zkArcadePublicNft;
     bool public useWhitelist;
 
-    event NewSolutionSubmitted(address user, uint256 level, uint256 score);
+    event BeastPointsClaimed(address user, uint256 level, uint256 score);
+    event ParityPointsClaimed(address user, uint256 level, uint256 score);
     event BeastGamesUpdated(BeastGame[] beastGames);
     event ParityGamesUpdated(ParityGame[] parityGames);
     event WhitelistEnabled();
@@ -96,7 +97,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     // ======== Core Game Functions ========
 
-    function submitBeastSolution(
+    function claimBeastPoints(
         uint256 gameIndex,
         bytes32 proofCommitment,
         bytes calldata publicInputs,
@@ -160,10 +161,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         verifyAndReplaceInTop10(msg.sender);
 
-        emit NewSolutionSubmitted(msg.sender, levelCompleted, usersScore[msg.sender]);
+        emit BeastPointsClaimed(msg.sender, levelCompleted, usersScore[msg.sender]);
     }
 
-    function submitParitySolution(
+    function claimParityPoints(
         uint256 gameIndex,
         bytes32 proofCommitment,
         bytes calldata publicInputs,
@@ -236,7 +237,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         verifyAndReplaceInTop10(msg.sender);
 
-        emit NewSolutionSubmitted(msg.sender, levelCompleted, usersScore[msg.sender]);
+        emit ParityPointsClaimed(msg.sender, levelCompleted, usersScore[msg.sender]);
     }
 
     // ======== View Functions ========

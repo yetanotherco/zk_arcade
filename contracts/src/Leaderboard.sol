@@ -130,7 +130,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
     }
 
-    function submitBeastSolution(
+    function claimBeastPoints(
         bytes32 proofCommitment,
         bytes calldata publicInputs,
         bytes20 proofGeneratorAddr,
@@ -194,7 +194,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         emit NewSolutionSubmitted(msg.sender, levelCompleted, usersScore[msg.sender]);
     }
 
-    function submitParitySolution(
+    function claimParityPoints(
         bytes32 proofCommitment,
         bytes calldata publicInputs,
         bytes20 proofGeneratorAddr,

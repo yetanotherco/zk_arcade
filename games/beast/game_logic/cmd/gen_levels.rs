@@ -183,9 +183,9 @@ struct LeaderboardConfig {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 5 {
+    if args.len() != 6 {
         eprintln!(
-            "Usage: {} <number_of_games> <levels_per_game> <total_campaign_in_days> <network>",
+            "Usage: {} <number_of_games> <levels_per_game> <total_campaign_in_days> <submission_offset_in_seconds> <network>",
             args[0]
         );
         std::process::exit(1);

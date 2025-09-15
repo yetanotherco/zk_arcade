@@ -90,7 +90,7 @@ export const useBeastLeaderboardContract = ({
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
-	const submitBeastSolution = useCallback(
+	const claimBeastPoints = useCallback(
 		async (proof: ProofSubmission) => {
 			setSubmitSolutionFetchingVDataIsLoading(true);
 			const res = await fetchProofVerificationData(proof.id);
@@ -136,7 +136,7 @@ export const useBeastLeaderboardContract = ({
 
 			await writeContractAsync({
 				address: contractAddress,
-				functionName: "submitBeastSolution",
+				functionName: "claimBeastPoints",
 				abi: leaderboardAbi,
 				args,
 			});
@@ -183,7 +183,7 @@ export const useBeastLeaderboardContract = ({
 	return {
 		score,
 		submitSolution: {
-			submitBeastSolution,
+			claimBeastPoints,
 			submitSolutionFetchingVDataIsLoading,
 			receipt,
 			tx: {

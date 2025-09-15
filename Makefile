@@ -95,39 +95,60 @@ parity_write_program_vk:
 	@cd games/parity/circuits/cmd && cargo run --release
 
 # Note: this target requires sed, which makes it only available on MacOS
-update_leaderboard_address:
+update_leaderboard_address: ## Update leaderboard contract address in web config for DEV environment
 	@set -e; \
 	addr=$$(jq -r '(.. | objects | to_entries[]? | select(.key|test("proxy";"i")) | .value) // empty' "contracts/script/output/devnet/leaderboard.json" \
 		| grep -Eo "0x[0-9a-fA-F]{40}" | head -n1); \
 	sed -E -i '' "s|(^[[:space:]]*config :zk_arcade, :leaderboard_address, \")[^\"]+(\".*)|\1$$addr\2|" "web/config/dev.exs";
 
-update_nft_address:
+update_nft_address: ## Set the NFT contract address in web config for DEV environment
 	@set -e; \
 	addr=$$(jq -r '(.. | objects | to_entries[]? | select(.key|test("proxy";"i")) | .value) // empty' "contracts/script/output/devnet/nft.json" \
 		| grep -Eo "0x[0-9a-fA-F]{40}" | head -n1); \
 	sed -E -i '' "s|(^[[:space:]]*config :zk_arcade, :nft_contract_address, \")[^\"]+(\".*)|\1$$addr\2|" "web/config/dev.exs";
 
-gen_and_deploy_devnet: beast_gen_levels parity_gen_levels web_db
+__CONTRACTS__:
+
+deploy_nft_contract: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_nft_contract.sh
+
+deploy_leaderboard_contract: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_leaderboard_contract.sh
+
+generate_merkle_tree:
+	@cd merkle_tree && cargo run --release -- $(WHITELIST_PATH) $(OUTPUT_PATH) $(MERKLE_ROOT_INDEX)
+
+add_merkle_root: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
+
+gen_levels_and_deploy_contracts_devnet: beast_gen_levels parity_gen_levels web_db
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
 	@jq ".parityGames = $$(jq '.games' games/parity/level_generator/levels/parity_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
-	@$(MAKE) deploy_contract NETWORK=devnet
+	@$(MAKE) deploy_nft_contract NETWORK=devnet
+	@jq ".zkArcadeNftContract = \"$$(jq -r '.addresses.proxy' contracts/script/output/devnet/nft.json)\"" \
+		contracts/script/deploy/config/devnet/leaderboard.json \
+		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
+	@$(MAKE) deploy_leaderboard_contract NETWORK=devnet
 	@$(MAKE) update_leaderboard_address
 	@$(MAKE) update_nft_address
-
-__CONTRACTS__:
-MERKLE_ROOT_INDEX ?= 0
-deploy_contract: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_contract.sh $(MERKLE_ROOT_INDEX)
+	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./whitelist_devnet.json OUTPUT_PATH=./merkle_output_devnet.json MERKLE_ROOT_INDEX=0
+	@$(MAKE) add_merkle_root NETWORK=devnet
 
 upgrade_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_contract.sh
 
+upgrade_nft_contract: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_nft_contract.sh
+
 set_beast_games: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
+
+set_parity_games:
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_parity_games.sh
 
 # This path is relative to the project root
 WHITELIST_PATH?=merkle_tree/whitelist.json

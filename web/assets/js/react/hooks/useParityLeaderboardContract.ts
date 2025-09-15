@@ -80,7 +80,7 @@ export const useParityLeaderboardContract = ({
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
-	const submitParitySolution = useCallback(
+	const claimParityPoints = useCallback(
 		async (proof: ProofSubmission) => {
 			setSubmitSolutionFetchingVDataIsLoading(true);
 			const res = await fetchProofVerificationData(proof.id);
@@ -126,7 +126,7 @@ export const useParityLeaderboardContract = ({
 
 			await writeContractAsync({
 				address: contractAddress,
-				functionName: "submitParitySolution",
+				functionName: "claimParityPoints",
 				abi: leaderboardAbi,
 				args,
 			});
@@ -179,7 +179,7 @@ export const useParityLeaderboardContract = ({
 				currentGame.error?.message?.includes("NoActiveParityGame"),
 		},
 		submitSolution: {
-			submitParitySolution,
+			claimParityPoints,
 			submitSolutionFetchingVDataIsLoading,
 			receipt,
 			tx: {

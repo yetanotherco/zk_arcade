@@ -3,7 +3,7 @@
     "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
   },
   "beastVKCommitment": "0x17d1f38bfbf17d1c9dd4d9dabe58c6d6a1f1a2b7a7fa8d01a422c7e1af7c7342",
-	"parityVKCommitment": "0x949446f1e2cd049ac9bec14482e4386015db6e2e8bf3b7160b31292434e6edeb",
+  "parityVKCommitment": "0x949446f1e2cd049ac9bec14482e4386015db6e2e8bf3b7160b31292434e6edeb",
   "alignedServiceManager": "0x851356ae760d987E095750cCeb3bC6014560891C",
   "alignedBatcherPaymentService": "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650",
   "zkArcadeNftContract": "0xBEc49fA140aCaA83533fB00A2BB19bDdd0290f25",

@@ -119,7 +119,7 @@ const BeastClaim = ({
 			return;
 		}
 
-		await submitSolution.submitBeastSolution(proofSubmission);
+		await submitSolution.claimBeastPoints(proofSubmission);
 	};
 
 	useEffect(() => {
@@ -207,7 +207,7 @@ const ParityClaim = ({
 			return;
 		}
 
-		await submitSolution.submitParitySolution(proofSubmission);
+		await submitSolution.claimParityPoints(proofSubmission);
 	};
 
 	useEffect(() => {

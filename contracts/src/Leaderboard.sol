@@ -65,7 +65,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     /**
      * Events
      */
-    event NewSolutionSubmitted(address user, uint256 level, uint256 score);
+    event NewBeastPointsClaimed(address user, uint256 level, uint256 score);
+    event NewParityPointsClaimed(address user, uint256 level, uint256 score);
     event BeastProgramIdUpdated(bytes32 newProgramId);
     event ParityProgramIdUpdated(bytes32 newProgramId);
 
@@ -191,7 +192,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         verifyAndReplaceInTop10(msg.sender);
 
-        emit NewSolutionSubmitted(msg.sender, levelCompleted, usersScore[msg.sender]);
+        emit NewBeastPointsClaimed(msg.sender, levelCompleted, usersScore[msg.sender]);
     }
 
     function claimParityPoints(
@@ -263,7 +264,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         verifyAndReplaceInTop10(msg.sender);
 
-        emit NewSolutionSubmitted(msg.sender, levelCompleted, usersScore[msg.sender]);
+        emit NewParityPointsClaimed(msg.sender, levelCompleted, usersScore[msg.sender]);
     }
 
     function getUserScore(address user) public view returns (uint256) {

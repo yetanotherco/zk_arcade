@@ -23,4 +23,3 @@ CMD="cast send $nft_proxy_address \
     --private-key $DEPLOYER_PRIVATE_KEY"
 
 eval $CMD
-q

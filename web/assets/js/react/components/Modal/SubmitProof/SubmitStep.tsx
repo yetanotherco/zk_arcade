@@ -462,8 +462,7 @@ export const SubmitProofStep = ({
 					</p>
 				) : (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
-						The proof has been included in a batch and it will be
-						verified soon by the operators
+						The proof has been included in a batch and it will be verified by the operators
 					</p>
 				)}
 

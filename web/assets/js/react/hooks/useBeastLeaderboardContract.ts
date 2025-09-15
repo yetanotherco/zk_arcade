@@ -66,7 +66,7 @@ export const useBeastLeaderboardContract = ({
 			currentGame.data
 				? currentGame.data[1] === 0
 					? 0
-					: currentGame.data[1]
+					: currentGame.data[1] - 1n
 				: -1,
 		],
 		chainId,

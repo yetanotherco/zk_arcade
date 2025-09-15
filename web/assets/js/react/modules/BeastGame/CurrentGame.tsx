@@ -45,10 +45,6 @@ const CurrentBeastGameComponent = ({
 	// Get the block timestamp for the current block
 	const currentBlock = useBlock();
 
-	const currentBlockTimestamp = currentBlock.data
-		? currentBlock.data.timestamp
-		: 0;
-
 	const { currentGame, currentGameLevelCompleted } =
 		useBeastLeaderboardContract({
 			contractAddress: leaderboard_address,
@@ -60,12 +56,20 @@ const CurrentBeastGameComponent = ({
 		minutes: number;
 	} | null>(null);
 
-	const endsAtTime = currentGame.game?.endsAtTime || 0;
-
 	useEffect(() => {
+		const endsAtTime = currentGame.game?.endsAtTime || 0n;
+		const currentBlockTimestamp = currentBlock.data
+			? currentBlock.data.timestamp
+			: 0;
+
+		const OFFSET_IN_SECONDS = 3600;
+
 		if (endsAtTime > 0 && currentBlockTimestamp) {
 			const timeRemaining =
-				Number(endsAtTime) - Number(currentBlockTimestamp);
+				Number(endsAtTime) -
+				Number(currentBlockTimestamp) -
+				OFFSET_IN_SECONDS;
+
 			const hours = timeRemaining / 3600;
 			const minutes = Math.floor(timeRemaining / 60);
 
@@ -74,7 +78,7 @@ const CurrentBeastGameComponent = ({
 				minutes,
 			});
 		}
-	}, [endsAtTime, currentBlockTimestamp]);
+	}, [currentGame.data, currentBlock.data]);
 
 	return (
 		<div className="w-full">

@@ -60,14 +60,19 @@ export const useParityGames = ({
 	} | null>(null);
 
 	useEffect(() => {
-		const endsAtTime = currentGame.game?.endsAtTime || 0;
+		const endsAtTime = currentGame.game?.endsAtTime || 0n;
 		const currentBlockTimestamp = currentBlock.data
 			? currentBlock.data.timestamp
 			: 0;
 
+		const OFFSET_IN_SECONDS = 3600;
+
 		if (endsAtTime > 0 && currentBlockTimestamp) {
 			const timeRemaining =
-				Number(endsAtTime) - Number(currentBlockTimestamp);
+				Number(endsAtTime) -
+				Number(currentBlockTimestamp) -
+				OFFSET_IN_SECONDS;
+
 			const hours = timeRemaining / 3600;
 			const minutes = Math.floor(timeRemaining / 60);
 

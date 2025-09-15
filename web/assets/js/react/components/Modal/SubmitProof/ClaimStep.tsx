@@ -138,16 +138,22 @@ const BeastClaim = ({
 	// The previous game can overlap with the current game for a few hours
 	// so if the game isn't from the current game, then we check if it is from the previous one
 	const gameHasExpired = () => {
+		const submissionExpired =
+			Number(previousGame.data?.endsAtTime || 0n) < Date.now() / 1000;
+
 		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
 			if (
 				submittedGameConfigBigInt ===
-				(previousGame.data?.gameConfig || 0n)
+					(previousGame.data?.gameConfig || 0n) &&
+				!submissionExpired
 			) {
 				return false;
 			}
+
+			return true;
 		}
 
-		return true;
+		return false;
 	};
 
 	return (
@@ -225,13 +231,19 @@ const ParityClaim = ({
 	// The previous game can overlap with the current game for a few hours
 	// so if the game isn't from the current game, then we check if it is from the previous one
 	const gameHasExpired = () => {
+		const submissionExpired =
+			Number(previousGame.data?.endsAtTime || 0n) < Date.now() / 1000;
+
 		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
 			const previousGameBigInt = readLeftmost(
 				previousGame.data?.gameConfig || 0n,
 				proofSubmission.level_reached
 			);
 
-			if (submittedGameConfigBigInt === previousGameBigInt) {
+			if (
+				submittedGameConfigBigInt === previousGameBigInt &&
+				!submissionExpired
+			) {
 				return false;
 			}
 

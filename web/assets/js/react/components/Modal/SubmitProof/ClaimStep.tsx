@@ -98,10 +98,11 @@ const BeastClaim = ({
 	proofSubmission,
 	setOpen,
 }: ClaimProps) => {
-	const { submitSolution, currentGame } = useBeastLeaderboardContract({
-		userAddress: user_address,
-		contractAddress: leaderboard_address,
-	});
+	const { submitSolution, previousGame, currentGame } =
+		useBeastLeaderboardContract({
+			userAddress: user_address,
+			contractAddress: leaderboard_address,
+		});
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleClaim = async () => {
@@ -134,12 +135,24 @@ const BeastClaim = ({
 	);
 	const currentGameConfigBigInt = BigInt(currentGame.game?.gameConfig || 0n);
 
-	const gameHasExpired =
-		submittedGameConfigBigInt !== currentGameConfigBigInt;
+	// The previous game can overlap with the current game for a few hours
+	// so if the game isn't from the current game, then we check if it is from the previous one
+	const gameHasExpired = () => {
+		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
+			if (
+				submittedGameConfigBigInt ===
+				(previousGame.data?.gameConfig || 0n)
+			) {
+				return false;
+			}
+		}
+
+		return true;
+	};
 
 	return (
 		<ClaimComponent
-			gameHasExpired={gameHasExpired}
+			gameHasExpired={gameHasExpired()}
 			handleClaim={handleClaim}
 			isLoading={false}
 			onCancel={() => setOpen(false)}
@@ -166,10 +179,11 @@ const ParityClaim = ({
 	proofSubmission,
 	setOpen,
 }: ClaimProps) => {
-	const { currentGame, submitSolution } = useParityLeaderboardContract({
-		contractAddress: leaderboard_address,
-		userAddress: user_address,
-	});
+	const { currentGame, previousGame, submitSolution } =
+		useParityLeaderboardContract({
+			contractAddress: leaderboard_address,
+			userAddress: user_address,
+		});
 
 	const formRef = useRef<HTMLFormElement>(null);
 
@@ -208,12 +222,28 @@ const ParityClaim = ({
 		proofSubmission.level_reached
 	);
 
-	const gameHasExpired =
-		submittedGameConfigBigInt !== currentGameConfigBigInt;
+	// The previous game can overlap with the current game for a few hours
+	// so if the game isn't from the current game, then we check if it is from the previous one
+	const gameHasExpired = () => {
+		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
+			const previousGameBigInt = readLeftmost(
+				previousGame.data?.gameConfig || 0n,
+				proofSubmission.level_reached
+			);
+
+			if (submittedGameConfigBigInt === previousGameBigInt) {
+				return false;
+			}
+
+			return true;
+		}
+
+		return false;
+	};
 
 	return (
 		<ClaimComponent
-			gameHasExpired={gameHasExpired}
+			gameHasExpired={gameHasExpired()}
 			handleClaim={handleClaim}
 			isLoading={false}
 			onCancel={() => setOpen(false)}

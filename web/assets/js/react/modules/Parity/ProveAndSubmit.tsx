@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "../../components";
 import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
-import { Address, encodePacked, keccak256 } from "viem";
+import { Address } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 import { gameDataKey, ParityGameState } from "./types";
 
@@ -26,6 +26,7 @@ export const ProveAndSubmit = ({
 	submittedLevelOnChain,
 	timeRemaining,
 	nft_contract_address,
+	gameIdx,
 }: {
 	user_address: Address;
 	payment_service_address: Address;
@@ -36,6 +37,7 @@ export const ProveAndSubmit = ({
 	submittedLevelOnChain: number;
 	timeRemaining?: TimeRemaining | null;
 	nft_contract_address: Address;
+	gameIdx: number;
 }) => {
 	const [open, setOpen] = useState(false);
 	const [proofVerificationData, setProofVerificationData] =
@@ -201,6 +203,7 @@ export const ProveAndSubmit = ({
 				proofToSubmitData={proofVerificationData}
 				gameName="parity"
 				nft_contract_address={nft_contract_address}
+				gameIdx={gameIdx}
 			/>
 		</div>
 	);

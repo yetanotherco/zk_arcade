@@ -91,7 +91,8 @@ defmodule ZkArcadeWeb.ProofController do
 
   def submit(conn, %{
         "submit_proof_message" => submit_proof_message_json,
-        "game" => game
+        "game" => game,
+        "game_idx" => game_idx
       }) do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
       address = get_session(conn, :wallet_address)
@@ -140,7 +141,7 @@ defmodule ZkArcadeWeb.ProofController do
             submit_proof_message["verificationData"]["maxFee"]
 
           with {:ok, pending_proof} <-
-                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee) do
+                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee, game_idx) do
             task =
               Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
                 Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)

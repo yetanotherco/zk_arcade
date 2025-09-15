@@ -453,8 +453,7 @@ export const SubmitProofStep = ({
 			<div className="flex flex-col gap-4 justify-between h-full">
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
-						The proof has been submitted to Aligned, and it will be
-						verified soon so you can claim your points.
+						The proof has been submitted to Aligned. Come back in a few hours to claim your points.
 					</p>
 				) : proofStatus === "underpriced" ? (
 					<p className="bg-orange/20 rounded p-2 text-orange">

@@ -2,11 +2,17 @@ defmodule ZkArcade.SubmissionPoller do
   use GenServer
   require Logger
 
-@topic "0x" <>
-         Base.encode16(
-           ExKeccak.hash_256("NewSolutionSubmitted(address,uint256,uint256)"),
-           case: :lower
-         )
+  @beastTopic "0x" <>
+           Base.encode16(
+             ExKeccak.hash_256("NewBeastPointsClaimed(address,uint256,uint256)"),
+             case: :lower
+           )
+
+  @parityTopic "0x" <>
+           Base.encode16(
+             ExKeccak.hash_256("NewParityPointsClaimed(address,uint256,uint256)"),
+             case: :lower
+           )
 
   def start_link(opts \\ []), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
@@ -64,7 +70,7 @@ defmodule ZkArcade.SubmissionPoller do
       address: contract_address,
       fromBlock: "0x" <> Integer.to_string(from_block, 16),
       toBlock: "0x" <> Integer.to_string(to_block, 16),
-      topics: [@topic]
+      topics: [[@beastTopic, @parityTopic]]
     }
 
     rpc_url = Application.get_env(:ethereumex, :url)
@@ -83,7 +89,7 @@ defmodule ZkArcade.SubmissionPoller do
 
       case decode_event_log(log) do
         {:ok, decoded} ->
-          Logger.info("NewSolutionSubmitted: #{inspect(decoded)}")
+          Logger.info("Claim event decoded: #{inspect(decoded)}")
           handle_event(decoded)
 
         {:error, reason} ->
@@ -92,42 +98,55 @@ defmodule ZkArcade.SubmissionPoller do
     end
   end
 
-  # This function handles the decoded event by fetching the current score from the Leaderboard contract and
-  # updating the database leaderboard entry.
-  defp handle_event(%{user: user, level: level, score: score}) do
-    Logger.info("New solution submitted by #{user} for level #{level} with score #{score}")
+  # This function handles the decoded event by updating the database leaderboard entry.
+  defp handle_event(%{user: user, level: level, score: score, event_type: event_type}) do
+    Logger.info("New #{event_type} event: user #{user}, level #{level}, score #{score}")
 
     case ZkArcade.Leaderboard.insert_or_update_entry(%{
            "user_address" => user,
            "score" => score
          }) do
       {:ok, _entry} ->
-        Logger.info("Leaderboard entry created/updated successfully.")
+        Logger.info("Leaderboard entry created/updated successfully for #{event_type}.")
 
       {:error, changeset} ->
         Logger.error("Failed to create/update leaderboard entry: #{inspect(changeset)}")
     end
   end
 
-  # This function extracts the user address and level from the log data. If the log format is unexpected,
-  # it logs a warning and returns an error.
+  # This function extracts the user address, level, and score from the log data, and determines the event type.
+  # If the log format is unexpected, it logs a warning and returns an error.
   defp decode_event_log(%{
-         "topics" => [_event_sig],
+         "topics" => [event_sig | _],
          "data" => data
        }) do
-    <<user::binary-size(32), level::binary-size(32), score::binary-size(32)>> =
-      Base.decode16!(String.trim_leading(data, "0x"), case: :lower)
 
-    user_address =
-      user
-      |> binary_part(12, 20)
-      |> Base.encode16(case: :lower)
-      |> then(&("0x" <> &1))
+    event_type = case event_sig do
+      @beastTopic -> "beast_points"
+      @parityTopic -> "parity_points"
+      _ -> "unknown"
+    end
 
-    level_value = :binary.decode_unsigned(level)
-    score_value = :binary.decode_unsigned(score)
+    case event_type do
+      "unknown" ->
+        Logger.warning("Unknown event signature: #{event_sig}")
+        {:error, :unknown_event_type}
 
-    {:ok, %{user: user_address, level: level_value, score: score_value}}
+      _ ->
+        <<user::binary-size(32), level::binary-size(32), score::binary-size(32)>> =
+          Base.decode16!(String.trim_leading(data, "0x"), case: :lower)
+
+        user_address =
+          user
+          |> binary_part(12, 20)
+          |> Base.encode16(case: :lower)
+          |> then(&("0x" <> &1))
+
+        level_value = :binary.decode_unsigned(level)
+        score_value = :binary.decode_unsigned(score)
+
+        {:ok, %{user: user_address, level: level_value, score: score_value, event_type: event_type}}
+    end
   end
 
   defp decode_event_log(log) do

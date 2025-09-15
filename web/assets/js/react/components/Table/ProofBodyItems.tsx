@@ -65,3 +65,23 @@ export const ProofBatchMerkleRoot = ({ proof, explorer_url }: Props) => {
 		</td>
 	);
 };
+
+export const ProofClaimTxHash = ({ proof, explorer_url }: Props) => {
+	return (
+		<td>
+			{proof.claim_tx_hash ? (
+				<a
+					// TODO: show different explorer based on the chain
+					href={`https://holesky.etherscan.io/tx/${proof.claim_tx_hash}`}
+					className="underline"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					{shortenHash(proof.claim_tx_hash)}
+				</a>
+			) : (
+				<p>...</p>
+			)}
+		</td>
+	);
+};

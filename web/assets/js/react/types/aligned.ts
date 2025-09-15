@@ -22,6 +22,7 @@ export type ProofSubmission = {
 	game_config: string;
 	submitted_max_fee: `0x${string}`;
 	game_idx: number;
+	claim_tx_hash?: string;
 };
 
 export type SubmitProof = {

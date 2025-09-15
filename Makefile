@@ -49,8 +49,9 @@ submit_beast_solution:
 NUM_GAMES ?= 10
 LEVELS_PER_GAME ?= 8
 CAMPAIGN_DAYS ?= 1
+BEAST_SUBMISSION_OFFSET_SECS ?= 3600
 beast_gen_levels:
-	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(NETWORK)
+	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(BEAST_SUBMISSION_OFFSET_SECS) $(NETWORK)
 	
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky

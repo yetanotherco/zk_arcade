@@ -194,7 +194,8 @@ fn main() {
     let num_games: usize = args[1].parse().expect("Invalid number of games");
     let levels_per_game: usize = args[2].parse().expect("Invalid number of levels");
     let time_days: u64 = args[3].parse().expect("Invalid total campaign in days");
-    let network: String = args[4].parse().expect("Invalid network");
+    let submission_offset_secs: u64 = args[4].parse().expect("Invalid submission offset secs");
+    let network: String = args[5].parse().expect("Invalid network");
 
     // Get the current time in seconds from the OS
     let current_time = std::time::SystemTime::now();
@@ -204,7 +205,7 @@ fn main() {
         .as_secs();
 
     let time_in_seconds = time_days * 24 * 3600;
-    let seconds_per_game = time_in_seconds / num_games as u64;
+    let seconds_per_game = (time_in_seconds / num_games as u64) + submission_offset_secs;
 
     let mut rng = rand::rng();
     let games: Vec<GameJson> = (0..num_games)

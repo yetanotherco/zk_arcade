@@ -103,13 +103,13 @@ export const DepositOnAlignedModal = ({
 				<div className="w-full">
 					<FormInput
 						label="Amount to deposit in ETH:"
-						placeholder="0.0001"
+						placeholder="0.001"
 						type="number"
 						value={balanceValue}
 						onChange={handleBalanceChange}
 						min="0"
 						max={ALIGNED_DEPOSIT_LIMIT.toString()}
-						step="0.0001"
+						step="0.001"
 					/>
 					<p className="mt-1">
 						~

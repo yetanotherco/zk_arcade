@@ -49,7 +49,7 @@ export const useParityLeaderboardContract = ({
 		chainId,
 	});
 
-	const previousGame = useReadContract({
+	const nextGame = useReadContract({
 		address: contractAddress,
 		abi: leaderboardAbi,
 		functionName: "parityGames",
@@ -57,7 +57,7 @@ export const useParityLeaderboardContract = ({
 			currentGame.data
 				? currentGame.data[1] === 0
 					? 0
-					: currentGame.data[1] - 1n
+					: currentGame.data[1] + 1n
 				: -1,
 		],
 		chainId,
@@ -188,6 +188,6 @@ export const useParityLeaderboardContract = ({
 			},
 		},
 		currentGameLevelCompleted,
-		previousGame,
+		nextGame,
 	};
 };

@@ -29,11 +29,13 @@ export const useParityGames = ({
 
 	const levels: ParityLevel[] = useMemo(() => {
 		if (!gameConfig) return [];
-		let gameConfigBytes = toBytes(gameConfig);
+		let gameConfigBytes = toBytes(gameConfig, { size: 32 });
 		let levels: ParityLevel[] = [];
 
-		for (let i = 0; i < gameConfigBytes.length / 10; i++) {
-			let byte_idx = i * 10;
+		// we substract 2 because the gameConfig only takes 30 bytes (each level takes 10 bytes and there is three per gameConfig)
+		for (let i = 0; i < (gameConfigBytes.length - 2) / 10; i++) {
+			// ignore the first two bytes
+			let byte_idx = i * 10 + 2;
 			let initialPos: ParityLevel["initialPos"] = {
 				col: gameConfigBytes[byte_idx] >> 4,
 				row: gameConfigBytes[byte_idx] & 0x0f,

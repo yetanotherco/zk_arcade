@@ -60,10 +60,12 @@
                 nft_contract_address={@nft_contract_address}
             />
 
-            <.history_section 
-                pagination={@pagination}
-                show_pagination={true}
-            />
+            <%= if @proofs_sent_total > 0 do %>
+                <.history_section 
+                    pagination={@pagination}
+                    show_pagination={true}
+                />
+            <% end %>
         </div>
     </div>
 

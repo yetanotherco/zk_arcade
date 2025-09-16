@@ -5,6 +5,8 @@ import { useBeastLeaderboardContract } from "../../../hooks";
 import { Address } from "../../../types/blockchain";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
 import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboardContract";
+import { useChainId, useReadContract } from "wagmi";
+import { leaderboardAbi } from "../../../constants/aligned";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
@@ -98,11 +100,20 @@ const BeastClaim = ({
 	proofSubmission,
 	setOpen,
 }: ClaimProps) => {
-	const { submitSolution, previousGame, currentGame } =
-		useBeastLeaderboardContract({
-			userAddress: user_address,
-			contractAddress: leaderboard_address,
-		});
+	const chainId = useChainId();
+	const { submitSolution } = useBeastLeaderboardContract({
+		userAddress: user_address,
+		contractAddress: leaderboard_address,
+	});
+
+	const claimGame = useReadContract({
+		address: leaderboard_address,
+		abi: leaderboardAbi,
+		functionName: "beastGames",
+		args: [proofSubmission.game_idx],
+		chainId,
+	});
+
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleClaim = async () => {
@@ -130,35 +141,12 @@ const BeastClaim = ({
 		}
 	}, [submitSolution.receipt]);
 
-	const submittedGameConfigBigInt = BigInt(
-		"0x" + proofSubmission.game_config
-	);
-	const currentGameConfigBigInt = BigInt(currentGame.game?.gameConfig || 0n);
-
-	// The previous game can overlap with the current game for a few hours
-	// so if the game isn't from the current game, then we check if it is from the previous one
-	const gameHasExpired = () => {
-		const submissionExpired =
-			Number(previousGame.data?.endsAtTime || 0n) < Date.now() / 1000;
-
-		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
-			if (
-				submittedGameConfigBigInt ===
-					(previousGame.data?.gameConfig || 0n) &&
-				!submissionExpired
-			) {
-				return false;
-			}
-
-			return true;
-		}
-
-		return false;
-	};
+	const gameHasExpired =
+		Number(claimGame.data?.endsAtTime || 0n) < Date.now() / 1000;
 
 	return (
 		<ClaimComponent
-			gameHasExpired={gameHasExpired()}
+			gameHasExpired={gameHasExpired}
 			handleClaim={handleClaim}
 			isLoading={false}
 			onCancel={() => setOpen(false)}
@@ -185,11 +173,20 @@ const ParityClaim = ({
 	proofSubmission,
 	setOpen,
 }: ClaimProps) => {
-	const { currentGame, previousGame, submitSolution } =
-		useParityLeaderboardContract({
-			contractAddress: leaderboard_address,
-			userAddress: user_address,
-		});
+	const chainId = useChainId();
+
+	const { submitSolution } = useParityLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address,
+	});
+
+	const claimGame = useReadContract({
+		address: leaderboard_address,
+		abi: leaderboardAbi,
+		functionName: "parityGames",
+		args: [proofSubmission.game_idx],
+		chainId,
+	});
 
 	const formRef = useRef<HTMLFormElement>(null);
 
@@ -218,44 +215,12 @@ const ParityClaim = ({
 		}
 	}, [submitSolution.receipt]);
 
-	const currentGameConfigBigInt = readLeftmost(
-		currentGame.game?.gameConfig || 0n,
-		proofSubmission.level_reached
-	);
-
-	const submittedGameConfigBigInt = readLeftmost(
-		BigInt("0x" + proofSubmission.game_config),
-		proofSubmission.level_reached
-	);
-
-	// The previous game can overlap with the current game for a few hours
-	// so if the game isn't from the current game, then we check if it is from the previous one
-	const gameHasExpired = () => {
-		const submissionExpired =
-			Number(previousGame.data?.endsAtTime || 0n) < Date.now() / 1000;
-
-		if (submittedGameConfigBigInt !== currentGameConfigBigInt) {
-			const previousGameBigInt = readLeftmost(
-				previousGame.data?.gameConfig || 0n,
-				proofSubmission.level_reached
-			);
-
-			if (
-				submittedGameConfigBigInt === previousGameBigInt &&
-				!submissionExpired
-			) {
-				return false;
-			}
-
-			return true;
-		}
-
-		return false;
-	};
+	const gameHasExpired =
+		Number(claimGame.data?.endsAtTime || 0n) < Date.now() / 1000;
 
 	return (
 		<ClaimComponent
-			gameHasExpired={gameHasExpired()}
+			gameHasExpired={gameHasExpired}
 			handleClaim={handleClaim}
 			isLoading={false}
 			onCancel={() => setOpen(false)}

@@ -5,7 +5,7 @@ defmodule ZkArcade.Utils do
 
   def autolink_and_linebreak(text) do
     text
-    |> String.replace(@url_regex, ~s(<a class="link" href="\\0" target="_blank" rel="noopener noreferrer">\\0</a>))
+    |> String.replace(@url_regex, ~s(<a class="link" style="word-break: break-word;" href="\\0" target="_blank" rel="noopener noreferrer">\\0</a>))
     |> String.replace("\n", "<br>")
   end
 

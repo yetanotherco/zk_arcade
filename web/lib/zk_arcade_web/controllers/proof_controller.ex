@@ -6,7 +6,7 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.Proofs
   alias ZkArcade.EIP712Verifier
 
-  def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id}) do
+  def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id, "claim_tx_hash" => claim_tx_hash}) do
     address = get_session(conn, :wallet_address)
 
     if is_nil(address) do
@@ -14,7 +14,7 @@ defmodule ZkArcadeWeb.ProofController do
       |> redirect(to: "/")
     end
 
-    Proofs.update_proof_status_claimed(address, proof_id)
+    Proofs.update_proof_status_claimed(address, proof_id, claim_tx_hash)
 
     conn
       |> redirect(to: build_redirect_url(conn, "", proof_id))
@@ -91,7 +91,8 @@ defmodule ZkArcadeWeb.ProofController do
 
   def submit(conn, %{
         "submit_proof_message" => submit_proof_message_json,
-        "game" => game
+        "game" => game,
+        "game_idx" => game_idx
       }) do
     with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
       address = get_session(conn, :wallet_address)
@@ -140,7 +141,7 @@ defmodule ZkArcadeWeb.ProofController do
             submit_proof_message["verificationData"]["maxFee"]
 
           with {:ok, pending_proof} <-
-                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee) do
+                Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee, game_idx) do
             task =
               Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
                 Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)

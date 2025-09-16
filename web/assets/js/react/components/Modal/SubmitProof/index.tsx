@@ -24,6 +24,7 @@ type Props = {
 	userBeastSubmissions: BeastProofClaimed[];
 	proofToSubmitData: VerificationData | null;
 	gameName?: string;
+	gameIdx?: number;
 };
 
 export type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
@@ -45,7 +46,7 @@ const BreadCrumb = ({
 	};
 
 	return (
-		<div className="w-full max-w-[220px]">
+		<div className="w-full min-w-[125px] max-w-[220px]">
 			<div className="flex gap-2 justify-center items-center">
 				<p className="text-center mb-1">{step}</p>
 				{status !== "neutral" && (
@@ -74,6 +75,7 @@ export const SubmitProofModal = ({
 	proofToSubmitData,
 	nft_contract_address,
 	gameName,
+	gameIdx,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
 	const { balance } = useBatcherPaymentService({
@@ -210,6 +212,7 @@ export const SubmitProofModal = ({
 				setProofStatus={setProofStatus}
 				proofToSubmitData={proofToSubmitData}
 				gameName={gameName ? gameName : proof?.game || "beast"}
+				initialGameIdx={gameIdx}
 			/>
 		),
 		claim: () =>
@@ -265,7 +268,7 @@ export const SubmitProofModal = ({
 		if (proofStatus === "verified" || proofStatus === "claimed") {
 			setSubmissionStatus("success");
 		}
-	}, [step, depositStatus, submissionStatus]);
+	}, [step, proofStatus, balance.data, nftBalance.data]);
 
 	return (
 		<Modal
@@ -283,34 +286,31 @@ export const SubmitProofModal = ({
 						{step ? headerBasedOnStep[step]["subtitle"] : ""}
 					</p>
 				</div>
-				<div className="w-full">
-					<div className="flex overflow-scroll gap-8 justify-center w-full">
-						<BreadCrumb
-							step="Mint NFT"
-							active={true}
-							status={claimNftStatus}
-						/>
-						<BreadCrumb
-							step="Deposit"
-							active={step !== "claim-nft"}
-							status={depositStatus}
-						/>
-						<BreadCrumb
-							step="Submit Proof"
-							active={step === "submit" || step === "claim"}
-							status={submissionStatus}
-						/>
-						<BreadCrumb
-							step="Claim Points"
-							// Check if the game is outdated and not claimed and mark as failed
-							active={step === "claim"}
-							status={
-								proofStatus === "claimed"
-									? "success"
-									: "neutral"
-							}
-						/>
-					</div>
+
+				<div className="flex overflow-x-scroll gap-8 w-full">
+					<BreadCrumb
+						step="Mint NFT"
+						active={true}
+						status={claimNftStatus}
+					/>
+					<BreadCrumb
+						step="Deposit"
+						active={step !== "claim-nft"}
+						status={depositStatus}
+					/>
+					<BreadCrumb
+						step="Submit Proof"
+						active={step === "submit" || step === "claim"}
+						status={submissionStatus}
+					/>
+					<BreadCrumb
+						step="Claim Points"
+						// Check if the game is outdated and not claimed and mark as failed
+						active={step === "claim"}
+						status={
+							proofStatus === "claimed" ? "success" : "neutral"
+						}
+					/>
 				</div>
 				<div className="w-full h-full max-h-[500px] overflow-scroll">
 					{step ? (

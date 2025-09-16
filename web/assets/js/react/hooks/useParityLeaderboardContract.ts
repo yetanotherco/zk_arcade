@@ -56,7 +56,7 @@ export const useParityLeaderboardContract = ({
 		args: [
 			getParitytKey(
 				userAddress,
-				currentGame.data?.gameConfig || BigInt(0)
+				currentGame.data ? currentGame.data[0].gameConfig : BigInt(0)
 			),
 		],
 		chainId,
@@ -66,7 +66,7 @@ export const useParityLeaderboardContract = ({
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
-	const submitParitySolution = useCallback(
+	const claimParityPoints = useCallback(
 		async (proof: ProofSubmission) => {
 			setSubmitSolutionFetchingVDataIsLoading(true);
 			const res = await fetchProofVerificationData(proof.id);
@@ -81,6 +81,7 @@ export const useParityLeaderboardContract = ({
 			const {
 				verification_data: { verificationData },
 				batch_data,
+				game_idx,
 			} = res;
 
 			if (!batch_data) {
@@ -98,12 +99,11 @@ export const useParityLeaderboardContract = ({
 					p => `${Buffer.from(p).toString("hex")}`
 				);
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
+
 			const args = [
+				game_idx,
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
-				bytesToHex(commitment.provingSystemAuxDataCommitment, {
-					size: 32,
-				}),
 				verificationData.proofGeneratorAddress,
 				merkleRoot,
 				encodedMerkleProof,
@@ -112,7 +112,7 @@ export const useParityLeaderboardContract = ({
 
 			await writeContractAsync({
 				address: contractAddress,
-				functionName: "submitParitySolution",
+				functionName: "claimParityPoints",
 				abi: leaderboardAbi,
 				args,
 			});
@@ -159,11 +159,13 @@ export const useParityLeaderboardContract = ({
 	return {
 		currentGame: {
 			...currentGame,
+			game: currentGame.data ? currentGame.data[0] : null,
+			gameIdx: currentGame.data ? currentGame.data[1] : null,
 			gamesHaveFinished:
 				currentGame.error?.message?.includes("NoActiveParityGame"),
 		},
 		submitSolution: {
-			submitParitySolution,
+			claimParityPoints,
 			submitSolutionFetchingVDataIsLoading,
 			receipt,
 			tx: {

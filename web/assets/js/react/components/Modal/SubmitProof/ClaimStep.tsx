@@ -12,11 +12,12 @@ type ClaimComponentProps = {
 	handleClaim: () => void;
 	onCancel: () => void;
 	isLoading: boolean;
+	claimTxHash: string;
 };
 
 const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 	(
-		{ gameHasExpired, proofSubmission, handleClaim, onCancel, isLoading },
+		{ gameHasExpired, proofSubmission, handleClaim, onCancel, isLoading, claimTxHash },
 		formRef
 	) => {
 		const { csrfToken } = useCSRFToken();
@@ -79,6 +80,11 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						name="proof_id"
 						value={proofSubmission.id}
 					/>
+					<input
+						type="hidden"
+						name="claim_tx_hash"
+						value={claimTxHash}
+					/>
 				</form>
 			</div>
 		);
@@ -118,7 +124,7 @@ const BeastClaim = ({
 			return;
 		}
 
-		await submitSolution.submitBeastSolution(proofSubmission);
+		await submitSolution.claimBeastPoints(proofSubmission);
 	};
 
 	useEffect(() => {
@@ -132,10 +138,12 @@ const BeastClaim = ({
 	const submittedGameConfigBigInt = BigInt(
 		"0x" + proofSubmission.game_config
 	);
-	const currentGameConfigBigInt = BigInt(currentGame.data?.gameConfig || 0n);
+	const currentGameConfigBigInt = BigInt(currentGame.game?.gameConfig || 0n);
 
 	const gameHasExpired =
 		submittedGameConfigBigInt !== currentGameConfigBigInt;
+
+	const claimTxHash = submitSolution.tx.hash || "";
 
 	return (
 		<ClaimComponent
@@ -145,6 +153,7 @@ const BeastClaim = ({
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
 			ref={formRef}
+			claimTxHash={claimTxHash}
 		/>
 	);
 };
@@ -187,7 +196,7 @@ const ParityClaim = ({
 			return;
 		}
 
-		await submitSolution.submitParitySolution(proofSubmission);
+		await submitSolution.claimParityPoints(proofSubmission);
 	};
 
 	useEffect(() => {
@@ -199,7 +208,7 @@ const ParityClaim = ({
 	}, [submitSolution.receipt]);
 
 	const currentGameConfigBigInt = readLeftmost(
-		currentGame.data?.gameConfig || 0n,
+		currentGame.game?.gameConfig || 0n,
 		proofSubmission.level_reached
 	);
 
@@ -219,6 +228,7 @@ const ParityClaim = ({
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
 			ref={formRef}
+			claimTxHash={submitSolution.tx.hash || ""}
 		/>
 	);
 };

@@ -102,14 +102,14 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 			address: contractAddress,
 			abi: zkArcadeNftAbi,
 			functionName: "claimNFT",
-			args: [merkleProofArray, res.tokenURI, BigInt(res.merkleRootIndex)],
+			args: [merkleProofArray, BigInt(res.merkle_root_index)],
 			account: userAddress,
 			chainId,
 		});
 
 		addToast({
 			title: "Transaction sent",
-			desc: `Your NFT is being minted. Hash: ${hash.slice(
+			desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
 				0,
 				8
 			)}...${hash.slice(-6)}`,

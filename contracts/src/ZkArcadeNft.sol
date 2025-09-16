@@ -4,46 +4,69 @@ pragma solidity ^0.8.28;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import {ERC721URIStorageUpgradeable} from
-    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
-
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpgradeable {
+contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 private _nextTokenId;
 
     bytes32[] public merkleRoots;
     mapping(address => bool) public hasClaimed;
+    bool internal transfersEnabled;
+    bool internal claimsEnabled;
+    string private _baseTokenURI;
 
+    /**
+     * Events
+     */
     event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event NFTClaimed(address indexed account);
+    event TransfersEnabled();
+    event TransfersDisabled();
+    event ClaimsEnabled();
+    event ClaimsDisabled();
+
+    /**
+     * Errors
+     */
+    error TransfersPaused();
+    error ClaimsPaused();
+
+    // ======== Initialization & Upgrades ========
 
     constructor() {
         _disableInitializers();
     }
 
     function initialize(
-        address owner, 
-        string memory name, 
+        address owner,
+        string memory name,
         string memory symbol,
-        bytes32[] memory _merkleRoots
+        string memory baseURI
     ) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
-        merkleRoots = _merkleRoots;
+        _baseTokenURI = baseURI;
+        transfersEnabled = false;
+        claimsEnabled = true;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    function claimNFT(bytes32[] calldata merkleProof, string memory tokenURI, uint256 rootIndex) public returns (uint256) {
+    // ======== Core NFT Functions ========
+
+    function claimNFT(bytes32[] calldata merkleProof, uint256 rootIndex) public returns (uint256) {
+        if (!claimsEnabled) {
+            revert ClaimsPaused();
+        }
         require(!hasClaimed[msg.sender], "NFT already claimed for this address");
 
         require(rootIndex < merkleRoots.length, "Invalid root index");
 
         // Verify that the address is whitelisted using Merkle Proof
         bytes32 inner = keccak256(abi.encode(msg.sender));
-        bytes32 leaf  = keccak256(abi.encode(inner));
+        bytes32 leaf = keccak256(abi.encode(inner));
         require(MerkleProof.verify(merkleProof, merkleRoots[rootIndex], leaf), "Invalid merkle proof");
 
         // Mark as claimed
@@ -52,12 +75,25 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         // Mint the NFT
         uint256 tokenId = _nextTokenId++;
         _mint(msg.sender, tokenId);
-        _setTokenURI(tokenId, tokenURI);
 
         emit NFTClaimed(msg.sender);
 
         return tokenId;
     }
+
+    function transferFrom(address from, address to, uint256 tokenId) public override {
+        if (!transfersEnabled) {
+            revert TransfersPaused();
+        }
+
+        super.transferFrom(from, to, tokenId);
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return _baseTokenURI;
+    }
+
+    // ======== Whitelist & Merkle Management ========
 
     function isWhitelisted(address user) public view returns (bool) {
         return balanceOf(user) >= 1;
@@ -74,5 +110,38 @@ contract ZkArcadeNft is ERC721URIStorageUpgradeable, UUPSUpgradeable, OwnableUpg
         merkleRoots[rootIndex] = _merkleRoot;
 
         emit MerkleRootUpdated(_merkleRoot, rootIndex);
+    }
+
+    // ======== Admin Controls ========
+
+    function enableTransfers() public onlyOwner {
+        transfersEnabled = true;
+        emit TransfersEnabled();
+    }
+
+    function disableTransfers() public onlyOwner {
+        transfersEnabled = false;
+        emit TransfersDisabled();
+    }
+
+    function enableClaims() public onlyOwner {
+        claimsEnabled = true;
+        emit ClaimsEnabled();
+    }
+
+    function disableClaims() public onlyOwner {
+        claimsEnabled = false;
+        emit ClaimsDisabled();
+    }
+
+    function endSeason() public onlyOwner {
+        claimsEnabled = false;
+        transfersEnabled = true;
+        emit ClaimsDisabled();
+        emit TransfersEnabled();
+    }
+
+    function setBaseURI(string memory newBaseURI) public onlyOwner {
+        _baseTokenURI = newBaseURI;
     }
 }

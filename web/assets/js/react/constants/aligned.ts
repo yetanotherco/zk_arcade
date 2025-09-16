@@ -48,12 +48,12 @@ export const batcherPaymentServiceAbi = [
 export const leaderboardAbi = [
 	{
 		type: "function",
-		name: "submitBeastSolution",
+		name: "claimBeastPoints",
 		stateMutability: "nonpayable",
 		inputs: [
+			{ name: "gameIndex", type: "uint256" },
 			{ name: "proofCommitment", type: "bytes32" },
 			{ name: "publicInputs", type: "bytes" },
-			{ name: "provingSystemAuxDataCommitment", type: "bytes32" },
 			{ name: "proofGeneratorAddr", type: "bytes20" },
 			{ name: "batchMerkleRoot", type: "bytes32" },
 			{ name: "merkleProof", type: "bytes" },
@@ -63,12 +63,12 @@ export const leaderboardAbi = [
 	},
 	{
 		type: "function",
-		name: "submitParitySolution",
+		name: "claimParityPoints",
 		stateMutability: "nonpayable",
 		inputs: [
+			{ name: "gameIndex", type: "uint256" },
 			{ name: "proofCommitment", type: "bytes32" },
 			{ name: "publicInputs", type: "bytes" },
-			{ name: "provingSystemAuxDataCommitment", type: "bytes32" },
 			{ name: "proofGeneratorAddr", type: "bytes20" },
 			{ name: "batchMerkleRoot", type: "bytes32" },
 			{ name: "merkleProof", type: "bytes" },
@@ -91,64 +91,74 @@ export const leaderboardAbi = [
 		stateMutability: "view",
 	},
 	{
-		type: "function",
-		name: "getCurrentBeastGame",
 		inputs: [],
+		name: "getCurrentBeastGame",
 		outputs: [
 			{
-				name: "",
-				type: "tuple",
-				internalType: "struct Leaderboard.BeastGame",
 				components: [
 					{
+						internalType: "uint256",
 						name: "endsAtTime",
 						type: "uint256",
-						internalType: "uint256",
 					},
 					{
+						internalType: "uint256",
 						name: "gameConfig",
 						type: "uint256",
-						internalType: "uint256",
 					},
 					{
+						internalType: "uint256",
 						name: "startsAtTime",
 						type: "uint256",
-						internalType: "uint256",
 					},
 				],
+				internalType: "struct BeastGame",
+				name: "",
+				type: "tuple",
+			},
+			{
+				internalType: "uint256",
+				name: "idx",
+				type: "uint256",
 			},
 		],
 		stateMutability: "view",
+		type: "function",
 	},
 	{
-		type: "function",
-		name: "getCurrentParityGame",
 		inputs: [],
+		name: "getCurrentParityGame",
 		outputs: [
 			{
-				name: "",
-				type: "tuple",
-				internalType: "struct Leaderboard.ParityGame",
 				components: [
 					{
+						internalType: "uint256",
 						name: "endsAtTime",
 						type: "uint256",
-						internalType: "uint256",
 					},
 					{
+						internalType: "uint256",
 						name: "gameConfig",
 						type: "uint256",
-						internalType: "uint256",
 					},
 					{
+						internalType: "uint256",
 						name: "startsAtTime",
 						type: "uint256",
-						internalType: "uint256",
 					},
 				],
+				internalType: "struct ParityGame",
+				name: "",
+				type: "tuple",
+			},
+			{
+				internalType: "uint256",
+				name: "idx",
+				type: "uint256",
 			},
 		],
 		stateMutability: "view",
+		type: "function",
 	},
 	{
 		type: "function",
@@ -182,7 +192,6 @@ export const zkArcadeNftAbi = [
         name: "claimNFT",
         inputs: [
             { name: "merkleProof", type: "bytes32[]" },
-            { name: "tokenURI", type: "string" },
 			{ name: "rootIndex", type: "uint256" }
         ],
         outputs: [],

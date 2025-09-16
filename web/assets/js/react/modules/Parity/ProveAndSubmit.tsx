@@ -72,6 +72,21 @@ export const ProveAndSubmit = ({
 		} catch (e) {
 			console.error("Error generating proof:", e);
 			setProofGenerationFailed(true);
+
+			// Delete the probably invalid levels from local storage (those that
+			// haven't been submitted on-chain yet)
+			const stored = localStorage.getItem("parity-game-data");
+			const gameData: { [key: string]: GameStatus } = stored
+				? JSON.parse(stored)
+				: {};
+			const key = gameDataKey(currentGameConfig, user_address);
+			if (gameData[key]) {
+				for (let i = submittedLevelOnChain + 1; i <= 3; i++) {
+					gameData[key].levelsBoards.pop();
+					gameData[key].userPositions.pop();
+				}
+				localStorage.setItem("parity-game-data", JSON.stringify(gameData));
+			}
 		}
 	};
 

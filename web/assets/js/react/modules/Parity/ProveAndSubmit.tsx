@@ -122,6 +122,27 @@ export const ProveAndSubmit = ({
 		);
 	}
 
+	const proofGenerationErrorView: JSX.Element = (
+		<>
+			<div className="bg-red/20 text-red border border-red text-center p-2 rounded mb-2 max-w-[500px]">
+				There was an error generating your proof.
+				Please try playing and generating your proof again.
+			</div>
+
+			<div className="flex flex-col gap-5 w-full max-w-[300px]">
+				<Button
+					variant="arcade"
+					className="w-full"
+					onClick={() => {
+						setGameState("home");
+					}}
+				>
+					Home
+				</Button>
+			</div>
+		</>
+	);
+
 	return (
 		<div>
 			<div className="w-full h-full flex flex-col gap-4 items-center max-w-[500px]">
@@ -138,24 +159,7 @@ export const ProveAndSubmit = ({
 					</div>
 
 						{proofGenerationFailed ? (
-							<>
-								<div className="bg-red/20 text-red border border-red text-center p-2 rounded mb-2 max-w-[500px]">
-									There was an error generating your proof.
-									Please try playing and generating your proof again.
-								</div>
-
-								<div className="flex flex-col gap-5 w-full max-w-[300px]">
-									<Button
-										variant="arcade"
-										className="w-full"
-										onClick={() => {
-											setGameState("home");
-										}}
-									>
-										Home
-									</Button>
-								</div>
-							</>
+							proofGenerationErrorView
 						) : (
 							<>
 								<div className="w-full max-w-[500px] space-y-2">

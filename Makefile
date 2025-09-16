@@ -68,7 +68,7 @@ beast_write_program_vk:
 # With defaults (levels=3, min=15, max=45): levels → [15, 30, 45]
 # ─────────────────────────────────────────────────────────────────────────────
 # Number of calendar days the campaign spans (scheduling/rotation; not difficulty).
-# Each game takes (campaign days * 24hs / num games)hs
+# Each game takes (campaign days * 24hs / num games) hs
 PARITY_CAMPAIGN_DAYS ?= 1
 # Total number of games in the campaign (pattern repeats per game).
 PARITY_NUM_GAMES ?= 10

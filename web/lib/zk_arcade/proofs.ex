@@ -91,6 +91,7 @@ defmodule ZkArcade.Proofs do
         level_reached: p.level_reached,
         game_config: p.game_config,
         submitted_max_fee: p.submitted_max_fee,
+        claim_tx_hash: p.claim_tx_hash
       })
       |> Repo.all()
       |> Enum.map(fn proof ->
@@ -137,7 +138,8 @@ defmodule ZkArcade.Proofs do
           level_reached: p.level_reached,
           game_config: p.game_config,
           submitted_max_fee: p.submitted_max_fee,
-          game_idx: p.game_idx
+          game_idx: p.game_idx,
+          claim_tx_hash: p.claim_tx_hash
         }
 
     case Repo.one(query) do
@@ -272,7 +274,7 @@ defmodule ZkArcade.Proofs do
     end
   end
 
-  def update_proof_status_claimed(address, proof_id) do
+  def update_proof_status_claimed(address, proof_id, claim_tx_hash) do
     Logger.info("Updating proof #{proof_id} status to claimed")
     proof = get_proof!(proof_id)
     downcased_addr = String.downcase(address)
@@ -281,7 +283,7 @@ defmodule ZkArcade.Proofs do
       Logger.error("Failed to update proof #{proof_id} does not belong to address #{address}")
       {:error, %{}}
     else
-      changeset = change_proof(proof, %{status: "claimed"})
+      changeset = change_proof(proof, %{status: "claimed", claim_tx_hash: claim_tx_hash})
 
       case Repo.update(changeset) do
         {:ok, updated_proof} ->

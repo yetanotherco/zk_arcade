@@ -50,6 +50,21 @@ export const EligibilityModal = ({
 							Your wallet is eligible to play and claim rewards.
 							Have fun!
 						</p>
+						<div className="relative group">
+							<span className="text-white text-sm underline cursor-help">
+								What is this?
+							</span>
+							<div className="absolute left-1/2 top-full transform -translate-x-[70%] translate-y-2 hidden group-hover:block z-10">
+								<div
+									className="bg-white text-black text-xs rounded shadow-lg px-2 py-1 
+															opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+															break-words whitespace-normal max-w-sm min-w-[400px] pointer-events-none"
+								>
+									In order to play you need to mint a free NFT
+									that will act as your ticket pass.
+								</div>
+							</div>
+						</div>
 						<div className="flex mt-4 gap-8 justify-center items-center text-center">
 							<Button variant="text" onClick={dismiss}>
 								Do it later

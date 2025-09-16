@@ -194,7 +194,7 @@ fn main() {
     let num_games: usize = args[1].parse().expect("Invalid number of games");
     let levels_per_game: usize = args[2].parse().expect("Invalid number of levels");
     let time_days: u64 = args[3].parse().expect("Invalid total campaign in days");
-    let submission_offset_secs: u64 = args[4].parse().expect("Invalid submission offset secs");
+    let submission_offset_minutes: u64 = args[4].parse().expect("Invalid submission offset secs");
     let network: String = args[5].parse().expect("Invalid network");
 
     // Get the current time in seconds from the OS
@@ -217,7 +217,7 @@ fn main() {
 
             GameJson {
                 from_time: from_time,
-                to_time: to_time + submission_offset_secs,
+                to_time: to_time + submission_offset_minutes * 60,
                 game_config: hex::encode(encode_game_config(&levels)),
                 levels,
             }

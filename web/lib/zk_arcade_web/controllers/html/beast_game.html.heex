@@ -26,10 +26,11 @@
                 <a href={link} class="text-md mb-1 text-blue hover:underline" target="_blank" rel="noopener noreferrer"><%= link %></a>
             </div>
             <% end %>
+            <img class="rounded max-h-[400px] mt-8" src={"/images/beast_gameplay.gif"} />
         </section>
     </div>
 
-     <div class="section-width section-width">
+    <div class="section-width section-width">
         <section class="section-spacer-md w-full">
             <.section_header header="Current game" />
             <x-app-current-game-beast 
@@ -43,7 +44,6 @@
     <div class="section-width section-width">
         <section class="section-spacer-md">
             <.section_header header="How to play" />
-            <img class="rounded max-h-[500px] mb-5" src={"/images/beast_help.gif"} />
             <p class="text-md text-text-200 text-wrap"><%= ZkArcade.Utils.autolink_and_linebreak(@game.how_to_play) |> raw() %></p>
         </section>
     </div>

@@ -118,7 +118,7 @@ fn gen_levels(
 
         let mut selected = random_number_between(0, 9);
         let mut solution: Vec<Movement> = vec![];
-        board[selected as usize] = board[selected as usize].saturating_sub(1);
+        board[selected as usize] -= 1;
 
         let moves = calculate_movements_for_level(i, num_levels, min_movements, max_movements);
 
@@ -148,7 +148,7 @@ fn gen_levels(
             selected = new_selected;
             solution.push(new_movement);
             if j + 1 != moves {
-                board[selected as usize] = board[selected as usize].saturating_sub(1);
+                board[selected as usize] -= 1;
             }
         }
 

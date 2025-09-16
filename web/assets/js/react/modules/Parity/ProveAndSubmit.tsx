@@ -27,6 +27,7 @@ export const ProveAndSubmit = ({
 	timeRemaining,
 	nft_contract_address,
 	gameIdx,
+	setPlayerLevelReached,
 }: {
 	user_address: Address;
 	payment_service_address: Address;
@@ -38,6 +39,7 @@ export const ProveAndSubmit = ({
 	timeRemaining?: TimeRemaining | null;
 	nft_contract_address: Address;
 	gameIdx: number;
+	setPlayerLevelReached: (level: number) => void;
 }) => {
 	const [open, setOpen] = useState(false);
 	const [proofVerificationData, setProofVerificationData] =
@@ -87,6 +89,9 @@ export const ProveAndSubmit = ({
 				}
 				localStorage.setItem("parity-game-data", JSON.stringify(gameData));
 			}
+
+			// Restore the level reached by the user to the last one submitted on-chain
+			setPlayerLevelReached(submittedLevelOnChain);
 		}
 	};
 

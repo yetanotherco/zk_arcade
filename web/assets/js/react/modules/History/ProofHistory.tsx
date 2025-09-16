@@ -14,6 +14,7 @@ import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader
 import {
 	ProofBatchMerkleRoot,
 	ProofStatusWithTooltipDesc,
+	ProofClaimTxHash,
 } from "../../components/Table/ProofBodyItems";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 
@@ -94,9 +95,7 @@ const Entry = ({
 					proof={proof}
 					explorer_url={explorer_url}
 				/>
-				<TableBodyItem
-					text={shortenHash(proof.verification_data_commitment)}
-				/>
+				<ProofClaimTxHash proof={proof}/>
 				<TableBodyItem text={proof.proving_system} />
 			</tr>
 
@@ -159,7 +158,7 @@ export const ProofHistory = ({
 					{ text: "Status" },
 					{ text: "Sent At" },
 					{ text: "Batch" },
-					{ text: "Hash" },
+					{ text: "Claim Tx Hash" },
 					{ text: "Prover" },
 				]}
 			>

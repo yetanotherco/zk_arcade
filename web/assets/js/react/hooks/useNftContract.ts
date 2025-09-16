@@ -109,7 +109,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 
 		addToast({
 			title: "Transaction sent",
-			desc: `Your NFT is being minted. Hash: ${hash.slice(
+			desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
 				0,
 				8
 			)}...${hash.slice(-6)}`,

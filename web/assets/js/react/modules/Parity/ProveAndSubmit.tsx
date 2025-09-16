@@ -91,7 +91,7 @@ export const ProveAndSubmit = ({
 			}
 
 			// Restore the level reached by the user to the last one submitted on-chain
-			setPlayerLevelReached(submittedLevelOnChain);
+			setPlayerLevelReached(submittedLevelOnChain == 0 ? 1 : submittedLevelOnChain);
 		}
 	};
 

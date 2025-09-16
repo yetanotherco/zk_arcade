@@ -58,6 +58,7 @@ export const useBeastLeaderboardContract = ({
 		chainId,
 	});
 
+	// Used to calculate the time remaining for the current game
 	const nextGame = useReadContract({
 		address: contractAddress,
 		abi: leaderboardAbi,

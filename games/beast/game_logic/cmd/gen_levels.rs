@@ -185,7 +185,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 6 {
         eprintln!(
-            "Usage: {} <number_of_games> <levels_per_game> <total_campaign_in_days> <submission_offset_in_seconds> <network>",
+            "Usage: {} <number_of_games> <levels_per_game> <total_campaign_in_days> <submission_offset_in_minutes> <network>",
             args[0]
         );
         std::process::exit(1);
@@ -194,7 +194,7 @@ fn main() {
     let num_games: usize = args[1].parse().expect("Invalid number of games");
     let levels_per_game: usize = args[2].parse().expect("Invalid number of levels");
     let time_days: u64 = args[3].parse().expect("Invalid total campaign in days");
-    let submission_offset_minutes: u64 = args[4].parse().expect("Invalid submission offset secs");
+    let submission_offset_minutes: u64 = args[4].parse().expect("Invalid submission offset minutes");
     let network: String = args[5].parse().expect("Invalid network");
 
     // Get the current time in seconds from the OS

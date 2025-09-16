@@ -186,7 +186,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 10 {
         eprintln!(
-            "Usage: {} <number_of_games> <levels_per_game> <min_end_of_level> <max_end_of_level> <min_movements> <max_movements> <total_campaign_in_days> <submission_offset_in_seconds> <network>",
+            "Usage: {} <number_of_games> <levels_per_game> <min_end_of_level> <max_end_of_level> <min_movements> <max_movements> <total_campaign_in_days> <submission_offset_in_minutes> <network>",
             args[0]
         );
         std::process::exit(1);

@@ -43,6 +43,8 @@ export const ProveAndSubmit = ({
 	const [proofVerificationData, setProofVerificationData] =
 		useState<VerificationData | null>(null);
 
+	const [proofGenerationFailed, setProofGenerationFailed] = useState(false);
+
 	const [userGameData, _setUserGameData] = useState<GameStatus>(() => {
 		const stored = localStorage.getItem("parity-game-data");
 		const gameData: { [key: string]: GameStatus } = stored
@@ -58,14 +60,19 @@ export const ProveAndSubmit = ({
 	});
 
 	const generateproofVerificationData = async () => {
-		const submitproofVerificationData = await generateCircomParityProof({
-			user_address,
-			userPositions: userGameData.userPositions,
-			levelsBoards: userGameData.levelsBoards,
-		});
+		try {
+			const submitproofVerificationData = await generateCircomParityProof({
+				user_address,
+				userPositions: userGameData.userPositions,
+				levelsBoards: userGameData.levelsBoards,
+			});
 
-		setProofVerificationData(submitproofVerificationData);
-		setOpen(true);
+			setProofVerificationData(submitproofVerificationData);
+			setOpen(true);
+		} catch (e) {
+			console.error("Error generating proof:", e);
+			setProofGenerationFailed(true);
+		}
 	};
 
 	const currentLevel = userGameData.levelsBoards.length;

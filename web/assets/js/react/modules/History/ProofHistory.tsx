@@ -95,7 +95,7 @@ const Entry = ({
 					proof={proof}
 					explorer_url={explorer_url}
 				/>
-				<ProofClaimTxHash proof={proof} explorer_url={explorer_url} />
+				<ProofClaimTxHash proof={proof}/>
 				<TableBodyItem text={proof.proving_system} />
 			</tr>
 

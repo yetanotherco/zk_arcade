@@ -67,7 +67,7 @@ export const ProofBatchMerkleRoot = ({ proof, explorer_url }: Props) => {
 	);
 };
 
-export const ProofClaimTxHash = ({ proof }: Props) => {
+export const ProofClaimTxHash = ({ proof }: { proof: ProofSubmission }) => {
 	const network = useChainId();
 
 	let explorer_url = "";

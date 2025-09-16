@@ -6,7 +6,7 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.Proofs
   alias ZkArcade.EIP712Verifier
 
-  def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id}) do
+  def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id, "claim_tx_hash" => claim_tx_hash}) do
     address = get_session(conn, :wallet_address)
 
     if is_nil(address) do
@@ -14,7 +14,7 @@ defmodule ZkArcadeWeb.ProofController do
       |> redirect(to: "/")
     end
 
-    Proofs.update_proof_status_claimed(address, proof_id)
+    Proofs.update_proof_status_claimed(address, proof_id, claim_tx_hash)
 
     conn
       |> redirect(to: build_redirect_url(conn, "", proof_id))

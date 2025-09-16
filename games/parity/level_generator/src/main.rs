@@ -122,43 +122,33 @@ fn gen_levels(
 
         let moves = calculate_movements_for_level(i, num_levels, min_movements, max_movements);
 
-        for j in 0..moves {
+        for mut j in 0..moves {
             let mut roll = -1;
 
             while !possible(roll, selected) {
                 roll = random_number_between(0, 4) as i16;
             }
 
-            match roll {
-                0 => {
-                    selected -= 3;
-                    solution.push(Movement::Down);
-                    if j + 1 != moves {
-                        board[selected as usize] = board[selected as usize].saturating_sub(1);
-                    }
-                }
-                1 => {
-                    selected += 3;
-                    solution.push(Movement::Up);
-                    if j + 1 != moves {
-                        board[selected as usize] = board[selected as usize].saturating_sub(1);
-                    }
-                }
-                2 => {
-                    selected -= 1;
-                    solution.push(Movement::Right);
-                    if j + 1 != moves {
-                        board[selected as usize] = board[selected as usize].saturating_sub(1);
-                    }
-                }
-                3 => {
-                    selected += 1;
-                    solution.push(Movement::Left);
-                    if j + 1 != moves {
-                        board[selected as usize] = board[selected as usize].saturating_sub(1);
-                    }
-                }
-                _ => {}
+            let (new_selected, new_movement) = match roll {
+                0 => (selected - 3, Movement::Down),
+                1 => (selected + 3, Movement::Up),
+                2 => (selected - 1, Movement::Right),
+                3 => (selected + 1, Movement::Left),
+                _ => (selected, Movement::Down),
+            };
+
+            // if the position is zero we cannot decrease it anymore, so we reroll
+            // Note: this could lead to infinite loops in some edge cases, but the probability is really low,
+            // and it's even lower when we increase the minimum end of level value.
+            if board[new_selected as usize] == 0 {
+                j -= 1;
+                continue;
+            }
+
+            selected = new_selected;
+            solution.push(new_movement);
+            if j + 1 != moves {
+                board[selected as usize] = board[selected as usize].saturating_sub(1);
             }
         }
 

@@ -14,11 +14,12 @@ type ClaimComponentProps = {
 	handleClaim: () => void;
 	onCancel: () => void;
 	isLoading: boolean;
+	claimTxHash: string;
 };
 
 const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 	(
-		{ gameHasExpired, proofSubmission, handleClaim, onCancel, isLoading },
+		{ gameHasExpired, proofSubmission, handleClaim, onCancel, isLoading, claimTxHash },
 		formRef
 	) => {
 		const { csrfToken } = useCSRFToken();
@@ -80,6 +81,11 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						type="hidden"
 						name="proof_id"
 						value={proofSubmission.id}
+					/>
+					<input
+						type="hidden"
+						name="claim_tx_hash"
+						value={claimTxHash}
 					/>
 				</form>
 			</div>
@@ -144,6 +150,8 @@ const BeastClaim = ({
 	const gameHasExpired =
 		Number(claimGame.data?.endsAtTime || 0n) < Date.now() / 1000;
 
+	const claimTxHash = submitSolution.tx.hash || "";
+
 	return (
 		<ClaimComponent
 			gameHasExpired={gameHasExpired}
@@ -152,6 +160,7 @@ const BeastClaim = ({
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
 			ref={formRef}
+			claimTxHash={claimTxHash}
 		/>
 	);
 };
@@ -226,6 +235,7 @@ const ParityClaim = ({
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
 			ref={formRef}
+			claimTxHash={submitSolution.tx.hash || ""}
 		/>
 	);
 };

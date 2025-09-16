@@ -2,6 +2,7 @@ import React from "react";
 import { ProofSubmission } from "../../types/aligned";
 import { shortenHash } from "../../utils/crypto";
 import { timeAgoInHs } from "../../utils/date";
+import { useChainId } from "wagmi";
 
 type KeysForStatus = ProofSubmission["status"];
 
@@ -58,6 +59,40 @@ export const ProofBatchMerkleRoot = ({ proof, explorer_url }: Props) => {
 					rel="noopener noreferrer"
 				>
 					{shortenHash(proof.batch_hash)}
+				</a>
+			) : (
+				<p>...</p>
+			)}
+		</td>
+	);
+};
+
+export const ProofClaimTxHash = ({ proof }: { proof: ProofSubmission }) => {
+	const network = useChainId();
+
+	let explorer_url = "";
+
+	// Determine explorer URL based on network
+	if (network === 0x1) {
+		explorer_url = "https://etherscan.io";
+	} else if (network === 0x6357d2e0a5) {
+		explorer_url = "https://holesky.etherscan.io";
+	} else if (network === 0xaa36a7) {
+		explorer_url = "https://sepolia.etherscan.io";
+	} else {
+		explorer_url = "https://etherscan.io"; // Default to mainnet
+	}
+
+	return (
+		<td>
+			{proof.claim_tx_hash ? (
+				<a
+					href={`${explorer_url}/tx/${proof.claim_tx_hash}`}
+					className="underline"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					{shortenHash(proof.claim_tx_hash)}
 				</a>
 			) : (
 				<p>...</p>

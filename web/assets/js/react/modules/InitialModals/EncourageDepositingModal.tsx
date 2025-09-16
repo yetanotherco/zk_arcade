@@ -76,7 +76,7 @@ export const EncourageDepositingModal = ({
 	});
 
 	const notEnoughBalance =
-		balance.data != undefined && balance.data < BigInt(100000000000000); // 0.0001 ETH
+		balance.data != undefined && balance.data < BigInt(1000000000000000); // 0.001 ETH
 
 	return (
 		<div>

@@ -190,7 +190,7 @@ defmodule ZkArcade.Proofs do
     downcased_addr = String.downcase(address)
 
     Proof
-      |> where([p], p.wallet_address == ^downcased_addr and p.game_idx == ^game_idx and p.game == ^game)
+      |> where([p], p.wallet_address == ^downcased_addr and p.game_idx == ^game_idx and p.game == ^game and p.status not in ["failed"])
       |> order_by([p], desc: p.level_reached)
       |> limit(1)
       |> Repo.one()

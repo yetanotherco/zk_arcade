@@ -12,6 +12,7 @@ import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
 import { ClaimNft } from "./ClaimNftStep";
+import { useProofSentMessageReader } from "../../../hooks/useProofSentMessageReader";
 
 type Props = {
 	modal: Omit<ModalProps, "maxWidth">;
@@ -96,6 +97,8 @@ export const SubmitProofModal = ({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
+
+	useProofSentMessageReader();
 
 	const updateState = useCallback(() => {
 		if (proof) {

@@ -147,7 +147,7 @@ defmodule ZkArcadeWeb.ProofController do
           if existing_proof && existing_proof.level_reached >= level do
             Logger.error("A proof with an equal or higher level already exists for this game configuration.")
             conn
-            |> redirect(to: build_redirect_url(conn, "proof-failed"))
+            |> redirect(to: build_redirect_url(conn, "level-reached"))
           else
             with {:ok, pending_proof} <-
                   Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee, game_idx) do

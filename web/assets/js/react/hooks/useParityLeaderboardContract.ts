@@ -49,6 +49,21 @@ export const useParityLeaderboardContract = ({
 		chainId,
 	});
 
+	// Used to calculate the time remaining for the current game
+	const nextGame = useReadContract({
+		address: contractAddress,
+		abi: leaderboardAbi,
+		functionName: "parityGames",
+		args: [
+			currentGame.data
+				? currentGame.data[1] === 0
+					? 0
+					: currentGame.data[1] + 1n
+				: -1,
+		],
+		chainId,
+	});
+
 	const currentGameLevelCompleted = useReadContract({
 		address: contractAddress,
 		abi: leaderboardAbi,
@@ -174,5 +189,6 @@ export const useParityLeaderboardContract = ({
 			},
 		},
 		currentGameLevelCompleted,
+		nextGame,
 	};
 };

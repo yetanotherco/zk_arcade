@@ -58,6 +58,21 @@ export const useBeastLeaderboardContract = ({
 		chainId,
 	});
 
+	// Used to calculate the time remaining for the current game
+	const nextGame = useReadContract({
+		address: contractAddress,
+		abi: leaderboardAbi,
+		functionName: "beastGames",
+		args: [
+			currentGame.data
+				? currentGame.data[1] === 0
+					? 0
+					: currentGame.data[1] + 1n
+				: -1,
+		],
+		chainId,
+	});
+
 	const currentGameLevelCompleted = useReadContract({
 		address: contractAddress,
 		abi: leaderboardAbi,
@@ -185,5 +200,6 @@ export const useBeastLeaderboardContract = ({
 			gamesHaveFinished:
 				currentGame.error?.message?.includes("NoActiveBeastGame"),
 		},
+		nextGame,
 	};
 };

@@ -221,6 +221,7 @@ export const Game = ({
 				timeRemaining={timeRemaining}
 				nft_contract_address={nft_contract_address}
 				gameIdx={currentGameIdx}
+				setPlayerLevelReached={setPlayerLevelReached}
 			/>
 		),
 	};

@@ -78,7 +78,7 @@ PARITY_SUBMISSION_OFFSET_MINUTES ?= 720
 PARITY_LEVELS_PER_GAME ?= 3
 # UI-only: lower bound for numbers shown at the end of a level on the board.
 # Does NOT affect difficulty or movement calculations.
-PARITY_MIN_END_OF_LEVEL ?= 8
+PARITY_MIN_END_OF_LEVEL ?= 12
 # UI-only: upper bound for numbers shown at the end of a level on the board.
 # Does NOT affect difficulty or movement calculations.
 PARITY_MAX_END_OF_LEVEL ?= 50

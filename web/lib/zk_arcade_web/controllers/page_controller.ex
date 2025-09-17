@@ -257,6 +257,10 @@ defmodule ZkArcadeWeb.PageController do
 
     {username, position} = get_username_and_position(wallet)
 
+    game_idx = ZkArcade.LeaderboardContract.get_current_game_idx("Beast")
+
+    highest_level_reached = ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Beast")
+
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
@@ -298,6 +302,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:beast_submissions, beast_submissions_json)
+      |> assign(:highest_level_reached, highest_level_reached)
       |> render(:beast_game)
   end
 
@@ -311,6 +316,10 @@ defmodule ZkArcadeWeb.PageController do
     ]
     {username, position} = get_username_and_position(wallet)
     {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
+
+    game_idx = ZkArcade.LeaderboardContract.get_current_game_idx("Parity")
+
+    highest_level_reached = ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Parity")
 
     conn
       |> assign(:wallet, wallet)
@@ -331,6 +340,7 @@ The goal of the game is to make each number on the board equal.
       |> assign(:beast_submissions, beast_submissions_json)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
+      |> assign(:highest_level_reached, highest_level_reached)
       |> render(:parity_game)
   end
 

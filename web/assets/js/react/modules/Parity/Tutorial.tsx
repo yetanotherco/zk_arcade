@@ -42,11 +42,7 @@ const TutorialText = ({
 	);
 };
 
-const BoardTutorial = ({
-	setGameState,
-}: {
-	setGameState: (state: ParityGameState) => void;
-}) => {
+const BoardTutorial = ({ goHome }: { goHome: () => void }) => {
 	const { positionIdx, values, userPositions, hasWon, reset, updatePos } =
 		useParityControls({
 			initialPosition: { col: 0, row: 0 },
@@ -59,7 +55,9 @@ const BoardTutorial = ({
 				header="End of tutorial"
 				text="You have completed the tutorial. Now that you understand how the game works, you are ready to prove it to others and climb the leaderboard."
 				button="Let's go!"
-				onClick={() => setGameState("home")}
+				onClick={() => {
+					goHome();
+				}}
 			/>
 		) : (
 			<ParityBoard
@@ -69,7 +67,7 @@ const BoardTutorial = ({
 				totalLevels={1}
 				reset={reset}
 				user_positions={userPositions}
-				home={() => setGameState("home")}
+				home={() => goHome()}
 				updatePos={updatePos}
 			/>
 		)
@@ -80,13 +78,21 @@ const BoardTutorial = ({
 
 export const ParityTutorial = ({
 	setGameState,
+	setHasPlayedTutorial,
 }: {
 	setGameState: (state: ParityGameState) => void;
+	setHasPlayedTutorial: (played: boolean) => void;
 }) => {
 	const [step, setStep] = useState(0);
 
 	const goToNextStep = () => {
 		setStep(prev => prev + 1);
+	};
+
+	const goHome = () => {
+		localStorage.setItem("parity-tutorial-played", "true");
+		setGameState("home");
+		setHasPlayedTutorial(true);
 	};
 
 	return (
@@ -100,7 +106,7 @@ export const ParityTutorial = ({
 						onClick={goToNextStep}
 					/>
 				) : (
-					<BoardTutorial setGameState={setGameState} />
+					<BoardTutorial goHome={goHome} />
 				)}
 			</div>
 		</div>

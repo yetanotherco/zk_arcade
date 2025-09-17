@@ -118,47 +118,37 @@ fn gen_levels(
 
         let mut selected = random_number_between(0, 9);
         let mut solution: Vec<Movement> = vec![];
-        board[selected as usize] = board[selected as usize].saturating_sub(1);
+        board[selected as usize] -= 1;
 
         let moves = calculate_movements_for_level(i, num_levels, min_movements, max_movements);
 
-        for j in 0..moves {
+        for mut j in 0..moves {
             let mut roll = -1;
 
             while !possible(roll, selected) {
                 roll = random_number_between(0, 4) as i16;
             }
 
-            match roll {
-                0 => {
-                    selected -= 3;
-                    solution.push(Movement::Down);
-                    if j + 1 != moves {
-                        board[selected as usize] = board[selected as usize].saturating_sub(1);
-                    }
-                }
-                1 => {
-                    selected += 3;
-                    solution.push(Movement::Up);
-                    if j + 1 != moves {
-                        board[selected as usize] = board[selected as usize].saturating_sub(1);
-                    }
-                }
-                2 => {
-                    selected -= 1;
-                    solution.push(Movement::Right);
-                    if j + 1 != moves {
-                        board[selected as usize] = board[selected as usize].saturating_sub(1);
-                    }
-                }
-                3 => {
-                    selected += 1;
-                    solution.push(Movement::Left);
-                    if j + 1 != moves {
-                        board[selected as usize] = board[selected as usize].saturating_sub(1);
-                    }
-                }
-                _ => {}
+            let (new_selected, new_movement) = match roll {
+                0 => (selected - 3, Movement::Down),
+                1 => (selected + 3, Movement::Up),
+                2 => (selected - 1, Movement::Right),
+                3 => (selected + 1, Movement::Left),
+                _ => (selected, Movement::Down),
+            };
+
+            // if the position is zero we cannot decrease it anymore, so we reroll
+            // Note: this could lead to infinite loops in some edge cases, but the probability is really low,
+            // and it's even lower when we increase the minimum end of level value.
+            if board[new_selected as usize] == 0 {
+                j -= 1;
+                continue;
+            }
+
+            selected = new_selected;
+            solution.push(new_movement);
+            if j + 1 != moves {
+                board[selected as usize] -= 1;
             }
         }
 
@@ -184,9 +174,9 @@ fn gen_levels(
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 9 {
+    if args.len() != 10 {
         eprintln!(
-            "Usage: {} <number_of_games> <levels_per_game> <min_end_of_level> <max_end_of_level> <min_movements> <max_movements> <total_campaign_in_days> <network>",
+            "Usage: {} <number_of_games> <levels_per_game> <min_end_of_level> <max_end_of_level> <min_movements> <max_movements> <total_campaign_in_days> <submission_offset_in_minutes> <network>",
             args[0]
         );
         std::process::exit(1);
@@ -199,7 +189,8 @@ fn main() {
     let min_movements = args[5].parse().expect("Invalid min movements");
     let max_movements = args[6].parse().expect("Invalid max movements");
     let time_days: u64 = args[7].parse().expect("Invalid total campaign in days");
-    let network: String = args[8].parse().expect("Invalid network");
+    let submission_offset_minutes: u64 = args[8].parse().expect("Invalid submission offset");
+    let network: String = args[9].parse().expect("Invalid network");
 
     let current_time = std::time::SystemTime::now();
     let mut current_timestamp = current_time
@@ -225,7 +216,8 @@ fn main() {
         let mut start_at_time_bytes = [0u8; 32];
         let mut ends_at_time_bytes = [0u8; 32];
         U256::from(current_timestamp).to_big_endian(&mut start_at_time_bytes);
-        U256::from(current_timestamp + seconds_per_game).to_big_endian(&mut ends_at_time_bytes);
+        U256::from(current_timestamp + seconds_per_game + submission_offset_minutes * 60)
+            .to_big_endian(&mut ends_at_time_bytes);
         current_timestamp = current_timestamp + seconds_per_game;
 
         games.push(GameEntry {

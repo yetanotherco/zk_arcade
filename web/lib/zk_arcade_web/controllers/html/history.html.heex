@@ -60,10 +60,18 @@
                 nft_contract_address={@nft_contract_address}
             />
 
-            <.history_section 
-                pagination={@pagination}
-                show_pagination={true}
-            />
+            <%= if @proofs_sent_total > 0 do %>
+                <.history_section 
+                    pagination={@pagination}
+                    show_pagination={true}
+                />
+            <% else %>
+                <div class="text-center">
+                    <p className="text-text-200 mt-10">
+                        You haven't submitted any proofs yet. Play a game and submit your first proof!
+                    </p>
+                </div>
+            <% end %>
         </div>
     </div>
 

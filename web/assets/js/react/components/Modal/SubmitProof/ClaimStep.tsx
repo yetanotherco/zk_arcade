@@ -5,6 +5,8 @@ import { useBeastLeaderboardContract } from "../../../hooks";
 import { Address } from "../../../types/blockchain";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
 import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboardContract";
+import { useChainId, useReadContract } from "wagmi";
+import { leaderboardAbi } from "../../../constants/aligned";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
@@ -104,10 +106,20 @@ const BeastClaim = ({
 	proofSubmission,
 	setOpen,
 }: ClaimProps) => {
-	const { submitSolution, currentGame } = useBeastLeaderboardContract({
+	const chainId = useChainId();
+	const { submitSolution } = useBeastLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});
+
+	const claimGame = useReadContract({
+		address: leaderboard_address,
+		abi: leaderboardAbi,
+		functionName: "beastGames",
+		args: [proofSubmission.game_idx],
+		chainId,
+	});
+
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleClaim = async () => {
@@ -135,13 +147,8 @@ const BeastClaim = ({
 		}
 	}, [submitSolution.receipt]);
 
-	const submittedGameConfigBigInt = BigInt(
-		"0x" + proofSubmission.game_config
-	);
-	const currentGameConfigBigInt = BigInt(currentGame.game?.gameConfig || 0n);
-
 	const gameHasExpired =
-		submittedGameConfigBigInt !== currentGameConfigBigInt;
+		Number(claimGame.data?.endsAtTime || 0n) < Date.now() / 1000;
 
 	const claimTxHash = submitSolution.tx.hash || "";
 
@@ -175,9 +182,19 @@ const ParityClaim = ({
 	proofSubmission,
 	setOpen,
 }: ClaimProps) => {
-	const { currentGame, submitSolution } = useParityLeaderboardContract({
+	const chainId = useChainId();
+
+	const { submitSolution } = useParityLeaderboardContract({
 		contractAddress: leaderboard_address,
 		userAddress: user_address,
+	});
+
+	const claimGame = useReadContract({
+		address: leaderboard_address,
+		abi: leaderboardAbi,
+		functionName: "parityGames",
+		args: [proofSubmission.game_idx],
+		chainId,
 	});
 
 	const formRef = useRef<HTMLFormElement>(null);
@@ -207,18 +224,8 @@ const ParityClaim = ({
 		}
 	}, [submitSolution.receipt]);
 
-	const currentGameConfigBigInt = readLeftmost(
-		currentGame.game?.gameConfig || 0n,
-		proofSubmission.level_reached
-	);
-
-	const submittedGameConfigBigInt = readLeftmost(
-		BigInt("0x" + proofSubmission.game_config),
-		proofSubmission.level_reached
-	);
-
 	const gameHasExpired =
-		submittedGameConfigBigInt !== currentGameConfigBigInt;
+		Number(claimGame.data?.endsAtTime || 0n) < Date.now() / 1000;
 
 	return (
 		<ClaimComponent

@@ -91,6 +91,7 @@ defmodule ZkArcade.Proofs do
         level_reached: p.level_reached,
         game_config: p.game_config,
         submitted_max_fee: p.submitted_max_fee,
+        game_idx: p.game_idx,
         claim_tx_hash: p.claim_tx_hash
       })
       |> Repo.all()

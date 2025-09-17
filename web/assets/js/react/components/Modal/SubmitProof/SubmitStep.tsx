@@ -79,12 +79,13 @@ export const SubmitProofStep = ({
 	proofToSubmitData,
 	gameName,
 	initialGameIdx,
+	highest_level_reached,
+	currentLevelReached = 0,
 }: {
 	batcher_url: string;
 	user_address: Address;
 	leaderboard_address: Address;
 	payment_service_addr: Address;
-	userProofs: BeastProofClaimed[];
 	setOpen: (open: boolean) => void;
 	setStep: (step: string) => void;
 	proofSubmission?: ProofSubmission;
@@ -93,6 +94,8 @@ export const SubmitProofStep = ({
 	proofToSubmitData: VerificationData | null;
 	gameName: string;
 	initialGameIdx?: number;
+	highest_level_reached: number;
+	currentLevelReached: number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
@@ -566,6 +569,15 @@ export const SubmitProofStep = ({
 			</div>
 		);
 	}
+
+	useEffect(() => {
+		if (!proofToSubmitData) return;
+		console.log({ highest_level_reached, currentLevelReached });
+		if (highest_level_reached >= currentLevelReached) {
+			setLevelAlreadyReached(true);
+			return;
+		}
+	}, []);
 
 	const gameData = getGameData(gameName);
 

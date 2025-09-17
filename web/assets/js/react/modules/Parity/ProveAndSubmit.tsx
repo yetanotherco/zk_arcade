@@ -27,6 +27,7 @@ export const ProveAndSubmit = ({
 	timeRemaining,
 	nft_contract_address,
 	gameIdx,
+	highest_level_reached,
 }: {
 	user_address: Address;
 	payment_service_address: Address;
@@ -38,6 +39,7 @@ export const ProveAndSubmit = ({
 	timeRemaining?: TimeRemaining | null;
 	nft_contract_address: Address;
 	gameIdx: number;
+	highest_level_reached: number;
 }) => {
 	const [open, setOpen] = useState(false);
 	const [proofVerificationData, setProofVerificationData] =
@@ -204,6 +206,8 @@ export const ProveAndSubmit = ({
 				gameName="parity"
 				nft_contract_address={nft_contract_address}
 				gameIdx={gameIdx}
+				highest_level_reached={highest_level_reached}
+				currentLevelReached={currentLevel}
 			/>
 		</div>
 	);

@@ -26,6 +26,8 @@ type Props = {
 	proofToSubmitData: VerificationData | null;
 	gameName?: string;
 	gameIdx?: number;
+	highest_level_reached: number;
+	currentLevelReached: number;
 };
 
 export type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
@@ -77,6 +79,8 @@ export const SubmitProofModal = ({
 	nft_contract_address,
 	gameName,
 	gameIdx,
+	highest_level_reached,
+	currentLevelReached,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
 	const { balance } = useBatcherPaymentService({
@@ -216,6 +220,8 @@ export const SubmitProofModal = ({
 				proofToSubmitData={proofToSubmitData}
 				gameName={gameName ? gameName : proof?.game || "beast"}
 				initialGameIdx={gameIdx}
+				highest_level_reached={highest_level_reached}
+				currentLevelReached={currentLevelReached}
 			/>
 		),
 		claim: () =>

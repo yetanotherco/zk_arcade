@@ -139,6 +139,7 @@ define(
 			"batcher_url",
 			"leaderboard_address",
 			"nft_contract_address",
+			"highest_level_reached",
 		],
 	}
 );

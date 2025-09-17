@@ -209,7 +209,6 @@ export const SubmitProofStep = ({
 		}
 
 		const alreadySubmitted = highest_level_reached >= parsed.level;
-		console.log({ alreadySubmitted, highest_level_reached, parsedLevel: parsed.level });
 
 		if (alreadySubmitted) {
 			setLevelAlreadyReached(true);
@@ -565,7 +564,6 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		if (!proofToSubmitData) return;
-		console.log({ highest_level_reached, currentLevelReached });
 		if (highest_level_reached >= currentLevelReached) {
 			setLevelAlreadyReached(true);
 			return;
@@ -708,7 +706,8 @@ export const SubmitProofStep = ({
 							!publicInputs ||
 							(balance.data || 0) < maxFee ||
 							nonceLoading ||
-							nonce == null
+							nonce == null ||
+							levelAlreadyReached
 						}
 						isLoading={submissionIsLoading}
 						onClick={handleSubmission}
@@ -721,7 +720,8 @@ export const SubmitProofStep = ({
 						disabled={
 							(balance.data || 0) < maxFee ||
 							nonceLoading ||
-							nonce == null
+							nonce == null ||
+							levelAlreadyReached
 						}
 						isLoading={submissionIsLoading}
 						onClick={() => handleSend(proofToSubmitData)}

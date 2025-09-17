@@ -188,6 +188,7 @@ defmodule ZkArcade.Proofs do
 
   def get_highest_level_proof(address, game_idx, game) do
     downcased_addr = String.downcase(address)
+    six_hours_ago = DateTime.add(DateTime.utc_now(), -21600, :second)
 
     Proof
       |> where(
@@ -196,7 +197,7 @@ defmodule ZkArcade.Proofs do
           (
             (p.status not in ["failed", "pending"]) or
             # This means we only consider those pending proofs that were submitted in the last 6 hours
-            (p.status == "pending" and p.inserted_at > DateTime.add(DateTime.utc_now(), -21600, :second))
+            (p.status == "pending" and p.inserted_at > ^six_hours_ago)
           )
       )
       |> order_by([p], desc: p.level_reached)

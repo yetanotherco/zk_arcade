@@ -47,7 +47,7 @@ const BoardTutorial = ({
 }: {
 	setGameState: (state: ParityGameState) => void;
 }) => {
-	const { positionIdx, values, userPositions, hasWon, reset } =
+	const { positionIdx, values, userPositions, hasWon, reset, updatePos } =
 		useParityControls({
 			initialPosition: { col: 0, row: 0 },
 			initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
@@ -70,6 +70,7 @@ const BoardTutorial = ({
 				reset={reset}
 				user_positions={userPositions}
 				home={() => setGameState("home")}
+				updatePos={updatePos}
 			/>
 		)
 	);

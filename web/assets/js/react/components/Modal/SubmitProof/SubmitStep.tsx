@@ -42,11 +42,6 @@ const GAMES: Game[] = [
 		name: "Parity",
 		cover: "/images/parity.jpg",
 	},
-	{
-		id: "Sudoku",
-		name: "Sudoku",
-		cover: "/images/sudoku.jpg",
-	},
 ];
 
 const getGameData = (id: GameId) => GAMES.find(game => game.id === id);
@@ -457,7 +452,8 @@ export const SubmitProofStep = ({
 			<div className="flex flex-col gap-4 justify-between h-full">
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
-						The proof has been submitted to Aligned. Come back in a few hours to claim your points.
+						The proof has been submitted to Aligned. Come back in a
+						few hours to claim your points.
 					</p>
 				) : proofStatus === "underpriced" ? (
 					<p className="bg-orange/20 rounded p-2 text-orange">
@@ -466,7 +462,8 @@ export const SubmitProofStep = ({
 					</p>
 				) : (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
-						The proof has been included in a batch and it will be verified by Aligned
+						The proof has been included in a batch and it will be
+						verified by Aligned
 					</p>
 				)}
 

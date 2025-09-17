@@ -201,7 +201,6 @@ export const ProveAndSubmit = ({
 				leaderboard_address={leaderboard_address}
 				payment_service_address={payment_service_address}
 				user_address={user_address}
-				userBeastSubmissions={[]}
 				proofToSubmitData={proofVerificationData}
 				gameName="parity"
 				nft_contract_address={nft_contract_address}

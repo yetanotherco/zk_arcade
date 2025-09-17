@@ -31,29 +31,10 @@ defmodule ZkArcadeWeb.PageController do
   end
 
 
-  defp get_proofs_and_submissions(address, page, size) do
+  defp get_proofs(address, page, size) do
     proofs = ZkArcade.Proofs.get_proofs_by_address(address, %{page: page, page_size: size})
 
-    beast_submissions =
-      case proofs do
-        [] -> []
-        proofs ->
-          # TODO: Pass the levels for the current game only, not all of them. This will be easier when we
-          # monitor the current game in the backend, logic not developed yet
-          proofs
-          |> Enum.filter(fn proof -> proof.game == "Beast" end)
-          |> Enum.filter(fn proof -> proof.status != "failed" end)
-          |> Enum.map(fn proof ->
-            %{
-              level: proof.level_reached,
-              game_config: proof.game_config
-            }
-          end)
-      end
-
-    beast_submissions_json = Jason.encode!(beast_submissions)
-
-    {proofs, beast_submissions_json}
+    proofs
   end
 
   defp build_redirect_url(conn, message) do
@@ -89,7 +70,7 @@ defmodule ZkArcadeWeb.PageController do
   def home(conn, _params) do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
-    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
+    proofs = get_proofs(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.list_proofs()
     total_players = ZkArcade.Accounts.list_wallets()
 
@@ -205,7 +186,6 @@ defmodule ZkArcadeWeb.PageController do
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
-      |> assign(:beast_submissions, beast_submissions_json)
       |> assign(:wallet, wallet)
       |> assign(:leaderboard, leaderboard)
       |> assign(:top_users, top_users)
@@ -230,13 +210,12 @@ defmodule ZkArcadeWeb.PageController do
   def games(conn, _params) do
     wallet = get_wallet_from_session(conn)
     eligible = get_user_eligibility(wallet)
-    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
+    proofs = get_proofs(wallet, 1, 5)
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
     {username, position} = get_username_and_position(wallet)
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
-      |> assign(:beast_submissions, beast_submissions_json)
       |> assign(:wallet, wallet)
       |> assign(:username, username)
       |> assign(:user_position, position)
@@ -249,7 +228,7 @@ defmodule ZkArcadeWeb.PageController do
     wallet = get_wallet_from_session(conn)
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
     eligible = get_user_eligibility(wallet)
-    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
+    proofs = get_proofs(wallet, 1, 5)
     acknowledgements = [
       %{text: "Original Beast game repository", link: "https://github.com/dominikwilkowski/beast"},
       %{text: "Original Beast game author", link: "https://github.com/dominikwilkowski"}
@@ -301,7 +280,6 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:username, username)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
-      |> assign(:beast_submissions, beast_submissions_json)
       |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
       |> render(:beast_game)
   end
@@ -315,7 +293,7 @@ defmodule ZkArcadeWeb.PageController do
       %{text: "Original Parity game author", link: "https://github.com/abejfehr"}
     ]
     {username, position} = get_username_and_position(wallet)
-    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 5)
+    proofs = get_proofs(wallet, 1, 5)
 
     game_idx = ZkArcade.LeaderboardContract.get_current_game_idx("Parity")
 
@@ -337,7 +315,6 @@ The goal of the game is to make each number on the board equal.
       })
       |> assign(:username, username)
       |> assign(:submitted_proofs, Jason.encode!(proofs))
-      |> assign(:beast_submissions, beast_submissions_json)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
@@ -358,7 +335,7 @@ The goal of the game is to make each number on the board equal.
         has_prev = page > 1
         has_next = page < total_pages
 
-        {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, page, entries_per_page)
+        proofs = get_proofs(wallet, page, entries_per_page)
 
         {username, position} = get_username_and_position(wallet)
 
@@ -372,7 +349,6 @@ The goal of the game is to make each number on the board equal.
         |> assign(:network, Application.get_env(:zk_arcade, :network))
         |> assign(:proofs_sent_total, length(proofs))
         |> assign(:submitted_proofs, Jason.encode!(proofs))
-        |> assign(:beast_submissions, beast_submissions_json)
         |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
         |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
         |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
@@ -395,7 +371,7 @@ The goal of the game is to make each number on the board equal.
   def leaderboard(conn, params) do
     wallet = get_wallet_from_session(conn)
     eligible = get_user_eligibility(wallet)
-    {proofs, beast_submissions_json} = get_proofs_and_submissions(wallet, 1, 10)
+    proofs = get_proofs(wallet, 1, 10)
 
     entries_per_page = 10
 
@@ -431,7 +407,6 @@ The goal of the game is to make each number on the board equal.
     |> assign(:wallet, wallet)
     |> assign(:eligible, eligible)
     |> assign(:submitted_proofs, Jason.encode!(proofs))
-    |> assign(:beast_submissions, beast_submissions_json)
     |> assign(:top_users, top_users)
     |> assign(:user_data, user_data)
     |> assign(:user_in_current_page, user_in_current_page?)

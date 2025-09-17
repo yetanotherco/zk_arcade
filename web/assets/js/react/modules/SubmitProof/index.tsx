@@ -16,7 +16,6 @@ type Props = {
 	batcher_url: string;
 	leaderboard_address: Address;
 	nft_contract_address: Address;
-	beast_submissions: string;
 };
 
 const SubmitModal = ({
@@ -24,7 +23,6 @@ const SubmitModal = ({
 	leaderboard_address,
 	payment_service_address,
 	batcher_url,
-	beast_submissions,
 	nft_contract_address,
 }: Omit<Props, "network">) => {
 	const { open: currentProofOpen, setOpen: currentProofSetOpen } = useModal();
@@ -64,9 +62,10 @@ const SubmitModal = ({
 					payment_service_address={payment_service_address}
 					nft_contract_address={nft_contract_address}
 					user_address={user_address}
-					userBeastSubmissions={JSON.parse(beast_submissions)}
 					proof={currentProof}
 					proofToSubmitData={null}
+					gameName={currentProof.game}
+					highest_level_reached={0}
 				/>
 			)}
 		</>
@@ -79,7 +78,6 @@ export default ({
 	user_address,
 	batcher_url,
 	leaderboard_address,
-	beast_submissions,
 	nft_contract_address,
 }: Props) => {
 	return (
@@ -91,7 +89,6 @@ export default ({
 					user_address={user_address}
 					batcher_url={batcher_url}
 					leaderboard_address={leaderboard_address}
-					beast_submissions={beast_submissions}
 					nft_contract_address={nft_contract_address}
 				/>
 			</ToastsProvider>

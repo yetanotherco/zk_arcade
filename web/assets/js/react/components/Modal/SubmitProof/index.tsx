@@ -22,12 +22,11 @@ type Props = {
 	leaderboard_address: Address;
 	nft_contract_address: Address;
 	proof?: ProofSubmission;
-	userBeastSubmissions: BeastProofClaimed[];
 	proofToSubmitData: VerificationData | null;
 	gameName?: string;
 	gameIdx?: number;
 	highest_level_reached: number;
-	currentLevelReached: number;
+	currentLevelReached?: number;
 };
 
 export type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
@@ -74,7 +73,6 @@ export const SubmitProofModal = ({
 	user_address,
 	batcher_url,
 	leaderboard_address,
-	userBeastSubmissions,
 	proofToSubmitData,
 	nft_contract_address,
 	gameName,
@@ -212,7 +210,6 @@ export const SubmitProofModal = ({
 				payment_service_addr={payment_service_address}
 				setOpen={modal.setOpen}
 				setStep={setStep}
-				userProofs={userBeastSubmissions}
 				user_address={user_address}
 				proofSubmission={proof}
 				proofStatus={proofStatus}
@@ -221,7 +218,7 @@ export const SubmitProofModal = ({
 				gameName={gameName ? gameName : proof?.game || "beast"}
 				initialGameIdx={gameIdx}
 				highest_level_reached={highest_level_reached}
-				currentLevelReached={currentLevelReached}
+				currentLevelReached={currentLevelReached ? currentLevelReached : 0}
 			/>
 		),
 		claim: () =>

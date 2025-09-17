@@ -70,7 +70,6 @@ export const SubmitProofStep = ({
 	leaderboard_address,
 	user_address,
 	payment_service_addr,
-	userProofs,
 	setOpen,
 	setStep,
 	proofSubmission,
@@ -209,14 +208,8 @@ export const SubmitProofStep = ({
 			setInvalidGameConfig(false);
 		}
 
-		const alreadySubmitted = userProofs.some(
-			p =>
-				typeof p.game_config === "string" &&
-				typeof parsed.game_config === "string" &&
-				p.game_config.toLowerCase() ===
-					parsed.game_config.toLowerCase() &&
-				p.level >= parsed.level
-		);
+		const alreadySubmitted = highest_level_reached >= parsed.level;
+		console.log({ alreadySubmitted, highest_level_reached, parsedLevel: parsed.level });
 
 		if (alreadySubmitted) {
 			setLevelAlreadyReached(true);

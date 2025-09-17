@@ -18,7 +18,7 @@ export const useParityGames = ({
 	leaderBoardContractAddress,
 	userAddress,
 }: Args) => {
-	const { currentGame, currentGameLevelCompleted } =
+	const { currentGame, nextGame, currentGameLevelCompleted } =
 		useParityLeaderboardContract({
 			contractAddress: leaderBoardContractAddress,
 			userAddress,
@@ -62,14 +62,15 @@ export const useParityGames = ({
 	} | null>(null);
 
 	useEffect(() => {
-		const endsAtTime = currentGame.game?.endsAtTime || 0;
+		const startsAtTime = nextGame.data?.startsAtTime || 0n;
 		const currentBlockTimestamp = currentBlock.data
 			? currentBlock.data.timestamp
 			: 0;
 
-		if (endsAtTime > 0 && currentBlockTimestamp) {
+		if (startsAtTime > 0 && currentBlockTimestamp) {
 			const timeRemaining =
-				Number(endsAtTime) - Number(currentBlockTimestamp);
+				Number(startsAtTime) - Number(currentBlockTimestamp);
+
 			const hours = timeRemaining / 3600;
 			const minutes = Math.floor(timeRemaining / 60);
 
@@ -78,7 +79,7 @@ export const useParityGames = ({
 				minutes,
 			});
 		}
-	}, [currentGame.data, currentBlock.data]);
+	}, [nextGame.data, currentGame.data, currentBlock.data]);
 
 	useEffect(() => {
 		if (!gameConfig || !userAddress) {

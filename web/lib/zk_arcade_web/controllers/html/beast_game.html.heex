@@ -23,7 +23,7 @@
              <%= for %{text: text, link: link} <- @game.acknowledgments do %>
              <div class="flex flex-row flex-wrap">
                 <p class="text-md mr-1 text-text-200"><%= text %>:</p>
-                <a href={link} class="text-md mb-1 text-blue hover:underline" target="_blank" rel="noopener noreferrer"><%= link %></a>
+                <a href={link} class="text-md mb-1 text-blue break-all hover:underline" target="_blank" rel="noopener noreferrer"><%= link %></a>
             </div>
             <% end %>
             <img class="rounded max-h-[400px] mt-8" src={"/images/beast_gameplay.gif"} />

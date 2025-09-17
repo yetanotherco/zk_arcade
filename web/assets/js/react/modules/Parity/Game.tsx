@@ -64,6 +64,13 @@ export const Game = ({
 				: [0, 0, 0, 0, 0, 0, 0, 0, 0],
 	});
 
+	const [hasPlayedTutorial, setHasPlayedTutorial] = useState(false);
+
+	useEffect(() => {
+		if (localStorage.getItem("parity-tutorial-played") === "true")
+			setHasPlayedTutorial(true);
+	}, []);
+
 	const saveLevelData = useCallback(() => {
 		const stored = localStorage.getItem("parity-game-data");
 		const gameData: { [key: string]: GameStatus } = stored
@@ -144,7 +151,11 @@ export const Game = ({
 					disabledTextOnHover="You need to connect your wallet first"
 					onClick={() => {
 						setCurrentLevel(null);
-						setGameState("running");
+						if (!hasPlayedTutorial) {
+							setGameState("tutorial");
+						} else {
+							setGameState("running");
+						}
 					}}
 				>
 					Play
@@ -167,7 +178,12 @@ export const Game = ({
 				</Button>
 			</div>
 		),
-		tutorial: <ParityTutorial setGameState={setGameState} />,
+		tutorial: (
+			<ParityTutorial
+				setHasPlayedTutorial={setHasPlayedTutorial}
+				setGameState={setGameState}
+			/>
+		),
 		running: (
 			<PlayState
 				levels={levels}
@@ -205,6 +221,7 @@ export const Game = ({
 				timeRemaining={timeRemaining}
 				nft_contract_address={nft_contract_address}
 				gameIdx={currentGameIdx}
+				setPlayerLevelReached={setPlayerLevelReached}
 			/>
 		),
 	};

@@ -19,7 +19,7 @@ export const useProofSentMessageReader = () => {
 		if (message == "proof-sent") {
 			addToast({
 				title: "Proof sent to Aligned",
-				desc: "The proof was sent and it will be verified soon. You can check the status of the proof in your profile",
+				desc: "The proof was sent and it will be verified. You can check the proof status in your profile",
 				type: "success",
 			});
 		}

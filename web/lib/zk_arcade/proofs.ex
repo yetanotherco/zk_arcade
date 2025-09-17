@@ -190,7 +190,15 @@ defmodule ZkArcade.Proofs do
     downcased_addr = String.downcase(address)
 
     Proof
-      |> where([p], p.wallet_address == ^downcased_addr and p.game_idx == ^game_idx and p.game == ^game and p.status not in ["failed"])
+      |> where(
+        [p],
+        p.wallet_address == ^downcased_addr and p.game_idx == ^game_idx and p.game == ^game and
+          (
+            (p.status not in ["failed", "pending"]) or
+            # This means we only consider those pending proofs that were submitted in the last 6 hours
+            (p.status == "pending" and p.inserted_at > DateTime.add(DateTime.utc_now(), -21600, :second))
+          )
+      )
       |> order_by([p], desc: p.level_reached)
       |> limit(1)
       |> Repo.one()

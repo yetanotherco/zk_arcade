@@ -11,7 +11,7 @@ const tutorialText = [
 		button: "Okay...",
 	},
 	{
-		text: "One number is always highlighted. You can move the highlight with WASD keys or by clicking a neighboring tile.",
+		text: "You can move the active tile using the WASD keys or by clicking an adjacent tile.",
 		button: "Sounds easy",
 	},
 	{

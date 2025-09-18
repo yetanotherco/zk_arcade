@@ -216,7 +216,7 @@ export const SubmitProofModal = ({
 				gameName={gameName ? gameName : proof?.game || "beast"}
 				initialGameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
-				currentLevelReached={currentLevelReached ? currentLevelReached : 0}
+				currentLevelReached={currentLevelReached ?? 0}
 			/>
 		),
 		claim: () =>

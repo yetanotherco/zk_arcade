@@ -67,6 +67,7 @@ const SubmitModal = ({
 					userBeastSubmissions={JSON.parse(beast_submissions)}
 					proof={currentProof}
 					proofToSubmitData={null}
+					gameIdx={currentProof.game_idx}
 				/>
 			)}
 		</>

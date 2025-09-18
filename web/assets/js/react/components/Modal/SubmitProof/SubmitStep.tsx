@@ -78,7 +78,7 @@ export const SubmitProofStep = ({
 	proofToSubmitData,
 	gameName,
 	initialGameIdx,
-	highest_level_reached,
+	highestLevelReached,
 	currentLevelReached = 0,
 }: {
 	batcher_url: string;
@@ -93,7 +93,7 @@ export const SubmitProofStep = ({
 	proofToSubmitData: VerificationData | null;
 	gameName: string;
 	initialGameIdx?: number;
-	highest_level_reached: number;
+	highestLevelReached: number;
 	currentLevelReached: number;
 }) => {
 	const chainId = useChainId();
@@ -208,7 +208,7 @@ export const SubmitProofStep = ({
 			setInvalidGameConfig(false);
 		}
 
-		const alreadySubmitted = highest_level_reached >= parsed.level;
+		const alreadySubmitted = highestLevelReached >= parsed.level;
 
 		if (alreadySubmitted) {
 			setLevelAlreadyReached(true);
@@ -564,7 +564,7 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		if (!proofToSubmitData) return;
-		if (highest_level_reached >= currentLevelReached) {
+		if (highestLevelReached >= currentLevelReached) {
 			setLevelAlreadyReached(true);
 			return;
 		}

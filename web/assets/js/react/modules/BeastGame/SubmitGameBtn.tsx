@@ -42,7 +42,7 @@ const SubmitModal = ({
 				proofToSubmitData={null}
 				gameName="beast"
 				nft_contract_address={nft_contract_address}
-				highest_level_reached={highest_level_reached}
+				highestLevelReached={highest_level_reached}
 			/>
 		</>
 	);

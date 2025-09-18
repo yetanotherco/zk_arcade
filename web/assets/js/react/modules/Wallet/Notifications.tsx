@@ -72,7 +72,7 @@ const NotificationEntry = ({
 				proof={proof}
 				proofToSubmitData={null}
 				nft_contract_address={nft_contract_address}
-				highest_level_reached={0}
+				highestLevelReached={0}
 			/>
 		</>
 	);

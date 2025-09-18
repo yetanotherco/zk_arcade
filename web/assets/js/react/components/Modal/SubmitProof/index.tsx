@@ -25,7 +25,7 @@ type Props = {
 	proofToSubmitData: VerificationData | null;
 	gameName?: string;
 	gameIdx?: number;
-	highest_level_reached: number;
+	highestLevelReached: number;
 	currentLevelReached?: number;
 };
 
@@ -77,7 +77,7 @@ export const SubmitProofModal = ({
 	nft_contract_address,
 	gameName,
 	gameIdx,
-	highest_level_reached,
+	highestLevelReached,
 	currentLevelReached,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
@@ -215,7 +215,7 @@ export const SubmitProofModal = ({
 				proofToSubmitData={proofToSubmitData}
 				gameName={gameName ? gameName : proof?.game || "beast"}
 				initialGameIdx={gameIdx}
-				highest_level_reached={highest_level_reached}
+				highestLevelReached={highestLevelReached}
 				currentLevelReached={currentLevelReached ? currentLevelReached : 0}
 			/>
 		),

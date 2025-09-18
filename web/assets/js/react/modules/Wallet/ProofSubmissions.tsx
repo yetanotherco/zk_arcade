@@ -63,7 +63,7 @@ const Proof = ({
 				proofToSubmitData={null}
 				nft_contract_address={nft_contract_address}
 				gameIdx={proof.game_idx}
-				highest_level_reached={highest_level_reached}
+				highestLevelReached={highest_level_reached}
 				gameName={proof.game}
 			/>
 		</>

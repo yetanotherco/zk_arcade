@@ -109,7 +109,7 @@ const Entry = ({
 				proofToSubmitData={null}
 				nft_contract_address={nft_contract_address}
 				gameIdx={proof.game_idx}
-				highest_level_reached={0}
+				highestLevelReached={0}
 			/>
 		</>
 	);

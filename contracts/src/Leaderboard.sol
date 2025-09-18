@@ -16,13 +16,18 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     struct BeastGame {
         uint256 endsAtTime;
+        // Note: each level takes 4 bytes (i.e 32 bits) in total we can have as much as 8 levels per config
+        // The first byte represent the number of blocks in the map
+        // The second byte represent the number of static blocks in the map
+        // The third byte represent the number of common beasts in the map
+        // The fourth byte represent the number of super beasts in the map
         uint256 gameConfig;
         uint256 startsAtTime;
     }
 
     struct ParityGame {
         uint256 endsAtTime;
-        // Note: each level takes 10 bytes (i.e 80 bits)
+        // Note: each level takes 10 bytes (i.e 80 bits) in total we can have as much as 3 levels per config
         // The first bytes for the position (first 4 bits for x, last 4 bits for y)
         // And the rest 9 bytes represent the number in the board
         uint256 gameConfig;

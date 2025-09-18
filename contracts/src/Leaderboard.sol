@@ -7,7 +7,6 @@ import {ZkArcadeNft} from "./ZkArcadeNft.sol";
 import {ZkArcadePublicNft} from "./ZkArcadePublicNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
-
     // ======== Storage ========
 
     address public alignedServiceManager;
@@ -215,14 +214,16 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert GameEnded();
         }
 
-        // The prover only commits the game config up to the level it reached
-        // So we shift to compare only that part
-        // Each level takes 10 bytes -> 80 bits
+        // The circom circuit rebuilds the gameConfig only up to the level reached.
+        // For the remaining levels it inserts zeroes (this is because of a limitation in the prover circuit).
+        // As a result, only the first `levelCompleted` levels contain meaningful data about the gameConfig.
+        // To compare the gameconfig, we right-shift to discard the zero-filled remainder.
+        // See games/parity/circuits/parity.circom for the circuit definition.
         uint256 shiftAmount = 256 - (80 * (levelCompleted));
-        uint256 currentGameConfigUntil = currentGame.gameConfig >> shiftAmount;
-        uint256 gameConfigUntil = gameConfig >> shiftAmount;
+        uint256 currentTruncatedConfig = currentGame.gameConfig >> shiftAmount;
+        uint256 newTruncatedConfig = gameConfig >> shiftAmount;
 
-        if (currentGameConfigUntil != gameConfigUntil) {
+        if (currentTruncatedConfig != newTruncatedConfig) {
             revert InvalidGame(currentGame.gameConfig, gameConfig);
         }
 
@@ -399,14 +400,14 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
                 return true;
             }
         }
-        
+
         if (zkArcadePublicNft != address(0)) {
             ZkArcadePublicNft publicNftContract = ZkArcadePublicNft(zkArcadePublicNft);
             if (publicNftContract.balanceOf(user) > 0) {
                 return true;
             }
         }
-        
+
         return false;
     }
 }

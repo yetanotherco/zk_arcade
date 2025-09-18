@@ -137,7 +137,7 @@ export const PlayState = ({
 
 			{currentLevel === null &&
 				(timeRemaining ? (
-					<p>
+					<p className="mb-2">
 						Levels renew in{" "}
 						<span className="text-accent-100">
 							{timeRemaining.hours > 0
@@ -148,6 +148,11 @@ export const PlayState = ({
 				) : (
 					<span className="text-accent-100">loading...</span>
 				))}
+			{currentLevel === null && (
+				<Button variant="arcade" onClick={() => setGameState("home")}>
+					Home
+				</Button>
+			)}
 		</div>
 	);
 };

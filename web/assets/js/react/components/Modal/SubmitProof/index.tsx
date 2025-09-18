@@ -100,8 +100,6 @@ export const SubmitProofModal = ({
 		userAddress: user_address,
 	});
 
-	useProofSentMessageReader();
-
 	const updateState = useCallback(() => {
 		if (proof) {
 			if (

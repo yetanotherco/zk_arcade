@@ -150,7 +150,7 @@ defmodule ZkArcadeWeb.ProofController do
                   "Proof created successfully with ID: #{pending_proof.id} with pending state"
                 )
 
-                submit_to_batcher(submit_proof_message, address, pending_proof.id)
+                submit_to_batcher(submit_proof_message, address, pending_proof.id, false)
               end)
 
             case Task.yield(task, 10_000) do
@@ -219,7 +219,7 @@ defmodule ZkArcadeWeb.ProofController do
     uri.path <> "?" <> new_query
   end
 
-  defp submit_to_batcher(submit_proof_message, address, pending_proof_id) do
+  defp submit_to_batcher(submit_proof_message, address, pending_proof_id, is_retry) do
     case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
       {:ok, {:batch_inclusion, batch_data}} ->
         case Proofs.update_proof_status_submitted(pending_proof_id, batch_data) do
@@ -237,11 +237,16 @@ defmodule ZkArcadeWeb.ProofController do
                 end
               {:error, reason} ->
                 Logger.error("Error: #{inspect(reason)}")
-                case Proofs.update_proof_status_failed(updated_proof.id) do
-                  {:ok, _} ->
-                    Logger.info("Proof #{updated_proof.id} status updated to failed")
-                  {:error, reason} ->
-                    Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
+                case is_retry do
+                  true ->
+                    Logger.error("Retry failed with reason #{inspect(reason)}")
+                  false ->
+                    case Proofs.update_proof_status_failed(updated_proof.id) do
+                      {:ok, _} ->
+                        Logger.info("Proof #{updated_proof.id} status updated to failed")
+                      {:error, reason} ->
+                        Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
+                    end
                 end
               nil ->
                 Logger.error("Error without reason")
@@ -306,15 +311,6 @@ defmodule ZkArcadeWeb.ProofController do
               {:ok, true} ->
                 Logger.info("Message decoded and signature verified. Retrying proof submission.")
 
-                case Registry.lookup(ZkArcade.ProofRegistry, proof.id) do
-                  [{pid, _value}] when is_pid(pid) ->
-                    Logger.info("Killing task for proof #{proof.id}")
-                    Process.exit(pid, :kill)
-
-                  [] ->
-                    Logger.error("No running task found for proof #{proof.id}")
-                end
-
                 max_fee =
                   submit_proof_message["verificationData"]["maxFee"]
 
@@ -326,13 +322,14 @@ defmodule ZkArcadeWeb.ProofController do
                     Logger.error("Failed to update proof #{proof.id} status: #{inspect(changeset)}")
                 end
 
+                proof_retry_pid = proof.id + "-retry-" + Integer.to_string(proof.times_retried)
                 task =
                   Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-                    Registry.register(ZkArcade.ProofRegistry, proof.id, nil)
+                    Registry.register(ZkArcade.ProofRegistry, proof_retry_pid, nil)
 
-                    Logger.info("Retrying proof submission for ID: #{proof.id}")
+                    Logger.info("Retrying proof submission for ID: #{proof_retry_pid}")
 
-                    submit_to_batcher(submit_proof_message, address, proof.id)
+                    submit_to_batcher(submit_proof_message, address, proof.id, true)
                   end)
 
                 case Task.yield(task, 10_000) do
@@ -351,7 +348,16 @@ defmodule ZkArcadeWeb.ProofController do
                     |> redirect(to: build_redirect_url(conn, "proof-failed", proof.id))
 
                   nil ->
-                    Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                    Logger.info("Task is taking longer than 10 seconds, proceeding and removing the previous task.")
+
+                    case Registry.lookup(ZkArcade.ProofRegistry, proof.id) do
+                      [{pid, _value}] when is_pid(pid) ->
+                        Logger.info("Killing task for proof #{proof.id}")
+                        Process.exit(pid, :kill)
+
+                      [] ->
+                        Logger.error("No running task found for proof #{proof.id}")
+                    end
 
                     conn
                     |> put_flash(:info, "Proof is being submitted to batcher.")

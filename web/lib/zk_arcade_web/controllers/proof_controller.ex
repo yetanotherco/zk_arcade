@@ -153,7 +153,7 @@ defmodule ZkArcadeWeb.ProofController do
                 submit_to_batcher(submit_proof_message, address, pending_proof.id)
               end)
 
-            case Task.yield(task, 10_000) do
+            case Task.yield(task, 5_000) do
               {:ok, {:ok, result}} ->
                 Logger.info("Task completed successfully: #{inspect(result)}")
 
@@ -169,7 +169,7 @@ defmodule ZkArcadeWeb.ProofController do
                 |> redirect(to: build_redirect_url(conn, "proof-failed", pending_proof.id))
 
               nil ->
-                Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                Logger.info("Task is taking longer than 5 seconds, proceeding.")
 
                 conn
                 |> put_flash(:info, "Proof is being submitted to batcher.")
@@ -335,7 +335,7 @@ defmodule ZkArcadeWeb.ProofController do
                     submit_to_batcher(submit_proof_message, address, proof.id)
                   end)
 
-                case Task.yield(task, 10_000) do
+                case Task.yield(task, 5_000) do
                   {:ok, {:ok, result}} ->
                     Logger.info("Task completed successfully: #{inspect(result)}")
 
@@ -351,7 +351,7 @@ defmodule ZkArcadeWeb.ProofController do
                     |> redirect(to: build_redirect_url(conn, "proof-failed", proof.id))
 
                   nil ->
-                    Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                    Logger.info("Task is taking longer than 5 seconds, proceeding.")
 
                     conn
                     |> put_flash(:info, "Proof is being submitted to batcher.")

@@ -581,7 +581,7 @@ export const SubmitProofStep = ({
 						setIsAnimating(false);
 						return 100;
 					}
-					return prev + 1;
+					return prev + 2;
 				});
 			}, 100);
 		} else {

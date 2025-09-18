@@ -79,7 +79,7 @@ export const SubmitProofStep = ({
 	gameName,
 	initialGameIdx,
 	highestLevelReached,
-	currentLevelReached = 0,
+	currentLevelReached,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -93,8 +93,8 @@ export const SubmitProofStep = ({
 	proofToSubmitData: VerificationData | null;
 	gameName: string;
 	initialGameIdx?: number;
-	highestLevelReached: number;
-	currentLevelReached: number;
+	highestLevelReached?: number;
+	currentLevelReached?: number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
@@ -208,7 +208,7 @@ export const SubmitProofStep = ({
 			setInvalidGameConfig(false);
 		}
 
-		const alreadySubmitted = highestLevelReached >= parsed.level;
+		const alreadySubmitted = (highestLevelReached ?? 0) >= parsed.level;
 
 		if (alreadySubmitted) {
 			setLevelAlreadyReached(true);
@@ -564,7 +564,7 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		if (!proofToSubmitData) return;
-		if (highestLevelReached >= currentLevelReached) {
+		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
 			setLevelAlreadyReached(true);
 			return;
 		}

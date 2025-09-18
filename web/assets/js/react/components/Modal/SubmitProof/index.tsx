@@ -25,7 +25,7 @@ type Props = {
 	proofToSubmitData: VerificationData | null;
 	gameName?: string;
 	gameIdx?: number;
-	highestLevelReached: number;
+	highestLevelReached?: number;
 	currentLevelReached?: number;
 };
 
@@ -216,7 +216,7 @@ export const SubmitProofModal = ({
 				gameName={gameName ? gameName : proof?.game || "beast"}
 				initialGameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
-				currentLevelReached={currentLevelReached ?? 0}
+				currentLevelReached={currentLevelReached}
 			/>
 		),
 		claim: () =>

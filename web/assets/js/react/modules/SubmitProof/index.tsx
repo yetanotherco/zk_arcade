@@ -65,7 +65,6 @@ const SubmitModal = ({
 					proof={currentProof}
 					proofToSubmitData={null}
 					gameName={currentProof.game}
-					highestLevelReached={0}
 				/>
 			)}
 		</>

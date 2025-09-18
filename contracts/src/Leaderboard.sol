@@ -222,11 +222,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert GameEnded();
         }
 
-        // The circom circuit rebuilds the gameConfig only up to the level reached.
-        // For the remaining levels it inserts zeroes (this is because of a limitation in the prover circuit).
+        // The circom program proves the user knows a solution for N (3) parity games.
+        // In the case where the games played are less,
+        // all the associated public inputs for non played levels are set on 0
         // As a result, only the first `levelCompleted` levels contain meaningful data about the gameConfig.
         // To compare the gameconfig, we right-shift to discard the zero-filled remainder.
-        // See games/parity/circuits/parity.circom for the circuit definition.
         uint256 shiftAmount = 256 - (80 * (levelCompleted));
         uint256 currentTruncatedConfig = currentGame.gameConfig >> shiftAmount;
         uint256 newTruncatedConfig = gameConfig >> shiftAmount;

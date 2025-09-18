@@ -209,12 +209,7 @@ template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
 
         level_completed_sum = level_completed_sum + 1 - level_completed[i].out;
 
-        // In order to prove that we are not lying about the initial boards,
-        // we reconstruct the gameConfig. This can only be done up to the
-        // level that was actually reached. For the following levels we
-        // can’t reconstruct the boards (there is no straightforward way
-        // to pass them without also passing the solution), so we pass
-        // arrays filled with zeroes instead.
+        // Enforce initial board state
         var posByte = ((userPositions[i][0][0] & 0x0F) << 4) | (userPositions[i][0][1] & 0x0F);
         acc = (acc << 8) + posByte;
 

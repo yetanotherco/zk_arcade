@@ -222,11 +222,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert GameEnded();
         }
 
-        // The circom program proves the user knows a solution for N (3) parity games.
-        // In the case where the games played are less,
-        // all the associated public inputs for non played levels are set on 0
-        // As a result, only the first `levelCompleted` levels contain meaningful data about the gameConfig.
-        // To compare the gameconfig, we right-shift to discard the zero-filled remainder.
+        // The circom program proves the user knows solutions to (3) parity games. 
+        // When fewer games are played, all public inputs for unplayed levels are set to 0. 
+        // This means only the first `levelCompleted` levels contain meaningful gameConfig data. 
+        // To compare configurations, we right-shift the data to discard the zero-filled remainder.
         uint256 shiftAmount = 256 - (80 * (levelCompleted));
         uint256 currentTruncatedConfig = currentGame.gameConfig >> shiftAmount;
         uint256 newTruncatedConfig = gameConfig >> shiftAmount;

@@ -42,11 +42,6 @@ const GAMES: Game[] = [
 		name: "Parity",
 		cover: "/images/parity.jpg",
 	},
-	{
-		id: "Sudoku",
-		name: "Sudoku",
-		cover: "/images/sudoku.jpg",
-	},
 ];
 
 const getGameData = (id: GameId) => GAMES.find(game => game.id === id);

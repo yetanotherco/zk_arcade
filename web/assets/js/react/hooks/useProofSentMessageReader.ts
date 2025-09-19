@@ -11,7 +11,7 @@ export const useProofSentMessageReader = () => {
 		if (message == "proof-failed") {
 			addToast({
 				title: "Proof failed",
-				desc: "The proof was sent but the verification failed",
+				desc: "The proof submission failed. Please try again later.",
 				type: "error",
 			});
 		}

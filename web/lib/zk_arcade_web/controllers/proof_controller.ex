@@ -346,7 +346,7 @@ defmodule ZkArcadeWeb.ProofController do
 
                     conn
                     |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
-                    |> redirect(to: build_redirect_url(conn, "bump-failed"))
+                    |> redirect(to: build_redirect_url(conn, "bump-failed", proof.id))
 
                   nil ->
                     Logger.info("Task is taking longer than 10 seconds, proceeding and removing the previous task.")

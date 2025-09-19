@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PARITY_MAX_MOVEMENTS } from "../../constants/parity";
 
-type Position = { row: number; col: number };
+export type Position = { row: number; col: number };
 
 type UseParityControlsArgs = {
 	initialPosition: Position;
@@ -39,6 +39,53 @@ export const useParityControls = ({
 		setHasWon(false);
 	};
 
+	const updatePos = ({ dr, dc }: { dr: number; dc: number }) => {
+		setPosition(prev => {
+			const newRow = prev.row + dr;
+			const newCol = prev.col + dc;
+			if (newRow < 0 || newRow >= size || newCol < 0 || newCol >= size) {
+				return prev; // invalid move
+			}
+
+			if (userPositions.length > PARITY_MAX_MOVEMENTS) {
+				return prev; // max moves reached
+			}
+
+			setValues(prevVals => {
+				const prevAllEqual = prevVals.every(v => v === prevVals[0]);
+				if (prevAllEqual) {
+					return prevVals;
+				}
+
+				const idx = newRow * size + newCol;
+				const next = prevVals.slice();
+				next[idx] = (next[idx] ?? 0) + 1;
+
+				// check win: all values equal
+				const allEqual = next.every(v => v === next[0]);
+				if (allEqual) setHasWon(true);
+
+				if (userPositions.length === 0) {
+					setUserPositions(prevPos => [
+						...prevPos,
+						[prev.col, prev.row],
+					]);
+					setLevelBoards(prevBoards => [
+						...prevBoards,
+						prevVals.slice(),
+					]);
+				}
+
+				setUserPositions(prevPos => [...prevPos, [newCol, newRow]]);
+				setLevelBoards(prevBoards => [...prevBoards, next.slice()]);
+
+				return next;
+			});
+
+			return { row: newRow, col: newCol };
+		});
+	};
+
 	useEffect(() => {
 		const onKeyDown = (e: KeyboardEvent) => {
 			const k = e.key.toLowerCase();
@@ -59,60 +106,15 @@ export const useParityControls = ({
 
 			const [dr, dc] = keyToDelta[k];
 
-			setPosition(prev => {
-				const newRow = prev.row + dr;
-				const newCol = prev.col + dc;
-				if (
-					newRow < 0 ||
-					newRow >= size ||
-					newCol < 0 ||
-					newCol >= size
-				) {
-					return prev; // invalid move
-				}
-
-				if (userPositions.length > PARITY_MAX_MOVEMENTS) {
-					return prev; // max moves reached
-				}
-
-				setValues(prevVals => {
-					const prevAllEqual = prevVals.every(v => v === prevVals[0]);
-					if (prevAllEqual) {
-						return prevVals;
-					}
-
-					const idx = newRow * size + newCol;
-					const next = prevVals.slice();
-					next[idx] = (next[idx] ?? 0) + 1;
-
-					// check win: all values equal
-					const allEqual = next.every(v => v === next[0]);
-					if (allEqual) setHasWon(true);
-
-					if (userPositions.length === 0) {
-						setUserPositions(prevPos => [
-							...prevPos,
-							[prev.col, prev.row],
-						]);
-						setLevelBoards(prevBoards => [
-							...prevBoards,
-							prevVals.slice(),
-						]);
-					}
-
-					setUserPositions(prevPos => [...prevPos, [newCol, newRow]]);
-					setLevelBoards(prevBoards => [...prevBoards, next.slice()]);
-
-					return next;
-				});
-
-				return { row: newRow, col: newCol };
+			updatePos({
+				dr,
+				dc,
 			});
 		};
 
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [size, userPositions.length, levelBoards.length]);
+	}, [size, updatePos, userPositions.length, levelBoards.length]);
 
 	return {
 		values,
@@ -126,5 +128,6 @@ export const useParityControls = ({
 		setValues,
 		setPosition,
 		setHasWon,
+		updatePos,
 	};
 };

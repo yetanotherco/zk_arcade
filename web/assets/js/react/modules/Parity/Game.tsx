@@ -55,6 +55,7 @@ export const Game = ({
 		setPosition,
 		setHasWon,
 		startLevel,
+		updatePos,
 	} = useParityControls({
 		initialPosition:
 			currentLevel !== null
@@ -203,6 +204,7 @@ export const Game = ({
 				setHasWon={setHasWon}
 				saveLevelData={saveLevelData}
 				user_positions={userPositions}
+				updatePos={updatePos}
 			/>
 		),
 		"after-level": (

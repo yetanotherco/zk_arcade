@@ -11,7 +11,7 @@ const tutorialText = [
 		button: "Okay...",
 	},
 	{
-		text: "One of the numbers is always selected. This number can be moved by using WASD",
+		text: "You can move the active tile using the WASD keys or by clicking an adjacent tile.",
 		button: "Sounds easy",
 	},
 	{
@@ -43,7 +43,7 @@ const TutorialText = ({
 };
 
 const BoardTutorial = ({ goHome }: { goHome: () => void }) => {
-	const { positionIdx, values, userPositions, hasWon, reset } =
+	const { positionIdx, values, userPositions, hasWon, reset, updatePos } =
 		useParityControls({
 			initialPosition: { col: 0, row: 0 },
 			initialValues: [1, 0, 0, 1, 1, 0, 1, 1, 0],
@@ -68,6 +68,7 @@ const BoardTutorial = ({ goHome }: { goHome: () => void }) => {
 				reset={reset}
 				user_positions={userPositions}
 				home={() => goHome()}
+				updatePos={updatePos}
 			/>
 		)
 	);

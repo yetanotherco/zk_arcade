@@ -150,7 +150,7 @@ defmodule ZkArcadeWeb.ProofController do
                   "Proof created successfully with ID: #{pending_proof.id} with pending state"
                 )
 
-                submit_to_batcher(submit_proof_message, address, pending_proof.id, false)
+                submit_to_batcher(submit_proof_message, address, pending_proof.id)
               end)
 
             case Task.yield(task, 10_000) do
@@ -222,7 +222,15 @@ defmodule ZkArcadeWeb.ProofController do
     uri.path <> "?" <> new_query
   end
 
-  defp submit_to_batcher(submit_proof_message, address, pending_proof_id, is_retry) do
+  defp submit_to_batcher(submit_proof_message, address, pending_proof_id) do
+    do_submit_to_batcher(submit_proof_message, address, pending_proof_id, :initial)
+  end
+
+  defp retry_submit_to_batcher(submit_proof_message, address, pending_proof_id) do
+    do_submit_to_batcher(submit_proof_message, address, pending_proof_id, :retry)
+  end
+
+  defp do_submit_to_batcher(submit_proof_message, address, pending_proof_id, attempt_type) do
     case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
       {:ok, {:batch_inclusion, batch_data}} ->
         case Proofs.update_proof_status_submitted(pending_proof_id, batch_data) do
@@ -240,17 +248,7 @@ defmodule ZkArcadeWeb.ProofController do
                 end
               {:error, reason} ->
                 Logger.error("Error: #{inspect(reason)}")
-                case is_retry do
-                  true ->
-                    Logger.error("Retry failed with reason #{inspect(reason)}")
-                  false ->
-                    case Proofs.update_proof_status_failed(updated_proof.id) do
-                      {:ok, _} ->
-                        Logger.info("Proof #{updated_proof.id} status updated to failed")
-                      {:error, reason} ->
-                        Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
-                    end
-                end
+                handle_verification_failure(updated_proof.id, reason, attempt_type)
               nil ->
                 Logger.error("Error without reason")
             end
@@ -264,25 +262,40 @@ defmodule ZkArcadeWeb.ProofController do
 
       {:error, reason} ->
         Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
+        handle_batcher_failure(pending_proof_id, reason, attempt_type)
+    end
+  end
 
-        case is_retry do
-          true ->
-            Logger.info("Retry failed with reason #{inspect(reason)}")
-            {:error, reason}
-          false ->
-            case Proofs.update_proof_status_failed(pending_proof_id) do
-              {:ok, _} ->
-                Logger.info("Proof #{pending_proof_id} status updated to failed")
-                {:error, reason}
+  defp handle_verification_failure(proof_id, reason, :retry) do
+    Logger.error("Retry failed with reason #{inspect(reason)}")
+  end
 
-              {:error, changeset} ->
-                Logger.error(
-                  "Failed to update proof #{pending_proof_id} status: #{inspect(changeset)}"
-                )
+  defp handle_verification_failure(proof_id, reason, :initial) do
+    case Proofs.update_proof_status_failed(proof_id) do
+      {:ok, _} ->
+        Logger.info("Proof #{proof_id} status updated to failed")
+      {:error, reason} ->
+        Logger.error("Failed to update proof #{proof_id} status: #{inspect(reason)}")
+    end
+  end
 
-                {:error, reason}
-            end
-        end
+  defp handle_batcher_failure(proof_id, reason, :retry) do
+    Logger.info("Retry failed with reason #{inspect(reason)}")
+    {:error, reason}
+  end
+
+  defp handle_batcher_failure(proof_id, reason, :initial) do
+    case Proofs.update_proof_status_failed(proof_id) do
+      {:ok, _} ->
+        Logger.info("Proof #{proof_id} status updated to failed")
+        {:error, reason}
+
+      {:error, changeset} ->
+        Logger.error(
+          "Failed to update proof #{proof_id} status: #{inspect(changeset)}"
+        )
+
+        {:error, reason}
     end
   end
 
@@ -330,7 +343,7 @@ defmodule ZkArcadeWeb.ProofController do
 
                     Logger.info("Retrying proof submission for ID: #{proof_retry_pid}")
 
-                    submit_to_batcher(submit_proof_message, address, proof.id, true)
+                    retry_submit_to_batcher(submit_proof_message, address, proof.id)
                   end)
 
                 case Task.yield(task, 10_000) do

@@ -348,15 +348,6 @@ defmodule ZkArcadeWeb.ProofController do
                   nil ->
                     Logger.info("Task is taking longer than 10 seconds, proceeding and removing the previous task.")
 
-                    case Registry.lookup(ZkArcade.ProofRegistry, proof.id) do
-                      [{pid, _value}] when is_pid(pid) ->
-                        Logger.info("Killing task for proof #{proof.id}")
-                        Process.exit(pid, :kill)
-
-                      [] ->
-                        Logger.error("No running task found for proof #{proof.id}")
-                    end
-
                     case Proofs.update_proof_retry(proof.id, max_fee) do
                       {:ok, _} ->
                         Logger.info("Proof #{proof.id} updated before retrying")

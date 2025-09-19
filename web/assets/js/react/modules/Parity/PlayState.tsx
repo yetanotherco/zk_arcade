@@ -143,7 +143,7 @@ export const PlayState = ({
 			{currentLevel === null &&
 				(timeRemaining ? (
 					<p>
-						Daily Quest renews in{" "}
+						Daily Quests renew in{" "}
 						<span className="text-accent-100">
 							{timeRemaining.hours > 0
 								? `${timeRemaining.hours} hours`

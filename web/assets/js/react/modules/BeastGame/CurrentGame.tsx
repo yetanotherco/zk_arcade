@@ -119,7 +119,7 @@ const CurrentBeastGameComponent = ({
 						</div>
 
 						<p className="text-lg text-text-200 text-center">
-							Daily Quest renews in{" "}
+							Daily Quests renew in{" "}
 							{timeRemaining ? (
 								<span className="text-accent-100">
 									{timeRemaining.hours > 0

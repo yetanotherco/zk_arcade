@@ -320,14 +320,6 @@ defmodule ZkArcadeWeb.ProofController do
                 max_fee =
                   submit_proof_message["verificationData"]["maxFee"]
 
-                case Proofs.update_proof_retry(proof.id, max_fee) do
-                  {:ok, _} ->
-                    Logger.info("Proof #{proof.id} updated before retrying")
-
-                  {:error, changeset} ->
-                    Logger.error("Failed to update proof #{proof.id} status: #{inspect(changeset)}")
-                end
-
                 proof_retry_pid = proof.id <> "-" <> Integer.to_string(proof.times_retried)
                 task =
                   Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
@@ -363,6 +355,14 @@ defmodule ZkArcadeWeb.ProofController do
 
                       [] ->
                         Logger.error("No running task found for proof #{proof.id}")
+                    end
+
+                    case Proofs.update_proof_retry(proof.id, max_fee) do
+                      {:ok, _} ->
+                        Logger.info("Proof #{proof.id} updated before retrying")
+
+                      {:error, changeset} ->
+                        Logger.error("Failed to update proof #{proof.id} status: #{inspect(changeset)}")
                     end
 
                     conn

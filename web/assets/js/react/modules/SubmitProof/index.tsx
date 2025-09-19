@@ -65,6 +65,7 @@ const SubmitModal = ({
 					proof={currentProof}
 					proofToSubmitData={null}
 					gameName={currentProof.game}
+					gameIdx={currentProof.game_idx}
 				/>
 			)}
 		</>

@@ -7,7 +7,6 @@ import {ZkArcadeNft} from "./ZkArcadeNft.sol";
 import {ZkArcadePublicNft} from "./ZkArcadePublicNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
-
     // ======== Storage ========
 
     address public alignedServiceManager;
@@ -17,12 +16,20 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     struct BeastGame {
         uint256 endsAtTime;
+        // Note: each level takes 4 bytes (i.e 32 bits) in total we can have as much as 8 levels per config
+        // The first byte represent the number of blocks in the map
+        // The second byte represent the number of static blocks in the map
+        // The third byte represent the number of common beasts in the map
+        // The fourth byte represent the number of super beasts in the map
         uint256 gameConfig;
         uint256 startsAtTime;
     }
 
     struct ParityGame {
         uint256 endsAtTime;
+        // Note: each level takes 10 bytes (i.e 80 bits) in total we can have as much as 3 levels per config
+        // The first byte is for the position (first 4 bits for x, last 4 bits for y)
+        // And the rest 9 bytes represent the number in the board
         uint256 gameConfig;
         uint256 startsAtTime;
     }
@@ -215,14 +222,15 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert GameEnded();
         }
 
-        // The prover only commits the game config up to the level it reached
-        // So we shift to compare only that part
-        // Each level takes 10 bytes -> 80 bits
+        // The circom program proves the user knows solutions to (3) parity games. 
+        // When fewer games are played, all public inputs for unplayed levels are set to 0. 
+        // This means only the first `levelCompleted` levels contain meaningful gameConfig data. 
+        // To compare configurations, we right-shift the data to discard the zero-filled remainder.
         uint256 shiftAmount = 256 - (80 * (levelCompleted));
-        uint256 currentGameConfigUntil = currentGame.gameConfig >> shiftAmount;
-        uint256 gameConfigUntil = gameConfig >> shiftAmount;
+        uint256 currentTruncatedConfig = currentGame.gameConfig >> shiftAmount;
+        uint256 newTruncatedConfig = gameConfig >> shiftAmount;
 
-        if (currentGameConfigUntil != gameConfigUntil) {
+        if (currentTruncatedConfig != newTruncatedConfig) {
             revert InvalidGame(currentGame.gameConfig, gameConfig);
         }
 
@@ -399,14 +407,14 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
                 return true;
             }
         }
-        
+
         if (zkArcadePublicNft != address(0)) {
             ZkArcadePublicNft publicNftContract = ZkArcadePublicNft(zkArcadePublicNft);
             if (publicNftContract.balanceOf(user) > 0) {
                 return true;
             }
         }
-        
+
         return false;
     }
 }

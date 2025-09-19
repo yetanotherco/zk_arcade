@@ -58,12 +58,30 @@ export const useBeastLeaderboardContract = ({
 		chainId,
 	});
 
+	// Used to calculate the time remaining for the current game
+	const nextGame = useReadContract({
+		address: contractAddress,
+		abi: leaderboardAbi,
+		functionName: "beastGames",
+		args: [
+			currentGame.data
+				? currentGame.data[1] === 0
+					? 0
+					: currentGame.data[1] + 1n
+				: -1,
+		],
+		chainId,
+	});
+
 	const currentGameLevelCompleted = useReadContract({
 		address: contractAddress,
 		abi: leaderboardAbi,
 		functionName: "usersBeastLevelCompleted",
 		args: [
-			getBeastKey(userAddress, currentGame.data?.gameConfig || BigInt(0)),
+			getBeastKey(
+				userAddress,
+				currentGame.data ? currentGame.data[0].gameConfig : 0n
+			),
 		],
 		chainId,
 	});
@@ -73,7 +91,7 @@ export const useBeastLeaderboardContract = ({
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
-	const submitBeastSolution = useCallback(
+	const claimBeastPoints = useCallback(
 		async (proof: ProofSubmission) => {
 			setSubmitSolutionFetchingVDataIsLoading(true);
 			const res = await fetchProofVerificationData(proof.id);
@@ -88,6 +106,7 @@ export const useBeastLeaderboardContract = ({
 			const {
 				verification_data: { verificationData },
 				batch_data,
+				game_idx,
 			} = res;
 
 			if (!batch_data) {
@@ -107,11 +126,9 @@ export const useBeastLeaderboardContract = ({
 			const encodedMerkleProof = `0x${hexPath.join("")}`;
 
 			const args = [
+				game_idx,
 				bytesToHex(commitment.proofCommitment, { size: 32 }),
 				bytesToHex(Uint8Array.from(verificationData.publicInput || [])),
-				bytesToHex(commitment.provingSystemAuxDataCommitment, {
-					size: 32,
-				}),
 				verificationData.proofGeneratorAddress,
 				merkleRoot,
 				encodedMerkleProof,
@@ -120,7 +137,7 @@ export const useBeastLeaderboardContract = ({
 
 			await writeContractAsync({
 				address: contractAddress,
-				functionName: "submitBeastSolution",
+				functionName: "claimBeastPoints",
 				abi: leaderboardAbi,
 				args,
 			});
@@ -167,7 +184,7 @@ export const useBeastLeaderboardContract = ({
 	return {
 		score,
 		submitSolution: {
-			submitBeastSolution,
+			claimBeastPoints,
 			submitSolutionFetchingVDataIsLoading,
 			receipt,
 			tx: {
@@ -178,8 +195,11 @@ export const useBeastLeaderboardContract = ({
 		currentGameLevelCompleted,
 		currentGame: {
 			...currentGame,
+			game: currentGame.data ? currentGame.data[0] : null,
+			gameIdx: currentGame.data ? currentGame.data[1] : null,
 			gamesHaveFinished:
 				currentGame.error?.message?.includes("NoActiveBeastGame"),
 		},
+		nextGame,
 	};
 };

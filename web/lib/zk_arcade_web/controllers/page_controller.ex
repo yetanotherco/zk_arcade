@@ -262,7 +262,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:wallet, wallet)
       |> assign(:eligible, eligible)
       |> assign(:game, %{
-        image: "/images/beast.jpg",
+        image: "/images/beast.gif",
         name: "Beast 1984",
         desc: "Survive across waves of enemies",
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
@@ -360,7 +360,7 @@ The goal of the game is to make each number on the board equal.
         |> assign(:wallet, wallet)
         |> assign(:eligible, eligible)
         |> assign(:network, Application.get_env(:zk_arcade, :network))
-        |> assign(:proofs_sent_total, length(proofs))
+        |> assign(:proofs_sent_total, total_proofs)
         |> assign(:submitted_proofs, Jason.encode!(proofs))
         |> assign(:beast_submissions, beast_submissions_json)
         |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))

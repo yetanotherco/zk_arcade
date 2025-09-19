@@ -24,6 +24,7 @@ import { useChainId } from "wagmi";
 import { Button } from "../../Button";
 import { BumpFee } from "./BumpFee";
 import { fetchProofVerificationData } from "../../../utils/aligned";
+import { ProgressBar } from "../../ProgressBar";
 
 type Game = {
 	id: "beast" | string;
@@ -35,17 +36,12 @@ const GAMES: Game[] = [
 	{
 		id: "beast",
 		name: "Beast",
-		cover: "/images/beast.jpg",
+		cover: "/images/beast.gif",
 	},
 	{
 		id: "parity",
 		name: "Parity",
 		cover: "/images/parity.jpg",
-	},
-	{
-		id: "Sudoku",
-		name: "Sudoku",
-		cover: "/images/sudoku.jpg",
 	},
 ];
 
@@ -78,6 +74,7 @@ export const SubmitProofStep = ({
 	setProofStatus,
 	proofToSubmitData,
 	gameName,
+	initialGameIdx,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -91,6 +88,7 @@ export const SubmitProofStep = ({
 	setProofStatus: (status: ProofSubmission["status"]) => void;
 	proofToSubmitData: VerificationData | null;
 	gameName: string;
+	initialGameIdx?: number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
@@ -113,6 +111,7 @@ export const SubmitProofStep = ({
 	);
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
+	const [gameIdx, setGameIdx] = useState(initialGameIdx);
 	const { price: ethPrice } = useEthPrice();
 
 	const [parsedPublicInputs, setParsedPublicInputs] = useState<
@@ -193,7 +192,7 @@ export const SubmitProofStep = ({
 
 		const parsedGameConfigBigInt = BigInt("0x" + parsed.game_config);
 		const currentGameConfigBigInt = BigInt(
-			currentGame.data?.gameConfig || 0n
+			currentGame.game?.gameConfig || 0n
 		);
 
 		if (parsedGameConfigBigInt !== currentGameConfigBigInt) {
@@ -220,6 +219,7 @@ export const SubmitProofStep = ({
 		setProof(proof);
 		setProofId(proofId);
 		setPublicInputs(publicInputs);
+		setGameIdx(currentGame.gameIdx);
 	};
 
 	const handleSubmission = useCallback(async () => {
@@ -453,8 +453,8 @@ export const SubmitProofStep = ({
 			<div className="flex flex-col gap-4 justify-between h-full">
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
-						The proof has been submitted to Aligned, and it will be
-						verified soon so you can claim your points.
+						The proof has been submitted to Aligned. Come back in a
+						few hours to claim your points.
 					</p>
 				) : proofStatus === "underpriced" ? (
 					<p className="bg-orange/20 rounded p-2 text-orange">
@@ -464,14 +464,15 @@ export const SubmitProofStep = ({
 				) : (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
 						The proof has been included in a batch and it will be
-						verified soon by the operators
+						verified by Aligned
 					</p>
 				)}
 
 				<div className="flex flex-col gap-2">
-					<p>Prover: {provingSystem}</p>
 					<p>Game: {gameName}</p>
+					<p>Daily Quest: {Number(gameIdx) + 1}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
+					<p>Prover: {provingSystem}</p>
 				</div>
 
 				{!bumpFeeOpen && (
@@ -674,6 +675,7 @@ export const SubmitProofStep = ({
 				/>
 				<input type="hidden" name="_csrf_token" value={csrfToken} />
 				<input type="hidden" name="game" value={gameData?.name} />
+				<input type="hidden" name="game_idx" value={Number(gameIdx)} />
 			</form>
 			<Button
 				variant="text"
@@ -683,6 +685,16 @@ export const SubmitProofStep = ({
 				<span className="hero-chevron-left"></span>
 				Go Back
 			</Button>
+
+			{submissionIsLoading && (
+				<div className="max-w-[300px] w-full flex items-center justify-center mx-auto">
+					<ProgressBar
+						shouldAnimate={submissionIsLoading}
+						timeToPassMs={10 * 1000}
+					/>
+				</div>
+			)}
+
 			<div className="self-end">
 				<Button
 					variant="text"

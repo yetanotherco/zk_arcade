@@ -210,13 +210,13 @@ export const WithdrawFromAlignedModal = ({
 					
 					<FormInput
 						label="Amount to withdraw in ETH:"
-						placeholder="0.0001"
+						placeholder="0.001"
 						type="number"
 						value={withdrawValue}
 						onChange={e => setWithdrawValue(e.target.value)}
 						min="0"
 						max={availableBalance}
-						step="0.0001"
+						step="0.001"
 						disabled={!isUnlocked}
 					/>
 					

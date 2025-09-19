@@ -11,7 +11,7 @@ export const useProofSentMessageReader = () => {
 		if (message == "proof-failed") {
 			addToast({
 				title: "Proof failed",
-				desc: "The proof was sent but the verification failed",
+				desc: "The proof submission failed. Please try again later.",
 				type: "error",
 			});
 		}
@@ -19,7 +19,7 @@ export const useProofSentMessageReader = () => {
 		if (message == "proof-sent") {
 			addToast({
 				title: "Proof sent to Aligned",
-				desc: "The proof was sent and it will be verified soon. You can check the status of the proof in your profile",
+				desc: "The proof was sent and it will be verified. You can check the proof status in your profile",
 				type: "success",
 			});
 		}

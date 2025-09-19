@@ -19,7 +19,7 @@ pub struct GameLevels {
 
 impl GameLevels {
     pub fn new(block_timestamp: u64, games: Vec<GameJson>) -> GameLevels {
-        for game in games.into_iter() {
+        for game in games.into_iter().rev() {
             if game.from_time <= block_timestamp && block_timestamp < game.to_time {
                 return Self::from_levels_json(&game.levels);
             }

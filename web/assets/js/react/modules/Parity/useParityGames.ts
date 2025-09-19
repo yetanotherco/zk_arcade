@@ -18,22 +18,24 @@ export const useParityGames = ({
 	leaderBoardContractAddress,
 	userAddress,
 }: Args) => {
-	const { currentGame, currentGameLevelCompleted } =
+	const { currentGame, nextGame, currentGameLevelCompleted } =
 		useParityLeaderboardContract({
 			contractAddress: leaderBoardContractAddress,
 			userAddress,
 		});
 	const [currentLevel, setCurrentLevel] = useState<number | null>(null);
 
-	const gameConfig = currentGame.data?.gameConfig ?? "";
+	const gameConfig = currentGame.game?.gameConfig ?? "";
 
 	const levels: ParityLevel[] = useMemo(() => {
 		if (!gameConfig) return [];
-		let gameConfigBytes = toBytes(gameConfig);
+		let gameConfigBytes = toBytes(gameConfig, { size: 32 });
 		let levels: ParityLevel[] = [];
 
-		for (let i = 0; i < gameConfigBytes.length / 10; i++) {
-			let byte_idx = i * 10;
+		// we substract 2 because the gameConfig only takes 30 bytes (each level takes 10 bytes and there is three per gameConfig)
+		for (let i = 0; i < (gameConfigBytes.length - 2) / 10; i++) {
+			// ignore the first two bytes
+			let byte_idx = i * 10 + 2;
 			let initialPos: ParityLevel["initialPos"] = {
 				col: gameConfigBytes[byte_idx] >> 4,
 				row: gameConfigBytes[byte_idx] & 0x0f,
@@ -60,14 +62,15 @@ export const useParityGames = ({
 	} | null>(null);
 
 	useEffect(() => {
-		const endsAtTime = currentGame.data?.endsAtTime || 0;
+		const startsAtTime = nextGame.data?.startsAtTime || 0n;
 		const currentBlockTimestamp = currentBlock.data
 			? currentBlock.data.timestamp
 			: 0;
 
-		if (endsAtTime > 0 && currentBlockTimestamp) {
+		if (startsAtTime > 0 && currentBlockTimestamp) {
 			const timeRemaining =
-				Number(endsAtTime) - Number(currentBlockTimestamp);
+				Number(startsAtTime) - Number(currentBlockTimestamp);
+
 			const hours = timeRemaining / 3600;
 			const minutes = Math.floor(timeRemaining / 60);
 
@@ -76,7 +79,7 @@ export const useParityGames = ({
 				minutes,
 			});
 		}
-	}, [currentGame.data, currentBlock.data]);
+	}, [nextGame.data, currentGame.data, currentBlock.data]);
 
 	useEffect(() => {
 		if (!gameConfig || !userAddress) {
@@ -105,5 +108,6 @@ export const useParityGames = ({
 		levels,
 		timeRemaining,
 		currentGameConfig: gameConfig,
+		currentGameIdx: currentGame.gameIdx,
 	};
 };

@@ -262,17 +262,23 @@ defmodule ZkArcadeWeb.ProofController do
       {:error, reason} ->
         Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
 
-        case Proofs.update_proof_status_failed(pending_proof_id) do
-          {:ok, _} ->
-            Logger.info("Proof #{pending_proof_id} status updated to failed")
+        case is_retry do
+          true ->
+            Logger.info("Retry failed with reason #{inspect(reason)}")
             {:error, reason}
+          false ->
+            case Proofs.update_proof_status_failed(pending_proof_id) do
+              {:ok, _} ->
+                Logger.info("Proof #{pending_proof_id} status updated to failed")
+                {:error, reason}
 
-          {:error, changeset} ->
-            Logger.error(
-              "Failed to update proof #{pending_proof_id} status: #{inspect(changeset)}"
-            )
+              {:error, changeset} ->
+                Logger.error(
+                  "Failed to update proof #{pending_proof_id} status: #{inspect(changeset)}"
+                )
 
-            {:error, reason}
+                {:error, reason}
+            end
         end
     end
   end

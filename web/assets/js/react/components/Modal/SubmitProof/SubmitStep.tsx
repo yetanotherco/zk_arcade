@@ -24,6 +24,7 @@ import { useChainId } from "wagmi";
 import { Button } from "../../Button";
 import { BumpFee } from "./BumpFee";
 import { fetchProofVerificationData } from "../../../utils/aligned";
+import { ProgressBar } from "../../ProgressBar";
 
 type Game = {
 	id: "beast" | string;
@@ -41,11 +42,6 @@ const GAMES: Game[] = [
 		id: "parity",
 		name: "Parity",
 		cover: "/images/parity.jpg",
-	},
-	{
-		id: "Sudoku",
-		name: "Sudoku",
-		cover: "/images/sudoku.jpg",
 	},
 ];
 
@@ -688,6 +684,16 @@ export const SubmitProofStep = ({
 				<span className="hero-chevron-left"></span>
 				Go Back
 			</Button>
+
+			{submissionIsLoading && (
+				<div className="max-w-[300px] w-full flex items-center justify-center mx-auto">
+					<ProgressBar
+						shouldAnimate={submissionIsLoading}
+						timeToPassMs={10 * 1000}
+					/>
+				</div>
+			)}
+
 			<div className="self-end">
 				<Button
 					variant="text"

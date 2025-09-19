@@ -24,6 +24,7 @@ import { useChainId } from "wagmi";
 import { Button } from "../../Button";
 import { BumpFee } from "./BumpFee";
 import { fetchProofVerificationData } from "../../../utils/aligned";
+import { ProgressBar } from "../../ProgressBar";
 
 type Game = {
 	id: "beast" | string;
@@ -566,43 +567,6 @@ export const SubmitProofStep = ({
 
 	const gameData = getGameData(gameName);
 
-	const [progress, setProgress] = useState(0);
-	const [isAnimating, setIsAnimating] = useState(false);
-
-	useEffect(() => {
-		if (submissionIsLoading) {
-			const interval = setInterval(() => {
-				setProgress(prev => {
-					if (prev >= 100) {
-						clearInterval(interval);
-						setIsAnimating(false);
-						return 100;
-					}
-					return prev + 1;
-				});
-			}, 100);
-		} else {
-			setProgress(0);
-		}
-	}, [isAnimating, submissionIsLoading]);
-
-	const ProgressBar = ({ 
-		value = 0, 
-	}) => {
-		const percentage = Math.min((value / 100) * 100, 100);
-		
-		return (
-			<div className={`w-full`}>
-				<div className={`w-full bg-gray-200 rounded overflow-hidden h-2`}>
-				<div
-					className={`bg-green-500 h-2 rounded transition-all duration-300 ease-out`}
-					style={{ width: `${percentage}%` }}
-				/>
-				</div>
-			</div>
-		);
-	};
-
 	return (
 		<div className="flex flex-col gap-6 justify-between h-full">
 			<div className="w-full flex flex-col gap-4">
@@ -723,8 +687,9 @@ export const SubmitProofStep = ({
 
 			{submissionIsLoading && (
 				<div className="max-w-[300px] w-full flex items-center justify-center mx-auto">
-					<ProgressBar 
-						value={progress}
+					<ProgressBar
+						shouldAnimate={submissionIsLoading}
+						timeToPassMs={10 * 1000}
 					/>
 				</div>
 			)}

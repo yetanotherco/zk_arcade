@@ -322,7 +322,7 @@ defmodule ZkArcadeWeb.ProofController do
                     Logger.error("Failed to update proof #{proof.id} status: #{inspect(changeset)}")
                 end
 
-                proof_retry_pid = proof.id + "-retry-" + Integer.to_string(proof.times_retried)
+                proof_retry_pid = proof.id <> "-" <> Integer.to_string(proof.times_retried)
                 task =
                   Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
                     Registry.register(ZkArcade.ProofRegistry, proof_retry_pid, nil)

@@ -138,7 +138,7 @@ gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen
 	@$(MAKE) deploy_leaderboard_contract NETWORK=devnet
 	@$(MAKE) update_leaderboard_address
 	@$(MAKE) update_nft_address
-	@$(MAKE) preprocess_whitelist WHITELIST_PATH=./whitelist_addresses_devnet.csv
+	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/inserted_devnet
 	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./data/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/inserted_devnet
 	@$(MAKE) add_merkle_root NETWORK=devnet
 
@@ -158,9 +158,10 @@ __WHITELIST__:
 
 # This path is relative to the project root
 WHITELIST_PATH?=merkle_tree/whitelist.json
+INSERTED_DIRECTORY?=data/inserted
 
 preprocess_whitelist:
-	cd data && pip3 install -r requirements.txt && python3 preprocess_addresses.py $(WHITELIST_PATH)
+	pip3 install -r data/requirements.txt && python3 data/preprocess_addresses.py $(WHITELIST_PATH) $(INSERTED_DIRECTORY)
 
 __INFRA__: ## ____
 ## Initial Setup

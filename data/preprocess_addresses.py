@@ -3,13 +3,13 @@ import sys
 import logging
 from pathlib import Path
 
-# Reads previously filtered addresses from all campaigns from the /inserted folder
-def read_previously_filtered():
-    print(f"Reading previously filtered addresses from the files of inserted folder...")
+# Reads previously filtered addresses from all campaigns from the specified folder
+def read_previously_filtered(inserted_dir):
+    print(f"Reading previously filtered addresses from the files of {inserted_dir} folder...")
 
-    # Read all files in the /inserted folder and gets the addresses column of each file
+    # Read all files in the specified folder and gets the addresses column of each file
     addresses = set()
-    for file_path in Path("inserted").glob("*.csv"):
+    for file_path in Path(inserted_dir).glob("*.csv"):
         print(f"Processing {file_path}...")
         try:
             df = pd.read_csv(file_path)
@@ -41,8 +41,8 @@ def print_stats(whitelist_df, df_filtered, df_removed):
 
 # Filters out addresses that are duplicates, in previous campaigns, or in the OFAC list. Saves the filtered addresses
 # to new_addresses.csv and the removed addresses to removed_addresses.csv with a reason column.
-def filter_repeated_and_ofac_addresses(whitelist_path):
-    previously_filtered = read_previously_filtered()
+def filter_repeated_and_ofac_addresses(whitelist_path, inserted_dir):
+    previously_filtered = read_previously_filtered(inserted_dir)
     ofac_addresses = read_ofac_addresses()
 
     whitelist_df = pd.read_csv(whitelist_path)
@@ -76,10 +76,11 @@ def filter_repeated_and_ofac_addresses(whitelist_path):
     print(f"Removed addresses saved to removed_addresses.csv")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python filter_repeated.py <whitelist_path>")
+    if len(sys.argv) != 3:
+        print("Usage: python preprocess_addresses.py <whitelist_path> <inserted_dir>")
         sys.exit(1)
     
     whitelist_path = sys.argv[1]
+    inserted_dir = sys.argv[2]
 
-    filter_repeated_and_ofac_addresses(whitelist_path)
+    filter_repeated_and_ofac_addresses(whitelist_path, inserted_dir)

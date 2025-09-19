@@ -157,9 +157,11 @@ To run the preprocessing:
    ```
 3. Run the preprocessing script:
    ```shell
-   make preprocess_whitelist WHITELIST_PATH=<whitelist_path>
+   make preprocess_whitelist WHITELIST_PATH=<whitelist_path> INSERTED_DIRECTORY=<inserted_directory>
    ```
-   (Where `WHITELIST_PATH` is the path to the CSV file containing the addresses to whitelist)
+   Where:
+   - `WHITELIST_PATH`: Path to the CSV file containing the addresses to whitelist
+   - `INSERTED_DIRECTORY`: Directory containing previously inserted addresses (default: `data/inserted`, for devnet use: `data/inserted_devnet`)
 4. Removed addresses will be written to `removed_addresses.csv`, and the addresses to generate Merkle proof data will be written to `new_addresses.csv` into `data` directory.
 
 ### Merkle Proof Data Generation
@@ -170,11 +172,16 @@ To run the preprocessing:
    ```
 2. Run:
    ```shell
-   make generate_merkle_data MERKLE_ROOT_INDEX=<campaign_number> WHITELIST_PATH=data/new_addresses.csv
+   make generate_merkle_tree WHITELIST_PATH=data/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output.json MERKLE_ROOT_INDEX=<campaign_number> INSERTED_DIRECTORY=<directory>
    ```  
-   We use `new_addresses.csv`, produced by the preprocessing step, as the final whitelist.
-   Note: The campaign number must match the index the merkle root will take in the contract, i.e. the current length of the merkleRoots array.
-3. This command generates the Merkle proof data, stores the Merkle paths in the backend database, and writes the campaign Merkle root to `merkle_output.json`. That Merkle root will be used when updating the NFT contract.
+   Where:
+   - `WHITELIST_PATH`: Path to the CSV file with addresses (usually `data/new_addresses.csv` from preprocessing)
+   - `OUTPUT_FILE`: Path where the Merkle proof JSON will be written
+   - `MERKLE_ROOT_INDEX`: Campaign number (must match the index the merkle root will take in the contract)
+   - `INSERTED_DIRECTORY`: Directory where filtered addresses CSV will be saved as `inserted_<MERKLE_ROOT_INDEX>.csv`
+   
+   For devnet, use: `INSERTED_DIRECTORY=./data/inserted_devnet`
+3. This command generates the Merkle proof data, stores the Merkle paths in the backend database, writes the campaign Merkle root to the output file, and saves filtered addresses to the specified directory.
 4. Add the new campaign Merkle root to the NFT contract by running:  
    ```shell
    make add_merkle_root NETWORK=<network>

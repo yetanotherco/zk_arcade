@@ -567,7 +567,7 @@ export const SubmitProofStep = ({
 			setLevelAlreadyReached(true);
 			return;
 		}
-	}, [setLevelAlreadyReached]);
+	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
 
 	const gameData = getGameData(gameName);
 

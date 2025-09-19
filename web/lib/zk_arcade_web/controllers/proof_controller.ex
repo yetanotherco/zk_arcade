@@ -257,7 +257,6 @@ defmodule ZkArcadeWeb.ProofController do
                     Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
                 end
               {:error, reason} ->
-                Logger.error("Error: #{inspect(reason)}")
                 handle_verification_failure(updated_proof.id, reason, attempt_type)
               nil ->
                 Logger.error("Error without reason")
@@ -271,16 +270,16 @@ defmodule ZkArcadeWeb.ProofController do
         end
 
       {:error, reason} ->
-        Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
         handle_batcher_failure(pending_proof_id, reason, attempt_type)
     end
   end
 
   defp handle_verification_failure(_proof_id, reason, :retry) do
-    Logger.error("Retry failed with reason #{inspect(reason)}")
+    Logger.error("Bump fee transaction failed to verify proof with reason: #{inspect(reason)}")
   end
 
   defp handle_verification_failure(proof_id, _reason, :initial) do
+        Logger.error("Failed to verify proof in aligned: #{inspect(reason)}")
     case Proofs.update_proof_status_failed(proof_id) do
       {:ok, _} ->
         Logger.info("Proof #{proof_id} status updated to failed")
@@ -290,11 +289,12 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   defp handle_batcher_failure(_proof_id, reason, :retry) do
-    Logger.info("Retry failed with reason #{inspect(reason)}")
+    Logger.info("Bump fee transaction failed with reason: #{inspect(reason)}")
     {:error, reason}
   end
 
   defp handle_batcher_failure(proof_id, reason, :initial) do
+    Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
     case Proofs.update_proof_status_failed(proof_id) do
       {:ok, _} ->
         Logger.info("Proof #{proof_id} status updated to failed")

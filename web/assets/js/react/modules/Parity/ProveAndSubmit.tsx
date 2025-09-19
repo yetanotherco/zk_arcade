@@ -48,6 +48,7 @@ export const ProveAndSubmit = ({
 		useState<VerificationData | null>(null);
 
 	const [proofGenerationFailed, setProofGenerationFailed] = useState(false);
+	const [isGeneratingProof, setIsGeneratingProof] = useState(false);
 
 	const [userGameData, _setUserGameData] = useState<GameStatus>(() => {
 		const stored = localStorage.getItem("parity-game-data");
@@ -65,16 +66,21 @@ export const ProveAndSubmit = ({
 
 	const generateproofVerificationData = async () => {
 		try {
-			const submitproofVerificationData = await generateCircomParityProof({
-				user_address,
-				userPositions: userGameData.userPositions,
-				levelsBoards: userGameData.levelsBoards,
-			});
+			setIsGeneratingProof(true);
+			const submitproofVerificationData = await generateCircomParityProof(
+				{
+					user_address,
+					userPositions: userGameData.userPositions,
+					levelsBoards: userGameData.levelsBoards,
+				}
+			);
 
 			setProofVerificationData(submitproofVerificationData);
+			setIsGeneratingProof(false);
 			setOpen(true);
 		} catch (e) {
 			console.error("Error generating proof:", e);
+			setIsGeneratingProof(false);
 			setProofGenerationFailed(true);
 
 			// Delete the probably invalid levels from local storage (those that
@@ -89,7 +95,10 @@ export const ProveAndSubmit = ({
 					gameData[key].levelsBoards.pop();
 					gameData[key].userPositions.pop();
 				}
-				localStorage.setItem("parity-game-data", JSON.stringify(gameData));
+				localStorage.setItem(
+					"parity-game-data",
+					JSON.stringify(gameData)
+				);
 			}
 
 			// Restore the level reached by the user to the last one submitted on-chain
@@ -147,8 +156,8 @@ export const ProveAndSubmit = ({
 	const proofGenerationErrorView: JSX.Element = (
 		<>
 			<div className="bg-red/20 text-red border border-red text-center p-2 rounded mb-2 max-w-[500px]">
-				There was an error generating your proof.
-				Please try playing and generating your proof again.
+				There was an error generating your proof. Please try playing and
+				generating your proof again.
 			</div>
 
 			<div className="flex flex-col gap-5 w-full max-w-[300px]">
@@ -180,72 +189,76 @@ export const ProveAndSubmit = ({
 						</p>
 					</div>
 
-						{proofGenerationFailed ? (
-							proofGenerationErrorView
-						) : (
-							<>
-								<div className="w-full max-w-[500px] space-y-2">
-									{currentLevel === 0 && (
+					{proofGenerationFailed ? (
+						proofGenerationErrorView
+					) : (
+						<>
+							<div className="w-full max-w-[500px] space-y-2">
+								{currentLevel === 0 && (
+									<div className="bg-red/20 text-red border border-red text-center p-2 rounded">
+										You haven’t completed any levels yet.
+										There’s nothing to generate.
+									</div>
+								)}
+
+								{alreadySubmittedUpToOrBeyond &&
+									!hasSubmittedThree && (
 										<div className="bg-red/20 text-red border border-red text-center p-2 rounded">
-											You haven’t completed any levels yet. There’s
-											nothing to generate.
+											You have already submitted a proof
+											up to level {submittedLevelOnChain}{" "}
+											on-chain. Complete at least one more
+											level before submitting again.
 										</div>
 									)}
 
-									{alreadySubmittedUpToOrBeyond && !hasSubmittedThree && (
-										<div className="bg-red/20 text-red border border-red text-center p-2 rounded">
-											You have already submitted a proof up to level{" "}
-											{submittedLevelOnChain} on-chain. Complete at
-											least one more level before submitting again.
+								{currentLevel > 0 &&
+									currentLevel < 3 &&
+									!alreadySubmittedUpToOrBeyond &&
+									!hasSubmittedThree && (
+										<div className="bg-yellow/20 text-yellow border border-yellow text-center p-2 rounded">
+											The full game wasn’t completed — you
+											are missing {3 - currentLevel}{" "}
+											{3 - currentLevel === 1
+												? "level"
+												: "levels"}
+											. If you submit a proof now, you’ll
+											need to prove the remaining levels
+											later.
 										</div>
 									)}
 
-									{currentLevel > 0 &&
-										currentLevel < 3 &&
-										!alreadySubmittedUpToOrBeyond &&
-										!hasSubmittedThree && (
-											<div className="bg-yellow/20 text-yellow border border-yellow text-center p-2 rounded">
-												The full game wasn’t completed — you are
-												missing {3 - currentLevel}{" "}
-												{3 - currentLevel === 1
-													? "level"
-													: "levels"}
-												. If you submit a proof now, you’ll need to
-												prove the remaining levels later.
-											</div>
-										)}
+								{currentLevel === 3 && !hasSubmittedThree && (
+									<div className="bg-accent-100/20 text-accent-100 border border-accent-100 text-center p-2 rounded">
+										Great job! You’ve completed the game —
+										generate and submit your proof now.
+									</div>
+								)}
+							</div>
 
-									{currentLevel === 3 && !hasSubmittedThree && (
-										<div className="bg-accent-100/20 text-accent-100 border border-accent-100 text-center p-2 rounded">
-											Great job! You’ve completed the game — generate
-											and submit your proof now.
-										</div>
-									)}
-								</div>
-
-								<div className="flex flex-col gap-5 w-full max-w-[300px]">
-									<Button
-										variant="arcade"
-										className="w-full"
-										onClick={() => {
-											generateproofVerificationData();
-										}}
-										disabled={disableGenerate}
-									>
-										Generate Proof
-									</Button>
-									<Button
-										variant="arcade"
-										className="w-full"
-										onClick={() => {
-											setGameState("home");
-										}}
-									>
-										Home
-									</Button>
-								</div>
-							</>
-						)}
+							<div className="flex flex-col gap-5 w-full max-w-[300px]">
+								<Button
+									variant="arcade"
+									className="w-full"
+									onClick={() => {
+										generateproofVerificationData();
+									}}
+									isLoading={isGeneratingProof}
+									disabled={disableGenerate}
+								>
+									Generate Proof
+								</Button>
+								<Button
+									variant="arcade"
+									className="w-full"
+									onClick={() => {
+										setGameState("home");
+									}}
+								>
+									Home
+								</Button>
+							</div>
+						</>
+					)}
 				</div>
 			</div>
 

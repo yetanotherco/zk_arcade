@@ -64,6 +64,14 @@ export const useProofSentMessageReader = () => {
 			});
 		}
 
+		if (message == "level-reached") {
+			addToast({
+				title: "Level already reached",
+				desc: `You have already reached this level in a previous run for today's game`,
+				type: "error",
+			});
+		}
+
 		// Remove the message param from the URL without reloading the page
 		// this prevents showing the message again when the user refreshes the page
 		if (message) {

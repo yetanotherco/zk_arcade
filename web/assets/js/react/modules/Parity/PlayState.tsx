@@ -3,6 +3,8 @@ import { GameStatus, ParityGameState, ParityLevel } from "./types";
 import { Button } from "../../components";
 import { ParityBoard } from "./Board";
 import { useSwapTransition } from "./useSwapTransition";
+import { Position } from "./useParityControls";
+import { update } from "@react-spring/web";
 
 const PickGame = ({
 	numberOfGames,
@@ -45,6 +47,7 @@ export const PlayState = ({
 	setHasWon,
 	saveLevelData,
 	user_positions,
+	updatePos,
 }: {
 	setGameState: (state: ParityGameState) => void;
 	currentLevel: number | null;
@@ -61,6 +64,7 @@ export const PlayState = ({
 	reset: () => void;
 	hasWon: boolean;
 	setPosition: (position: { col: number; row: number }) => void;
+	updatePos: (_: { dr: number; dc: number }) => void;
 	setHasWon: (hasWon: boolean) => void;
 	saveLevelData: () => void;
 	user_positions: [number, number][];
@@ -87,6 +91,7 @@ export const PlayState = ({
 					reset={reset}
 					home={() => setGameState("home")}
 					user_positions={user_positions}
+					updatePos={updatePos}
 				/>
 			),
 		{ className: "h-full w-full flex items-center justify-center" }

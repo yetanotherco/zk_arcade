@@ -437,6 +437,14 @@ export const SubmitProofStep = ({
 		}
 	}, [proofSubmission]);
 
+	useEffect(() => {
+		if (!proofToSubmitData) return;
+		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
+			setLevelAlreadyReached(true);
+			return;
+		}
+	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
+
 	const [bumpFeeOpen, setBumpFeeOpen] = useState(false);
 
 	if (
@@ -544,7 +552,7 @@ export const SubmitProofStep = ({
 		);
 	}
 
-	if (proofSubmission?.status === "failed") {
+	if (proofStatus === "failed") {
 		return (
 			<div className="flex flex-col gap-4 justify-between h-full">
 				<p className="bg-red/20 rounded p-2 text-red">
@@ -560,14 +568,6 @@ export const SubmitProofStep = ({
 			</div>
 		);
 	}
-
-	useEffect(() => {
-		if (!proofToSubmitData) return;
-		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
-			setLevelAlreadyReached(true);
-			return;
-		}
-	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
 
 	const gameData = getGameData(gameName);
 
@@ -654,7 +654,8 @@ export const SubmitProofStep = ({
 						<p className="text-red">
 							You have already submitted a proof with a higher or
 							equal level for this game. If you uploaded the proof
-							recently, you'll have to wait 6 hours to submit it again.
+							recently, you'll have to wait 6 hours to submit it
+							again.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (

@@ -65,7 +65,9 @@ export const Modal = ({
 							</div>
 						)}
 					</div>
-					{children}
+					<div className="max-h-[90vh] overflow-y-scroll">
+						{children}
+					</div>
 				</div>
 			</div>
 		</div>,

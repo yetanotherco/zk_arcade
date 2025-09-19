@@ -141,6 +141,7 @@ export const WalletInfo = ({
 						user_address={user_address}
 						batcher_url={batcher_url}
 						nft_contract_address={nft_contract_address}
+						highest_level_reached={0}
 					/>
 				</div>
 			</div>

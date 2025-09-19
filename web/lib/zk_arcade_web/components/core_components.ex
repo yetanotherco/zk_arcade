@@ -66,7 +66,6 @@ defmodule ZkArcadeWeb.CoreComponents do
               user_address={@wallet}
               batcher_url={@batcher_url}
               leaderboard_address={@leaderboard_address}
-              beast_submissions={@beast_submissions}
           />
 
           <x-app-user-wallet
@@ -79,7 +78,6 @@ defmodule ZkArcadeWeb.CoreComponents do
               user_position={@user_position}
               explorer_url={@explorer_url}
               batcher_url={@batcher_url}
-              beast_submissions={@beast_submissions}
               is_eligible={@eligible}
               nft_contract_address={@nft_contract_address}
           />

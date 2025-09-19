@@ -473,10 +473,10 @@ export const SubmitProofStep = ({
 				)}
 
 				<div className="flex flex-col gap-2">
-					<p>Prover: {provingSystem}</p>
 					<p>Game: {gameName}</p>
+					<p>Daily Quest: {Number(gameIdx) + 1}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
-					<p>Game number: {Number(gameIdx) + 1}</p>
+					<p>Prover: {provingSystem}</p>
 				</div>
 
 				{!bumpFeeOpen && (

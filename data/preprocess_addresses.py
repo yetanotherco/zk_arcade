@@ -72,7 +72,7 @@ def filter_repeated_and_ofac_addresses(whitelist_path):
     df_filtered.to_csv("new_addresses.csv", index=False)
     df_removed.to_csv("removed_addresses.csv", index=False)
 
-    print(f"Not filtered addresses saved to new_addresses.csv")
+    print(f"New addresses saved to new_addresses.csv")
     print(f"Removed addresses saved to removed_addresses.csv")
 
 if __name__ == "__main__":

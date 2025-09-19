@@ -111,6 +111,7 @@ async fn handle_merkle_processing(
     addresses: Vec<String>,
     output_path: &str,
     merkle_root_index: i32,
+    inserted_directory: &str,
 ) {
     let output = build_tree_and_proofs(&addresses);
 
@@ -122,23 +123,24 @@ async fn handle_merkle_processing(
     // Write the output to a JSON file
     let serialized = serde_json::to_string_pretty(&output).expect("Failed to serialize output");
     fs::write(output_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {}: {}", output_path, e));
-    println!("Merkle proof data written to merkle_tree/{}", output_path);
+    println!("Merkle proof data written to {}", output_path);
 
-    let filtered_path = format!("data/inserted/inserted_{}.csv", merkle_root_index);
-    write_whitelist_to_file(addresses, &filtered_path);
+    let inserted_path = format!("{}/inserted_{}.csv", inserted_directory, merkle_root_index);
+    write_whitelist_to_file(addresses, &inserted_path);
 }
 
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
 
-    if args.len() == 3 {
+    if args.len() == 4 {
         let input_path = &args[0];
         let output_path = &args[1];
         let merkle_root_index: i32 = args[2].parse().unwrap_or_else(|e| {
             eprintln!("Invalid merkle_root_index: {}", e);
             std::process::exit(1);
         });
+        let inserted_directory = &args[3];
 
         let addresses: Vec<String> = read_addresses_from_file(input_path)
             .into_iter()
@@ -150,9 +152,9 @@ async fn main() {
             std::process::exit(1);
         }
 
-        handle_merkle_processing(addresses, output_path, merkle_root_index).await;
+        handle_merkle_processing(addresses, output_path, merkle_root_index, inserted_directory).await;
     } else {
-        eprintln!("Usage: merkle_json_cli <input.csv> [<output.json> <merkle_root_index>]");
+        eprintln!("Usage: merkle_json_cli <input.csv> <output.json> <merkle_root_index> <inserted_directory>");
         std::process::exit(1);
     }
 }

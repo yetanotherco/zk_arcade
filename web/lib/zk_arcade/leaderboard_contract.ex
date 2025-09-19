@@ -26,4 +26,21 @@ defmodule ZkArcade.LeaderboardContract do
     {:ok, score} = users_score(user_address) |> Ethers.call(to: contract_address)
     score
   end
+
+  def get_current_game_idx(game) do
+    contract_address = Application.get_env(:zk_arcade, :leaderboard_address)
+
+    case game do
+      "Parity" ->
+        {:ok, [_game_config, game_idx]} = get_current_parity_game() |> Ethers.call(to: contract_address)
+        Logger.info("Current Parity game idx: #{inspect(game_idx)}")
+        game_idx
+
+      "Beast" ->
+        {:ok, [_game_config, game_idx]} = get_current_beast_game() |> Ethers.call(to: contract_address)
+        Logger.info("Current Beast game idx: #{inspect(game_idx)}")
+        game_idx
+      _ -> {:error, :unknown_game}
+    end
+  end
 end

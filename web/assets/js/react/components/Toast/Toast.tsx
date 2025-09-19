@@ -43,6 +43,7 @@ export const Toast: React.FC<Props> = ({ id, title, desc, type }) => {
 					"border bg-accent-100/20 border-accent-100":
 						type === "success",
 					"border bg-red/20 border-red": type === "error",
+					"border bg-yellow/20 border-yellow": type === "warning",
 				}
 			)}
 			style={{ maxWidth: 500, ...springs }}
@@ -52,11 +53,16 @@ export const Toast: React.FC<Props> = ({ id, title, desc, type }) => {
 					className={clsx("text-md", {
 						"text-text-100": type === "success",
 						"text-white": type === "error",
+						"text-yellow": type === "warning",
 					})}
 				>
 					{title}
 				</p>
-				<p className="text-sm text-text-200">{desc}</p>
+				<p
+					className={`text-sm ${type === "warning" ? "text-yellow opacity-80" : "text-text-200"}`}
+				>
+					{desc}
+				</p>
 			</div>
 
 			{/* Progress bar */}
@@ -64,6 +70,7 @@ export const Toast: React.FC<Props> = ({ id, title, desc, type }) => {
 				className={clsx("absolute bottom-0 left-0 h-1 transition", {
 					"bg-accent-100": type === "success",
 					"bg-white": type === "error",
+					"bg-yellow": type === "warning",
 				})}
 				style={{ width: `${progress * 100}%` }}
 			></div>

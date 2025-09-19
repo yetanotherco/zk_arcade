@@ -4,7 +4,7 @@ export type Toast = {
 	id: string;
 	title: string;
 	desc: string;
-	type: "success" | "error";
+	type: "success" | "error" | "warning";
 };
 
 type ToastContextType = {

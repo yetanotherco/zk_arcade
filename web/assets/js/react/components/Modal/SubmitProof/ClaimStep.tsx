@@ -19,7 +19,14 @@ type ClaimComponentProps = {
 
 const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 	(
-		{ gameHasExpired, proofSubmission, handleClaim, onCancel, isLoading, claimTxHash },
+		{
+			gameHasExpired,
+			proofSubmission,
+			handleClaim,
+			onCancel,
+			isLoading,
+			claimTxHash,
+		},
 		formRef
 	) => {
 		const { csrfToken } = useCSRFToken();
@@ -44,10 +51,11 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 					</p>
 				)}
 				<div className="flex flex-col gap-2">
-					<p>Prover: {proofSubmission.proving_system}</p>
 					<p>Game: {proofSubmission.game}</p>
+					<p>Daily Quest: {Number(proofSubmission.game_idx) + 1}</p>
 					<p>Level reached: {proofSubmission.level_reached}</p>
 					<p>Points to claim: {proofSubmission.level_reached}</p>
+					<p>Prover: {proofSubmission.proving_system}</p>
 				</div>
 				<a
 					href="/leaderboard"

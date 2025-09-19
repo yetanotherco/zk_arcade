@@ -24,7 +24,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 200,
+        "blocks": 205,
         "static_blocks": 20,
         "common_beasts": 12,
         "super_beasts": 0,
@@ -35,8 +35,8 @@
         "completion_score": 7
       },
       {
-        "blocks": 186,
-        "static_blocks": 30,
+        "blocks": 181,
+        "static_blocks": 31,
         "common_beasts": 12,
         "super_beasts": 1,
         "eggs": 0,
@@ -47,6 +47,101 @@
       },
       {
         "blocks": 170,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 162,
+        "static_blocks": 31,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 50,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 166,
+        "static_blocks": 102,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "ff0a0300fa0c0500cd140c00b51f0c01aa1e0f03a21f0a07a0320f07a6660a0a",
+    "from_time": 1758292594,
+    "to_time": 1758422194
+  },
+  {
+    "levels": [
+      {
+        "blocks": 250,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 252,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 206,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 31,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 178,
         "static_blocks": 30,
         "common_beasts": 15,
         "super_beasts": 3,
@@ -68,8 +163,8 @@
         "completion_score": 15
       },
       {
-        "blocks": 166,
-        "static_blocks": 51,
+        "blocks": 165,
+        "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
         "eggs": 0,
@@ -79,8 +174,8 @@
         "completion_score": 20
       },
       {
-        "blocks": 161,
-        "static_blocks": 105,
+        "blocks": 164,
+        "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -90,14 +185,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "ff0a0300fa0c0500c8140c00ba1e0c01aa1e0f03a01e0a07a6330f07a1690a0a",
-    "from_time": 1757968996,
-    "to_time": 1758055396
+    "game_config": "fa0a0300fc0c0500ce140c00b41f0c01b21e0f03a01e0a07a5320f07a4640a0a",
+    "from_time": 1758378994,
+    "to_time": 1758508594
   },
   {
     "levels": [
       {
-        "blocks": 255,
+        "blocks": 250,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -130,7 +225,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 181,
+        "blocks": 182,
         "static_blocks": 30,
         "common_beasts": 12,
         "super_beasts": 1,
@@ -141,7 +236,7 @@
         "completion_score": 10
       },
       {
-        "blocks": 174,
+        "blocks": 170,
         "static_blocks": 30,
         "common_beasts": 15,
         "super_beasts": 3,
@@ -153,7 +248,7 @@
       },
       {
         "blocks": 160,
-        "static_blocks": 30,
+        "static_blocks": 31,
         "common_beasts": 10,
         "super_beasts": 7,
         "eggs": 0,
@@ -163,7 +258,7 @@
         "completion_score": 15
       },
       {
-        "blocks": 160,
+        "blocks": 164,
         "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
@@ -174,8 +269,8 @@
         "completion_score": 20
       },
       {
-        "blocks": 165,
-        "static_blocks": 100,
+        "blocks": 167,
+        "static_blocks": 102,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -185,14 +280,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "ff0a0300fa0c0500d1150c00b51e0c01ae1e0f03a01e0a07a0320f07a5640a0a",
-    "from_time": 1758055396,
-    "to_time": 1758141796
+    "game_config": "fa0a0300fa0c0500d1150c00b61e0c01aa1e0f03a01f0a07a4320f07a7660a0a",
+    "from_time": 1758465394,
+    "to_time": 1758594994
   },
   {
     "levels": [
       {
-        "blocks": 250,
+        "blocks": 252,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -203,7 +298,7 @@
         "completion_score": 5
       },
       {
-        "blocks": 255,
+        "blocks": 250,
         "static_blocks": 12,
         "common_beasts": 5,
         "super_beasts": 0,
@@ -214,7 +309,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 207,
+        "blocks": 200,
         "static_blocks": 20,
         "common_beasts": 12,
         "super_beasts": 0,
@@ -225,7 +320,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 181,
+        "blocks": 188,
         "static_blocks": 30,
         "common_beasts": 12,
         "super_beasts": 1,
@@ -236,7 +331,7 @@
         "completion_score": 10
       },
       {
-        "blocks": 176,
+        "blocks": 175,
         "static_blocks": 30,
         "common_beasts": 15,
         "super_beasts": 3,
@@ -247,8 +342,8 @@
         "completion_score": 12
       },
       {
-        "blocks": 163,
-        "static_blocks": 30,
+        "blocks": 167,
+        "static_blocks": 31,
         "common_beasts": 10,
         "super_beasts": 7,
         "eggs": 0,
@@ -258,8 +353,8 @@
         "completion_score": 15
       },
       {
-        "blocks": 164,
-        "static_blocks": 50,
+        "blocks": 160,
+        "static_blocks": 52,
         "common_beasts": 15,
         "super_beasts": 7,
         "eggs": 0,
@@ -269,8 +364,8 @@
         "completion_score": 20
       },
       {
-        "blocks": 164,
-        "static_blocks": 104,
+        "blocks": 160,
+        "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -280,9 +375,9 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fa0a0300ff0c0500cf140c00b51e0c01b01e0f03a31e0a07a4320f07a4680a0a",
-    "from_time": 1758141796,
-    "to_time": 1758228196
+    "game_config": "fc0a0300fa0c0500c8140c00bc1e0c01af1e0f03a71f0a07a0340f07a0640a0a",
+    "from_time": 1758551794,
+    "to_time": 1758681394
   },
   {
     "levels": [
@@ -298,7 +393,7 @@
         "completion_score": 5
       },
       {
-        "blocks": 250,
+        "blocks": 252,
         "static_blocks": 12,
         "common_beasts": 5,
         "super_beasts": 0,
@@ -310,101 +405,6 @@
       },
       {
         "blocks": 203,
-        "static_blocks": 21,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 181,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 178,
-        "static_blocks": 31,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 165,
-        "static_blocks": 30,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 50,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300fa0c0500cb150c00b51e0c01b21f0f03a51e0a07a0320f07a0640a0a",
-    "from_time": 1758228196,
-    "to_time": 1758314596
-  },
-  {
-    "levels": [
-      {
-        "blocks": 250,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 250,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 204,
         "static_blocks": 20,
         "common_beasts": 12,
         "super_beasts": 0,
@@ -415,7 +415,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 186,
+        "blocks": 182,
         "static_blocks": 31,
         "common_beasts": 12,
         "super_beasts": 1,
@@ -426,8 +426,8 @@
         "completion_score": 10
       },
       {
-        "blocks": 177,
-        "static_blocks": 31,
+        "blocks": 170,
+        "static_blocks": 30,
         "common_beasts": 15,
         "super_beasts": 3,
         "eggs": 0,
@@ -437,8 +437,8 @@
         "completion_score": 12
       },
       {
-        "blocks": 162,
-        "static_blocks": 30,
+        "blocks": 165,
+        "static_blocks": 31,
         "common_beasts": 10,
         "super_beasts": 7,
         "eggs": 0,
@@ -448,7 +448,7 @@
         "completion_score": 15
       },
       {
-        "blocks": 165,
+        "blocks": 160,
         "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
@@ -470,14 +470,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fa0a0300fa0c0500cc140c00ba1f0c01b11f0f03a21e0a07a5320f07a0640a0a",
-    "from_time": 1758314596,
-    "to_time": 1758400996
+    "game_config": "fa0a0300fc0c0500cb140c00b61f0c01aa1e0f03a51f0a07a0320f07a0640a0a",
+    "from_time": 1758638194,
+    "to_time": 1758767794
   },
   {
     "levels": [
       {
-        "blocks": 250,
+        "blocks": 255,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -521,196 +521,6 @@
         "completion_score": 10
       },
       {
-        "blocks": 177,
-        "static_blocks": 30,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 31,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 50,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 165,
-        "static_blocks": 101,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300ff0c0500c8140c00b81e0c01b11e0f03a01f0a07a0320f07a5650a0a",
-    "from_time": 1758400996,
-    "to_time": 1758487396
-  },
-  {
-    "levels": [
-      {
-        "blocks": 250,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 255,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 21,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 180,
-        "static_blocks": 31,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 174,
-        "static_blocks": 31,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 31,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 50,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300ff0c0500c8150c00b41f0c01ae1f0f03a01f0a07a0320f07a0640a0a",
-    "from_time": 1758487396,
-    "to_time": 1758573796
-  },
-  {
-    "levels": [
-      {
-        "blocks": 251,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 255,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 208,
-        "static_blocks": 21,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 186,
-        "static_blocks": 31,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
         "blocks": 170,
         "static_blocks": 30,
         "common_beasts": 15,
@@ -733,7 +543,7 @@
         "completion_score": 15
       },
       {
-        "blocks": 165,
+        "blocks": 160,
         "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
@@ -744,7 +554,7 @@
         "completion_score": 20
       },
       {
-        "blocks": 160,
+        "blocks": 167,
         "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
@@ -755,104 +565,9 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fb0a0300ff0c0500d0150c00ba1f0c01aa1e0f03a01e0a07a5320f07a0640a0a",
-    "from_time": 1758573796,
-    "to_time": 1758660196
-  },
-  {
-    "levels": [
-      {
-        "blocks": 255,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 250,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 21,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 183,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 170,
-        "static_blocks": 30,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 30,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 163,
-        "static_blocks": 50,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 162,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "ff0a0300fa0c0500c8150c00b71e0c01aa1e0f03a01e0a07a3320f07a2640a0a",
-    "from_time": 1758660196,
-    "to_time": 1758746596
+    "game_config": "ff0a0300ff0c0500c8140c00b81e0c01aa1e0f03a01e0a07a0320f07a7640a0a",
+    "from_time": 1758724594,
+    "to_time": 1758854194
   },
   {
     "levels": [
@@ -879,7 +594,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 207,
+        "blocks": 210,
         "static_blocks": 21,
         "common_beasts": 12,
         "super_beasts": 0,
@@ -890,8 +605,103 @@
         "completion_score": 7
       },
       {
-        "blocks": 182,
+        "blocks": 180,
         "static_blocks": 30,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 170,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 165,
+        "static_blocks": 52,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 104,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fa0a0300fe0c0500d2150c00b41e0c01aa1e0f03a01e0a07a5340f07a0680a0a",
+    "from_time": 1758810994,
+    "to_time": 1758940594
+  },
+  {
+    "levels": [
+      {
+        "blocks": 255,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 206,
+        "static_blocks": 21,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 31,
         "common_beasts": 12,
         "super_beasts": 1,
         "eggs": 0,
@@ -923,8 +733,8 @@
         "completion_score": 15
       },
       {
-        "blocks": 160,
-        "static_blocks": 52,
+        "blocks": 162,
+        "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
         "eggs": 0,
@@ -935,7 +745,7 @@
       },
       {
         "blocks": 160,
-        "static_blocks": 101,
+        "static_blocks": 103,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -945,14 +755,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fa0a0300fe0c0500cf150c00b61e0c01aa1e0f03a31f0a07a0340f07a0650a0a",
-    "from_time": 1758746596,
-    "to_time": 1758832996
+    "game_config": "ff0a0300fa0c0500ce150c00b41f0c01aa1e0f03a31f0a07a2320f07a0670a0a",
+    "from_time": 1758897394,
+    "to_time": 1759026994
   },
   {
     "levels": [
       {
-        "blocks": 250,
+        "blocks": 251,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -974,7 +784,102 @@
         "completion_score": 7
       },
       {
-        "blocks": 202,
+        "blocks": 204,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 31,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 170,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 165,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 50,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 163,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fb0a0300fc0c0500cc140c00b41f0c01aa1e0f03a51e0a07a0320f07a3640a0a",
+    "from_time": 1758983794,
+    "to_time": 1759113394
+  },
+  {
+    "levels": [
+      {
+        "blocks": 255,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 255,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 200,
         "static_blocks": 20,
         "common_beasts": 12,
         "super_beasts": 0,
@@ -996,7 +901,7 @@
         "completion_score": 10
       },
       {
-        "blocks": 172,
+        "blocks": 171,
         "static_blocks": 31,
         "common_beasts": 15,
         "super_beasts": 3,
@@ -1007,7 +912,7 @@
         "completion_score": 12
       },
       {
-        "blocks": 160,
+        "blocks": 163,
         "static_blocks": 31,
         "common_beasts": 10,
         "super_beasts": 7,
@@ -1018,7 +923,7 @@
         "completion_score": 15
       },
       {
-        "blocks": 162,
+        "blocks": 160,
         "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
@@ -1030,7 +935,7 @@
       },
       {
         "blocks": 160,
-        "static_blocks": 101,
+        "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -1040,9 +945,199 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fa0a0300fc0c0500ca140c00b41e0c01ac1f0f03a01f0a07a2320f07a0650a0a",
-    "from_time": 1758832996,
-    "to_time": 1758919396
+    "game_config": "ff0a0300ff0c0500c8140c00b41e0c01ab1f0f03a31f0a07a0320f07a0640a0a",
+    "from_time": 1759070194,
+    "to_time": 1759199794
+  },
+  {
+    "levels": [
+      {
+        "blocks": 255,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 206,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 182,
+        "static_blocks": 31,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 176,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 50,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 167,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "ff0a0300fa0c0500ce140c00b61f0c01b01e0f03a01e0a07a0320f07a7640a0a",
+    "from_time": 1759156594,
+    "to_time": 1759286194
+  },
+  {
+    "levels": [
+      {
+        "blocks": 255,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 200,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 182,
+        "static_blocks": 30,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 178,
+        "static_blocks": 31,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 168,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 52,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 163,
+        "static_blocks": 105,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "ff0a0300fa0c0500c8140c00b61e0c01b21f0f03a81e0a07a0340f07a3690a0a",
+    "from_time": 1759242994,
+    "to_time": 1759372594
   },
   {
     "levels": [
@@ -1070,7 +1165,7 @@
       },
       {
         "blocks": 200,
-        "static_blocks": 21,
+        "static_blocks": 20,
         "common_beasts": 12,
         "super_beasts": 0,
         "eggs": 0,
@@ -1113,7 +1208,7 @@
         "completion_score": 15
       },
       {
-        "blocks": 161,
+        "blocks": 162,
         "static_blocks": 52,
         "common_beasts": 15,
         "super_beasts": 7,
@@ -1125,7 +1220,7 @@
       },
       {
         "blocks": 160,
-        "static_blocks": 103,
+        "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -1135,14 +1230,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fa0a0300fa0c0500c8150c00b41e0c01aa1e0f03a01f0a07a1340f07a0670a0a",
-    "from_time": 1758919396,
-    "to_time": 1759005796
+    "game_config": "fa0a0300fa0c0500c8140c00b41e0c01aa1e0f03a01f0a07a2340f07a0640a0a",
+    "from_time": 1759329394,
+    "to_time": 1759458994
   },
   {
     "levels": [
       {
-        "blocks": 255,
+        "blocks": 250,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -1153,7 +1248,102 @@
         "completion_score": 5
       },
       {
-        "blocks": 251,
+        "blocks": 255,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 200,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 30,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 176,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 162,
+        "static_blocks": 52,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fa0a0300ff0c0500c8140c00b41e0c01b01e0f03a01e0a07a2340f07a0640a0a",
+    "from_time": 1759415794,
+    "to_time": 1759545394
+  },
+  {
+    "levels": [
+      {
+        "blocks": 250,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 255,
         "static_blocks": 12,
         "common_beasts": 5,
         "super_beasts": 0,
@@ -1175,8 +1365,8 @@
         "completion_score": 7
       },
       {
-        "blocks": 183,
-        "static_blocks": 31,
+        "blocks": 180,
+        "static_blocks": 30,
         "common_beasts": 12,
         "super_beasts": 1,
         "eggs": 0,
@@ -1186,7 +1376,7 @@
         "completion_score": 10
       },
       {
-        "blocks": 174,
+        "blocks": 175,
         "static_blocks": 30,
         "common_beasts": 15,
         "super_beasts": 3,
@@ -1197,8 +1387,8 @@
         "completion_score": 12
       },
       {
-        "blocks": 165,
-        "static_blocks": 30,
+        "blocks": 166,
+        "static_blocks": 31,
         "common_beasts": 10,
         "super_beasts": 7,
         "eggs": 0,
@@ -1208,7 +1398,7 @@
         "completion_score": 15
       },
       {
-        "blocks": 161,
+        "blocks": 160,
         "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
@@ -1219,7 +1409,7 @@
         "completion_score": 20
       },
       {
-        "blocks": 160,
+        "blocks": 162,
         "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
@@ -1230,14 +1420,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "ff0a0300fb0c0500c8150c00b71f0c01ae1e0f03a51e0a07a1320f07a0640a0a",
-    "from_time": 1759005796,
-    "to_time": 1759092196
+    "game_config": "fa0a0300ff0c0500c8150c00b41e0c01af1e0f03a61f0a07a0320f07a2640a0a",
+    "from_time": 1759502194,
+    "to_time": 1759631794
   },
   {
     "levels": [
       {
-        "blocks": 250,
+        "blocks": 251,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -1271,767 +1461,7 @@
       },
       {
         "blocks": 181,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 170,
-        "static_blocks": 30,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 162,
         "static_blocks": 31,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 165,
-        "static_blocks": 52,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 168,
-        "static_blocks": 103,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300fa0c0500c8150c00b51e0c01aa1e0f03a21f0a07a5340f07a8670a0a",
-    "from_time": 1759092196,
-    "to_time": 1759178596
-  },
-  {
-    "levels": [
-      {
-        "blocks": 250,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 255,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 21,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 185,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 170,
-        "static_blocks": 30,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 30,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 166,
-        "static_blocks": 51,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 163,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300ff0c0500c8150c00b91e0c01aa1e0f03a01e0a07a6330f07a3640a0a",
-    "from_time": 1759178596,
-    "to_time": 1759264996
-  },
-  {
-    "levels": [
-      {
-        "blocks": 250,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 252,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 21,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 180,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 172,
-        "static_blocks": 31,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 30,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 167,
-        "static_blocks": 51,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 166,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300fc0c0500c8150c00b41e0c01ac1f0f03a01e0a07a7330f07a6640a0a",
-    "from_time": 1759264996,
-    "to_time": 1759351396
-  },
-  {
-    "levels": [
-      {
-        "blocks": 250,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 255,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 20,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 183,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 172,
-        "static_blocks": 31,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 164,
-        "static_blocks": 31,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 168,
-        "static_blocks": 50,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 168,
-        "static_blocks": 105,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300ff0c0500c8140c00b71e0c01ac1f0f03a41f0a07a8320f07a8690a0a",
-    "from_time": 1759351396,
-    "to_time": 1759437796
-  },
-  {
-    "levels": [
-      {
-        "blocks": 250,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 250,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 20,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 180,
-        "static_blocks": 31,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 175,
-        "static_blocks": 30,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 31,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 161,
-        "static_blocks": 51,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300fa0c0500c8140c00b41f0c01af1e0f03a01f0a07a1330f07a0640a0a",
-    "from_time": 1759437796,
-    "to_time": 1759524196
-  },
-  {
-    "levels": [
-      {
-        "blocks": 250,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 250,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 21,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 183,
-        "static_blocks": 31,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 170,
-        "static_blocks": 30,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 168,
-        "static_blocks": 31,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 161,
-        "static_blocks": 52,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 168,
-        "static_blocks": 104,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300fa0c0500c8150c00b71f0c01aa1e0f03a81f0a07a1340f07a8680a0a",
-    "from_time": 1759524196,
-    "to_time": 1759610596
-  },
-  {
-    "levels": [
-      {
-        "blocks": 255,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 250,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 21,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 180,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 170,
-        "static_blocks": 31,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 30,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 168,
-        "static_blocks": 52,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "ff0a0300fa0c0500c8150c00b41e0c01aa1f0f03a01e0a07a8340f07a0640a0a",
-    "from_time": 1759610596,
-    "to_time": 1759696996
-  },
-  {
-    "levels": [
-      {
-        "blocks": 255,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 251,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 202,
-        "static_blocks": 20,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 180,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 176,
-        "static_blocks": 31,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 165,
-        "static_blocks": 31,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 51,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "ff0a0300fb0c0500ca140c00b41e0c01b01f0f03a51f0a07a0330f07a0640a0a",
-    "from_time": 1759696996,
-    "to_time": 1759783396
-  },
-  {
-    "levels": [
-      {
-        "blocks": 255,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 255,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 210,
-        "static_blocks": 20,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 187,
-        "static_blocks": 30,
         "common_beasts": 12,
         "super_beasts": 1,
         "eggs": 0,
@@ -2052,8 +1482,103 @@
         "completion_score": 12
       },
       {
+        "blocks": 167,
+        "static_blocks": 31,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 166,
+        "static_blocks": 51,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
         "blocks": 160,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fb0a0300fa0c0500c8150c00b51f0c01ad1f0f03a71f0a07a6330f07a0640a0a",
+    "from_time": 1759588594,
+    "to_time": 1759718194
+  },
+  {
+    "levels": [
+      {
+        "blocks": 254,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 200,
+        "static_blocks": 21,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 31,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 170,
         "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 168,
+        "static_blocks": 31,
         "common_beasts": 10,
         "super_beasts": 7,
         "eggs": 0,
@@ -2085,14 +1610,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "ff0a0300ff0c0500d2140c00bb1e0c01ad1f0f03a01e0a07a0320f07a0680a0a",
-    "from_time": 1759783396,
-    "to_time": 1759869796
+    "game_config": "fe0a0300fa0c0500c8150c00b41f0c01aa1e0f03a81f0a07a0320f07a0680a0a",
+    "from_time": 1759674994,
+    "to_time": 1759804594
   },
   {
     "levels": [
       {
-        "blocks": 252,
+        "blocks": 250,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -2103,7 +1628,102 @@
         "completion_score": 5
       },
       {
-        "blocks": 255,
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 200,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 30,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 172,
+        "static_blocks": 31,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 163,
+        "static_blocks": 31,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 52,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fa0a0300fa0c0500c8140c00b41e0c01ac1f0f03a31f0a07a0340f07a0640a0a",
+    "from_time": 1759761394,
+    "to_time": 1759890994
+  },
+  {
+    "levels": [
+      {
+        "blocks": 250,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 254,
         "static_blocks": 12,
         "common_beasts": 5,
         "super_beasts": 0,
@@ -2125,7 +1745,292 @@
         "completion_score": 7
       },
       {
-        "blocks": 187,
+        "blocks": 180,
+        "static_blocks": 30,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 170,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 165,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 52,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 162,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fa0a0300fe0c0500c9140c00b41e0c01aa1e0f03a51e0a07a0340f07a2640a0a",
+    "from_time": 1759847794,
+    "to_time": 1759977394
+  },
+  {
+    "levels": [
+      {
+        "blocks": 250,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 203,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 30,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 178,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 52,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 165,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fa0a0300fa0c0500cb140c00b41e0c01b21e0f03a01e0a07a0340f07a5640a0a",
+    "from_time": 1759934194,
+    "to_time": 1760063794
+  },
+  {
+    "levels": [
+      {
+        "blocks": 255,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 255,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 200,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 183,
+        "static_blocks": 31,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 170,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 161,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 164,
+        "static_blocks": 50,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "ff0a0300ff0c0500c8140c00b71f0c01aa1e0f03a11e0a07a4320f07a0640a0a",
+    "from_time": 1760020594,
+    "to_time": 1760150194
+  },
+  {
+    "levels": [
+      {
+        "blocks": 250,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 200,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 182,
         "static_blocks": 30,
         "common_beasts": 12,
         "super_beasts": 1,
@@ -2158,7 +2063,7 @@
         "completion_score": 15
       },
       {
-        "blocks": 165,
+        "blocks": 163,
         "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
@@ -2169,8 +2074,8 @@
         "completion_score": 20
       },
       {
-        "blocks": 162,
-        "static_blocks": 102,
+        "blocks": 160,
+        "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -2180,9 +2085,199 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fc0a0300ff0c0500c9140c00bb1e0c01aa1e0f03a01e0a07a5320f07a2660a0a",
-    "from_time": 1759869796,
-    "to_time": 1759956196
+    "game_config": "fa0a0300fa0c0500c8140c00b61e0c01aa1e0f03a01e0a07a3320f07a0640a0a",
+    "from_time": 1760106994,
+    "to_time": 1760236594
+  },
+  {
+    "levels": [
+      {
+        "blocks": 250,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 209,
+        "static_blocks": 21,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 30,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 170,
+        "static_blocks": 31,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 31,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 167,
+        "static_blocks": 52,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fa0a0300fa0c0500d1150c00b41e0c01aa1f0f03a01f0a07a7340f07a0640a0a",
+    "from_time": 1760193394,
+    "to_time": 1760322994
+  },
+  {
+    "levels": [
+      {
+        "blocks": 250,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 251,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 200,
+        "static_blocks": 21,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 180,
+        "static_blocks": 31,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 170,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 168,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 164,
+        "static_blocks": 50,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 168,
+        "static_blocks": 100,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fa0a0300fb0c0500c8150c00b41f0c01aa1e0f03a81e0a07a4320f07a8640a0a",
+    "from_time": 1760279794,
+    "to_time": 1760409394
   },
   {
     "levels": [
@@ -2221,7 +2316,7 @@
       },
       {
         "blocks": 180,
-        "static_blocks": 30,
+        "static_blocks": 31,
         "common_beasts": 12,
         "super_beasts": 1,
         "eggs": 0,
@@ -2231,8 +2326,8 @@
         "completion_score": 10
       },
       {
-        "blocks": 170,
-        "static_blocks": 30,
+        "blocks": 178,
+        "static_blocks": 31,
         "common_beasts": 15,
         "super_beasts": 3,
         "eggs": 0,
@@ -2242,8 +2337,8 @@
         "completion_score": 12
       },
       {
-        "blocks": 160,
-        "static_blocks": 31,
+        "blocks": 164,
+        "static_blocks": 30,
         "common_beasts": 10,
         "super_beasts": 7,
         "eggs": 0,
@@ -2254,7 +2349,7 @@
       },
       {
         "blocks": 160,
-        "static_blocks": 51,
+        "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
         "eggs": 0,
@@ -2264,7 +2359,7 @@
         "completion_score": 20
       },
       {
-        "blocks": 164,
+        "blocks": 160,
         "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
@@ -2275,14 +2370,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fc0a0300ff0c0500c8140c00b41e0c01aa1e0f03a01f0a07a0330f07a4640a0a",
-    "from_time": 1759956196,
-    "to_time": 1760042596
+    "game_config": "fc0a0300ff0c0500c8140c00b41f0c01b21f0f03a41e0a07a0320f07a0640a0a",
+    "from_time": 1760366194,
+    "to_time": 1760495794
   },
   {
     "levels": [
       {
-        "blocks": 250,
+        "blocks": 252,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -2304,8 +2399,8 @@
         "completion_score": 7
       },
       {
-        "blocks": 200,
-        "static_blocks": 21,
+        "blocks": 208,
+        "static_blocks": 20,
         "common_beasts": 12,
         "super_beasts": 0,
         "eggs": 0,
@@ -2315,8 +2410,8 @@
         "completion_score": 7
       },
       {
-        "blocks": 180,
-        "static_blocks": 31,
+        "blocks": 184,
+        "static_blocks": 30,
         "common_beasts": 12,
         "super_beasts": 1,
         "eggs": 0,
@@ -2326,7 +2421,7 @@
         "completion_score": 10
       },
       {
-        "blocks": 170,
+        "blocks": 175,
         "static_blocks": 30,
         "common_beasts": 15,
         "super_beasts": 3,
@@ -2337,7 +2432,7 @@
         "completion_score": 12
       },
       {
-        "blocks": 165,
+        "blocks": 161,
         "static_blocks": 30,
         "common_beasts": 10,
         "super_beasts": 7,
@@ -2348,8 +2443,103 @@
         "completion_score": 15
       },
       {
-        "blocks": 161,
-        "static_blocks": 52,
+        "blocks": 166,
+        "static_blocks": 50,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 164,
+        "static_blocks": 105,
+        "common_beasts": 10,
+        "super_beasts": 10,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 330,
+        "completion_score": 25
+      }
+    ],
+    "game_config": "fc0a0300ff0c0500d0140c00b81e0c01af1e0f03a11e0a07a6320f07a4690a0a",
+    "from_time": 1760452594,
+    "to_time": 1760582194
+  },
+  {
+    "levels": [
+      {
+        "blocks": 250,
+        "static_blocks": 10,
+        "common_beasts": 3,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 120,
+        "completion_score": 5
+      },
+      {
+        "blocks": 250,
+        "static_blocks": 12,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 120,
+        "completion_score": 7
+      },
+      {
+        "blocks": 208,
+        "static_blocks": 20,
+        "common_beasts": 12,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 7
+      },
+      {
+        "blocks": 181,
+        "static_blocks": 31,
+        "common_beasts": 12,
+        "super_beasts": 1,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 10
+      },
+      {
+        "blocks": 177,
+        "static_blocks": 30,
+        "common_beasts": 15,
+        "super_beasts": 3,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 240,
+        "completion_score": 12
+      },
+      {
+        "blocks": 168,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 168,
+        "static_blocks": 51,
         "common_beasts": 15,
         "super_beasts": 7,
         "eggs": 0,
@@ -2370,9 +2560,9 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fa0a0300ff0c0500c8150c00b41f0c01aa1e0f03a51e0a07a1340f07a0640a0a",
-    "from_time": 1760042596,
-    "to_time": 1760128996
+    "game_config": "fa0a0300fa0c0500d0140c00b51f0c01b11e0f03a81e0a07a8330f07a0640a0a",
+    "from_time": 1760538994,
+    "to_time": 1760668594
   },
   {
     "levels": [
@@ -2399,8 +2589,8 @@
         "completion_score": 7
       },
       {
-        "blocks": 209,
-        "static_blocks": 21,
+        "blocks": 210,
+        "static_blocks": 20,
         "common_beasts": 12,
         "super_beasts": 0,
         "eggs": 0,
@@ -2421,7 +2611,7 @@
         "completion_score": 10
       },
       {
-        "blocks": 170,
+        "blocks": 174,
         "static_blocks": 30,
         "common_beasts": 15,
         "super_beasts": 3,
@@ -2432,102 +2622,7 @@
         "completion_score": 12
       },
       {
-        "blocks": 160,
-        "static_blocks": 30,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 161,
-        "static_blocks": 50,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 103,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "fa0a0300fa0c0500d1150c00b41e0c01aa1e0f03a01e0a07a1320f07a0670a0a",
-    "from_time": 1760128996,
-    "to_time": 1760215396
-  },
-  {
-    "levels": [
-      {
-        "blocks": 250,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 250,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 20,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 185,
-        "static_blocks": 30,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 178,
-        "static_blocks": 30,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 167,
+        "blocks": 162,
         "static_blocks": 31,
         "common_beasts": 10,
         "super_beasts": 7,
@@ -2550,7 +2645,7 @@
       },
       {
         "blocks": 163,
-        "static_blocks": 105,
+        "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -2560,9 +2655,9 @@
         "completion_score": 25
       }
     ],
-    "game_config": "fa0a0300fa0c0500c8140c00b91e0c01b21e0f03a71f0a07a0340f07a3690a0a",
-    "from_time": 1760215396,
-    "to_time": 1760301796
+    "game_config": "fa0a0300fa0c0500d2140c00b41e0c01ae1e0f03a21f0a07a0340f07a3640a0a",
+    "from_time": 1760625394,
+    "to_time": 1760754994
   },
   {
     "levels": [
@@ -2578,7 +2673,7 @@
         "completion_score": 5
       },
       {
-        "blocks": 250,
+        "blocks": 254,
         "static_blocks": 12,
         "common_beasts": 5,
         "super_beasts": 0,
@@ -2589,7 +2684,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 209,
+        "blocks": 200,
         "static_blocks": 20,
         "common_beasts": 12,
         "super_beasts": 0,
@@ -2600,7 +2695,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 185,
+        "blocks": 184,
         "static_blocks": 30,
         "common_beasts": 12,
         "super_beasts": 1,
@@ -2623,7 +2718,7 @@
       },
       {
         "blocks": 166,
-        "static_blocks": 31,
+        "static_blocks": 30,
         "common_beasts": 10,
         "super_beasts": 7,
         "eggs": 0,
@@ -2633,7 +2728,7 @@
         "completion_score": 15
       },
       {
-        "blocks": 167,
+        "blocks": 163,
         "static_blocks": 50,
         "common_beasts": 15,
         "super_beasts": 7,
@@ -2645,7 +2740,7 @@
       },
       {
         "blocks": 160,
-        "static_blocks": 102,
+        "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
         "eggs": 0,
@@ -2655,14 +2750,14 @@
         "completion_score": 25
       }
     ],
-    "game_config": "ff0a0300fa0c0500d1140c00b91e0c01aa1e0f03a61f0a07a7320f07a0660a0a",
-    "from_time": 1760301796,
-    "to_time": 1760388196
+    "game_config": "ff0a0300fe0c0500c8140c00b81e0c01aa1e0f03a61e0a07a3320f07a0640a0a",
+    "from_time": 1760711794,
+    "to_time": 1760841394
   },
   {
     "levels": [
       {
-        "blocks": 255,
+        "blocks": 250,
         "static_blocks": 10,
         "common_beasts": 3,
         "super_beasts": 0,
@@ -2673,7 +2768,7 @@
         "completion_score": 5
       },
       {
-        "blocks": 250,
+        "blocks": 255,
         "static_blocks": 12,
         "common_beasts": 5,
         "super_beasts": 0,
@@ -2684,7 +2779,7 @@
         "completion_score": 7
       },
       {
-        "blocks": 207,
+        "blocks": 203,
         "static_blocks": 21,
         "common_beasts": 12,
         "super_beasts": 0,
@@ -2706,8 +2801,8 @@
         "completion_score": 10
       },
       {
-        "blocks": 177,
-        "static_blocks": 30,
+        "blocks": 172,
+        "static_blocks": 31,
         "common_beasts": 15,
         "super_beasts": 3,
         "eggs": 0,
@@ -2715,126 +2810,31 @@
         "beast_starting_distance": 27,
         "time": 240,
         "completion_score": 12
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 30,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 167,
-        "static_blocks": 51,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 100,
-        "common_beasts": 10,
-        "super_beasts": 10,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 330,
-        "completion_score": 25
-      }
-    ],
-    "game_config": "ff0a0300fa0c0500cf150c00b41e0c01b11e0f03a01e0a07a7330f07a0640a0a",
-    "from_time": 1760388196,
-    "to_time": 1760474596
-  },
-  {
-    "levels": [
-      {
-        "blocks": 255,
-        "static_blocks": 10,
-        "common_beasts": 3,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 16,
-        "time": 120,
-        "completion_score": 5
-      },
-      {
-        "blocks": 255,
-        "static_blocks": 12,
-        "common_beasts": 5,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 42,
-        "time": 120,
-        "completion_score": 7
-      },
-      {
-        "blocks": 200,
-        "static_blocks": 20,
-        "common_beasts": 12,
-        "super_beasts": 0,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 7
-      },
-      {
-        "blocks": 187,
-        "static_blocks": 31,
-        "common_beasts": 12,
-        "super_beasts": 1,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 10
-      },
-      {
-        "blocks": 170,
-        "static_blocks": 30,
-        "common_beasts": 15,
-        "super_beasts": 3,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 240,
-        "completion_score": 12
-      },
-      {
-        "blocks": 164,
-        "static_blocks": 31,
-        "common_beasts": 10,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 15
-      },
-      {
-        "blocks": 160,
-        "static_blocks": 52,
-        "common_beasts": 15,
-        "super_beasts": 7,
-        "eggs": 0,
-        "egg_hatching_time": 20000,
-        "beast_starting_distance": 27,
-        "time": 300,
-        "completion_score": 20
       },
       {
         "blocks": 165,
+        "static_blocks": 30,
+        "common_beasts": 10,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 15
+      },
+      {
+        "blocks": 160,
+        "static_blocks": 50,
+        "common_beasts": 15,
+        "super_beasts": 7,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 20
+      },
+      {
+        "blocks": 164,
         "static_blocks": 100,
         "common_beasts": 10,
         "super_beasts": 10,
@@ -2845,8 +2845,8 @@
         "completion_score": 25
       }
     ],
-    "game_config": "ff0a0300ff0c0500c8140c00bb1f0c01aa1e0f03a41f0a07a0340f07a5640a0a",
-    "from_time": 1760474596,
-    "to_time": 1760560996
+    "game_config": "fa0a0300ff0c0500cb150c00b41e0c01ac1f0f03a51e0a07a0320f07a4640a0a",
+    "from_time": 1760798194,
+    "to_time": 1760927794
   }
 ]

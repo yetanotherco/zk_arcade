@@ -163,6 +163,9 @@ defmodule ZkArcadeWeb.ProofController do
 
               {:ok, {:error, reason}} ->
                 Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
+                # Remove the proof since it failed during batcher validation,
+                # we don't want to count it as sent
+                Proofs.delete_proof(pending_proof)
 
                 conn
                 |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")

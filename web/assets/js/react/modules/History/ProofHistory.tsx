@@ -95,7 +95,7 @@ const Entry = ({
 					proof={proof}
 					explorer_url={explorer_url}
 				/>
-				<ProofClaimTxHash proof={proof}/>
+				<ProofClaimTxHash proof={proof} />
 				<TableBodyItem text={proof.proving_system} />
 			</tr>
 
@@ -109,6 +109,7 @@ const Entry = ({
 				proof={proof}
 				proofToSubmitData={null}
 				nft_contract_address={nft_contract_address}
+				gameIdx={proof.game_idx}
 			/>
 		</>
 	);
@@ -162,7 +163,10 @@ export const ProofHistory = ({
 					{ text: "Prover" },
 				]}
 			>
-                <hr className="border-text-200 w-full" style={{ minWidth: 1000 }} />
+				<hr
+					className="border-text-200 w-full"
+					style={{ minWidth: 1000 }}
+				/>
 
 				{proofs.map((proof, idx) => (
 					<Entry

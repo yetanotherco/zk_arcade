@@ -16,6 +16,14 @@ export const useProofSentMessageReader = () => {
 			});
 		}
 
+		if (message == "bump-failed") {
+			addToast({
+				title: "Bump failed",
+				desc: "Check if the original proof was verified on the profile menu",
+				type: "error",
+			});
+		}
+
 		if (message == "proof-sent") {
 			addToast({
 				title: "Proof sent to Aligned",

@@ -187,6 +187,25 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
+  def get_highest_level_proof(address, game_idx, game) do
+    downcased_addr = String.downcase(address)
+    six_hours_ago = DateTime.add(DateTime.utc_now(), -21600, :second)
+
+    Proof
+      |> where(
+        [p],
+        p.wallet_address == ^downcased_addr and p.game_idx == ^game_idx and p.game == ^game and
+          (
+            (p.status not in ["failed", "pending"]) or
+            # This means we only consider those pending proofs that were submitted in the last 6 hours
+            (p.status == "pending" and p.inserted_at > ^six_hours_ago)
+          )
+      )
+      |> order_by([p], desc: p.level_reached)
+      |> limit(1)
+      |> Repo.one()
+  end
+
   def create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee, game_idx) do
     {:ok, verification_data_commitment} = ZkArcade.VerificationDataCommitment.compute_verification_data_commitment(submit_proof_message["verificationData"]["verificationData"])
     proof_params = %{

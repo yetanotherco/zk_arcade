@@ -66,7 +66,6 @@ export const SubmitProofStep = ({
 	leaderboard_address,
 	user_address,
 	payment_service_addr,
-	userProofs,
 	setOpen,
 	setStep,
 	proofSubmission,
@@ -75,12 +74,13 @@ export const SubmitProofStep = ({
 	proofToSubmitData,
 	gameName,
 	initialGameIdx,
+	highestLevelReached,
+	currentLevelReached,
 }: {
 	batcher_url: string;
 	user_address: Address;
 	leaderboard_address: Address;
 	payment_service_addr: Address;
-	userProofs: BeastProofClaimed[];
 	setOpen: (open: boolean) => void;
 	setStep: (step: string) => void;
 	proofSubmission?: ProofSubmission;
@@ -89,6 +89,8 @@ export const SubmitProofStep = ({
 	proofToSubmitData: VerificationData | null;
 	gameName: string;
 	initialGameIdx?: number;
+	highestLevelReached?: number;
+	currentLevelReached?: number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
@@ -202,14 +204,7 @@ export const SubmitProofStep = ({
 			setInvalidGameConfig(false);
 		}
 
-		const alreadySubmitted = userProofs.some(
-			p =>
-				typeof p.game_config === "string" &&
-				typeof parsed.game_config === "string" &&
-				p.game_config.toLowerCase() ===
-					parsed.game_config.toLowerCase() &&
-				p.level >= parsed.level
-		);
+		const alreadySubmitted = (highestLevelReached ?? 0) >= parsed.level;
 
 		if (alreadySubmitted) {
 			setLevelAlreadyReached(true);
@@ -566,6 +561,14 @@ export const SubmitProofStep = ({
 		);
 	}
 
+	useEffect(() => {
+		if (!proofToSubmitData) return;
+		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
+			setLevelAlreadyReached(true);
+			return;
+		}
+	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
+
 	const gameData = getGameData(gameName);
 
 	return (
@@ -650,7 +653,8 @@ export const SubmitProofStep = ({
 					{levelAlreadyReached && (
 						<p className="text-red">
 							You have already submitted a proof with a higher or
-							equal level for this game.
+							equal level for this game. If you uploaded the proof
+							recently, you'll have to wait 6 hours to submit it again.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (
@@ -712,7 +716,8 @@ export const SubmitProofStep = ({
 							!publicInputs ||
 							(balance.data || 0) < maxFee ||
 							nonceLoading ||
-							nonce == null
+							nonce == null ||
+							levelAlreadyReached
 						}
 						isLoading={submissionIsLoading}
 						onClick={handleSubmission}
@@ -725,7 +730,8 @@ export const SubmitProofStep = ({
 						disabled={
 							(balance.data || 0) < maxFee ||
 							nonceLoading ||
-							nonce == null
+							nonce == null ||
+							levelAlreadyReached
 						}
 						isLoading={submissionIsLoading}
 						onClick={() => handleSend(proofToSubmitData)}

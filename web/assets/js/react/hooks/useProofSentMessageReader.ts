@@ -20,7 +20,7 @@ export const useProofSentMessageReader = () => {
 			addToast({
 				title: "Bump failed",
 				desc: "Check if the original proof was verified on the profile menu",
-				type: "error",
+				type: "warning",
 			});
 		}
 

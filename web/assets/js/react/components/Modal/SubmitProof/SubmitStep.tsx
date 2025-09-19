@@ -654,7 +654,7 @@ export const SubmitProofStep = ({
 						<p className="text-red">
 							You have already submitted a proof with a higher or
 							equal level for this game. If you uploaded the proof
-							recently, please wait 6 hours to try submit it again.
+							recently, you'll have to wait 6 hours to submit it again.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (

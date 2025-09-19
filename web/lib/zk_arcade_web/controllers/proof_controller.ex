@@ -278,8 +278,8 @@ defmodule ZkArcadeWeb.ProofController do
     Logger.error("Bump fee transaction failed to verify proof with reason: #{inspect(reason)}")
   end
 
-  defp handle_verification_failure(proof_id, _reason, :initial) do
-        Logger.error("Failed to verify proof in aligned: #{inspect(reason)}")
+  defp handle_verification_failure(proof_id, reason, :initial) do
+    Logger.error("Failed to verify proof in aligned: #{inspect(reason)}")
     case Proofs.update_proof_status_failed(proof_id) do
       {:ok, _} ->
         Logger.info("Proof #{proof_id} status updated to failed")

@@ -276,11 +276,11 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp handle_verification_failure(proof_id, reason, :retry) do
+  defp handle_verification_failure(_proof_id, reason, :retry) do
     Logger.error("Retry failed with reason #{inspect(reason)}")
   end
 
-  defp handle_verification_failure(proof_id, reason, :initial) do
+  defp handle_verification_failure(proof_id, _reason, :initial) do
     case Proofs.update_proof_status_failed(proof_id) do
       {:ok, _} ->
         Logger.info("Proof #{proof_id} status updated to failed")
@@ -289,7 +289,7 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp handle_batcher_failure(proof_id, reason, :retry) do
+  defp handle_batcher_failure(_proof_id, reason, :retry) do
     Logger.info("Retry failed with reason #{inspect(reason)}")
     {:error, reason}
   end

@@ -653,7 +653,8 @@ export const SubmitProofStep = ({
 					{levelAlreadyReached && (
 						<p className="text-red">
 							You have already submitted a proof with a higher or
-							equal level for this game.
+							equal level for this game. If you uploaded the proof
+							recently, please wait 6 hours to try submit it again.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (

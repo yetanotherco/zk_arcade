@@ -344,10 +344,29 @@ defmodule ZkArcadeWeb.ProofController do
                   {:ok, {:error, reason}} ->
                     Logger.error("Failed to retry proof submission: #{inspect(reason)}")
 
-                    conn
-                    |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
-                    |> redirect(to: build_redirect_url(conn, "bump-failed", proof.id))
+                    {:unrecognized_message, message} = reason
 
+                    case message do
+                      "UnderpricedProof" ->
+                        conn
+                        |> put_flash(:error, "Proof was underpriced.")
+                        |> redirect(to: build_redirect_url(conn, "underpriced-proof", proof.id))
+
+                      "InvalidNonce" ->
+                        conn
+                        |> put_flash(:error, "Invalid nonce used in the proof submission.")
+                        |> redirect(to: build_redirect_url(conn, "invalid-nonce", proof.id))
+
+                      "InsufficientBalance" ->
+                        conn
+                        |> put_flash(:error, "Insufficient balance to cover the fee.")
+                        |> redirect(to: build_redirect_url(conn, "insufficient-balance", proof.id))
+
+                      _ ->
+                        conn
+                        |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
+                        |> redirect(to: build_redirect_url(conn, "bump-failed", proof.id))
+                    end
                   nil ->
                     Logger.info("Task is taking longer than 10 seconds, proceeding and removing the previous task.")
 

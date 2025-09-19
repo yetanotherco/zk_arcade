@@ -19,7 +19,31 @@ export const useProofSentMessageReader = () => {
 		if (message == "bump-failed") {
 			addToast({
 				title: "Bump failed",
-				desc: "Check if the original proof was verified on the profile menu",
+				desc: "The bump transaction failed. Check if the original proof transaction was verified before bumping the fee again.",
+				type: "warning",
+			});
+		}
+
+		if (message == "underpriced-proof") {
+			addToast({
+				title: "Underpriced proof",
+				desc: "The proof was underpriced. Please send the proof again with a higher fee.",
+				type: "warning",
+			});
+		}
+
+		if (message == "invalid-nonce") {
+			addToast({
+				title: "Invalid nonce",
+				desc: "The proof was included in the batch, the bump transaction was skipped.",
+				type: "warning",
+			});
+		}
+
+		if (message == "insufficient-balance") {
+			addToast({
+				title: "Insufficient balance",
+				desc: "You do not have enough funds to bump the proof fee. The transaction was skipped.",
 				type: "warning",
 			});
 		}

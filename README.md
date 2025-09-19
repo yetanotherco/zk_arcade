@@ -131,17 +131,36 @@ systemctl restart zk_arcade --user
 
 First, we run a preprocessing step on the address whitelist to ensure it contains no duplicate or invalid addresses. Then, we use the valid addresses to generate the Merkle proof data for the new campaign, which will be stored in the database and added to the NFT contract.
 
+### Prerequisites
+
+The preprocessing script requires Python with pandas. Set up a virtual environment:
+
+```shell
+# Create virtual environment
+python3 -m venv ~/.python_venvs/pandas_venv
+
+# Activate virtual environment
+source ~/.python_venvs/pandas_venv/bin/activate
+
+# Install dependencies
+pip install -r data/requirements.txt
+```
+
 ### Preprocessing Workflow
 
 To run the preprocessing:
 
 1. Put your addresses in `whitelist_addresses.csv`, or provide your own CSV file.
-2. Run the preprocessing script:
+2. Activate the Python virtual environment:
+   ```shell
+   source ~/.python_venvs/pandas_venv/bin/activate
+   ```
+3. Run the preprocessing script:
    ```shell
    make preprocess_whitelist WHITELIST_PATH=<whitelist_path>
    ```
    (Where `WHITELIST_PATH` is the path to the CSV file containing the addresses to whitelist)
-3. Removed addresses will be written to `removed_addresses.csv`, and the addresses to generate Merkle proof data will be written to `new_addresses.csv` into `data` directory.
+4. Removed addresses will be written to `removed_addresses.csv`, and the addresses to generate Merkle proof data will be written to `new_addresses.csv` into `data` directory.
 
 ### Merkle Proof Data Generation
 

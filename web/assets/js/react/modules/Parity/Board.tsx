@@ -11,16 +11,21 @@ type Props = {
 	totalLevels: number;
 	home: () => void;
 	user_positions: [number, number][];
+	updatePos: (_: { dr: number; dc: number }) => void;
 };
 
 const Tile = ({
 	value,
 	currentPos,
 	gameEnded,
+	onClick,
+	canMove,
 }: {
 	value: number | string;
 	currentPos: boolean;
 	gameEnded: boolean;
+	canMove: boolean;
+	onClick: () => void;
 }) => {
 	const prev = React.useRef(value);
 	const { muted } = useAudioState();
@@ -51,7 +56,9 @@ const Tile = ({
 				changed && !gameEnded
 					? "scale-102 ring-2 ring-accent-100"
 					: "ring-0",
+				canMove && "cursor-pointer",
 			].join(" ")}
+			onClick={onClick}
 		>
 			<p
 				className={[
@@ -68,18 +75,39 @@ const Tile = ({
 
 export const ParityBoard = ({
 	values,
-	positionIdx,
 	levelNumber,
 	totalLevels,
 	home,
 	reset,
 	user_positions,
+	positionIdx,
+	updatePos,
 }: Props) => {
 	const { muted, toggleMuted } = useAudioState();
 
 	const userMovements =
 		user_positions.length > 0 ? user_positions.length - 1 : 0;
 	const remainingMovements = PARITY_MAX_MOVEMENTS - userMovements;
+
+	const getMoveDx = (idx: number) => {
+		if (remainingMovements <= 0) return null;
+
+		const size = 3;
+		const curRow = Math.floor(positionIdx / size);
+		const curCol = positionIdx % size;
+
+		const tgtRow = Math.floor(idx / size);
+		const tgtCol = idx % size;
+
+		const dr = tgtRow - curRow;
+		const dc = tgtCol - curCol;
+
+		if (Math.abs(dr) + Math.abs(dc) === 1)
+			return {
+				dr,
+				dc,
+			};
+	};
 
 	return (
 		<div className="h-full flex flex-col justify-center items-center gap-4">
@@ -90,6 +118,13 @@ export const ParityBoard = ({
 						value={val}
 						currentPos={positionIdx === idx}
 						gameEnded={remainingMovements <= 0}
+						canMove={!!getMoveDx(idx)}
+						onClick={() => {
+							const move = getMoveDx(idx);
+							if (move) {
+								updatePos(move);
+							}
+						}}
 					/>
 				))}
 			</div>

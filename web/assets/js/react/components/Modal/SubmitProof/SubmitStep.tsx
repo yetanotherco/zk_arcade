@@ -24,6 +24,7 @@ import { useChainId } from "wagmi";
 import { Button } from "../../Button";
 import { BumpFee } from "./BumpFee";
 import { fetchProofVerificationData } from "../../../utils/aligned";
+import { ProgressBar } from "../../ProgressBar";
 
 type Game = {
 	id: "beast" | string;
@@ -35,17 +36,12 @@ const GAMES: Game[] = [
 	{
 		id: "beast",
 		name: "Beast",
-		cover: "/images/beast.jpg",
+		cover: "/images/beast.gif",
 	},
 	{
 		id: "parity",
 		name: "Parity",
 		cover: "/images/parity.jpg",
-	},
-	{
-		id: "Sudoku",
-		name: "Sudoku",
-		cover: "/images/sudoku.jpg",
 	},
 ];
 
@@ -457,7 +453,8 @@ export const SubmitProofStep = ({
 			<div className="flex flex-col gap-4 justify-between h-full">
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
-						The proof has been submitted to Aligned. Come back in a few hours to claim your points.
+						The proof has been submitted to Aligned. Come back in a
+						few hours to claim your points.
 					</p>
 				) : proofStatus === "underpriced" ? (
 					<p className="bg-orange/20 rounded p-2 text-orange">
@@ -466,7 +463,8 @@ export const SubmitProofStep = ({
 					</p>
 				) : (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
-						The proof has been included in a batch and it will be verified by Aligned
+						The proof has been included in a batch and it will be
+						verified by Aligned
 					</p>
 				)}
 
@@ -686,6 +684,16 @@ export const SubmitProofStep = ({
 				<span className="hero-chevron-left"></span>
 				Go Back
 			</Button>
+
+			{submissionIsLoading && (
+				<div className="max-w-[300px] w-full flex items-center justify-center mx-auto">
+					<ProgressBar
+						shouldAnimate={submissionIsLoading}
+						timeToPassMs={10 * 1000}
+					/>
+				</div>
+			)}
+
 			<div className="self-end">
 				<Button
 					variant="text"

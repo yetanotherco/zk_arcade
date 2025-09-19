@@ -251,7 +251,7 @@ release:
 	mix local.rebar --force && \
 	mix deps.get --only $(MIX_ENV) && \
 	mix compile && \
-	npm --prefix assets install && \
+	npm --prefix assets ci && \
 	mix phx.digest && \
 	mix assets.deploy && \
 	mix release

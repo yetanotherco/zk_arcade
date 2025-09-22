@@ -358,7 +358,6 @@ defmodule ZkArcadeWeb.ProofController do
 
   defp handle_batcher_failure(proof_id, reason, :initial) do
     Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-
     case Proofs.update_proof_status_failed(proof_id) do
       {:ok, _} ->
         Logger.info("Proof #{proof_id} status updated to failed")

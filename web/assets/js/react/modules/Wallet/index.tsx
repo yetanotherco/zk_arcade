@@ -22,7 +22,6 @@ type Props = {
 	user_position: number;
 	explorer_url: string;
 	batcher_url: string;
-	user_beast_submissions: string;
 	is_eligible: string;
 	nft_contract_address: Address;
 };
@@ -37,7 +36,6 @@ const WalletContent = ({
 	user_position,
 	explorer_url,
 	batcher_url,
-	user_beast_submissions,
 	is_eligible,
 	nft_contract_address,
 }: Omit<Props, "needs_agreement">) => {
@@ -84,9 +82,6 @@ const WalletContent = ({
 						payment_service_address={payment_service_address}
 						user_address={user_address}
 						batcher_url={batcher_url}
-						user_beast_submissions={JSON.parse(
-							user_beast_submissions
-						)}
 						nft_contract_address={nft_contract_address}
 					/>
 				</div>
@@ -126,7 +121,6 @@ export default ({
 	user_position,
 	explorer_url,
 	batcher_url,
-	user_beast_submissions,
 	is_eligible,
 	nft_contract_address,
 }: Omit<Props, "needs_agreement">) => {
@@ -144,7 +138,6 @@ export default ({
 					user_position={user_position}
 					explorer_url={explorer_url}
 					batcher_url={batcher_url}
-					user_beast_submissions={user_beast_submissions}
 					is_eligible={is_eligible}
 					nft_contract_address={nft_contract_address}
 				/>

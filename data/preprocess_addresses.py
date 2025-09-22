@@ -69,11 +69,13 @@ def filter_repeated_and_ofac_addresses(whitelist_path, inserted_dir):
 
     print_stats(whitelist_df, df_filtered, df_removed)
 
-    df_filtered.to_csv("new_addresses.csv", index=False)
-    df_removed.to_csv("removed_addresses.csv", index=False)
+    # NOTE: This is to be intended to be run from the root of the repository
+    # so the data/ folder is correctly referenced.
+    df_filtered.to_csv("data/new_addresses.csv", index=False)
+    df_removed.to_csv("data/removed_addresses.csv", index=False)
 
-    print(f"New addresses saved to new_addresses.csv")
-    print(f"Removed addresses saved to removed_addresses.csv")
+    print(f"New addresses saved to data/new_addresses.csv")
+    print(f"Removed addresses saved to data/removed_addresses.csv")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

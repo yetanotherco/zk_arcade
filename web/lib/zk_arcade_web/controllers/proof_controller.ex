@@ -8,52 +8,54 @@ defmodule ZkArcadeWeb.ProofController do
 
   @task_timeout 10_000
 
-  def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id, "claim_tx_hash" => claim_tx_hash}) do
-    address = get_session(conn, :wallet_address)
-
-    if is_nil(address) do
-      conn
-      |> redirect(to: "/")
+  defp get_wallet_address_or_redirect(conn) do
+    case get_session(conn, :wallet_address) do
+      nil ->
+        conn = redirect(conn, to: "/")
+        {:error, :wallet_redirect}
+      address ->
+        {:ok, address}
     end
+  end
 
-    Proofs.update_proof_status_claimed(address, proof_id, claim_tx_hash)
+  defp send_not_found_response(conn, message) do
+    send_resp(conn, 404, Jason.encode!(%{error: message}))
+  end
 
-    conn
-      |> redirect(to: build_redirect_url(conn, "", proof_id))
+  def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id, "claim_tx_hash" => claim_tx_hash}) do
+    with {:ok, address} <- get_wallet_address_or_redirect(conn) do
+      Proofs.update_proof_status_claimed(address, proof_id, claim_tx_hash)
+      redirect(conn, to: build_redirect_url(conn, "", proof_id))
+    else
+      {:error, :wallet_redirect} -> conn
+    end
   end
 
   def get_proof_status(conn, %{"proof_id" => proof_id}) do
-    proof_status = Proofs.get_status(proof_id)
-
-    case proof_status do
-      nil -> send_resp(conn, 404, Jason.encode!(%{error: "Proof not found"}))
+    case Proofs.get_status(proof_id) do
+      nil -> send_not_found_response(conn, "Proof not found")
       proof_status -> json(conn, %{status: proof_status.status})
     end
   end
 
   def get_proof_submission(conn, %{"proof_id" => proof_id}) do
-    proof = Proofs.get_proof_submission(proof_id)
-
-    case proof do
-      nil -> send_resp(conn, 404, Jason.encode!(%{error: "Proof not found"}))
+    case Proofs.get_proof_submission(proof_id) do
+      nil -> send_not_found_response(conn, "Proof not found")
       proof -> json(conn, proof)
     end
   end
 
   def get_proof_verification_data(conn, %{"proof_id" => proof_id}) do
-    address = get_session(conn, :wallet_address)
-
-    if is_nil(address) do
-      conn
-      |> redirect(to: "/")
-    else
+    with {:ok, _address} <- get_wallet_address_or_redirect(conn) do
       case Proofs.get_proof_verification_data(proof_id) do
         nil ->
-          send_resp(conn, 404, Jason.encode!(%{error: "Proof not found"}))
+          send_not_found_response(conn, "Proof not found")
 
         proof_data ->
           json(conn, proof_data)
       end
+    else
+      {:error, :wallet_redirect} -> conn
     end
   end
 

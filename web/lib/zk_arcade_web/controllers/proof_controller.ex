@@ -326,34 +326,39 @@ defmodule ZkArcadeWeb.ProofController do
   defp do_submit_to_batcher(submit_proof_message, address, pending_proof_id, attempt_type) do
     case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
       {:ok, {:batch_inclusion, batch_data}} ->
-        case Proofs.update_proof_status_submitted(pending_proof_id, batch_data) do
-          {:ok, updated_proof} ->
-            Logger.info("Proof #{pending_proof_id} submitted and updated successfully")
+        handle_batch_inclusion(submit_proof_message, pending_proof_id, batch_data, attempt_type)
+      {:error, reason} ->
+        handle_batcher_failure(pending_proof_id, reason, attempt_type)
+    end
+  end
 
-            case ZkArcade.AlignedVerificationWatcher.wait_aligned_verification(submit_proof_message, batch_data) do
-              {:ok, _result} ->
-                Logger.info("Verification succeeded")
-                case Proofs.update_proof_status_verified(updated_proof.id) do
-                  {:ok, _} ->
-                    Logger.info("Proof #{updated_proof.id} status updated to verified")
-                  {:error, reason} ->
-                    Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
-                end
-              {:error, reason} ->
-                handle_verification_failure(updated_proof.id, reason, attempt_type)
-              nil ->
-                Logger.error("Error without reason")
-            end
+  defp handle_batch_inclusion(submit_proof_message, pending_proof_id, batch_data, attempt_type) do
+    case Proofs.update_proof_status_submitted(pending_proof_id, batch_data) do
+      {:ok, updated_proof} ->
+        Logger.info("Proof #{pending_proof_id} submitted and updated successfully")
+        handle_aligned_verification(submit_proof_message, batch_data, updated_proof, attempt_type)
+        {:ok, updated_proof}
 
-            {:ok, updated_proof}
+      {:error, reason} ->
+        Logger.error("Failed to update proof status: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
 
-          {:error, reason} ->
-            Logger.error("Failed to update proof status: #{inspect(reason)}")
-            {:error, reason}
+  defp handle_aligned_verification(submit_proof_message, batch_data, updated_proof, attempt_type) do
+    case ZkArcade.AlignedVerificationWatcher.wait_aligned_verification(submit_proof_message, batch_data) do
+      {:ok, _result} ->
+        Logger.info("Verification succeeded")
+        case Proofs.update_proof_status_verified(proof_id) do
+          {:ok, _} -> Logger.info("Proof #{proof_id} status updated to verified")
+          {:error, reason} -> Logger.error("Failed to update proof #{proof_id} status: #{inspect(reason)}")
         end
 
       {:error, reason} ->
-        handle_batcher_failure(pending_proof_id, reason, attempt_type)
+        handle_verification_failure(updated_proof.id, reason, attempt_type)
+
+      nil ->
+        Logger.error("Error without reason")
     end
   end
 

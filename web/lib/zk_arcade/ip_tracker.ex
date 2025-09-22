@@ -1,6 +1,6 @@
 defmodule ZkArcade.IpTracker do
   require Logger
-  @api_base "https://ipapi.co"
+  @api_base "https://api.ipinfo.io/lite/"
 
 
   def get_country_from_conn(conn) do
@@ -10,12 +10,13 @@ defmodule ZkArcade.IpTracker do
   end
 
   def get_country(ip) when is_binary(ip) do
-    url = "#{@api_base}/#{ip}/json/"
+    token = Application.get_env(:zk_arcade, :ip_info_api_key)
+    url = "#{@api_base}/#{ip}?token=#{token}"
 
     case HTTPoison.get(url, [], recv_timeout: 5_000) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         with {:ok, decoded} <- Jason.decode(body),
-             %{"country_name" => country} <- decoded do
+             %{"country" => country} <- decoded do
           {:ok, country}
         else
           _ -> {:error, :unexpected_response}

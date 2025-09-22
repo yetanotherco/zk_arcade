@@ -104,7 +104,6 @@ const Entry = ({
 				payment_service_address={payment_service_address}
 				batcher_url={batcher_url}
 				leaderboard_address={leaderboard_address}
-				userBeastSubmissions={[]}
 				user_address={user_address}
 				proof={proof}
 				proofToSubmitData={null}

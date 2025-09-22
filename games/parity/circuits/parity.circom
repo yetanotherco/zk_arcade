@@ -209,6 +209,7 @@ template ValidateParityGame(MAX_LEVELS, MAX_ROUNDS) {
 
         level_completed_sum = level_completed_sum + 1 - level_completed[i].out;
 
+        // Enforce initial board state
         var posByte = ((userPositions[i][0][0] & 0x0F) << 4) | (userPositions[i][0][1] & 0x0F);
         acc = (acc << 8) + posByte;
 

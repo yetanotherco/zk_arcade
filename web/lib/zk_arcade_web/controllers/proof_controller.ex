@@ -6,6 +6,8 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.Proofs
   alias ZkArcade.EIP712Verifier
 
+  @task_timeout 10_000
+
   def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id, "claim_tx_hash" => claim_tx_hash}) do
     address = get_session(conn, :wallet_address)
 
@@ -162,7 +164,7 @@ defmodule ZkArcadeWeb.ProofController do
                   submit_to_batcher(submit_proof_message, address, pending_proof.id)
                 end)
 
-              case Task.yield(task, 10_000) do
+              case Task.yield(task, @task_timeout) do
                 {:ok, {:ok, result}} ->
                   Logger.info("Task completed successfully: #{inspect(result)}")
 
@@ -181,7 +183,7 @@ defmodule ZkArcadeWeb.ProofController do
                   |> redirect(to: build_redirect_url(conn, "proof-failed", pending_proof.id))
 
                 nil ->
-                  Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                  Logger.info("Task is taking longer than #{@task_timeout} seconds, proceeding.")
 
                   conn
                   |> put_flash(:info, "Proof is being submitted to batcher.")
@@ -356,7 +358,7 @@ defmodule ZkArcadeWeb.ProofController do
                     retry_submit_to_batcher(submit_proof_message, address, proof.id)
                   end)
 
-                case Task.yield(task, 10_000) do
+                case Task.yield(task, @task_timeout) do
                   {:ok, {:ok, result}} ->
                     Logger.info("Task completed successfully: #{inspect(result)}")
 
@@ -391,7 +393,7 @@ defmodule ZkArcadeWeb.ProofController do
                         |> redirect(to: build_redirect_url(conn, "bump-failed", proof.id))
                     end
                   nil ->
-                    Logger.info("Task is taking longer than 10 seconds, proceeding and removing the previous task.")
+                    Logger.info("Task is taking longer than #{@task_timeout} seconds, proceeding and removing the previous task.")
 
                     case Proofs.update_proof_retry(proof.id, max_fee) do
                       {:ok, _} ->

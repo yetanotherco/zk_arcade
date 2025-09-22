@@ -24,7 +24,6 @@ defmodule ZkArcadeWeb.WalletController do
           case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address), agreement_signature: sig}) do
             {:ok, wallet} ->
               Logger.info("Created wallet for address #{wallet.address}")
-              ZKArcadeIP.log_country_from_conn(conn)
 
               conn
               |> put_session(:wallet_address, wallet.address)

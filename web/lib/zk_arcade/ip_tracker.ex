@@ -1,17 +1,12 @@
-defmodule ZKArcadeIP do
+defmodule ZkArcade.IpTracker do
   require Logger
   @api_base "https://ipapi.co"
 
-  def log_country_from_conn(conn) do
+
+  def get_country_from_conn(conn) do
     ip = ip_from_conn(conn)
 
-    case get_country(ip) do
-      {:ok, country} ->
-        Logger.info("IP #{ip} is from #{country}")
-
-      {:error, reason} ->
-        Logger.warning("Could not resolve country for IP #{ip}: #{inspect(reason)}")
-    end
+    get_country(ip)
   end
 
   def get_country(ip) when is_binary(ip) do

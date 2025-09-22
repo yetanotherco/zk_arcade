@@ -93,127 +93,206 @@ defmodule ZkArcadeWeb.ProofController do
     }
   end
 
+  defp verify_signature(submit_proof_message, address) do
+    chain_id = submit_proof_message["verificationData"]["chain_id"]
+    case EIP712Verifier.verify_aligned_signature(submit_proof_message, address, chain_id) do
+      {:ok, true} -> {:ok, true}
+      {:ok, false} -> {:error, "Signature verification failed"}
+      {:error, reason} -> {:error, "Signature verification error: #{inspect(reason)}"}
+    end
+  end
+
+  defp parse_proof_data(submit_proof_message) do
+    verification_data = submit_proof_message["verificationData"]["verificationData"]
+    proving_system = verification_data["provingSystem"]
+    public_input = verification_data["publicInput"]
+    max_fee = submit_proof_message["verificationData"]["maxFee"]
+
+    parsed_input = case proving_system do
+      system when system in ["Risc0", "SP1"] ->
+        parse_public_input_risc0_sp1(public_input)
+      "CircomGroth16Bn256" ->
+        parse_public_input_circom(public_input)
+      _ ->
+        raise "Unsupported proving system: #{proving_system}"
+    end
+
+    {:ok, Map.merge(parsed_input, %{proving_system: proving_system, max_fee: max_fee})}
+  rescue
+    error -> {:error, "Failed to parse proof data: #{inspect(error)}"}
+  end
+
+  defp create_pending_proof_if_valid(submit_proof_message, address, game, game_idx, parsed_data) do
+    %{level: level, game: game_config, proving_system: proving_system, max_fee: max_fee} = parsed_data
+
+    existing_proof = Proofs.get_highest_level_proof(address, game_idx, game)
+    level = if existing_proof, do: existing_proof.level_reached, else: "none"
+    Logger.info("Existing proof for address #{address}, game_idx #{game_idx} and game #{game}, with level reached #{level}")
+
+    if existing_proof && existing_proof.level_reached >= level do
+      {:error, :level_already_reached}
+    else
+      case Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, game_config, level, max_fee, game_idx) do
+        {:ok, pending_proof} -> {:ok, pending_proof}
+        {:error, changeset} ->
+          Logger.error("Failed to create proof: #{inspect(changeset)}")
+          {:error, changeset}
+      end
+    end
+  end
+
+  defp get_proof_for_retry(proof_id, address) do
+    case Proofs.get_proof_by_id(proof_id) do
+      nil ->
+        Logger.error("Proof with ID #{proof_id} not found for wallet #{address}")
+        {:error, :proof_not_found}
+      proof ->
+        {:ok, proof}
+    end
+  end
+
+  defp handle_proof_retry_task(conn, submit_proof_message, address, proof) do
+    max_fee = submit_proof_message["verificationData"]["maxFee"]
+    proof_retry_pid = "#{proof.id}-#{proof.times_retried}"
+
+    task = create_retry_task(submit_proof_message, address, proof.id, proof_retry_pid)
+
+    case Task.yield(task, @task_timeout) do
+      {:ok, {:ok, result}} ->
+        Logger.info("Task completed successfully: #{inspect(result)}")
+        conn
+        |> put_flash(:info, "Proof retried successfully!")
+        |> redirect(to: build_redirect_url(conn, "proof-sent", proof.id))
+
+      {:ok, {:error, reason}} ->
+        handle_retry_task_error(conn, reason, proof.id)
+
+      nil ->
+        handle_retry_task_timeout(conn, proof.id, max_fee)
+    end
+  end
+
+  defp create_retry_task(submit_proof_message, address, proof_id, proof_retry_pid) do
+    Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
+      Registry.register(ZkArcade.ProofRegistry, proof_retry_pid, nil)
+      Logger.info("Retrying proof submission for ID: #{proof_retry_pid}")
+      retry_submit_to_batcher(submit_proof_message, address, proof_id)
+    end)
+  end
+
+  defp handle_retry_task_error(conn, reason, proof_id) do
+    Logger.error("Failed to retry proof submission: #{inspect(reason)}")
+
+    case reason do
+      {:unrecognized_message, "UnderpricedProof"} ->
+        conn
+        |> put_flash(:error, "Proof was underpriced.")
+        |> redirect(to: build_redirect_url(conn, "underpriced-proof", proof_id))
+
+      {:unrecognized_message, "InvalidNonce"} ->
+        conn
+        |> put_flash(:error, "Invalid nonce used in the proof submission.")
+        |> redirect(to: build_redirect_url(conn, "invalid-nonce", proof_id))
+
+      {:unrecognized_message, "InsufficientBalance"} ->
+        conn
+        |> put_flash(:error, "Insufficient balance to cover the fee.")
+        |> redirect(to: build_redirect_url(conn, "insufficient-balance", proof_id))
+
+      _ ->
+        conn
+        |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
+        |> redirect(to: build_redirect_url(conn, "bump-failed", proof_id))
+    end
+  end
+
+  defp handle_retry_task_timeout(conn, proof_id, max_fee) do
+    Logger.info("Task is taking longer than #{@task_timeout} seconds, proceeding and removing the previous task.")
+
+    case Proofs.update_proof_retry(proof_id, max_fee) do
+      {:ok, _} -> Logger.info("Proof #{proof_id} updated before retrying")
+      {:error, changeset} -> Logger.error("Failed to update proof #{proof_id} status: #{inspect(changeset)}")
+    end
+
+    conn
+    |> put_flash(:info, "Proof is being submitted to batcher.")
+    |> redirect(to: build_redirect_url(conn, "proof-sent", proof_id))
+  end
+
+  defp handle_submission_error(conn, reason) do
+    Logger.error("Submission failed: #{inspect(reason)}")
+    conn
+    |> put_flash(:error, "Failed to verify the received signature: #{inspect(reason)}")
+    |> redirect(to: build_redirect_url(conn, "proof-failed"))
+  end
+
+  defp handle_proof_not_found_error(conn) do
+    conn
+    |> put_flash(:error, "Proof not found.")
+    |> redirect(to: build_redirect_url(conn, "proof-failed"))
+  end
+
+  defp handle_retry_error(conn, reason) do
+    Logger.error("Retry failed: #{inspect(reason)}")
+    conn
+    |> put_flash(:error, "Invalid input: #{inspect(reason)}")
+    |> redirect(to: build_redirect_url(conn, "proof-failed"))
+  end
+
   def submit(conn, %{
         "submit_proof_message" => submit_proof_message_json,
         "game" => game,
         "game_idx" => game_idx
       }) do
-    with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json) do
-      address = get_session(conn, :wallet_address)
+    with {:ok, submit_proof_message} <- Jason.decode(submit_proof_message_json),
+         {:ok, address} <- get_wallet_address_or_redirect(conn),
+         {:ok, true} <- verify_signature(submit_proof_message, address),
+         {:ok, parsed_data} <- parse_proof_data(submit_proof_message),
+         {:ok, pending_proof} <- create_pending_proof_if_valid(submit_proof_message, address, game, game_idx, parsed_data) do
+          task =
+            Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
+              Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)
 
-      if is_nil(address) do
-        Logger.error("Address is not defined in session!")
+              Logger.info(
+                "Proof created successfully with ID: #{pending_proof.id} with pending state"
+              )
 
-        conn
-        |> put_flash(:error, "Wallet address is undefined.")
-        |> redirect(to: "/")
-        |> halt()
-      else
-        with {:ok, true} <-
-              EIP712Verifier.verify_aligned_signature(
-                submit_proof_message,
-                address,
-                submit_proof_message["verificationData"]["chain_id"]
-              ) do
-          Logger.info("Message decoded and signature verified. Sending async task.")
+              submit_to_batcher(submit_proof_message, address, pending_proof.id)
+            end)
 
-          proving_system =
-              submit_proof_message["verificationData"]["verificationData"]["provingSystem"]
+          case Task.yield(task, @task_timeout) do
+            {:ok, {:ok, result}} ->
+              Logger.info("Task completed successfully: #{inspect(result)}")
 
-          %{level: level, game: gameConfig, address: _address} =
-            case proving_system do
-              "Risc0" ->
-                parse_public_input_risc0_sp1(
-                  submit_proof_message["verificationData"]["verificationData"]["publicInput"]
-                )
+              conn
+              |> put_flash(:info, "Proof submitted successfully!")
+              |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
 
-              "SP1" ->
-                parse_public_input_risc0_sp1(
-                  submit_proof_message["verificationData"]["verificationData"]["publicInput"]
-                )
+            {:ok, {:error, reason}} ->
+              Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
+              # Remove the proof since it failed during batcher validation,
+              # we don't want to count it as sent
+              Proofs.delete_proof(pending_proof)
 
-              "CircomGroth16Bn256" ->
-                parse_public_input_circom(
-                  submit_proof_message["verificationData"]["verificationData"]["publicInput"]
-                )
+              conn
+              |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
+              |> redirect(to: build_redirect_url(conn, "proof-failed", pending_proof.id))
 
-              _ ->
-                raise "Unsupported proving system: #{proving_system}"
-            end
+            nil ->
+              Logger.info("Task is taking longer than #{@task_timeout} seconds, proceeding.")
 
-          max_fee =
-            submit_proof_message["verificationData"]["maxFee"]
-
-          # Check if exists a proof with a higher or equal level for the same game config
-          existing_proof = Proofs.get_highest_level_proof(address, game_idx, game)
-          Logger.info("Existing proof for address #{address}, game_idx #{game_idx} and game #{game}, with level reached #{ if existing_proof do existing_proof.level_reached else "none" end}")
-
-          if existing_proof && existing_proof.level_reached >= level do
-            Logger.error("A proof with an equal or higher level already exists for this game configuration.")
-            conn
-            |> redirect(to: build_redirect_url(conn, "level-reached"))
-          else
-            with {:ok, pending_proof} <-
-                  Proofs.create_pending_proof(submit_proof_message, address, game, proving_system, gameConfig, level, max_fee, game_idx) do
-              task =
-                Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-                  Registry.register(ZkArcade.ProofRegistry, pending_proof.id, nil)
-
-                  Logger.info(
-                    "Proof created successfully with ID: #{pending_proof.id} with pending state"
-                  )
-
-                  submit_to_batcher(submit_proof_message, address, pending_proof.id)
-                end)
-
-              case Task.yield(task, @task_timeout) do
-                {:ok, {:ok, result}} ->
-                  Logger.info("Task completed successfully: #{inspect(result)}")
-
-                  conn
-                  |> put_flash(:info, "Proof submitted successfully!")
-                  |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
-
-                {:ok, {:error, reason}} ->
-                  Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
-                  # Remove the proof since it failed during batcher validation,
-                  # we don't want to count it as sent
-                  Proofs.delete_proof(pending_proof)
-
-                  conn
-                  |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
-                  |> redirect(to: build_redirect_url(conn, "proof-failed", pending_proof.id))
-
-                nil ->
-                  Logger.info("Task is taking longer than #{@task_timeout} seconds, proceeding.")
-
-                  conn
-                  |> put_flash(:info, "Proof is being submitted to batcher.")
-                  |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
-              end
-            else
-              {:error, changeset} when is_map(changeset) ->
-                Logger.error("Failed to create proof: #{inspect(changeset)}")
-                {:error, changeset}
-            end
+              conn
+              |> put_flash(:info, "Proof is being submitted to batcher.")
+              |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
           end
         else
-          {:error, reason} ->
-            Logger.error("Failed to verify the received signature: #{inspect(reason)}")
-
-            conn
-            |> put_flash(:error, "Failed to verify the received signature: #{inspect(reason)}")
-            |> redirect(to: build_redirect_url(conn, "proof-failed"))
-        end
-      end
-    else
-      error ->
-        Logger.error("Input validation failed: #{inspect(error)}")
-
+      {:error, :wallet_redirect} ->
         conn
-        |> put_flash(:error, "Invalid input: #{inspect(error)}")
-        |> redirect(to: build_redirect_url(conn, "proof-failed"))
-        |> halt()
+      {:error, :level_already_reached} ->
+        conn
+        |> redirect(to: build_redirect_url(conn, "level-reached"))
+      {:error, reason} ->
+        handle_submission_error(conn, reason)
     end
   end
 

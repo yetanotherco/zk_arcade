@@ -233,6 +233,13 @@ export const ProveAndSubmit = ({
 										generate and submit your proof now.
 									</div>
 								)}
+								{currentLevel < 3 && hasSubmittedThree && (
+									<div className="bg-red/20 text-red border border-red text-center p-2 rounded">
+										You have already submitted a proof for
+										the full game. You can’t submit proofs
+										for the previous levels.
+									</div>
+								)}
 							</div>
 
 							<div className="flex flex-col gap-5 w-full max-w-[300px]">

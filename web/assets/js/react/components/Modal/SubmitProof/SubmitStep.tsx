@@ -439,6 +439,14 @@ export const SubmitProofStep = ({
 		}
 	}, [proofSubmission]);
 
+	useEffect(() => {
+		if (!proofToSubmitData) return;
+		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
+			setLevelAlreadyReached(true);
+			return;
+		}
+	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
+
 	const [bumpFeeOpen, setBumpFeeOpen] = useState(false);
 
 	if (
@@ -546,7 +554,7 @@ export const SubmitProofStep = ({
 		);
 	}
 
-	if (proofSubmission?.status === "failed") {
+	if (proofStatus === "failed") {
 		return (
 			<div className="flex flex-col gap-4 justify-between h-full">
 				<p className="bg-red/20 rounded p-2 text-red">
@@ -562,14 +570,6 @@ export const SubmitProofStep = ({
 			</div>
 		);
 	}
-
-	useEffect(() => {
-		if (!proofToSubmitData) return;
-		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
-			setLevelAlreadyReached(true);
-			return;
-		}
-	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
 
 	const gameData = getGameData(gameName);
 

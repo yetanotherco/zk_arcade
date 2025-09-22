@@ -447,7 +447,7 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp save_country(conn, address, true) do
+  defp save_country(_conn, _address, true) do
   end
 
   defp save_country(conn, address, false) do

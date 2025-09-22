@@ -184,6 +184,7 @@ defmodule ZkArcadeWeb.ProofController do
 
                 nil ->
                   Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                  save_user_country(conn, address)
 
                   conn
                   |> put_flash(:info, "Proof is being submitted to batcher.")
@@ -446,7 +447,8 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
-  defp save_country(conn, address, true), do:
+  defp save_country(conn, address, true) do
+  end
 
   defp save_country(conn, address, false) do
    case ZkArcade.IpTracker.get_country_from_conn(conn) do

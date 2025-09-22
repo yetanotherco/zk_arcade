@@ -358,6 +358,7 @@ export const SubmitProofStep = ({
 				proofSubmission?.id || ""
 			);
 			if (!res) {
+				setBumpLoading(false);
 				addToast({
 					title: "There was a problem while sending the proof",
 					desc: "Please try again.",
@@ -396,6 +397,7 @@ export const SubmitProofStep = ({
 				formRetryRef.current?.submit();
 			}, 1000);
 		} catch (error) {
+			setBumpLoading(false);
 			addToast({
 				title: "Could not apply the bump",
 				desc: "Please try again in a few seconds.",
@@ -654,7 +656,8 @@ export const SubmitProofStep = ({
 						<p className="text-red">
 							You have already submitted a proof with a higher or
 							equal level for this game. If you uploaded the proof
-							recently, you'll have to wait 6 hours to submit it again.
+							recently, you'll have to wait 6 hours to submit it
+							again.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (

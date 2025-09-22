@@ -123,7 +123,7 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   defp create_pending_proof_if_valid(submit_proof_message, address, game, game_idx, parsed_data) do
-    %{level: level, game: game_config, proving_system: proving_system, max_fee: max_fee} = parsed_data
+    %{level: _level, game: game_config, proving_system: proving_system, max_fee: max_fee} = parsed_data
 
     existing_proof = Proofs.get_highest_level_proof(address, game_idx, game)
     level = if existing_proof, do: existing_proof.level_reached, else: "none"
@@ -289,9 +289,9 @@ defmodule ZkArcadeWeb.ProofController do
     case ZkArcade.AlignedVerificationWatcher.wait_aligned_verification(submit_proof_message, batch_data) do
       {:ok, _result} ->
         Logger.info("Verification succeeded")
-        case Proofs.update_proof_status_verified(proof_id) do
-          {:ok, _} -> Logger.info("Proof #{proof_id} status updated to verified")
-          {:error, reason} -> Logger.error("Failed to update proof #{proof_id} status: #{inspect(reason)}")
+        case Proofs.update_proof_status_verified(updated_proof.id) do
+          {:ok, _} -> Logger.info("Proof #{updated_proof.id} status updated to verified")
+          {:error, reason} -> Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
         end
 
       {:error, reason} ->

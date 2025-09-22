@@ -358,6 +358,7 @@ export const SubmitProofStep = ({
 				proofSubmission?.id || ""
 			);
 			if (!res) {
+				setBumpLoading(false);
 				addToast({
 					title: "There was a problem while sending the proof",
 					desc: "Please try again.",
@@ -396,6 +397,7 @@ export const SubmitProofStep = ({
 				formRetryRef.current?.submit();
 			}, 1000);
 		} catch (error) {
+			setBumpLoading(false);
 			addToast({
 				title: "Could not apply the bump",
 				desc: "Please try again in a few seconds.",

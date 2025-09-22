@@ -185,13 +185,11 @@ defmodule ZkArcadeWeb.ProofController do
     Logger.error("Submission failed: #{inspect(reason)}")
 
     conn
-    |> put_flash(:error, "Failed to verify the received signature: #{inspect(reason)}")
     |> redirect(to: build_redirect_url(conn, "proof-failed"))
   end
 
   defp handle_proof_not_found_error(conn) do
     conn
-    |> put_flash(:error, "Proof not found.")
     |> redirect(to: build_redirect_url(conn, "proof-failed"))
   end
 
@@ -199,7 +197,6 @@ defmodule ZkArcadeWeb.ProofController do
     Logger.error("Retry failed: #{inspect(reason)}")
 
     conn
-    |> put_flash(:error, "Invalid input: #{inspect(reason)}")
     |> redirect(to: build_redirect_url(conn, "proof-failed"))
   end
 
@@ -236,7 +233,6 @@ defmodule ZkArcadeWeb.ProofController do
           Logger.info("Task completed successfully: #{inspect(result)}")
 
           conn
-          |> put_flash(:info, "Proof submitted successfully!")
           |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
 
         {:ok, {:error, reason}} ->
@@ -246,14 +242,12 @@ defmodule ZkArcadeWeb.ProofController do
           Proofs.delete_proof(pending_proof)
 
           conn
-          |> put_flash(:error, "Failed to submit proof: #{inspect(reason)}")
           |> redirect(to: build_redirect_url(conn, "proof-failed", pending_proof.id))
 
         nil ->
           Logger.info("Task is taking longer than #{@task_timeout} seconds, proceeding.")
 
           conn
-          |> put_flash(:info, "Proof is being submitted to batcher.")
           |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
       end
     else
@@ -399,7 +393,6 @@ defmodule ZkArcadeWeb.ProofController do
           Logger.info("Task completed successfully: #{inspect(result)}")
 
           conn
-          |> put_flash(:info, "Proof retried successfully!")
           |> redirect(to: build_redirect_url(conn, "proof-sent", proof.id))
 
         {:ok, {:error, reason}} ->
@@ -408,22 +401,18 @@ defmodule ZkArcadeWeb.ProofController do
           case reason do
             {:unrecognized_message, "UnderpricedProof"} ->
               conn
-              |> put_flash(:error, "Proof was underpriced.")
               |> redirect(to: build_redirect_url(conn, "underpriced-proof", proof_id))
 
             {:unrecognized_message, "InvalidNonce"} ->
               conn
-              |> put_flash(:error, "Invalid nonce used in the proof submission.")
               |> redirect(to: build_redirect_url(conn, "invalid-nonce", proof_id))
 
             {:unrecognized_message, "InsufficientBalance"} ->
               conn
-              |> put_flash(:error, "Insufficient balance to cover the fee.")
               |> redirect(to: build_redirect_url(conn, "insufficient-balance", proof_id))
 
             _ ->
               conn
-              |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
               |> redirect(to: build_redirect_url(conn, "bump-failed", proof_id))
           end
 
@@ -441,7 +430,6 @@ defmodule ZkArcadeWeb.ProofController do
           end
 
           conn
-          |> put_flash(:info, "Proof is being submitted to batcher.")
           |> redirect(to: build_redirect_url(conn, "proof-sent", proof_id))
       end
     else

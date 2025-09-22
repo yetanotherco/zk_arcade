@@ -132,13 +132,13 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   defp create_pending_proof_if_valid(submit_proof_message, address, game, game_idx, parsed_data) do
-    %{level: _level, game: game_config, proving_system: proving_system, max_fee: max_fee} = parsed_data
+    %{level: level, game: game_config, proving_system: proving_system, max_fee: max_fee} = parsed_data
 
+    # Check if exists a proof with a higher or equal level for the same game config
     existing_proof = Proofs.get_highest_level_proof(address, game_idx, game)
-    level = if existing_proof, do: existing_proof.level_reached, else: "none"
 
     Logger.info(
-      "Existing proof for address #{address}, game_idx #{game_idx} and game #{game}, with level reached #{level}"
+      "Existing proof for address #{address}, game_idx #{game_idx} and game #{game}, with level reached #{ if existing_proof do existing_proof.level_reached else "none" end}"
     )
 
     if existing_proof && existing_proof.level_reached >= level do

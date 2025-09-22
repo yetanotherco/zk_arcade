@@ -11,7 +11,6 @@ defmodule ZkArcadeWeb.ProofController do
   defp get_wallet_address_or_redirect(conn) do
     case get_session(conn, :wallet_address) do
       nil ->
-        conn = redirect(conn, to: "/")
         {:error, :wallet_redirect}
       address ->
         {:ok, address}
@@ -30,7 +29,9 @@ defmodule ZkArcadeWeb.ProofController do
       Proofs.update_proof_status_claimed(address, proof_id, claim_tx_hash)
       redirect(conn, to: build_redirect_url(conn, "", proof_id))
     else
-      {:error, :wallet_redirect} -> conn
+      {:error, :wallet_redirect} ->
+        conn
+        |> redirect(to: "/")
     end
   end
 
@@ -58,7 +59,9 @@ defmodule ZkArcadeWeb.ProofController do
           json(conn, proof_data)
       end
     else
-      {:error, :wallet_redirect} -> conn
+      {:error, :wallet_redirect} ->
+        conn
+        |> redirect(to: "/")
     end
   end
 
@@ -256,6 +259,7 @@ defmodule ZkArcadeWeb.ProofController do
     else
       {:error, :wallet_redirect} ->
         conn
+        |> redirect(to: "/")
       {:error, :level_already_reached} ->
         conn
         |> redirect(to: build_redirect_url(conn, "level-reached"))
@@ -441,7 +445,9 @@ defmodule ZkArcadeWeb.ProofController do
           |> redirect(to: build_redirect_url(conn, "proof-sent", proof_id))
       end
     else
-      {:error, :wallet_redirect} -> conn
+      {:error, :wallet_redirect} ->
+        conn
+        |> redirect(to: "/")
       {:error, :proof_not_found} -> handle_proof_not_found_error(conn)
       {:error, reason} -> handle_retry_error(conn, reason)
     end

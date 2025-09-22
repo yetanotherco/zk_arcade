@@ -49,8 +49,9 @@ submit_beast_solution:
 NUM_GAMES ?= 10
 LEVELS_PER_GAME ?= 8
 CAMPAIGN_DAYS ?= 1
+BEAST_SUBMISSION_OFFSET_MINUTES ?= 720
 beast_gen_levels:
-	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(NETWORK)
+	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
 	
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
@@ -66,13 +67,18 @@ beast_write_program_vk:
 #   level_i    := min(PARITY_MIN_MOVEMENTS + i * step_size, PARITY_MAX_MOVEMENTS)
 # With defaults (levels=3, min=15, max=45): levels → [15, 30, 45]
 # ─────────────────────────────────────────────────────────────────────────────
+# Number of calendar days the campaign spans (scheduling/rotation; not difficulty).
+# Each game takes (campaign days * 24hs / num games) hs
+PARITY_CAMPAIGN_DAYS ?= 1
 # Total number of games in the campaign (pattern repeats per game).
 PARITY_NUM_GAMES ?= 10
+# Adds a time offset to the ends_at to allow a bit more time for claiming
+PARITY_SUBMISSION_OFFSET_MINUTES ?= 720 
 # Levels per game (indexes 0..L-1). Can be up to 3 (fits proof data in 32 bytes).
 PARITY_LEVELS_PER_GAME ?= 3
 # UI-only: lower bound for numbers shown at the end of a level on the board.
 # Does NOT affect difficulty or movement calculations.
-PARITY_MIN_END_OF_LEVEL ?= 8
+PARITY_MIN_END_OF_LEVEL ?= 12
 # UI-only: upper bound for numbers shown at the end of a level on the board.
 # Does NOT affect difficulty or movement calculations.
 PARITY_MAX_END_OF_LEVEL ?= 50
@@ -80,12 +86,10 @@ PARITY_MAX_END_OF_LEVEL ?= 50
 PARITY_MIN_MOVEMENTS ?= 15
 # Movement budget at the last level. Defines the top of the ramp.
 PARITY_MAX_MOVEMENTS ?= 45
-# Number of calendar days the campaign spans (scheduling/rotation; not difficulty).
-PARITY_CAMPAIGN_DAYS ?= 1
 parity_gen_levels:
 	@cd games/parity/level_generator && \
 	cargo run --release $(PARITY_NUM_GAMES) $(PARITY_LEVELS_PER_GAME) $(PARITY_MIN_END_OF_LEVEL) $(PARITY_MAX_END_OF_LEVEL) \
-	$(PARITY_MIN_MOVEMENTS) $(PARITY_MAX_MOVEMENTS) $(PARITY_CAMPAIGN_DAYS) $(NETWORK)
+	$(PARITY_MIN_MOVEMENTS) $(PARITY_MAX_MOVEMENTS) $(PARITY_CAMPAIGN_DAYS) $(PARITY_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
 
 parity_write_program_vk:
 	@cd games/parity/circuits/cmd && cargo run --release
@@ -247,7 +251,7 @@ release:
 	mix local.rebar --force && \
 	mix deps.get --only $(MIX_ENV) && \
 	mix compile && \
-	npm --prefix assets install && \
+	npm --prefix assets ci && \
 	mix phx.digest && \
 	mix assets.deploy && \
 	mix release

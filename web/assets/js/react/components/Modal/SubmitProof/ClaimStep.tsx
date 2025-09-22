@@ -5,6 +5,8 @@ import { useBeastLeaderboardContract } from "../../../hooks";
 import { Address } from "../../../types/blockchain";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
 import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboardContract";
+import { useChainId, useReadContract } from "wagmi";
+import { leaderboardAbi } from "../../../constants/aligned";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
@@ -17,7 +19,14 @@ type ClaimComponentProps = {
 
 const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 	(
-		{ gameHasExpired, proofSubmission, handleClaim, onCancel, isLoading, claimTxHash },
+		{
+			gameHasExpired,
+			proofSubmission,
+			handleClaim,
+			onCancel,
+			isLoading,
+			claimTxHash,
+		},
 		formRef
 	) => {
 		const { csrfToken } = useCSRFToken();
@@ -42,10 +51,11 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 					</p>
 				)}
 				<div className="flex flex-col gap-2">
-					<p>Prover: {proofSubmission.proving_system}</p>
 					<p>Game: {proofSubmission.game}</p>
+					<p>Daily Quest: {Number(proofSubmission.game_idx) + 1}</p>
 					<p>Level reached: {proofSubmission.level_reached}</p>
 					<p>Points to claim: {proofSubmission.level_reached}</p>
+					<p>Prover: {proofSubmission.proving_system}</p>
 				</div>
 				<a
 					href="/leaderboard"
@@ -104,10 +114,20 @@ const BeastClaim = ({
 	proofSubmission,
 	setOpen,
 }: ClaimProps) => {
-	const { submitSolution, currentGame } = useBeastLeaderboardContract({
+	const chainId = useChainId();
+	const { submitSolution } = useBeastLeaderboardContract({
 		userAddress: user_address,
 		contractAddress: leaderboard_address,
 	});
+
+	const claimGame = useReadContract({
+		address: leaderboard_address,
+		abi: leaderboardAbi,
+		functionName: "beastGames",
+		args: [proofSubmission.game_idx],
+		chainId,
+	});
+
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleClaim = async () => {
@@ -135,13 +155,8 @@ const BeastClaim = ({
 		}
 	}, [submitSolution.receipt]);
 
-	const submittedGameConfigBigInt = BigInt(
-		"0x" + proofSubmission.game_config
-	);
-	const currentGameConfigBigInt = BigInt(currentGame.game?.gameConfig || 0n);
-
 	const gameHasExpired =
-		submittedGameConfigBigInt !== currentGameConfigBigInt;
+		Number(claimGame.data?.endsAtTime || 0n) < Date.now() / 1000;
 
 	const claimTxHash = submitSolution.tx.hash || "";
 
@@ -175,9 +190,19 @@ const ParityClaim = ({
 	proofSubmission,
 	setOpen,
 }: ClaimProps) => {
-	const { currentGame, submitSolution } = useParityLeaderboardContract({
+	const chainId = useChainId();
+
+	const { submitSolution } = useParityLeaderboardContract({
 		contractAddress: leaderboard_address,
 		userAddress: user_address,
+	});
+
+	const claimGame = useReadContract({
+		address: leaderboard_address,
+		abi: leaderboardAbi,
+		functionName: "parityGames",
+		args: [proofSubmission.game_idx],
+		chainId,
 	});
 
 	const formRef = useRef<HTMLFormElement>(null);
@@ -207,18 +232,8 @@ const ParityClaim = ({
 		}
 	}, [submitSolution.receipt]);
 
-	const currentGameConfigBigInt = readLeftmost(
-		currentGame.game?.gameConfig || 0n,
-		proofSubmission.level_reached
-	);
-
-	const submittedGameConfigBigInt = readLeftmost(
-		BigInt("0x" + proofSubmission.game_config),
-		proofSubmission.level_reached
-	);
-
 	const gameHasExpired =
-		submittedGameConfigBigInt !== currentGameConfigBigInt;
+		Number(claimGame.data?.endsAtTime || 0n) < Date.now() / 1000;
 
 	return (
 		<ClaimComponent

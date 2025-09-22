@@ -11,8 +11,40 @@ export const useProofSentMessageReader = () => {
 		if (message == "proof-failed") {
 			addToast({
 				title: "Proof failed",
-				desc: "The proof was sent but the verification failed",
+				desc: "The proof submission failed. Please try again later.",
 				type: "error",
+			});
+		}
+
+		if (message == "bump-failed") {
+			addToast({
+				title: "Bump failed",
+				desc: "The bump transaction failed. Check if the original proof transaction was verified before bumping the fee again.",
+				type: "warning",
+			});
+		}
+
+		if (message == "underpriced-proof") {
+			addToast({
+				title: "Underpriced proof",
+				desc: "The proof was underpriced. Please send the proof again with a higher fee.",
+				type: "warning",
+			});
+		}
+
+		if (message == "invalid-nonce") {
+			addToast({
+				title: "Invalid nonce",
+				desc: "The proof was included in the batch, the bump transaction was skipped.",
+				type: "warning",
+			});
+		}
+
+		if (message == "insufficient-balance") {
+			addToast({
+				title: "Insufficient balance",
+				desc: "You do not have enough funds to bump the proof fee. The transaction was skipped.",
+				type: "warning",
 			});
 		}
 
@@ -28,6 +60,14 @@ export const useProofSentMessageReader = () => {
 			addToast({
 				title: "User not connected",
 				desc: "You must be connected to a wallet to view your profile.",
+				type: "error",
+			});
+		}
+
+		if (message == "level-reached") {
+			addToast({
+				title: "Level already reached",
+				desc: `You have already reached this level in a previous run for today's game`,
 				type: "error",
 			});
 		}

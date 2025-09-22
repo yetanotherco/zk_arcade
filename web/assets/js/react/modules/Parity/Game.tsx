@@ -17,6 +17,7 @@ type GameProps = {
 	leaderboard_address: Address;
 	nft_contract_address: Address;
 	batcher_url: string;
+	highest_level_reached: number;
 };
 
 export const Game = ({
@@ -25,6 +26,7 @@ export const Game = ({
 	leaderboard_address,
 	nft_contract_address,
 	batcher_url,
+	highest_level_reached,
 }: GameProps) => {
 	const [gameState, setGameState] = useState<ParityGameState>("home");
 	const {
@@ -53,6 +55,7 @@ export const Game = ({
 		setPosition,
 		setHasWon,
 		startLevel,
+		updatePos,
 	} = useParityControls({
 		initialPosition:
 			currentLevel !== null
@@ -63,6 +66,13 @@ export const Game = ({
 				? levels[currentLevel - 1].board
 				: [0, 0, 0, 0, 0, 0, 0, 0, 0],
 	});
+
+	const [hasPlayedTutorial, setHasPlayedTutorial] = useState(false);
+
+	useEffect(() => {
+		if (localStorage.getItem("parity-tutorial-played") === "true")
+			setHasPlayedTutorial(true);
+	}, []);
 
 	const saveLevelData = useCallback(() => {
 		const stored = localStorage.getItem("parity-game-data");
@@ -144,7 +154,11 @@ export const Game = ({
 					disabledTextOnHover="You need to connect your wallet first"
 					onClick={() => {
 						setCurrentLevel(null);
-						setGameState("running");
+						if (!hasPlayedTutorial) {
+							setGameState("tutorial");
+						} else {
+							setGameState("running");
+						}
 					}}
 				>
 					Play
@@ -167,7 +181,12 @@ export const Game = ({
 				</Button>
 			</div>
 		),
-		tutorial: <ParityTutorial setGameState={setGameState} />,
+		tutorial: (
+			<ParityTutorial
+				setHasPlayedTutorial={setHasPlayedTutorial}
+				setGameState={setGameState}
+			/>
+		),
 		running: (
 			<PlayState
 				levels={levels}
@@ -185,6 +204,7 @@ export const Game = ({
 				setHasWon={setHasWon}
 				saveLevelData={saveLevelData}
 				user_positions={userPositions}
+				updatePos={updatePos}
 			/>
 		),
 		"after-level": (
@@ -205,6 +225,8 @@ export const Game = ({
 				timeRemaining={timeRemaining}
 				nft_contract_address={nft_contract_address}
 				gameIdx={currentGameIdx}
+				highestLevelReached={highest_level_reached}
+				setPlayerLevelReached={setPlayerLevelReached}
 			/>
 		),
 	};

@@ -9,6 +9,7 @@
                 nft_contract_address={Application.get_env(:zk_arcade, :nft_contract_address)}
                 batcher_url={Application.get_env(:zk_arcade, :batcher_url)}
                 user_address={@wallet}
+                highest_level_reached={@highest_level_reached}
              />
             <div class="mt-8">
                 <h2 class="text-3xl text-text-100 font-normal mb-1"><%= @game.name %></h2>
@@ -30,7 +31,7 @@
              <%= for %{text: text, link: link} <- @game.acknowledgments do %>
              <div class="flex flex-row flex-wrap">
                 <p class="text-md mr-1 text-text-200"><%= text %>:</p>
-                <a href={link} class="text-md mb-1 text-blue hover:underline" target="_blank" rel="noopener noreferrer"><%= link %></a>
+                <a href={link} class="text-md mb-1 text-blue break-all hover:underline" target="_blank" rel="noopener noreferrer"><%= link %></a>
             </div>
             <% end %>
         </section>

@@ -159,7 +159,7 @@ defmodule ZkArcadeWeb.ProofController do
                     "Proof created successfully with ID: #{pending_proof.id} with pending state"
                   )
 
-                  submit_to_batcher(submit_proof_message, address, pending_proof.id)
+                  submit_to_batcher(submit_proof_message, address, pending_proof.id, false)
                 end)
 
               case Task.yield(task, 10_000) do
@@ -232,7 +232,7 @@ defmodule ZkArcadeWeb.ProofController do
     uri.path <> "?" <> new_query
   end
 
-  defp submit_to_batcher(submit_proof_message, address, pending_proof_id) do
+  defp submit_to_batcher(submit_proof_message, address, pending_proof_id, is_retry) do
     case BatcherConnection.send_submit_proof_message(submit_proof_message, address) do
       {:ok, {:batch_inclusion, batch_data}} ->
         case Proofs.update_proof_status_submitted(pending_proof_id, batch_data) do
@@ -250,11 +250,16 @@ defmodule ZkArcadeWeb.ProofController do
                 end
               {:error, reason} ->
                 Logger.error("Error: #{inspect(reason)}")
-                case Proofs.update_proof_status_failed(updated_proof.id) do
-                  {:ok, _} ->
-                    Logger.info("Proof #{updated_proof.id} status updated to failed")
-                  {:error, reason} ->
-                    Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
+                case is_retry do
+                  true ->
+                    Logger.error("Retry failed with reason #{inspect(reason)}")
+                  false ->
+                    case Proofs.update_proof_status_failed(updated_proof.id) do
+                      {:ok, _} ->
+                        Logger.info("Proof #{updated_proof.id} status updated to failed")
+                      {:error, reason} ->
+                        Logger.error("Failed to update proof #{updated_proof.id} status: #{inspect(reason)}")
+                    end
                 end
               nil ->
                 Logger.error("Error without reason")
@@ -270,17 +275,23 @@ defmodule ZkArcadeWeb.ProofController do
       {:error, reason} ->
         Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
 
-        case Proofs.update_proof_status_failed(pending_proof_id) do
-          {:ok, _} ->
-            Logger.info("Proof #{pending_proof_id} status updated to failed")
+        case is_retry do
+          true ->
+            Logger.info("Retry failed with reason #{inspect(reason)}")
             {:error, reason}
+          false ->
+            case Proofs.update_proof_status_failed(pending_proof_id) do
+              {:ok, _} ->
+                Logger.info("Proof #{pending_proof_id} status updated to failed")
+                {:error, reason}
 
-          {:error, changeset} ->
-            Logger.error(
-              "Failed to update proof #{pending_proof_id} status: #{inspect(changeset)}"
-            )
+              {:error, changeset} ->
+                Logger.error(
+                  "Failed to update proof #{pending_proof_id} status: #{inspect(changeset)}"
+                )
 
-            {:error, reason}
+                {:error, reason}
+            end
         end
     end
   end
@@ -319,33 +330,17 @@ defmodule ZkArcadeWeb.ProofController do
               {:ok, true} ->
                 Logger.info("Message decoded and signature verified. Retrying proof submission.")
 
-                case Registry.lookup(ZkArcade.ProofRegistry, proof.id) do
-                  [{pid, _value}] when is_pid(pid) ->
-                    Logger.info("Killing task for proof #{proof.id}")
-                    Process.exit(pid, :kill)
-
-                  [] ->
-                    Logger.error("No running task found for proof #{proof.id}")
-                end
-
                 max_fee =
                   submit_proof_message["verificationData"]["maxFee"]
 
-                case Proofs.update_proof_retry(proof.id, max_fee) do
-                  {:ok, _} ->
-                    Logger.info("Proof #{proof.id} updated before retrying")
-
-                  {:error, changeset} ->
-                    Logger.error("Failed to update proof #{proof.id} status: #{inspect(changeset)}")
-                end
-
+                proof_retry_pid = proof.id <> "-" <> Integer.to_string(proof.times_retried)
                 task =
                   Task.Supervisor.async_nolink(ZkArcade.TaskSupervisor, fn ->
-                    Registry.register(ZkArcade.ProofRegistry, proof.id, nil)
+                    Registry.register(ZkArcade.ProofRegistry, proof_retry_pid, nil)
 
-                    Logger.info("Retrying proof submission for ID: #{proof.id}")
+                    Logger.info("Retrying proof submission for ID: #{proof_retry_pid}")
 
-                    submit_to_batcher(submit_proof_message, address, proof.id)
+                    submit_to_batcher(submit_proof_message, address, proof.id, true)
                   end)
 
                 case Task.yield(task, 10_000) do
@@ -359,12 +354,39 @@ defmodule ZkArcadeWeb.ProofController do
                   {:ok, {:error, reason}} ->
                     Logger.error("Failed to retry proof submission: #{inspect(reason)}")
 
-                    conn
-                    |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
-                    |> redirect(to: build_redirect_url(conn, "proof-failed", proof.id))
+                    {:unrecognized_message, message} = reason
 
+                    case message do
+                      "UnderpricedProof" ->
+                        conn
+                        |> put_flash(:error, "Proof was underpriced.")
+                        |> redirect(to: build_redirect_url(conn, "underpriced-proof", proof.id))
+
+                      "InvalidNonce" ->
+                        conn
+                        |> put_flash(:error, "Invalid nonce used in the proof submission.")
+                        |> redirect(to: build_redirect_url(conn, "invalid-nonce", proof.id))
+
+                      "InsufficientBalance" ->
+                        conn
+                        |> put_flash(:error, "Insufficient balance to cover the fee.")
+                        |> redirect(to: build_redirect_url(conn, "insufficient-balance", proof.id))
+
+                      _ ->
+                        conn
+                        |> put_flash(:error, "Failed to retry proof submission: #{inspect(reason)}")
+                        |> redirect(to: build_redirect_url(conn, "bump-failed", proof.id))
+                    end
                   nil ->
-                    Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                    Logger.info("Task is taking longer than 10 seconds, proceeding and removing the previous task.")
+
+                    case Proofs.update_proof_retry(proof.id, max_fee) do
+                      {:ok, _} ->
+                        Logger.info("Proof #{proof.id} updated before retrying")
+
+                      {:error, changeset} ->
+                        Logger.error("Failed to update proof #{proof.id} status: #{inspect(changeset)}")
+                    end
 
                     conn
                     |> put_flash(:info, "Proof is being submitted to batcher.")

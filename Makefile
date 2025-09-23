@@ -125,6 +125,7 @@ add_merkle_root: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
 
 gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db
+	@rm -rf data/inserted_devnet/inserted_*.csv
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json

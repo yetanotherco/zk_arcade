@@ -8,14 +8,6 @@ defmodule ZkArcadeWeb.ProofController do
 
   @task_timeout 10_000
 
-  defp get_wallet_address_or_redirect(conn) do
-    case get_session(conn, :wallet_address) do
-      nil ->
-        {:error, :wallet_redirect}
-      address ->
-        {:ok, address}
-    end
-  end
 
   defp send_not_found_response(conn, message) do
     send_resp(conn, 404, Jason.encode!(%{error: message}))
@@ -25,13 +17,12 @@ defmodule ZkArcadeWeb.ProofController do
         "proof_id" => proof_id,
         "claim_tx_hash" => claim_tx_hash
       }) do
-    with {:ok, address} <- get_wallet_address_or_redirect(conn) do
+    if address = get_session(conn, :wallet_address) do
       Proofs.update_proof_status_claimed(address, proof_id, claim_tx_hash)
       redirect(conn, to: build_redirect_url(conn, "", proof_id))
     else
-      {:error, :wallet_redirect} ->
-        conn
-        |> redirect(to: "/")
+      conn
+      |> redirect(to: "/")
     end
   end
 
@@ -50,18 +41,16 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   def get_proof_verification_data(conn, %{"proof_id" => proof_id}) do
-    with {:ok, _address} <- get_wallet_address_or_redirect(conn) do
+    if get_session(conn, :wallet_address) do
       case Proofs.get_proof_verification_data(proof_id) do
         nil ->
           send_not_found_response(conn, "Proof not found")
-
         proof_data ->
           json(conn, proof_data)
       end
     else
-      {:error, :wallet_redirect} ->
-        conn
-        |> redirect(to: "/")
+      conn
+      |> redirect(to: "/")
     end
   end
 

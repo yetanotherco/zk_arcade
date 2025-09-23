@@ -36,6 +36,10 @@ export const useParityLeaderboardContract = ({
 	userAddress,
 }: Args) => {
 	const chainId = useChainId();
+	const [
+		submitSolutionFetchingVDataIsLoading,
+		setSubmitSolutionFetchingVDataIsLoading,
+	] = useState(false);
 
 	const currentGame = useReadContract({
 		address: contractAddress,
@@ -79,7 +83,9 @@ export const useParityLeaderboardContract = ({
 
 	const claimParityPoints = useCallback(
 		async (proof: ProofSubmission) => {
+			setSubmitSolutionFetchingVDataIsLoading(true);
 			const res = await fetchProofVerificationData(proof.id);
+			setSubmitSolutionFetchingVDataIsLoading(false);
 			if (!res) {
 				alert(
 					"There was a problem while sending the proof, please try again"
@@ -165,7 +171,7 @@ export const useParityLeaderboardContract = ({
 		}
 	}, [receipt.isLoading, receipt.isError]);
 
-	const isClaimLoading = isPending || receipt.isLoading;
+	const isClaimLoading = isPending || receipt.isLoading || submitSolutionFetchingVDataIsLoading;
 
 	return {
 		currentGame: {

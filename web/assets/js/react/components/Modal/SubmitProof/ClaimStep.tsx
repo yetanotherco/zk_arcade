@@ -164,7 +164,7 @@ const BeastClaim = ({
 		<ClaimComponent
 			gameHasExpired={gameHasExpired}
 			handleClaim={handleClaim}
-			isLoading={false}
+			isLoading={submitSolution.isLoading}
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
 			ref={formRef}
@@ -228,7 +228,7 @@ const ParityClaim = ({
 		<ClaimComponent
 			gameHasExpired={gameHasExpired}
 			handleClaim={handleClaim}
-			isLoading={false}
+			isLoading={submitSolution.isLoading}
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
 			ref={formRef}

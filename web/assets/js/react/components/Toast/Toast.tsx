@@ -38,42 +38,32 @@ export const Toast: React.FC<Props> = ({ id, title, desc, type }) => {
 			onMouseLeave={togglePaused}
 			onClick={() => setHide(true)}
 			className={clsx(
-				"relative flex cursor-pointer mr-4 mb-4 items-center gap-10 rounded px-8 py-4",
+				"relative flex cursor-pointer mr-4 mb-4 items-center gap-10 rounded px-8 py-4 shadow-md",
 				{
-					"border bg-accent-100/20 border-accent-100":
+					"bg-green-50 border border-green-400 text-green-900":
 						type === "success",
-					"border bg-red/20 border-red": type === "error",
-					"border bg-yellow/20 border-yellow": type === "warning",
+					"bg-red-50 border border-red-400 text-red-900":
+						type === "error",
+					"bg-yellow-50 border border-yellow-400 text-yellow-900":
+						type === "warning",
 				}
 			)}
 			style={{ maxWidth: 500, ...springs }}
 		>
 			<div>
-				<p
-					className={clsx("text-md", {
-						"text-text-100": type === "success",
-						"text-white": type === "error",
-						"text-yellow": type === "warning",
-					})}
-				>
-					{title}
-				</p>
-				<p
-					className={`text-sm ${type === "warning" ? "text-yellow opacity-80" : "text-text-200"}`}
-				>
-					{desc}
-				</p>
+				<p className={clsx("text-md")}>{title}</p>
+				{desc && <p className="text-sm mt-1">{desc}</p>}
 			</div>
 
 			{/* Progress bar */}
 			<div
-				className={clsx("absolute bottom-0 left-0 h-1 transition", {
-					"bg-accent-100": type === "success",
-					"bg-white": type === "error",
-					"bg-yellow": type === "warning",
+				className={clsx("absolute bottom-0 left-0 h-1", {
+					"bg-green-500": type === "success",
+					"bg-red-500": type === "error",
+					"bg-yellow-500": type === "warning",
 				})}
 				style={{ width: `${progress * 100}%` }}
-			></div>
+			/>
 		</animated.div>
 	);
 };

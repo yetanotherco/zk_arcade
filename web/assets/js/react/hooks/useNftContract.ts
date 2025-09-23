@@ -146,7 +146,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 				type: "success",
 			});
 		}
-	}, [receipt.isLoading, receipt.isError, receipt.isSuccess]);
+	}, [receipt.isSuccess, receipt.isError]);
 
 	const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
 

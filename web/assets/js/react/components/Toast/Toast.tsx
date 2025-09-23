@@ -44,7 +44,7 @@ export const Toast: React.FC<Props> = ({ id, title, desc, type }) => {
 						type === "success",
 					"bg-red-100 border border-red-400 text-red-900":
 						type === "error",
-					"bg-yellow-50 border border-yellow-400 text-yellow-900":
+					"bg-yellow-100 border border-yellow-400 text-yellow-900":
 						type === "warning",
 				}
 			)}

@@ -1,31 +1,26 @@
 import React from "react";
-import { useNftContract } from "../../hooks/useNftContract";
 import { Modal } from "../../components/Modal";
 import { Button } from "../../components";
-import { Address } from "../../types/blockchain";
 
 type Props = {
-	user_address: Address;
-	nft_contract_address: Address;
 	isEligible: boolean;
 	open: boolean;
 	setOpen: (open: boolean) => void;
 	onClose?: () => void;
+	claimNft: () => Promise<`0x${string}` | void>;
+	isLoading: boolean;
+	balance: BigInt;
 };
 
 export const EligibilityModal = ({
-	user_address,
-	nft_contract_address,
 	isEligible,
+	claimNft,
+	isLoading,
+	balance,
 	onClose,
 	open,
 	setOpen,
 }: Props) => {
-	const { balance, claimNft, receipt } = useNftContract({
-		userAddress: user_address,
-		contractAddress: nft_contract_address,
-	});
-
 	const dismiss = () => {
 		setOpen(false);
 		onClose && onClose();
@@ -79,8 +74,8 @@ export const EligibilityModal = ({
 									await claimNft();
 									dismiss();
 								}}
-								isLoading={receipt.isLoading}
-								disabled={balance.data !== 0n}
+								isLoading={isLoading}
+								disabled={balance !== 0n}
 							>
 								Mint
 							</Button>

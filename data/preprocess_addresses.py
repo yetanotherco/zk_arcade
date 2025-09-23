@@ -21,9 +21,9 @@ def read_previously_filtered(inserted_dir):
 
 # Reads OFAC addresses from ofac.csv
 def read_ofac_addresses():
-    print(f"Reading OFAC addresses from ofac.csv...")
+    print(f"Reading OFAC addresses from data/ofac.csv...")
     try:
-        df = pd.read_csv("ofac.csv")
+        df = pd.read_csv("data/ofac.csv")
         return set(df['address'].str.lower())
     except Exception as e:
         logging.warning(f"Error reading ofac.csv: {e}")

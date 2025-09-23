@@ -40,11 +40,11 @@ export const Toast: React.FC<Props> = ({ id, title, desc, type }) => {
 			className={clsx(
 				"relative flex cursor-pointer mr-4 mb-4 items-center gap-10 rounded px-8 py-4 shadow-md",
 				{
-					"bg-green-50 border border-green-400 text-green-900":
+					"bg-green-200 border border-green-400 text-black":
 						type === "success",
-					"bg-red-100 border border-red-400 text-red-900":
+					"bg-red-200 border border-red-400 text-black":
 						type === "error",
-					"bg-yellow-100 border border-yellow-400 text-yellow-900":
+					"bg-yellow-200 border border-yellow-400 text-black":
 						type === "warning",
 				}
 			)}

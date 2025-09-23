@@ -232,7 +232,7 @@ export const SubmitProofModal = ({
 	};
 
 	useEffect(() => {
-		if (step === "deposit" || (step === "submit" && !proof)) {
+		if (step === "deposit") {
 			if (Number(formatEther(balance.data || BigInt(0))) < 0.001) {
 				setDepositStatus("warn");
 			}

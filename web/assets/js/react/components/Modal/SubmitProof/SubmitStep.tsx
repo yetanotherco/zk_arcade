@@ -358,6 +358,7 @@ export const SubmitProofStep = ({
 				proofSubmission?.id || ""
 			);
 			if (!res) {
+				setBumpLoading(false);
 				addToast({
 					title: "There was a problem while sending the proof",
 					desc: "Please try again.",
@@ -396,6 +397,7 @@ export const SubmitProofStep = ({
 				formRetryRef.current?.submit();
 			}, 1000);
 		} catch (error) {
+			setBumpLoading(false);
 			addToast({
 				title: "Could not apply the bump",
 				desc: "Please try again in a few seconds.",
@@ -436,6 +438,14 @@ export const SubmitProofStep = ({
 			return () => clearInterval(interval);
 		}
 	}, [proofSubmission]);
+
+	useEffect(() => {
+		if (!proofToSubmitData) return;
+		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
+			setLevelAlreadyReached(true);
+			return;
+		}
+	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
 
 	const [bumpFeeOpen, setBumpFeeOpen] = useState(false);
 
@@ -544,7 +554,7 @@ export const SubmitProofStep = ({
 		);
 	}
 
-	if (proofSubmission?.status === "failed") {
+	if (proofStatus === "failed") {
 		return (
 			<div className="flex flex-col gap-4 justify-between h-full">
 				<p className="bg-red/20 rounded p-2 text-red">
@@ -560,14 +570,6 @@ export const SubmitProofStep = ({
 			</div>
 		);
 	}
-
-	useEffect(() => {
-		if (!proofToSubmitData) return;
-		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
-			setLevelAlreadyReached(true);
-			return;
-		}
-	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
 
 	const gameData = getGameData(gameName);
 
@@ -654,7 +656,8 @@ export const SubmitProofStep = ({
 						<p className="text-red">
 							You have already submitted a proof with a higher or
 							equal level for this game. If you uploaded the proof
-							recently, you'll have to wait 6 hours to submit it again.
+							recently, you'll have to wait 6 hours to submit it
+							again.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (

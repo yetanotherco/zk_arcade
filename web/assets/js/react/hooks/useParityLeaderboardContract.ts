@@ -74,7 +74,7 @@ export const useParityLeaderboardContract = ({
 	});
 
 	const { addToast } = useToast();
-	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
+	const { writeContractAsync, data: txHash, isPending, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
 	const claimParityPoints = useCallback(
@@ -165,6 +165,8 @@ export const useParityLeaderboardContract = ({
 		}
 	}, [receipt.isLoading, receipt.isError]);
 
+	const isClaimLoading = isPending || receipt.isLoading;
+
 	return {
 		currentGame: {
 			...currentGame,
@@ -180,6 +182,7 @@ export const useParityLeaderboardContract = ({
 				hash: txHash,
 				...txRest,
 			},
+			isLoading: isClaimLoading,
 		},
 		currentGameLevelCompleted,
 		nextGame,

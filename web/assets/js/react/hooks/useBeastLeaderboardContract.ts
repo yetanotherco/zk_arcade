@@ -37,10 +37,6 @@ export const useBeastLeaderboardContract = ({
 	userAddress,
 }: Args) => {
 	const chainId = useChainId();
-	const [
-		submitSolutionFetchingVDataIsLoading,
-		setSubmitSolutionFetchingVDataIsLoading,
-	] = useState(false);
 
 	const score = useReadContract({
 		address: contractAddress,
@@ -93,9 +89,7 @@ export const useBeastLeaderboardContract = ({
 
 	const claimBeastPoints = useCallback(
 		async (proof: ProofSubmission) => {
-			setSubmitSolutionFetchingVDataIsLoading(true);
 			const res = await fetchProofVerificationData(proof.id);
-			setSubmitSolutionFetchingVDataIsLoading(false);
 			if (!res) {
 				alert(
 					"There was a problem while sending the proof, please try again"
@@ -185,7 +179,6 @@ export const useBeastLeaderboardContract = ({
 		score,
 		submitSolution: {
 			claimBeastPoints,
-			submitSolutionFetchingVDataIsLoading,
 			receipt,
 			tx: {
 				hash: txHash,

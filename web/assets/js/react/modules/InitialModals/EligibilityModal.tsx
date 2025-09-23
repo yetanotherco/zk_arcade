@@ -1,9 +1,6 @@
-// src/pages/EncourageDepositing/EligibilityModal.tsx
 import React, { useEffect } from "react";
 import { useModal } from "../../hooks";
 import { useNftContract } from "../../hooks/useNftContract";
-import { Modal } from "../../components/Modal";
-import { Button } from "../../components";
 import { Address } from "../../types/blockchain";
 import { EligibilityModal } from "../../components/Modal/EligibilityModal";
 
@@ -42,7 +39,7 @@ export const ShowEligibilityModal = ({
 	isEligible,
 }: Props) => {
 	const { open, setOpen } = useModal();
-	const { balance } = useNftContract({
+	const { balance, claimNft, receipt } = useNftContract({
 		userAddress: user_address,
 		contractAddress: nft_contract_address,
 	});
@@ -91,11 +88,12 @@ export const ShowEligibilityModal = ({
 	return (
 		<EligibilityModal
 			isEligible={isEligible}
-			nft_contract_address={nft_contract_address}
-			user_address={user_address}
 			open={open}
 			setOpen={setOpen}
 			onClose={dismiss}
+			claimNft={claimNft}
+			balance={balance.data || 0n}
+			isLoading={receipt.isLoading}
 		/>
 	);
 };

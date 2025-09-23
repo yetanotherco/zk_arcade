@@ -173,17 +173,6 @@ const BeastClaim = ({
 	);
 };
 
-function readLeftmost(value, level) {
-	const bitsToKeep = level * 80;
-	const totalBits = 256;
-
-	if (bitsToKeep > totalBits) throw new Error("Too many bits requested");
-
-	const shiftAmount = totalBits - bitsToKeep;
-
-	return value >> BigInt(shiftAmount);
-}
-
 const ParityClaim = ({
 	user_address,
 	leaderboard_address,

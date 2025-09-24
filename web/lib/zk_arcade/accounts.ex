@@ -134,4 +134,31 @@ defmodule ZkArcade.Accounts do
       {:error, :not_found} -> {:error, :not_found}
     end
   end
+
+  def set_country(address, country) do
+    case fetch_wallet_by_address(address) do
+      {:ok, wallet} ->
+        changeset = Wallet.changeset(wallet, %{country: country})
+        case Repo.update(changeset) do
+          {:ok, updated_wallet} -> {:ok, updated_wallet}
+          {:error, changeset} -> {:error, changeset}
+        end
+
+      {:error, :not_found} -> {:error, :not_found}
+    end
+  end
+
+ def has_country(address) do
+    case fetch_wallet_by_address(address) do
+      {:ok, wallet} ->
+        if wallet.country not in [nil, ""] do
+          {:ok, true}
+        else
+          {:ok, false}
+        end
+
+      {:error, :not_found} ->
+        {:error, :not_found}
+    end
+  end
 end

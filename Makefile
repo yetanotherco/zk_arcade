@@ -20,11 +20,15 @@ web_db:
 	docker compose up -d db --wait && \
 	mix ecto.migrate
 
+web_metrics:
+	@cd web/ && \
+	docker compose up -d prometheus grafana --wait
+
 web_migrate:
 	@cd web/ && \
 	mix ecto.migrate
 
-web_run: web_deps web_db
+web_run: web_deps web_db web_metrics
 	@cd web/ && \
 	iex -S mix phx.server
 

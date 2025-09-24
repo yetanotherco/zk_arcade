@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { encode as cborEncode, decode as cborDecode } from 'cbor2';
 import { hexToBigInt } from "viem";
 
-type GetMaxFeeFromBatcherResponse = {
+type GetLastMaxFeeFromBatcherResponse = {
 	ProtocolVersion: string,
-	MaxFee: `0x${string}`;
+	LastMaxFee: `0x${string}`;
 	EthRpcError: string;
 	InvalidRequest: string;
 }
@@ -32,15 +32,15 @@ export function useBatcherMaxFee(batcher_url: string, address?: string) {
 			ws.onmessage = (event) => {
 				try {
 					const cbor_data = event.data;
-					const data = cborDecode<GetMaxFeeFromBatcherResponse>(new Uint8Array(cbor_data));
+					const data = cborDecode<GetLastMaxFeeFromBatcherResponse>(new Uint8Array(cbor_data));
 
 					if (data?.ProtocolVersion) {
-						const message = { GetMaxFeeForAddress: address }; // This should match the batcher's expected request
+						const message = { GetLastMaxFee: address };
 						const encoded = cborEncode(message).buffer;
 						ws?.send(encoded);
-					} else if (data?.MaxFee) {
+					} else if (data?.LastMaxFee) {
 						ws?.close();
-						setMaxFee(hexToBigInt(data.MaxFee));
+						setMaxFee(hexToBigInt(data.LastMaxFee));
 						setIsLoading(false);
 					} else if (data?.EthRpcError || data?.InvalidRequest) {
 						ws?.close();
@@ -62,21 +62,6 @@ export function useBatcherMaxFee(batcher_url: string, address?: string) {
 		};
 
 		fetchMaxFee();
-
-        if (isLoading) {
-            console.log("Loading max fee from batcher...");
-            const loadingInterval = setInterval(() => {
-                console.log("Still loading max fee from batcher...");
-            }, 20000);
-            console.log("Setting a placeholder value for maxFee to avoid null issues.");
-            setMaxFee(39152300274066000n);
-            setIsLoading(false);
-            return;
-        } else if (error) {
-            console.error("Error fetching max fee from batcher:", error);
-        } else {
-            console.log("Fetched max fee from batcher:", maxFee?.toString());
-        }
 
 		return () => {
 			ws?.close();

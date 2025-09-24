@@ -51,7 +51,7 @@ export const Toast: React.FC<Props> = ({ id, title, desc, type }) => {
 			style={{ maxWidth: 500, ...springs }}
 		>
 			<div>
-				<p className={clsx("text-md")}>{title}</p>
+				<p className="text-md">{title}</p>
 				{desc && <p className="text-sm mt-1">{desc}</p>}
 			</div>
 

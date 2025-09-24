@@ -12,7 +12,6 @@ type Props = {
 	isConfirmLoading?: boolean;
 	previousMaxFee: string;
 	lastTimeSubmitted: string;
-	latestMaxFee: bigint | null;
 };
 
 const EthPriceWithTooltip = ({
@@ -46,7 +45,6 @@ export const BumpFee = ({
 	previousMaxFee,
 	lastTimeSubmitted,
 	onCancel,
-	latestMaxFee,
 }: Props) => {
 	const { price } = useEthPrice();
 	const [choice, setChoice] = useState<BumpChoice>("default");
@@ -111,25 +109,14 @@ export const BumpFee = ({
 	const estimateFees = async () => {
 		try {
 			setEstimating(true);
-			let estimatedDefault = await estimateMaxFeeForBatchOfProofs(16);
-			let estimatedInstant = await estimateMaxFeeForBatchOfProofs(1);
+			const estimatedDefault = await estimateMaxFeeForBatchOfProofs(16);
+			const estimatedInstant = await estimateMaxFeeForBatchOfProofs(1);
 
 			if (!estimatedDefault) {
 				handleBumpError(
 					"Could not estimate the fee. Please try again in a few seconds."
 				);
 				return;
-			}
-
-			if (latestMaxFee && estimatedDefault > latestMaxFee) {
-				console.warn("Default estimated fee is greater than the latest max fee from batcher, using latest max fee instead");
-				console.log({estimatedDefault, latestMaxFee});
-				estimatedDefault = latestMaxFee;
-			}
-			if (estimatedInstant && latestMaxFee && estimatedInstant > latestMaxFee) {
-				console.warn("Instant estimated fee is greater than the latest max fee from batcher, using latest max fee instead");
-				console.log({estimatedInstant, latestMaxFee});
-				estimatedInstant = latestMaxFee;
 			}
 
 			setDefaultFeeWei(estimatedDefault);

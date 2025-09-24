@@ -166,6 +166,8 @@ defmodule ZkArcadeWeb.ProofController do
                 {:ok, {:ok, result}} ->
                   Logger.info("Task completed successfully: #{inspect(result)}")
 
+                  save_user_country(conn, address)
+
                   conn
                   |> put_flash(:info, "Proof submitted successfully!")
                   |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
@@ -182,6 +184,7 @@ defmodule ZkArcadeWeb.ProofController do
 
                 nil ->
                   Logger.info("Task is taking longer than 10 seconds, proceeding.")
+                  save_user_country(conn, address)
 
                   conn
                   |> put_flash(:info, "Proof is being submitted to batcher.")
@@ -432,4 +435,30 @@ defmodule ZkArcadeWeb.ProofController do
         |> halt()
     end
   end
+
+  defp save_user_country(conn, address) do
+    has_country = ZkArcade.Accounts.has_country(address)
+
+    case has_country do
+      {:ok, result} ->
+        save_country(conn, address, result)
+      {:error, reason} ->
+        Logger.warning("Could not resolve country for address #{address}: #{inspect(reason)}")
+    end
+  end
+
+  defp save_country(_conn, _address, true) do
+  end
+
+  defp save_country(conn, address, false) do
+   case ZkArcade.IpTracker.get_country_from_conn(conn) do
+    {:ok, country} ->
+      Logger.info("Address #{address} is from #{country}")
+      ZkArcade.Accounts.set_country(address, country)
+
+    {:error, reason} ->
+      Logger.warning("Could not resolve country for address #{address}: #{inspect(reason)}")
+   end
+  end
+
 end

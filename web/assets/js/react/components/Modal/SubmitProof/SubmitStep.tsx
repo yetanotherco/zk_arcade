@@ -13,6 +13,7 @@ import {
 import {
 	useAligned,
 	useBatcherNonce,
+	useBatcherMaxFee,
 	useBatcherPaymentService,
 	useEthPrice,
 	useBeastLeaderboardContract,
@@ -108,6 +109,10 @@ export const SubmitProofStep = ({
 	const [maxFee, setMaxFee] = useState(BigInt(0));
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const { nonce, isLoading: nonceLoading } = useBatcherNonce(
+		batcher_url,
+		user_address
+	);
+	const { maxFee: latestMaxFee, isLoading: previousMaxFeeLoading } = useBatcherMaxFee(
 		batcher_url,
 		user_address
 	);
@@ -237,11 +242,17 @@ export const SubmitProofStep = ({
 			return;
 		}
 
-		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-		if (!maxFee) {
+		// This value should be capped by the previous proof max fee
+		const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
+		if (!estimatedMaxFee) {
 			alert("Could not estimate max fee");
 			return;
 		}
+
+		const maxFee = latestMaxFee && latestMaxFee > estimatedMaxFee
+			? latestMaxFee
+			: estimatedMaxFee;
+		console.log({maxFee, latestMaxFee, estimatedMaxFee});
 
 		if (nonce == null) {
 			alert("Nonce is still loading or failed");
@@ -299,11 +310,15 @@ export const SubmitProofStep = ({
 
 	const handleSend = useCallback(
 		async (proofToSubmitData: VerificationData) => {
-			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-			if (!maxFee) {
+			const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
+			if (!estimatedMaxFee) {
 				alert("Could not estimate max fee");
 				return;
 			}
+			const maxFee = latestMaxFee && latestMaxFee > estimatedMaxFee
+				? latestMaxFee
+				: estimatedMaxFee;
+			console.log({maxFee, latestMaxFee, estimatedMaxFee});
 
 			if (nonce == null) {
 				alert("Nonce is still loading or failed");
@@ -548,6 +563,7 @@ export const SubmitProofStep = ({
 							lastTimeSubmitted={
 								proofSubmission?.inserted_at || "0"
 							}
+							latestMaxFee={latestMaxFee}
 						/>
 					)}
 			</div>
@@ -719,6 +735,7 @@ export const SubmitProofStep = ({
 							!publicInputs ||
 							(balance.data || 0) < maxFee ||
 							nonceLoading ||
+							previousMaxFeeLoading ||
 							nonce == null ||
 							levelAlreadyReached
 						}
@@ -733,6 +750,7 @@ export const SubmitProofStep = ({
 						disabled={
 							(balance.data || 0) < maxFee ||
 							nonceLoading ||
+							previousMaxFeeLoading ||
 							nonce == null ||
 							levelAlreadyReached
 						}

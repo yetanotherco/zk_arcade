@@ -252,7 +252,6 @@ export const SubmitProofStep = ({
 		const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
 			? latestMaxFee
 			: estimatedMaxFee;
-		console.log({maxFee, latestMaxFee, estimatedMaxFee});
 
 		if (nonce == null) {
 			alert("Nonce is still loading or failed");
@@ -318,7 +317,6 @@ export const SubmitProofStep = ({
 			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
 				? latestMaxFee
 				: estimatedMaxFee;
-			console.log({maxFee, latestMaxFee, estimatedMaxFee});
 
 			if (nonce == null) {
 				alert("Nonce is still loading or failed");
@@ -563,7 +561,6 @@ export const SubmitProofStep = ({
 							lastTimeSubmitted={
 								proofSubmission?.inserted_at || "0"
 							}
-							latestMaxFee={latestMaxFee}
 						/>
 					)}
 			</div>

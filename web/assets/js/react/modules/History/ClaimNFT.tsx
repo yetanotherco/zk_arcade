@@ -21,7 +21,7 @@ const ClaimNFT = ({
 }: Omit<Props, "network">) => {
 	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
 	const [claimed, setClaimed] = useState(false);
-	const { balance } = useNftContract({
+	const { balance, claimNft, receipt } = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
@@ -55,11 +55,12 @@ const ClaimNFT = ({
 
 			<EligibilityModal
 				isEligible={isEligible}
-				nft_contract_address={nft_contract_address}
 				open={mintModalOpen}
 				setOpen={setMintModalOpen}
-				user_address={user_address}
 				onClose={() => setClaimed(true)}
+				claimNft={claimNft}
+				balance={balance.data || 0n}
+				isLoading={receipt.isLoading}
 			/>
 		</div>
 	);

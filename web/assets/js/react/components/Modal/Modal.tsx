@@ -35,7 +35,8 @@ export const Modal = ({
 	});
 
 	const [ref] = useOnClickOutside<HTMLDivElement>(
-		() => shouldCloseOnOutsideClick && setOpen(false)
+		() => shouldCloseOnOutsideClick && setOpen(false),
+		['[data-toast-container]']
 	);
 
 	useEffect(() => {

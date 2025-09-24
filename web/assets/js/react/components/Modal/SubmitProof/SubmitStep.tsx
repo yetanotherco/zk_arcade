@@ -249,7 +249,7 @@ export const SubmitProofStep = ({
 			return;
 		}
 
-		const maxFee = latestMaxFee && latestMaxFee > estimatedMaxFee
+		const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
 			? latestMaxFee
 			: estimatedMaxFee;
 		console.log({maxFee, latestMaxFee, estimatedMaxFee});
@@ -315,7 +315,7 @@ export const SubmitProofStep = ({
 				alert("Could not estimate max fee");
 				return;
 			}
-			const maxFee = latestMaxFee && latestMaxFee > estimatedMaxFee
+			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
 				? latestMaxFee
 				: estimatedMaxFee;
 			console.log({maxFee, latestMaxFee, estimatedMaxFee});

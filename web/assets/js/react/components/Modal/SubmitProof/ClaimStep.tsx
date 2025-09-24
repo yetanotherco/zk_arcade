@@ -164,7 +164,7 @@ const BeastClaim = ({
 		<ClaimComponent
 			gameHasExpired={gameHasExpired}
 			handleClaim={handleClaim}
-			isLoading={false}
+			isLoading={submitSolution.isLoading}
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
 			ref={formRef}
@@ -172,17 +172,6 @@ const BeastClaim = ({
 		/>
 	);
 };
-
-function readLeftmost(value, level) {
-	const bitsToKeep = level * 80;
-	const totalBits = 256;
-
-	if (bitsToKeep > totalBits) throw new Error("Too many bits requested");
-
-	const shiftAmount = totalBits - bitsToKeep;
-
-	return value >> BigInt(shiftAmount);
-}
 
 const ParityClaim = ({
 	user_address,
@@ -239,7 +228,7 @@ const ParityClaim = ({
 		<ClaimComponent
 			gameHasExpired={gameHasExpired}
 			handleClaim={handleClaim}
-			isLoading={false}
+			isLoading={submitSolution.isLoading}
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
 			ref={formRef}

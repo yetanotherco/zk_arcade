@@ -88,7 +88,7 @@ export const useBeastLeaderboardContract = ({
 
 	const { addToast } = useToast();
 
-	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
+	const { writeContractAsync, data: txHash, isPending, ...txRest } = useWriteContract();
 	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
 	const claimBeastPoints = useCallback(
@@ -181,16 +181,18 @@ export const useBeastLeaderboardContract = ({
 		}
 	}, [receipt.isLoading, receipt.isError]);
 
+	const isClaimLoading = isPending || receipt.isLoading || submitSolutionFetchingVDataIsLoading;
+
 	return {
 		score,
 		submitSolution: {
 			claimBeastPoints,
-			submitSolutionFetchingVDataIsLoading,
 			receipt,
 			tx: {
 				hash: txHash,
 				...txRest,
 			},
+			isLoading: isClaimLoading,
 		},
 		currentGameLevelCompleted,
 		currentGame: {

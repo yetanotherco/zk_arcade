@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Address } from "viem";
 
-type PendingProofsToBump = {
+export type PendingProofToBump = {
 	id: string;
 	status: string;
 	inserted_at: string;
 	updated_at: string;
-}[];
+	submitted_max_fee: string;
+};
 
 const fetchProofsToBump = async (
 	address: Address
-): Promise<PendingProofsToBump | null> => {
+): Promise<PendingProofToBump[] | null> => {
 	try {
 		const response = await fetch(`/proof/pending/?address=${address}`, {
 			method: "GET",
@@ -36,7 +37,7 @@ export const usePendingProofsToBump = ({
 }: {
 	user_address: Address;
 }) => {
-	const [proofsToBump, setProofsToBump] = useState<PendingProofsToBump>([]);
+	const [proofsToBump, setProofsToBump] = useState<PendingProofToBump[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 

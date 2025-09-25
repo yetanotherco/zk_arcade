@@ -134,6 +134,7 @@ defmodule ZkArcade.Proofs do
         status: p.status,
         inserted_at: p.inserted_at,
         updated_at: p.updated_at,
+        submitted_max_fee: p.submitted_max_fee
       })
       |> Repo.all()
   end

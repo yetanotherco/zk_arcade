@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useAligned, useEthPrice } from "../../../hooks";
 import { useToast } from "../../../state/toast";
-import { ProofSubmission } from "../../../types/aligned";
 import { Modal } from "../Modal";
 import { BumpSelector } from "./BumpSelector";
 import { BumpResult } from "./BumpResult";
 import { ethStrToWei, weiToEthNumber } from "../../../utils/conversion";
 import { BumpChoice } from "./helpers";
 import { Button } from "../../Button";
+import { PendingProofToBump } from "../../../hooks/usePendingProofsToBump";
 
 type Props = {
 	maxFeeLimit: bigint;
 	open: boolean;
 	setOpen: (open: boolean) => void;
-	proofsToBump: ProofSubmission[];
+	proofsToBump: PendingProofToBump[];
 };
 
 export const BumpFeeModal = ({

@@ -18,7 +18,10 @@ import {
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 import { Button } from "../../components/Button";
 import { BumpFeeModal } from "../../components/Modal/BumpFee";
-import { usePendingProofsToBump } from "../../hooks/usePendingProofsToBump";
+import {
+	PendingProofToBump,
+	usePendingProofsToBump,
+} from "../../hooks/usePendingProofsToBump";
 
 type Props = {
 	leaderboard_address: Address;
@@ -48,7 +51,7 @@ const Entry = ({
 	proof: ProofSubmission;
 	batcher_url: string;
 	explorer_url: string;
-	proofsToBump: ProofSubmission[];
+	proofsToBump: PendingProofToBump[];
 	maxFeeLimit: bigint;
 }) => {
 	const { open, setOpen, toggleOpen } = useModal();
@@ -152,7 +155,9 @@ export const ProofHistory = ({
 	nft_contract_address,
 }: Props) => {
 	useProofSentMessageReader();
-	const {} = usePendingProofsToBump({ user_address: user_address });
+	const { proofsToBump } = usePendingProofsToBump({
+		user_address: user_address,
+	});
 
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
@@ -207,7 +212,7 @@ export const ProofHistory = ({
 						nft_contract_address={nft_contract_address}
 						proof={proof}
 						user_address={user_address}
-						proofsToBump={[]}
+						proofsToBump={proofsToBump}
 						maxFeeLimit={100n}
 					/>
 				))}

@@ -8,12 +8,12 @@ defmodule ZkArcadeWeb.ProofController do
 
   def get_pending_proofs_to_bump(conn, %{"address" => address}) do
     case ZkArcade.Proofs.get_pending_proofs_to_bump(address) do
-      proofs ->
-        conn |> json(proofs)
       nil ->
         conn
         |> put_status(:internal_server_error)
         |> json(%{error: "Failed to fetch pending proofs"})
+      proofs ->
+        conn |> json(proofs)
     end
   end
 

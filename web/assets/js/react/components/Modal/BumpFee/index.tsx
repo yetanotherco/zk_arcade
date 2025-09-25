@@ -12,6 +12,7 @@ import { fetchProofVerificationData } from "../../../utils/aligned";
 import { NoncedVerificationdata, SubmitProof } from "../../../types/aligned";
 import { toHex } from "viem";
 import { Address } from "../../../types/blockchain";
+import { useCSRFToken } from "../../../hooks/useCSRFToken";
 
 type Props = {
 	maxFeeLimit: bigint;
@@ -43,6 +44,7 @@ export const BumpFeeModal = ({
 		ProofBumpResult[]
 	>([]);
 	const { signVerificationData } = useAligned();
+	const { csrfToken } = useCSRFToken();
 
 	const { addToast } = useToast();
 	const { estimateMaxFeeForBatchOfProofs } = useAligned();
@@ -112,68 +114,79 @@ export const BumpFeeModal = ({
 	}, [estimateMaxFeeForBatchOfProofs, hasEstimatedOnce, proofsToBump]);
 
 	const handleConfirm = async () => {
-		let chosenWei: bigint | null = null;
+		const submitProofMessages: { msg: SubmitProof; proof_id: string }[] =
+			[];
 
-		if (choice === "suggested") {
-			chosenWei = suggestedFeeWei;
-		} else if (choice === "instant") {
-			chosenWei = instantFeeWei;
-		} else if (choice === "custom") {
-			chosenWei = ethStrToWei(customEth);
-			if (!chosenWei || chosenWei <= maxFeeLimit) {
-				handleBumpError(
-					`The fee must be greater than the current fee of ${weiToEthNumber(
-						maxFeeLimit
-					)} ETH.`
-				);
-				return;
-			}
-		}
-
-		if (!chosenWei || chosenWei <= 0n) {
-			handleBumpError("Please enter a value greater than 0 ETH.");
-			return;
-		}
-
-		const submitProofMessages: SubmitProof[] = [];
+		setIsLoading(true);
 		for (const proof of proofsBumpingResult) {
 			if (proof.new_max_fee === proof.previous_max_fee) {
 				continue;
 			}
 
-			const res = await fetchProofVerificationData(proof.id);
-			if (!res) {
-				setIsLoading(false);
-				addToast({
-					title: "There was a problem while sending the proof",
-					desc: "Please try again.",
-					type: "error",
+			try {
+				const res = await fetchProofVerificationData(proof.id);
+				if (!res) {
+					setIsLoading(false);
+					addToast({
+						title: "There was a problem while sending the proof",
+						desc: "Please try again.",
+						type: "error",
+					});
+					return;
+				}
+				const noncedVerificationData: NoncedVerificationdata = {
+					...res.verification_data,
+					maxFee: toHex(proof.new_max_fee, { size: 32 }),
+				};
+
+				const { r, s, v } = await signVerificationData(
+					noncedVerificationData,
+					paymentServiceAddr
+				);
+
+				const submitProofMessage: SubmitProof = {
+					verificationData: noncedVerificationData,
+					signature: {
+						r,
+						s,
+						v: Number(v),
+					},
+				};
+
+				submitProofMessages.push({
+					msg: submitProofMessage,
+					proof_id: proof.id,
 				});
+			} catch {
+				setIsLoading(false);
 				return;
 			}
-			const noncedVerificationData: NoncedVerificationdata =
-				res.verification_data;
-
-			noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
-
-			const { r, s, v } = await signVerificationData(
-				noncedVerificationData,
-				paymentServiceAddr
-			);
-
-			const submitProofMessage: SubmitProof = {
-				verificationData: noncedVerificationData,
-				signature: {
-					r,
-					s,
-					v: Number(v),
-				},
-			};
-
-			submitProofMessages.push(submitProofMessage);
 		}
 
-		// TODO: send each proof one by one
+		for await (const submitProofMessage of submitProofMessages) {
+			try {
+				const response = await fetch("/proof/status/retry", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					body: new URLSearchParams({
+						_csrf_token: csrfToken,
+						submit_proof_message: JSON.stringify(
+							submitProofMessage.msg
+						),
+						proof_id: submitProofMessage.proof_id,
+					}),
+				});
+
+				if (!response.ok) {
+					throw new Error(`Request failed: ${response.status}`);
+				}
+			} catch (error) {
+				setIsLoading(false);
+				console.error("Error retrying proof submission:", error);
+			}
+		}
 
 		setOpen(false);
 	};

@@ -336,6 +336,8 @@ defmodule ZkArcade.Proofs do
   end
 
   def update_proof_retry(proof_id, max_fee) do
+    PrometheusMetrics.bumped_proof()
+
     proof = get_proof!(proof_id)
 
     changeset = change_proof(proof, %{

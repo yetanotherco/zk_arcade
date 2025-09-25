@@ -44,10 +44,11 @@ defmodule ZkArcade.BatcherConnection do
             message = build_submit_proof_message(submit_proof_message, address)
             binary = CBOR.encode(message)
             :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
-            handle_websocket_messages(conn_pid, stream_ref)
+            response = handle_websocket_messages(conn_pid, stream_ref)
 
             PrometheusMetrics.remove_open_batcher_connection()
 
+            response
           {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
             Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
             close_connection(conn_pid, stream_ref)

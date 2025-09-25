@@ -340,7 +340,6 @@ defmodule ZkArcade.Proofs do
 
     changeset = change_proof(proof, %{
       status: "pending",
-      inserted_at: DateTime.utc_now(),
       updated_at: DateTime.utc_now(),
       times_retried: proof.times_retried + 1,
       submitted_max_fee: max_fee

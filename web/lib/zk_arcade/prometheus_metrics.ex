@@ -3,10 +3,12 @@ defmodule ZkArcade.PrometheusMetrics do
 
   @counter [name: :failed_proofs_count, help: "Failed Proofs"]
   @counter [name: :users_registered_count, help: "Users Registered"]
+  @gauge [name: :open_batcher_connections, help: "Active Batcher Connections"]
 
   def setup() do
     Counter.declare(name: :failed_proofs_count, help: "Failed Proofs")
     Counter.declare(name: :users_registered_count, help: "Users Registered")
+    Gauge.declare(name: :open_batcher_connections, help: "Active Batcher Connections")
   end
 
   def failed_proof() do
@@ -17,4 +19,11 @@ defmodule ZkArcade.PrometheusMetrics do
     Counter.inc(name: :users_registered_count)
   end
 
+  def add_open_batcher_connection() do
+    Gauge.inc(name: :open_batcher_connections)
+  end
+
+  def remove_open_batcher_connection() do
+    Gauge.dec(name: :open_batcher_connections)
+  end
 end

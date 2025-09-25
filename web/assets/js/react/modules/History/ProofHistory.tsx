@@ -43,6 +43,7 @@ const Entry = ({
 	nft_contract_address,
 	proofsToBump,
 	maxFeeLimit,
+	proofsToBumpIsLoading,
 }: {
 	payment_service_address: Address;
 	leaderboard_address: Address;
@@ -53,6 +54,7 @@ const Entry = ({
 	explorer_url: string;
 	proofsToBump: PendingProofToBump[];
 	maxFeeLimit: bigint;
+	proofsToBumpIsLoading: boolean;
 }) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const { open: bumpOpen, setOpen: setBumpOpen } = useModal();
@@ -136,12 +138,16 @@ const Entry = ({
 				gameIdx={proof.game_idx}
 			/>
 
-			<BumpFeeModal
-				open={bumpOpen}
-				maxFeeLimit={maxFeeLimit}
-				proofsToBump={proofsToBump}
-				setOpen={setBumpOpen}
-			/>
+			{bumpOpen && (
+				<BumpFeeModal
+					open={bumpOpen}
+					maxFeeLimit={maxFeeLimit}
+					proofsToBump={proofsToBump}
+					setOpen={setBumpOpen}
+					proofsToBumpIsLoading={proofsToBumpIsLoading}
+					paymentServiceAddr={payment_service_address}
+				/>
+			)}
 		</>
 	);
 };
@@ -155,9 +161,10 @@ export const ProofHistory = ({
 	nft_contract_address,
 }: Props) => {
 	useProofSentMessageReader();
-	const { proofsToBump } = usePendingProofsToBump({
-		user_address: user_address,
-	});
+	const { proofsToBump, isLoading: proofsToBumpIsLoading } =
+		usePendingProofsToBump({
+			user_address: user_address,
+		});
 
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
@@ -214,6 +221,7 @@ export const ProofHistory = ({
 						user_address={user_address}
 						proofsToBump={proofsToBump}
 						maxFeeLimit={100n}
+						proofsToBumpIsLoading={proofsToBumpIsLoading}
 					/>
 				))}
 			</Table>

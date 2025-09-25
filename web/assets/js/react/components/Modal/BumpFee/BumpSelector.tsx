@@ -42,7 +42,7 @@ type Props = {
 	customEth: string;
 	setCustomEth: (value: string) => void;
 	instantFeeWei: bigint;
-	defaultFeeWei: bigint;
+	suggestedFeeWei: bigint;
 	lastTimeSubmitted: string;
 };
 
@@ -56,7 +56,7 @@ export const BumpSelector = ({
 	customEth,
 	setCustomEth,
 	instantFeeWei,
-	defaultFeeWei,
+	suggestedFeeWei,
 	lastTimeSubmitted,
 }: Props) => {
 	const isCustomFeeValid = (customEthValue: string): boolean => {
@@ -80,18 +80,6 @@ export const BumpSelector = ({
 
 		return (
 			<div className="flex flex-col gap-3">
-				<div className="bg-contrast-100/10 rounded-lg">
-					<div className="text-sm opacity-80">
-						Previous submitted max fee:
-					</div>
-					<div className="font-medium">
-						<EthPriceWithTooltip
-							wei={maxFeeLimit}
-							ethPrice={price}
-						/>
-					</div>
-				</div>
-
 				<label
 					className={`cursor-pointer rounded-xl border p-3 transition-colors ${
 						choice === "instant"
@@ -148,14 +136,14 @@ export const BumpSelector = ({
 								type="radio"
 								name="bump"
 								className="cursor-pointer"
-								checked={choice === "instant"}
+								checked={choice === "suggested"}
 								onChange={() =>
-									!isLoading && setChoice("instant")
+									!isLoading && setChoice("suggested")
 								}
 								disabled={isLoading}
 							/>
 							<span className="font-medium relative group">
-								Default
+								Suggested
 								<div
 									className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words whitespace-normal max-w-sm min-w-[200px] z-10 pointer-events-none"
 									style={{ minWidth: "400px" }}
@@ -166,9 +154,9 @@ export const BumpSelector = ({
 							</span>
 						</div>
 						<span className="text-sm opacity-80">
-							{defaultFeeWei ? (
+							{suggestedFeeWei ? (
 								<EthPriceWithTooltip
-									wei={defaultFeeWei}
+									wei={suggestedFeeWei}
 									ethPrice={price}
 								/>
 							) : (

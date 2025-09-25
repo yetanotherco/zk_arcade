@@ -7,6 +7,8 @@ export type PendingProofToBump = {
 	inserted_at: string;
 	updated_at: string;
 	submitted_max_fee: string;
+	game: string;
+	level_reached: number;
 };
 
 const fetchProofsToBump = async (

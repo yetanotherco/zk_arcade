@@ -2,6 +2,7 @@
 // https://tailwindcss.com/docs/configuration
 
 const plugin = require("tailwindcss/plugin");
+const colors = require("tailwindcss/colors");
 const fs = require("fs");
 const path = require("path");
 
@@ -24,9 +25,15 @@ module.exports = {
 				"modal-overlay": "rgba(0, 0, 0, 0.5)",
 				black: "rgb(26 26 26 / <alpha-value>)",
 				orange: "rgb(255 160 24 / <alpha-value>)",
-				red: "rgb(253 77 77 / <alpha-value>)",
-				yellow: "rgb(241 254 64 / <alpha-value>)",
 				risc0: "rgb(254 254 157 / <alpha-value>)",
+				red: {
+					...colors.red,
+					DEFAULT: "rgb(253 77 77 / <alpha-value>)",
+				},
+				yellow: {
+					...colors.yellow,
+					DEFAULT: "rgb(241 254 64 / <alpha-value>)",
+				},
 				circom: "rgb(148 148 148 / <alpha-value>)",
 				sp1: "rgb(255 105 180 / <alpha-value>)",
 				blue: "rgb(64 165 254 / <alpha-value>)",
@@ -115,21 +122,22 @@ module.exports = {
 				".phx-change-loading &",
 			])
 		),
-		plugin(function({ addUtilities }) {
+		plugin(function ({ addUtilities }) {
 			addUtilities({
-				'.text-accent-gradient': {
-					'background': 'linear-gradient(135deg, rgb(24 255 127), rgb(187 242 219))',
-					'-webkit-background-clip': 'text',
-					'background-clip': 'text',
-					'-webkit-text-fill-color': 'transparent',
-					'background-size': '100%',
-					'background-repeat': 'no-repeat',
-				},	
-				'.transition-grid': {
-					'transition-property': 'grid-template-rows',
-					'transition-duration': '300ms',
-					'transition-timing-function': 'ease-in-out',
-					'will-change': 'grid-template-rows',
+				".text-accent-gradient": {
+					background:
+						"linear-gradient(135deg, rgb(24 255 127), rgb(187 242 219))",
+					"-webkit-background-clip": "text",
+					"background-clip": "text",
+					"-webkit-text-fill-color": "transparent",
+					"background-size": "100%",
+					"background-repeat": "no-repeat",
+				},
+				".transition-grid": {
+					"transition-property": "grid-template-rows",
+					"transition-duration": "300ms",
+					"transition-timing-function": "ease-in-out",
+					"will-change": "grid-template-rows",
 				},
 			});
 		}),

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Address } from "../../types/blockchain";
 import {
 	useBatcherPaymentService,
@@ -9,7 +9,6 @@ import { formatEther } from "viem";
 import { Table, TableBodyItem } from "../../components/Table";
 import { ProofSubmission } from "../../types/aligned";
 import { timeAgo } from "../../utils/date";
-import { shortenHash } from "../../utils/crypto";
 import { useProofSentMessageReader } from "../../hooks/useProofSentMessageReader";
 import {
 	ProofBatchMerkleRoot,
@@ -17,6 +16,8 @@ import {
 	ProofClaimTxHash,
 } from "../../components/Table/ProofBodyItems";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
+import { Button } from "../../components/Button";
+import { BumpFeeModal } from "../../components/Modal/BumpFee";
 
 type Props = {
 	leaderboard_address: Address;
@@ -36,6 +37,8 @@ const Entry = ({
 	batcher_url,
 	explorer_url,
 	nft_contract_address,
+	proofsToBump,
+	maxFeeLimit,
 }: {
 	payment_service_address: Address;
 	leaderboard_address: Address;
@@ -44,8 +47,13 @@ const Entry = ({
 	proof: ProofSubmission;
 	batcher_url: string;
 	explorer_url: string;
+	proofsToBump: ProofSubmission[];
+	maxFeeLimit: bigint;
 }) => {
 	const { open, setOpen, toggleOpen } = useModal();
+	const { open: bumpOpen, setOpen: setBumpOpen } = useModal();
+
+	const [suppressRowHover, setSuppressRowHover] = useState(false);
 
 	const levelsNumber = proof.game === "Beast" ? 8 : 3;
 
@@ -53,27 +61,26 @@ const Entry = ({
 		<>
 			<tr
 				onClick={toggleOpen}
-				className="cursor-pointer gap-y-2 [&>td]:pb-2 animate-in fade-in-0 truncat transition hover:bg-contrast-100"
+				className={`cursor-pointer gap-y-2 [&>td]:pb-2 animate-in fade-in-0 transition
+					${suppressRowHover ? "" : "hover:bg-contrast-100"}
+				`}
 			>
 				<td>
-					<p>{proof.game} </p>
+					<p>{proof.game}</p>
 					<div
 						className="group/tooltip flex flex-row gap-0.5 items-center"
 						style={{ maxWidth: 50 }}
 					>
-						{[...Array(levelsNumber)].map((_, index) => {
-							return (
-								<div
-									key={index}
-									className={`
-									w-full h-[10px] mb-2
+						{[...Array(levelsNumber)].map((_, index) => (
+							<div
+								key={index}
+								className={`w-full h-[10px] mb-2
 									${index < proof.level_reached ? "bg-accent-100" : "bg-contrast-100"}
 									${index === 0 ? "rounded-l-[3px]" : ""}
 									${index === levelsNumber - 1 ? "rounded-r-[3px]" : ""}
-									`}
-								></div>
-							);
-						})}
+								`}
+							/>
+						))}
 
 						<div
 							className="absolute translate-x-1/4 mt-2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover/tooltip:opacity-100 transition pointer-events-none z-50"
@@ -96,7 +103,21 @@ const Entry = ({
 					explorer_url={explorer_url}
 				/>
 				<ProofClaimTxHash proof={proof} />
-				<TableBodyItem text={proof.proving_system} />
+				<td>
+					<Button
+						variant="icon"
+						onMouseEnter={() => setSuppressRowHover(true)}
+						onMouseLeave={() => setSuppressRowHover(false)}
+						onFocus={() => setSuppressRowHover(true)}
+						onBlur={() => setSuppressRowHover(false)}
+						onClick={e => {
+							e.stopPropagation();
+							setBumpOpen(true);
+						}}
+					>
+						B
+					</Button>
+				</td>
 			</tr>
 
 			<SubmitProofModal
@@ -109,6 +130,13 @@ const Entry = ({
 				proofToSubmitData={null}
 				nft_contract_address={nft_contract_address}
 				gameIdx={proof.game_idx}
+			/>
+
+			<BumpFeeModal
+				open={bumpOpen}
+				maxFeeLimit={maxFeeLimit}
+				proofsToBump={proofsToBump}
+				setOpen={setBumpOpen}
 			/>
 		</>
 	);
@@ -177,6 +205,8 @@ export const ProofHistory = ({
 						nft_contract_address={nft_contract_address}
 						proof={proof}
 						user_address={user_address}
+						proofsToBump={[]}
+						maxFeeLimit={100n}
 					/>
 				))}
 			</Table>

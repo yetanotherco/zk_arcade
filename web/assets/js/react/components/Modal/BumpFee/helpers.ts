@@ -1,1 +1,1 @@
-type BumpChoice = "instant" | "suggested" | "custom";
+export type BumpChoice = "instant" | "suggested" | "custom";

@@ -6,6 +6,8 @@ import { Modal } from "../Modal";
 import { BumpSelector } from "./BumpSelector";
 import { BumpResult } from "./BumpResult";
 import { ethStrToWei, weiToEthNumber } from "../../../utils/conversion";
+import { BumpChoice } from "./helpers";
+import { Button } from "../../Button";
 
 type Props = {
 	maxFeeLimit: bigint;
@@ -14,7 +16,7 @@ type Props = {
 	proofsToBump: ProofSubmission[];
 };
 
-export const BumpFee = ({
+export const BumpFeeModal = ({
 	maxFeeLimit,
 	open,
 	setOpen,
@@ -121,6 +123,10 @@ export const BumpFee = ({
 				price={price || 0}
 				setChoice={setChoice}
 			/>
+			<Button variant="accent-fill" onClick={handleConfirm}>
+				Confirm
+			</Button>
+			<div className="h-[2px] bg-black w-full"></div>
 			<BumpResult proofs={[]} />
 		</Modal>
 	);

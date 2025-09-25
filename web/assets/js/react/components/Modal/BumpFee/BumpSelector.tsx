@@ -5,6 +5,7 @@ import {
 	weiToEthNumber,
 } from "../../../utils/conversion";
 import { timeAgoInHs } from "../../../utils/date";
+import { BumpChoice } from "./helpers";
 
 const EthPriceWithTooltip = ({
 	wei,

@@ -30,6 +30,7 @@ export const BumpResult = ({ proofs }: Props) => {
 			{proofs.map((proof, idx) => {
 				const previousFee = formatFee(proof.previous_max_fee);
 				const newFee = formatFee(proof.new_max_fee);
+				const isSameFee = proof.new_max_fee === proof.previous_max_fee;
 
 				return (
 					<div className="border border-contrast-100/20 rounded-lg p-4 flex flex-col gap-2">
@@ -49,9 +50,18 @@ export const BumpResult = ({ proofs }: Props) => {
 								<span className="uppercase text-xs opacity-60">
 									After
 								</span>
-								<span className="text-accent-100 font-medium">
+								<span
+									className={`text-accent-100 font-medium${
+										isSameFee ? " opacity-40" : ""
+									}`}
+								>
 									{newFee}
 								</span>
+								{isSameFee && (
+									<span className="text-xs uppercase tracking-wide opacity-60">
+										No bump needed
+									</span>
+								)}
 							</div>
 						</div>
 					</div>

@@ -58,38 +58,34 @@ export const BumpFeeModal = ({
 	const estimateFees = async () => {
 		try {
 			setEstimating(true);
-			// TODO: here get the default and it is lower than the first one bump to the first one
-			// if not bump everything to the first one instead
-			const estimateSuggested = await estimateMaxFeeForBatchOfProofs(16);
-			const estimatedInstant = await estimateMaxFeeForBatchOfProofs(
-				proofsToBump.length || 1
-			);
 
-			if (!estimateSuggested) {
+			let estimateSuggested =
+				(await estimateMaxFeeForBatchOfProofs(16)) || 0n;
+			let estimatedInstant =
+				(await estimateMaxFeeForBatchOfProofs(
+					proofsToBump.length || 1
+				)) || 0n;
+
+			if (!estimateSuggested || !proofsToBump.length) {
 				handleBumpError(
 					"Could not estimate the fee. Please try again in a few seconds."
 				);
 				return;
 			}
 
+			if (estimateSuggested < BigInt(proofsToBump[0].submitted_max_fee))
+				estimateSuggested = BigInt(proofsToBump[0].submitted_max_fee);
+
+			if (estimatedInstant < BigInt(proofsToBump[0].submitted_max_fee))
+				estimatedInstant = BigInt(proofsToBump[0].submitted_max_fee);
+
 			setSuggestedFeeWei(estimateSuggested);
 			setInstantFeeWei(estimatedInstant);
 
-			if (!hasEstimatedOnce) {
-				setChoice("suggested");
-				setCustomEth("");
-				setHasEstimatedOnce(true);
-			}
-
 			const bumpingResult = proofsToBump.map<ProofBumpResult>(p => {
-				const newMaxFee =
-					(choice === "instant"
-						? estimatedInstant
-						: estimateSuggested) || 0n;
-
 				return {
 					id: p.id,
-					new_max_fee: newMaxFee,
+					new_max_fee: estimateSuggested,
 					previous_max_fee: BigInt(p.submitted_max_fee),
 				};
 			});
@@ -140,8 +136,11 @@ export const BumpFeeModal = ({
 		}
 
 		const submitProofMessages: SubmitProof[] = [];
-		// TODO: see if possible to sign all transactions in a single call
 		for (const proof of proofsBumpingResult) {
+			if (proof.new_max_fee === proof.previous_max_fee) {
+				continue;
+			}
+
 			const res = await fetchProofVerificationData(proof.id);
 			if (!res) {
 				setIsLoading(false);
@@ -234,6 +233,11 @@ export const BumpFeeModal = ({
 				) : (
 					<>
 						<p>Bumping overview:</p>
+						<p className="text-sm">
+							TODO: EXPLAIN HOW THE BUMPING WORKS
+						</p>
+						{/* TODO: add correct number of proofs to bump */}
+						<p className="text-sm">Total proofs to bump: 10</p>
 						<div className="h-[2px] bg-gray-300 w-full"></div>
 						<BumpResult proofs={proofsBumpingResult} />
 					</>
@@ -245,6 +249,10 @@ export const BumpFeeModal = ({
 						proofsToBumpIsLoading ||
 						isLoading ||
 						estimating ||
+						!proofsBumpingResult.length ||
+						proofsBumpingResult.every(
+							p => p.previous_max_fee === p.new_max_fee
+						) ||
 						(choice === "custom" &&
 							(!ethStrToWei(customEth) ||
 								!isCustomFeeValid(customEth, maxFeeLimit)))

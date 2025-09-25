@@ -18,6 +18,7 @@ import {
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 import { Button } from "../../components/Button";
 import { BumpFeeModal } from "../../components/Modal/BumpFee";
+import { usePendingProofsToBump } from "../../hooks/usePendingProofsToBump";
 
 type Props = {
 	leaderboard_address: Address;
@@ -151,6 +152,7 @@ export const ProofHistory = ({
 	nft_contract_address,
 }: Props) => {
 	useProofSentMessageReader();
+	const {} = usePendingProofsToBump({ user_address: user_address });
 
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,

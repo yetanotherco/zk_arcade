@@ -28,6 +28,8 @@ services:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
+      - RPC_URL=http://host.docker.internal:8545
     restart: unless-stopped
     ports:
       - "3000:3000"

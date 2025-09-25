@@ -25,9 +25,9 @@ defmodule ZkArcadeWeb.WalletController do
             {:ok, wallet} ->
               Logger.info("Created wallet for address #{wallet.address}")
 
-            conn
-            |> put_session(:wallet_address, wallet.address)
-            |> redirect(to: ~p"/")
+              conn
+              |> put_session(:wallet_address, wallet.address)
+              |> redirect(to: ~p"/")
             {:error, changeset} ->
               Logger.error("Error creating wallet: #{inspect(changeset.errors)}")
 

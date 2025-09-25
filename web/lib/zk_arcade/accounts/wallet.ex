@@ -10,6 +10,7 @@ defmodule ZkArcade.Accounts.Wallet do
     field :balance, :float, default: 0.0
     field :agreement_signature, :string
     field :username, :string
+    field :country, :string
     # TODO: Add the required fields to use in wallets
 
     has_many :proofs, ZkArcade.Proofs.Proof, foreign_key: :wallet_address, references: :address
@@ -20,7 +21,7 @@ defmodule ZkArcade.Accounts.Wallet do
   @doc false
   def changeset(wallet, attrs) do
     wallet
-    |> cast(attrs, [:address, :points, :balance, :agreement_signature, :username])
+    |> cast(attrs, [:address, :points, :balance, :agreement_signature, :username, :country])
     |> validate_address()
     |> validate_required([:address, :agreement_signature])
     |> put_default(:points, 0)

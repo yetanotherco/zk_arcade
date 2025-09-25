@@ -16,13 +16,16 @@ web_deps:
 	cd assets && npm install
 
 web_db:
-	@cd web/ && \
-	docker compose up -d db --wait && \
-	mix ecto.migrate
+	@docker compose up -d db --wait && \
+		cd web/ && \
+		mix ecto.migrate
 
 web_metrics:
-	@cd web/ && \
-	docker compose up -d prometheus grafana --wait
+	@docker compose up -d prometheus grafana --wait
+
+web_metrics_stop:
+	@docker stop zk_arcade_prometheus zk_arcade_grafana || true  && \
+		docker rm zk_arcade_prometheus zk_arcade_grafana || true
 
 web_migrate:
 	@cd web/ && \
@@ -33,13 +36,11 @@ web_run: web_deps web_db web_metrics
 	iex -S mix phx.server
 
 web_remove_db_container:
-	@cd web && \
-		docker stop zk_arcade_db || true  && \
+	@docker stop zk_arcade_db || true  && \
 		docker rm zk_arcade_db || true
 
 web_clean_db: web_remove_db_container
-	@cd web && \
-		docker volume rm zkarcade-postgres-data || true
+	@docker volume rm zkarcade-postgres-data || true
 
 
 __GAME__:

@@ -4,7 +4,7 @@ global:
 # A scrape configuration containing exactly one endpoint to scrape.
 scrape_configs:
   - job_name: "zk_arcade"
-    scrape_interval: 1s
+    scrape_interval: 15s
     static_configs:
       - targets: ["host.docker.internal:4005"]
         labels:

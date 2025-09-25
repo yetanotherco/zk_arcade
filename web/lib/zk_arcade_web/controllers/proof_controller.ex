@@ -6,6 +6,17 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.Proofs
   alias ZkArcade.EIP712Verifier
 
+  def get_pending_proofs_to_bump(conn, %{"address" => address}) do
+    case ZkArcade.Proofs.get_pending_proofs_to_bump(address) do
+      {:ok, proofs} ->
+        conn |> json(%{proofs: proofs})
+      {:error, _} ->
+         conn
+          |> put_status(:internal_server_error)
+          |> json(%{error: "Failed to fetch pending proofs"})
+    end
+  end
+
   def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id, "claim_tx_hash" => claim_tx_hash}) do
     address = get_session(conn, :wallet_address)
 

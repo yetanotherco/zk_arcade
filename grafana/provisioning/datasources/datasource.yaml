@@ -12,3 +12,20 @@ datasources:
     editable: true
     jsonData:
       timeInterval: 15s
+  
+  - name: PostgreSQL
+    type: postgres
+    uid: postgres
+    access: proxy
+    orgId: 1
+    url: ${POSTGRES_HOST}:${POSTGRES_PORT}
+    database: ${POSTGRES_DB}
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    basicAuth: false
+    isDefault: false
+    editable: true
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600

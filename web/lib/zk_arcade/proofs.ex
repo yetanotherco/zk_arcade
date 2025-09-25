@@ -282,6 +282,22 @@ defmodule ZkArcade.Proofs do
     Logger.info("Updating proof #{proof_id} status to verified")
     proof = get_proof!(proof_id)
 
+    # Get the time difference in minutes between inserted_at and utc now
+    time_diff_minutes = DateTime.diff(
+      DateTime.utc_now(),
+      DateTime.from_naive!(proof.inserted_at, "Etc/UTC"),
+      :minute
+    )
+    time_diff_minutes = case time_diff_minutes do
+      diff when diff <= 0 ->
+        Logger.warn("Time difference for proof #{proof_id} is negative or zero: #{diff} minutes. Setting to 1.")
+        1
+      _ -> time_diff_minutes
+    end
+    Logger.info("Proof #{proof_id} verified in #{time_diff_minutes} minutes")
+    Logger.info("utc now is #{DateTime.utc_now()}, proof inserted at is #{DateTime.from_naive!(proof.inserted_at, "Etc/UTC")}")
+    PrometheusMetrics.time_to_verify(time_diff_minutes)
+
     changeset = change_proof(proof, %{status: "verified"})
 
     case Repo.update(changeset) do

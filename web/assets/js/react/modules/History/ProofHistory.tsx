@@ -200,7 +200,7 @@ export const ProofHistory = ({
 					{ text: "Sent At" },
 					{ text: "Batch" },
 					{ text: "Claim Tx Hash" },
-					{ text: "Prover" },
+					{ text: "Speed up" },
 				]}
 			>
 				<hr

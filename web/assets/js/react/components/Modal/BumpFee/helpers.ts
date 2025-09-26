@@ -6,6 +6,9 @@ export type ProofBumpResult = {
 	id: string;
 	previous_max_fee: bigint;
 	new_max_fee: bigint;
+	updated_at: string;
+	game: string;
+	level_reached: number;
 };
 
 export const isCustomFeeValid = (

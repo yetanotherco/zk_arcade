@@ -90,6 +90,9 @@ export const BumpFeeModal = ({
 						id: p.id,
 						new_max_fee: estimateSuggested,
 						previous_max_fee: BigInt(p.submitted_max_fee),
+						game: p.game,
+						level_reached: p.level_reached,
+						updated_at: p.updated_at,
 					};
 				});
 
@@ -194,6 +197,9 @@ export const BumpFeeModal = ({
 				id: p.id,
 				previous_max_fee: BigInt(p.submitted_max_fee),
 				new_max_fee: newMaxFee,
+				game: p.game,
+				level_reached: p.level_reached,
+				updated_at: p.updated_at,
 			};
 		});
 
@@ -216,6 +222,9 @@ export const BumpFeeModal = ({
 					id: p.id,
 					new_max_fee: newMaxFee,
 					previous_max_fee: BigInt(p.submitted_max_fee),
+					game: p.game,
+					level_reached: p.level_reached,
+					updated_at: p.updated_at,
 				};
 			});
 		setProofsBumpingResult(bumpingResult);

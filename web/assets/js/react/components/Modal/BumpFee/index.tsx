@@ -83,18 +83,16 @@ export const BumpFeeModal = ({
 			setSuggestedFeeWei(estimateSuggested);
 			setInstantFeeWei(estimatedInstant);
 
-			const bumpingResult = proofsToBump
-				.filter(p => BigInt(p.submitted_max_fee) !== estimateSuggested)
-				.map<ProofBumpResult>(p => {
-					return {
-						id: p.id,
-						new_max_fee: estimateSuggested,
-						previous_max_fee: BigInt(p.submitted_max_fee),
-						game: p.game,
-						level_reached: p.level_reached,
-						updated_at: p.updated_at,
-					};
-				});
+			const bumpingResult = proofsToBump.map<ProofBumpResult>(p => {
+				return {
+					id: p.id,
+					new_max_fee: estimateSuggested,
+					previous_max_fee: BigInt(p.submitted_max_fee),
+					game: p.game,
+					level_reached: p.level_reached,
+					updated_at: p.updated_at,
+				};
+			});
 
 			setProofsBumpingResult(bumpingResult);
 		} catch {
@@ -123,6 +121,10 @@ export const BumpFeeModal = ({
 		setIsLoading(true);
 		for (const proof of proofsBumpingResult) {
 			try {
+				if (proof.new_max_fee <= proof.previous_max_fee) {
+					continue;
+				}
+
 				const res = await fetchProofVerificationData(proof.id);
 				if (!res) {
 					setIsLoading(false);
@@ -215,18 +217,16 @@ export const BumpFeeModal = ({
 				? suggestedFeeWei
 				: ethStrToWei(customEth)) || 0n;
 
-		const bumpingResult = proofsToBump
-			.filter(p => BigInt(p.submitted_max_fee) !== newMaxFee)
-			.map<ProofBumpResult>(p => {
-				return {
-					id: p.id,
-					new_max_fee: newMaxFee,
-					previous_max_fee: BigInt(p.submitted_max_fee),
-					game: p.game,
-					level_reached: p.level_reached,
-					updated_at: p.updated_at,
-				};
-			});
+		const bumpingResult = proofsToBump.map<ProofBumpResult>(p => {
+			return {
+				id: p.id,
+				new_max_fee: newMaxFee,
+				previous_max_fee: BigInt(p.submitted_max_fee),
+				game: p.game,
+				level_reached: p.level_reached,
+				updated_at: p.updated_at,
+			};
+		});
 		setProofsBumpingResult(bumpingResult);
 		setChoice(choice);
 	};
@@ -264,7 +264,12 @@ export const BumpFeeModal = ({
 							same is skipped.
 						</p>
 						<p className="text-sm">
-							Total proofs to bump: {proofsBumpingResult.length}
+							Total proofs to bump:{" "}
+							{
+								proofsBumpingResult.filter(
+									p => p.new_max_fee !== p.previous_max_fee
+								).length
+							}
 						</p>
 						<div className="h-[2px] bg-gray-300 w-full"></div>
 						<BumpResult

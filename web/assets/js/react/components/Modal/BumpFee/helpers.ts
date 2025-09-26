@@ -11,11 +11,23 @@ export type ProofBumpResult = {
 	level_reached: number;
 };
 
+export const getMinBumpValue = (previous: bigint): bigint => {
+	if (previous <= 0n) return previous;
+	const increase = (previous * 11n) / 100n;
+	return previous + increase;
+};
+
 export const isCustomFeeValid = (
 	customEthValue: string,
 	prevMaxFee: bigint
 ): boolean => {
 	const customWei = ethStrToWei(customEthValue);
 	if (!customWei) return false;
-	return customWei > prevMaxFee;
+	return customWei >= getMinBumpValue(prevMaxFee);
+};
+
+// Align requires a bump to be at least 10% than the previous max fee
+export const ensureMinBump = (previous: bigint, candidate: bigint): bigint => {
+	const minRequired = getMinBumpValue(previous);
+	return candidate >= minRequired ? candidate : minRequired;
 };

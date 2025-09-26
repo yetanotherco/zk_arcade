@@ -5,7 +5,13 @@ import { Modal } from "../Modal";
 import { BumpSelector } from "./BumpSelector";
 import { BumpResult } from "./BumpResult";
 import { ethStrToWei } from "../../../utils/conversion";
-import { BumpChoice, isCustomFeeValid, ProofBumpResult } from "./helpers";
+import {
+	BumpChoice,
+	ensureMinBump,
+	getMinBumpValue,
+	isCustomFeeValid,
+	ProofBumpResult,
+} from "./helpers";
 import { Button } from "../../Button";
 import { PendingProofToBump } from "../../../hooks/usePendingProofsToBump";
 import { fetchProofVerificationData } from "../../../utils/aligned";
@@ -88,20 +94,27 @@ export const BumpFeeModal = ({
 				return;
 			}
 
-			if (estimateSuggested < BigInt(proofsToBump[0].submitted_max_fee))
-				estimateSuggested = BigInt(proofsToBump[0].submitted_max_fee);
+			const firstProofPrevMax = BigInt(proofsToBump[0].submitted_max_fee);
 
-			if (estimatedInstant < BigInt(proofsToBump[0].submitted_max_fee))
-				estimatedInstant = BigInt(proofsToBump[0].submitted_max_fee);
+			estimateSuggested = ensureMinBump(
+				firstProofPrevMax,
+				estimateSuggested
+			);
+
+			estimatedInstant = ensureMinBump(
+				firstProofPrevMax,
+				estimatedInstant
+			);
 
 			setSuggestedFeeWei(estimateSuggested);
 			setInstantFeeWei(estimatedInstant);
 
 			const bumpingResult = proofsToBump.map<ProofBumpResult>(p => {
+				const previousMaxFee = BigInt(p.submitted_max_fee);
 				return {
 					id: p.id,
 					new_max_fee: estimateSuggested,
-					previous_max_fee: BigInt(p.submitted_max_fee),
+					previous_max_fee: previousMaxFee,
 					game: p.game,
 					level_reached: p.level_reached,
 					updated_at: p.updated_at,
@@ -285,8 +298,8 @@ export const BumpFeeModal = ({
 						<div className="h-[2px] bg-gray-300 w-full"></div>
 						<BumpResult
 							proofs={proofsBumpingResult}
-							minMaxFee={BigInt(
-								proofsToBump[0]?.submitted_max_fee || 0n
+							minMaxFee={getMinBumpValue(
+								BigInt(proofsToBump[0]?.submitted_max_fee || 0n)
 							)}
 						/>
 					</>

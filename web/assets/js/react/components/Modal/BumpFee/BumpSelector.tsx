@@ -5,7 +5,7 @@ import {
 	weiToEthNumber,
 } from "../../../utils/conversion";
 import { timeAgoInHs } from "../../../utils/date";
-import { BumpChoice } from "./helpers";
+import { BumpChoice, getMinBumpValue } from "./helpers";
 
 const EthPriceWithTooltip = ({
 	wei,
@@ -62,7 +62,7 @@ export const BumpSelector = ({
 	const isCustomFeeValid = (customEthValue: string): boolean => {
 		const customWei = ethStrToWei(customEthValue);
 		if (!customWei) return false;
-		return customWei > maxFeeLimit;
+		return customWei >= getMinBumpValue(maxFeeLimit);
 	};
 
 	const renderContent = () => {
@@ -75,6 +75,7 @@ export const BumpSelector = ({
 		}
 
 		const currentFeeEth = weiToEthNumber(maxFeeLimit);
+		const minFeeEth = currentFeeEth * 1.1;
 		const isCustomFeeInputValid =
 			choice === "custom" ? isCustomFeeValid(customEth) : true;
 
@@ -199,17 +200,20 @@ export const BumpSelector = ({
 								className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words whitespace-normal max-w-sm min-w-[200px] z-10 pointer-events-none"
 								style={{ minWidth: "400px" }}
 							>
-								Define your own max fee, that must be greater
-								than the current max fee of {currentFeeEth} ETH
+								Define your own max fee, that must be at least
+								10% higher than the current max fee of{" "}
+								{currentFeeEth} ETH
 							</div>
 						</span>
 					</label>
 					<div className="mt-2 flex items-center gap-2">
 						<input
 							type="number"
-							min={currentFeeEth}
+							min={minFeeEth}
 							step="0.000000000000000001"
-							placeholder={`Enter fee > ${currentFeeEth} ETH`}
+							placeholder={`Enter fee ≥ ${minFeeEth.toFixed(
+								9
+							)} ETH`}
 							className={`w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none disabled:opacity-50 ${
 								choice === "custom" &&
 								customEth &&

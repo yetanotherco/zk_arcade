@@ -19,6 +19,7 @@ defmodule ZkArcadeWeb.ProofController do
 
   def mark_proof_as_submitted_to_leaderboard(conn, %{"proof_id" => proof_id, "claim_tx_hash" => claim_tx_hash}) do
     address = get_session(conn, :wallet_address)
+  end
 
   @task_timeout 10_000
 

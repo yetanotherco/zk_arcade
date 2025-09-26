@@ -42,7 +42,6 @@ const Entry = ({
 	explorer_url,
 	nft_contract_address,
 	proofsToBump,
-	maxFeeLimit,
 	proofsToBumpIsLoading,
 }: {
 	payment_service_address: Address;
@@ -53,7 +52,6 @@ const Entry = ({
 	batcher_url: string;
 	explorer_url: string;
 	proofsToBump: PendingProofToBump[];
-	maxFeeLimit: bigint;
 	proofsToBumpIsLoading: boolean;
 }) => {
 	const { open, setOpen, toggleOpen } = useModal();
@@ -110,19 +108,21 @@ const Entry = ({
 				/>
 				<ProofClaimTxHash proof={proof} />
 				<td>
-					<Button
-						variant="icon"
-						onMouseEnter={() => setSuppressRowHover(true)}
-						onMouseLeave={() => setSuppressRowHover(false)}
-						onFocus={() => setSuppressRowHover(true)}
-						onBlur={() => setSuppressRowHover(false)}
-						onClick={e => {
-							e.stopPropagation();
-							setBumpOpen(true);
-						}}
-					>
-						<span className="hero-arrow-trending-up"></span>
-					</Button>
+					{proof.status === "pending" && (
+						<Button
+							variant="icon"
+							onMouseEnter={() => setSuppressRowHover(true)}
+							onMouseLeave={() => setSuppressRowHover(false)}
+							onFocus={() => setSuppressRowHover(true)}
+							onBlur={() => setSuppressRowHover(false)}
+							onClick={e => {
+								e.stopPropagation();
+								setBumpOpen(true);
+							}}
+						>
+							<span className="hero-arrow-trending-up"></span>
+						</Button>
+					)}
 				</td>
 			</tr>
 
@@ -219,7 +219,6 @@ export const ProofHistory = ({
 						proof={proof}
 						user_address={user_address}
 						proofsToBump={proofsToBump}
-						maxFeeLimit={100n}
 						proofsToBumpIsLoading={proofsToBumpIsLoading}
 					/>
 				))}

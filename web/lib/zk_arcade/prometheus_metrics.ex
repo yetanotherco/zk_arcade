@@ -1,18 +1,17 @@
 defmodule ZkArcade.PrometheusMetrics do
   use Prometheus.Metric
 
-  @counter [name: :failed_proofs_count, help: "Failed Proofs"]
-  @counter [name: :users_registered_count, help: "Users Registered"]
-  @gauge [name: :open_batcher_connections, help: "Active Batcher Connections"]
-  @counter [name: :bumped_proofs_count, help: "Total Bumped Proofs"]
-  @histogram [name: :time_to_verify_minutes, help: "Time for proof to be verified in minutes", buckets: [1, 3, 5, 7, 10, 15, 20, 40, 80, 160, 240, 300, 360, 420, 480]]
-
   def setup() do
     Counter.declare(name: :failed_proofs_count, help: "Failed Proofs")
     Counter.declare(name: :users_registered_count, help: "Users Registered")
     Gauge.declare(name: :open_batcher_connections, help: "Active Batcher Connections")
     Counter.declare(name: :bumped_proofs_count, help: "Total Bumped Proofs")
-    Histogram.declare(name: :time_to_verify_minutes, help: "Time for proof to be verified in minutes", buckets: [1, 3, 5, 7, 10, 15, 20, 40, 80, 160, 240, 300, 360, 420, 480])
+
+    # Summary.declare(
+    #   name: :time_to_verify_seconds,
+    #   help: "Time to verify in seconds",
+    #   duration_unit: false
+    # )
   end
 
   def failed_proof() do
@@ -34,8 +33,7 @@ defmodule ZkArcade.PrometheusMetrics do
   def bumped_proof() do
     Counter.inc(name: :bumped_proofs_count)
   end
-
-  def time_to_verify(minutes) when is_number(minutes) and minutes > 0 do
-    Histogram.observe(name: :time_to_verify_minutes, value: minutes)
-  end
+  # def time_to_verify_seconds(seconds) when is_number(seconds) and seconds > 0 do
+  #   Summary.observe(name: :time_to_verify_seconds, value: seconds)
+  # end
 end

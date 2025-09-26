@@ -7,6 +7,7 @@ defmodule ZkArcade.Proofs do
   alias ZkArcade.Repo
   alias ZkArcade.Proofs.Proof
   alias ZkArcade.Accounts
+  alias ZkArcade.PrometheusMetrics
 
   require Logger
   @doc """
@@ -324,6 +325,7 @@ defmodule ZkArcade.Proofs do
 
     case Repo.update(changeset) do
       {:ok, updated_proof} ->
+        PrometheusMetrics.failed_proof()
         Logger.info("Updated proof #{proof_id} status to failed")
         {:ok, updated_proof}
 
@@ -338,7 +340,6 @@ defmodule ZkArcade.Proofs do
 
     changeset = change_proof(proof, %{
       status: "pending",
-      inserted_at: DateTime.utc_now(),
       updated_at: DateTime.utc_now(),
       times_retried: proof.times_retried + 1,
       submitted_max_fee: max_fee

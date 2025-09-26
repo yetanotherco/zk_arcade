@@ -7,6 +7,8 @@ defmodule ZkArcade.Application do
 
   @impl true
   def start(_type, _args) do
+    ZkArcade.MetricsExporter.setup()
+
     children = [
       ZkArcadeWeb.Telemetry,
       {Cachex, name: :eth_price_cache},

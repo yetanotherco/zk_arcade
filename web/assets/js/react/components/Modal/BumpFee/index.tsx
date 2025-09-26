@@ -296,7 +296,7 @@ export const BumpFeeModal = ({
 								)))
 					}
 				>
-					Confirm
+					{isLoading ? "Loading..." : "Confirm"}
 				</Button>
 			</div>
 		</Modal>

@@ -86,6 +86,7 @@ export const BumpSelector = ({
 							? "border-accent-100"
 							: "border-contrast-100/40"
 					} ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+					onClick={() => setChoice("instant")}
 				>
 					<div className="flex items-center justify-between gap-3">
 						<div className="flex items-center gap-2">
@@ -129,6 +130,7 @@ export const BumpSelector = ({
 							? "border-accent-100"
 							: "border-contrast-100/40"
 					} ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+					onClick={() => setChoice("suggested")}
 				>
 					<div className="flex items-center justify-between gap-3">
 						<div className="flex items-center gap-2">
@@ -179,7 +181,10 @@ export const BumpSelector = ({
 							: ""
 					}`}
 				>
-					<label className="flex items-center gap-2 cursor-pointer">
+					<label
+						className="flex items-center gap-2 cursor-pointer"
+						onClick={() => setChoice("custom")}
+					>
 						<input
 							type="radio"
 							name="bump"

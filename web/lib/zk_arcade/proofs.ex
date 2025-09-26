@@ -301,6 +301,11 @@ defmodule ZkArcade.Proofs do
     Logger.info("Updating proof #{proof_id} status to verified")
     proof = get_proof!(proof_id)
 
+    # time_diff_seconds =
+    #   DateTime.diff(DateTime.utc_now(), DateTime.from_naive!(proof.inserted_at, "Etc/UTC"), :second)
+    # time_diff_seconds = if time_diff_seconds <= 0, do: 1, else: time_diff_seconds
+    # PrometheusMetrics.time_to_verify_seconds(time_diff_seconds)
+
     changeset = change_proof(proof, %{status: "verified"})
 
     case Repo.update(changeset) do
@@ -355,6 +360,8 @@ defmodule ZkArcade.Proofs do
   end
 
   def update_proof_retry(proof_id, max_fee) do
+    PrometheusMetrics.bumped_proof()
+
     proof = get_proof!(proof_id)
 
     changeset = change_proof(proof, %{

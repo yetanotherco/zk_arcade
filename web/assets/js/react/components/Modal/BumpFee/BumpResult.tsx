@@ -3,6 +3,7 @@ import { weiToEthNumber } from "../../../utils/conversion";
 import { ProofBumpResult } from "./helpers";
 type Props = {
 	proofs: ProofBumpResult[];
+	minMaxFee: bigint;
 };
 
 const formatFee = (wei: bigint) => {
@@ -16,13 +17,9 @@ const formatFee = (wei: bigint) => {
 	}
 };
 
-export const BumpResult = ({ proofs }: Props) => {
+export const BumpResult = ({ proofs, minMaxFee }: Props) => {
 	if (!proofs.length) {
-		return (
-			<div className="text-sm opacity-70">
-				No proofs selected to bump yet.
-			</div>
-		);
+		return <div className="text-sm opacity-70">No proofs to bump yet.</div>;
 	}
 
 	return (
@@ -31,6 +28,10 @@ export const BumpResult = ({ proofs }: Props) => {
 				const previousFee = formatFee(proof.previous_max_fee);
 				const newFee = formatFee(proof.new_max_fee);
 				const isSameFee = proof.new_max_fee === proof.previous_max_fee;
+				const isBelowMinFee = proof.new_max_fee < minMaxFee;
+				const newFeeClasses = `font-medium${
+					isBelowMinFee ? " text-red" : " text-accent-100"
+				}${isSameFee ? " opacity-40" : ""}`;
 
 				return (
 					<div className="border border-contrast-100/20 rounded-lg p-4 flex flex-col gap-2">
@@ -50,13 +51,12 @@ export const BumpResult = ({ proofs }: Props) => {
 								<span className="uppercase text-xs opacity-60">
 									After
 								</span>
-								<span
-									className={`text-accent-100 font-medium${
-										isSameFee ? " opacity-40" : ""
-									}`}
-								>
-									{newFee}
-								</span>
+								<span className={newFeeClasses}>{newFee}</span>
+								{isBelowMinFee && (
+									<span className="text-xs uppercase tracking-wide text-red">
+										Max fee below minimum
+									</span>
+								)}
 								{isSameFee && (
 									<span className="text-xs uppercase tracking-wide opacity-60">
 										No bump needed

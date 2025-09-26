@@ -42,9 +42,9 @@ export const BumpFeeModal = ({
 	const [proofsBumpingResult, setProofsBumpingResult] = useState<
 		ProofBumpResult[]
 	>([]);
+
 	const { signVerificationData } = useAligned();
 	const { csrfToken } = useCSRFToken();
-
 	const { addToast } = useToast();
 	const { estimateMaxFeeForBatchOfProofs } = useAligned();
 
@@ -83,13 +83,15 @@ export const BumpFeeModal = ({
 			setSuggestedFeeWei(estimateSuggested);
 			setInstantFeeWei(estimatedInstant);
 
-			const bumpingResult = proofsToBump.map<ProofBumpResult>(p => {
-				return {
-					id: p.id,
-					new_max_fee: estimateSuggested,
-					previous_max_fee: BigInt(p.submitted_max_fee),
-				};
-			});
+			const bumpingResult = proofsToBump
+				.filter(p => BigInt(p.submitted_max_fee) !== estimateSuggested)
+				.map<ProofBumpResult>(p => {
+					return {
+						id: p.id,
+						new_max_fee: estimateSuggested,
+						previous_max_fee: BigInt(p.submitted_max_fee),
+					};
+				});
 
 			setProofsBumpingResult(bumpingResult);
 		} catch {
@@ -117,10 +119,6 @@ export const BumpFeeModal = ({
 
 		setIsLoading(true);
 		for (const proof of proofsBumpingResult) {
-			if (proof.new_max_fee === proof.previous_max_fee) {
-				continue;
-			}
-
 			try {
 				const res = await fetchProofVerificationData(proof.id);
 				if (!res) {
@@ -205,20 +203,22 @@ export const BumpFeeModal = ({
 	};
 
 	const handleChoiceChange = (choice: BumpChoice) => {
-		const bumpingResult = proofsToBump.map<ProofBumpResult>(p => {
-			const newMaxFee =
-				(choice === "instant"
-					? instantFeeWei
-					: choice === "suggested"
-					? suggestedFeeWei
-					: ethStrToWei(customEth)) || 0n;
+		const newMaxFee =
+			(choice === "instant"
+				? instantFeeWei
+				: choice === "suggested"
+				? suggestedFeeWei
+				: ethStrToWei(customEth)) || 0n;
 
-			return {
-				id: p.id,
-				new_max_fee: newMaxFee,
-				previous_max_fee: BigInt(p.submitted_max_fee),
-			};
-		});
+		const bumpingResult = proofsToBump
+			.filter(p => BigInt(p.submitted_max_fee) !== newMaxFee)
+			.map<ProofBumpResult>(p => {
+				return {
+					id: p.id,
+					new_max_fee: newMaxFee,
+					previous_max_fee: BigInt(p.submitted_max_fee),
+				};
+			});
 		setProofsBumpingResult(bumpingResult);
 		setChoice(choice);
 	};
@@ -259,7 +259,12 @@ export const BumpFeeModal = ({
 							Total proofs to bump: {proofsBumpingResult.length}
 						</p>
 						<div className="h-[2px] bg-gray-300 w-full"></div>
-						<BumpResult proofs={proofsBumpingResult} />
+						<BumpResult
+							proofs={proofsBumpingResult}
+							minMaxFee={BigInt(
+								proofsToBump[0]?.submitted_max_fee || 0n
+							)}
+						/>
 					</>
 				)}
 				<Button

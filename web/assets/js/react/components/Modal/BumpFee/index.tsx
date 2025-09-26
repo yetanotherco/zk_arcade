@@ -4,7 +4,7 @@ import { useToast } from "../../../state/toast";
 import { Modal } from "../Modal";
 import { BumpSelector } from "./BumpSelector";
 import { BumpResult } from "./BumpResult";
-import { ethStrToWei, weiToEthNumber } from "../../../utils/conversion";
+import { ethStrToWei } from "../../../utils/conversion";
 import { BumpChoice, isCustomFeeValid, ProofBumpResult } from "./helpers";
 import { Button } from "../../Button";
 import { PendingProofToBump } from "../../../hooks/usePendingProofsToBump";
@@ -15,21 +15,21 @@ import { Address } from "../../../types/blockchain";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
 
 type Props = {
-	maxFeeLimit: bigint;
 	open: boolean;
 	setOpen: (open: boolean) => void;
+	onClose?: () => void;
 	proofsToBump: PendingProofToBump[];
 	proofsToBumpIsLoading: boolean;
 	paymentServiceAddr: Address;
 };
 
 export const BumpFeeModal = ({
-	maxFeeLimit,
 	open,
 	setOpen,
 	proofsToBump,
 	proofsToBumpIsLoading,
 	paymentServiceAddr,
+	onClose,
 }: Props) => {
 	const { price } = useEthPrice();
 	const [choice, setChoice] = useState<BumpChoice>("suggested");
@@ -37,9 +37,8 @@ export const BumpFeeModal = ({
 	const [suggestedFeeWei, setSuggestedFeeWei] = useState<bigint | null>(null);
 	const [instantFeeWei, setInstantFeeWei] = useState<bigint | null>(null);
 	const [estimating, setEstimating] = useState(false);
-	const [hasEstimatedOnce, setHasEstimatedOnce] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [lastTimeSubmitted, setLastTimeSubmitted] = useState("2025-24-09");
+	const [hasEstimatedOnce, setHasEstimatedOnce] = useState(false);
 	const [proofsBumpingResult, setProofsBumpingResult] = useState<
 		ProofBumpResult[]
 	>([]);
@@ -106,12 +105,11 @@ export const BumpFeeModal = ({
 		if (!proofsToBump.length) {
 			return;
 		}
-		if (hasEstimatedOnce) {
-			setChoice("suggested");
-			setCustomEth("");
+		if (!hasEstimatedOnce) {
+			estimateFees();
+			setHasEstimatedOnce(true);
 		}
-		estimateFees();
-	}, [estimateMaxFeeForBatchOfProofs, hasEstimatedOnce, proofsToBump]);
+	}, [estimateMaxFeeForBatchOfProofs, proofsToBump]);
 
 	const handleConfirm = async () => {
 		const submitProofMessages: { msg: SubmitProof; proof_id: string }[] =
@@ -226,7 +224,7 @@ export const BumpFeeModal = ({
 	};
 
 	return (
-		<Modal open={open} setOpen={setOpen} maxWidth={1000}>
+		<Modal open={open} setOpen={setOpen} maxWidth={1000} onClose={onClose}>
 			<div className="bg-contrast-100 p-10 rounded flex flex-col gap-6">
 				<BumpSelector
 					choice={choice}
@@ -236,9 +234,11 @@ export const BumpFeeModal = ({
 					estimating={estimating}
 					instantFeeWei={instantFeeWei || 0n}
 					isLoading={isLoading}
-					lastTimeSubmitted={lastTimeSubmitted}
-					maxFeeLimit={maxFeeLimit}
+					lastTimeSubmitted={proofsToBump[0]?.updated_at}
 					price={price || 0}
+					maxFeeLimit={BigInt(
+						proofsToBump[0]?.submitted_max_fee || 0n
+					)}
 					setChoice={handleChoiceChange}
 				/>
 				{proofsToBumpIsLoading ? (
@@ -247,10 +247,17 @@ export const BumpFeeModal = ({
 					<>
 						<p>Bumping overview:</p>
 						<p className="text-sm">
-							TODO: EXPLAIN HOW THE BUMPING WORKS
+							Bumping resubmits every pending proof with a higher
+							maxFee: suggested takes the network-based estimate,
+							instant pushes to the fastest rate, and custom
+							applies the ETH value you enter (it must exceed the
+							current max). Each proof must be re-signed before
+							retrying, and any proof whose fee would stay the
+							same is skipped.
 						</p>
-						{/* TODO: add correct number of proofs to bump */}
-						<p className="text-sm">Total proofs to bump: 10</p>
+						<p className="text-sm">
+							Total proofs to bump: {proofsBumpingResult.length}
+						</p>
 						<div className="h-[2px] bg-gray-300 w-full"></div>
 						<BumpResult proofs={proofsBumpingResult} />
 					</>
@@ -268,7 +275,12 @@ export const BumpFeeModal = ({
 						) ||
 						(choice === "custom" &&
 							(!ethStrToWei(customEth) ||
-								!isCustomFeeValid(customEth, maxFeeLimit)))
+								!isCustomFeeValid(
+									customEth,
+									BigInt(
+										proofsToBump[0]?.submitted_max_fee || 0n
+									)
+								)))
 					}
 				>
 					Confirm

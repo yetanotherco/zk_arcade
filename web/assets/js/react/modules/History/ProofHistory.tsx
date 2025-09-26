@@ -121,7 +121,7 @@ const Entry = ({
 							setBumpOpen(true);
 						}}
 					>
-						B
+						<span className="hero-arrow-trending-up"></span>
 					</Button>
 				</td>
 			</tr>
@@ -141,7 +141,6 @@ const Entry = ({
 			{bumpOpen && (
 				<BumpFeeModal
 					open={bumpOpen}
-					maxFeeLimit={maxFeeLimit}
 					proofsToBump={proofsToBump}
 					setOpen={setBumpOpen}
 					proofsToBumpIsLoading={proofsToBumpIsLoading}

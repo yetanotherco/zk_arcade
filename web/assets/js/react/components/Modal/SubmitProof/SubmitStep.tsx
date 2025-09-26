@@ -460,19 +460,19 @@ export const SubmitProofStep = ({
 					</Button>
 				)}
 
-				{(proofStatus === "pending" || proofStatus === "underpriced") &&
-					bumpFeeOpen && (
-						<BumpFeeModal
-							open={bumpFeeOpen}
-							proofsToBump={proofsToBump}
-							setOpen={setBumpFeeOpen}
-							proofsToBumpIsLoading={proofsToBumpIsLoading}
-							paymentServiceAddr={payment_service_addr}
-							onClose={() => {
-								refetch();
-							}}
-						/>
-					)}
+				{(proofStatus === "pending" ||
+					proofStatus === "underpriced") && (
+					<BumpFeeModal
+						open={bumpFeeOpen}
+						proofsToBump={proofsToBump}
+						setOpen={setBumpFeeOpen}
+						proofsToBumpIsLoading={proofsToBumpIsLoading}
+						paymentServiceAddr={payment_service_addr}
+						onClose={() => {
+							refetch();
+						}}
+					/>
+				)}
 			</div>
 		);
 	}

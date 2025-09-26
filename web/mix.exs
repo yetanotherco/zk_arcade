@@ -8,6 +8,14 @@ defmodule ZkArcade.MixProject do
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      releases: [
+        zk_arcade: [
+          applications: [
+            prometheus_ex: :permanent,
+            prometheus_plugs: :permanent
+          ]
+        ]
+      ],
       aliases: aliases(),
       deps: deps()
     ]
@@ -66,7 +74,9 @@ defmodule ZkArcade.MixProject do
       {:cachex, "~> 4.0"},
       {:httpoison, "~> 2.0"},
       {:ethereumex, "~> 0.10.0"},
-      {:uuid, "~> 1.1" }
+      {:uuid, "~> 1.1" },
+      {:prometheus_ex, "~> 3.0"},
+      {:prometheus_plugs, "~> 1.0"},
     ]
   end
 

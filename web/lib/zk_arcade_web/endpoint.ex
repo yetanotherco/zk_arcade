@@ -48,7 +48,7 @@ defmodule ZkArcadeWeb.Endpoint do
     json_decoder: Phoenix.json_library(),
     length: 16_000_000
 
-
+  plug ZkArcade.MetricsExporter
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options

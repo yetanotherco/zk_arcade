@@ -150,12 +150,17 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		const fn = async () => {
-			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-			if (!maxFee) return;
+			const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
+			if (!estimatedMaxFee) return;
+
+			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
+				? latestMaxFee
+				: estimatedMaxFee;
+
 			setMaxFee(maxFee);
 		};
 		fn();
-	}, [estimateMaxFeeForBatchOfProofs]);
+	}, [estimateMaxFeeForBatchOfProofs, latestMaxFee, maxFee]);
 
 	const handleCombinedProofFile = async (
 		e: React.ChangeEvent<HTMLInputElement>

@@ -5,7 +5,7 @@ networks:
 
 services:
   db:
-    image: postgres
+    image: postgres:16
     restart: always
     container_name: zk_arcade_db
     environment:
@@ -14,6 +14,12 @@ services:
       POSTGRES_DB: zk_arcade_dev
     ports:
       - "5433:5432"
+    networks:
+      - zk_arcade_network
+    # host.docker.internal might not work on linux
+    # https://stackoverflow.com/a/67158212/4971151
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   grafana:
     image: grafana/grafana:10.1.10
@@ -28,11 +34,21 @@ services:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
+      - RPC_URL=http://host.docker.internal:8545
+      # PostgreSQL datasource configuration
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=zk_arcade_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     restart: unless-stopped
     ports:
       - "3000:3000"
     networks:
       - zk_arcade_network
+    depends_on:
+      - db
 
   prometheus:
     image: prom/prometheus:v2.52.0

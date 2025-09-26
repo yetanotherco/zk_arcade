@@ -180,7 +180,6 @@ export const BumpFeeModal = ({
 				}
 			} catch (error) {
 				setIsLoading(false);
-				console.error("Error retrying proof submission:", error);
 			}
 		}
 

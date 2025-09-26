@@ -23,7 +23,7 @@ export const BumpResult = ({ proofs, minMaxFee }: Props) => {
 	}
 
 	return (
-		<div className="flex flex-col items-center gap-4 overflow-scroll max-h-[200px]">
+		<div className="flex flex-col items-center gap-4 overflow-scroll max-h-[150px]">
 			{proofs.map((proof, idx) => {
 				const previousFee = formatFee(proof.previous_max_fee);
 				const newFee = formatFee(proof.new_max_fee);

@@ -42,6 +42,8 @@ export const BumpFeeModal = ({
 	const [proofsBumpingResult, setProofsBumpingResult] = useState<
 		ProofBumpResult[]
 	>([]);
+	const [bumpableProofsCount, setBumpableProofsCount] = useState(0);
+	const [hasPendingBump, setHasPendingBump] = useState(false);
 
 	const { signVerificationData } = useAligned();
 	const { csrfToken } = useCSRFToken();
@@ -54,6 +56,18 @@ export const BumpFeeModal = ({
 			desc: message,
 			type: "error",
 		});
+	};
+
+	const updateProofsBumpingState = (nextProofs: ProofBumpResult[]) => {
+		let bumpableCount = 0;
+		for (const proof of nextProofs) {
+			if (proof.new_max_fee !== proof.previous_max_fee) {
+				bumpableCount += 1;
+			}
+		}
+		setProofsBumpingResult(nextProofs);
+		setBumpableProofsCount(bumpableCount);
+		setHasPendingBump(bumpableCount > 0);
 	};
 
 	const estimateFees = async () => {
@@ -94,7 +108,7 @@ export const BumpFeeModal = ({
 				};
 			});
 
-			setProofsBumpingResult(bumpingResult);
+			updateProofsBumpingState(bumpingResult);
 		} catch {
 			handleBumpError(
 				"Could not estimate the fee. Please try again in a few seconds."
@@ -205,7 +219,7 @@ export const BumpFeeModal = ({
 			};
 		});
 
-		setProofsBumpingResult(bumpingResult);
+		updateProofsBumpingState(bumpingResult);
 		setCustomEth(newValue);
 	};
 
@@ -227,7 +241,7 @@ export const BumpFeeModal = ({
 				updated_at: p.updated_at,
 			};
 		});
-		setProofsBumpingResult(bumpingResult);
+		updateProofsBumpingState(bumpingResult);
 		setChoice(choice);
 	};
 
@@ -250,7 +264,9 @@ export const BumpFeeModal = ({
 					setChoice={handleChoiceChange}
 				/>
 				{proofsToBumpIsLoading ? (
-					<></>
+					<>
+						<p>Loading proofs to bump...</p>
+					</>
 				) : (
 					<>
 						<p>Bumping overview:</p>
@@ -264,12 +280,7 @@ export const BumpFeeModal = ({
 							same is skipped.
 						</p>
 						<p className="text-sm">
-							Total proofs to bump:{" "}
-							{
-								proofsBumpingResult.filter(
-									p => p.new_max_fee !== p.previous_max_fee
-								).length
-							}
+							Total proofs to bump: {bumpableProofsCount}
 						</p>
 						<div className="h-[2px] bg-gray-300 w-full"></div>
 						<BumpResult
@@ -288,9 +299,7 @@ export const BumpFeeModal = ({
 						isLoading ||
 						estimating ||
 						!proofsBumpingResult.length ||
-						proofsBumpingResult.every(
-							p => p.previous_max_fee === p.new_max_fee
-						) ||
+						!hasPendingBump ||
 						(choice === "custom" &&
 							(!ethStrToWei(customEth) ||
 								!isCustomFeeValid(

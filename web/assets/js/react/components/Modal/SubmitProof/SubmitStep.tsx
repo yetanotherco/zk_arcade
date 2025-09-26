@@ -114,10 +114,13 @@ export const SubmitProofStep = ({
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
 	const [gameIdx, setGameIdx] = useState(initialGameIdx);
 	const { price: ethPrice } = useEthPrice();
-	const { proofsToBump, isLoading: proofsToBumpIsLoading } =
-		usePendingProofsToBump({
-			user_address: user_address,
-		});
+	const {
+		proofsToBump,
+		isLoading: proofsToBumpIsLoading,
+		refetch,
+	} = usePendingProofsToBump({
+		user_address: user_address,
+	});
 
 	const [parsedPublicInputs, setParsedPublicInputs] = useState<
 		| {
@@ -465,6 +468,9 @@ export const SubmitProofStep = ({
 							setOpen={setBumpFeeOpen}
 							proofsToBumpIsLoading={proofsToBumpIsLoading}
 							paymentServiceAddr={payment_service_addr}
+							onClose={() => {
+								refetch();
+							}}
 						/>
 					)}
 			</div>

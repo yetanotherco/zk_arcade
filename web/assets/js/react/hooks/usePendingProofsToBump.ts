@@ -43,29 +43,30 @@ export const usePendingProofsToBump = ({
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 
-	useEffect(() => {
-		const fn = async () => {
-			try {
-				setIsLoading(true);
-				const res = await fetchProofsToBump(user_address);
-				if (!res) {
-					setIsError(true);
-					return;
-				}
-				setProofsToBump(res);
-				setIsLoading(false);
-			} catch (err) {
+	const fetchProofs = async () => {
+		try {
+			setIsLoading(true);
+			const res = await fetchProofsToBump(user_address);
+			if (!res) {
 				setIsError(true);
-				setIsLoading(false);
+				return;
 			}
-		};
+			setProofsToBump(res);
+			setIsLoading(false);
+		} catch (err) {
+			setIsError(true);
+			setIsLoading(false);
+		}
+	};
 
-		fn();
+	useEffect(() => {
+		fetchProofs();
 	}, [setIsLoading, setProofsToBump]);
 
 	return {
 		proofsToBump,
 		isError,
 		isLoading,
+		refetch: fetchProofs,
 	};
 };

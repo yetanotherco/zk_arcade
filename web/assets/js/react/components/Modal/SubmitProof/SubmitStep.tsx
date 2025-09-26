@@ -305,6 +305,8 @@ export const SubmitProofStep = ({
 		payment_service_addr,
 		chainId,
 		nonce,
+		latestMaxFee,
+		maxFee,
 	]);
 
 	const handleSend = useCallback(
@@ -358,6 +360,8 @@ export const SubmitProofStep = ({
 			payment_service_addr,
 			chainId,
 			nonce,
+			latestMaxFee,
+			maxFee,
 		]
 	);
 

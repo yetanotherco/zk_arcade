@@ -1,18 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Modal, ModalProps } from "../Modal";
 import { Address, formatEther } from "viem";
-import {
-	BeastProofClaimed,
-	ProofSubmission,
-	VerificationData,
-} from "../../../types/aligned";
+import { ProofSubmission, VerificationData } from "../../../types/aligned";
 import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentService";
 import { useNftContract } from "../../../hooks/useNftContract";
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
 import { ClaimNft } from "./ClaimNftStep";
-import { useProofSentMessageReader } from "../../../hooks/useProofSentMessageReader";
 
 type Props = {
 	modal: Omit<ModalProps, "maxWidth">;

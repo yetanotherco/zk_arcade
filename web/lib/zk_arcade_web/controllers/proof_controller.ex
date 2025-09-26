@@ -6,6 +6,17 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.Proofs
   alias ZkArcade.EIP712Verifier
 
+  def get_pending_proofs_to_bump(conn, %{"address" => address}) do
+    case ZkArcade.Proofs.get_pending_proofs_to_bump(address) do
+      nil ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: "Failed to fetch pending proofs"})
+      proofs ->
+        conn |> json(proofs)
+    end
+  end
+
   @task_timeout 10_000
 
   defp bind({:ok, v}, fun), do: fun.(v)

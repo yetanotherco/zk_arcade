@@ -123,6 +123,25 @@ defmodule ZkArcade.Proofs do
     |> Repo.aggregate(:count, :id)
   end
 
+  def get_pending_proofs_to_bump(nil), do: []
+  def get_pending_proofs_to_bump(address) do
+    downcased_addr = String.downcase(address)
+
+    Proof
+      |> where([p], p.wallet_address == ^downcased_addr and p.status == "pending")
+      |> order_by([p], asc: p.inserted_at)
+      |> select([p], %{
+        id: p.id,
+        status: p.status,
+        inserted_at: p.inserted_at,
+        updated_at: p.updated_at,
+        submitted_max_fee: p.submitted_max_fee,
+        game: p.game,
+        level_reached: p.level_reached
+      })
+      |> Repo.all()
+  end
+
   def get_proof_submission(proof_id) do
     query =
       from p in Proof,

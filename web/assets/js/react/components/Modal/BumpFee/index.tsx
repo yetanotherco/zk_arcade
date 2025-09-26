@@ -284,15 +284,6 @@ export const BumpFeeModal = ({
 					<>
 						<p>Bumping overview:</p>
 						<p className="text-sm">
-							Bumping resubmits every pending proof with a higher
-							maxFee: suggested takes the network-based estimate,
-							instant pushes to the fastest rate, and custom
-							applies the ETH value you enter (it must exceed the
-							current max). Each proof must be re-signed before
-							retrying, and any proof whose fee would stay the
-							same is skipped.
-						</p>
-						<p className="text-sm">
 							Total proofs to bump: {bumpableProofsCount}
 						</p>
 						<div className="h-[2px] bg-gray-300 w-full"></div>

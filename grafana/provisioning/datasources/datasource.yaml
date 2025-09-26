@@ -12,7 +12,7 @@ datasources:
     editable: true
     jsonData:
       timeInterval: 15s
-  
+
   - name: PostgreSQL
     type: postgres
     uid: postgres
@@ -29,3 +29,16 @@ datasources:
     jsonData:
       sslmode: disable
       postgresVersion: 1600
+
+  - name: "Ethereum RPC"
+    type: "yesoreyeram-infinity-datasource"
+    typeName: "Infinity"
+    uid: "ethereum_rpc"
+    access: "proxy"
+    url: "${RPC_URL}"
+    isDefault: false
+    jsonData:
+      global_queries: []
+    readOnly: false
+    editable: true
+    basicAuth: false

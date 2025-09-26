@@ -238,7 +238,7 @@ defmodule ZkArcadeWeb.PageController do
 
     game_idx = ZkArcade.LeaderboardContract.get_current_game_idx("Beast")
 
-    highest_level_reached_proof = ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Beast")
+    highest_level_reached_proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Beast") else nil end
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -297,7 +297,7 @@ defmodule ZkArcadeWeb.PageController do
 
     game_idx = ZkArcade.LeaderboardContract.get_current_game_idx("Parity")
 
-    highest_level_reached_proof = ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Parity")
+    highest_level_reached_proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Parity") else nil end
 
     conn
       |> assign(:wallet, wallet)

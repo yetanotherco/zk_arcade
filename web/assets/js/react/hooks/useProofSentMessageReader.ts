@@ -56,6 +56,14 @@ export const useProofSentMessageReader = () => {
 			});
 		}
 
+		if (message == "proofs-bumped") {
+			addToast({
+				title: "Proofs successfully bumped",
+				desc: "The fee has been increased for your pending proofs. They will be processed with higher priority.",
+				type: "success",
+			});
+		}
+
 		if (message == "user-not-connected") {
 			addToast({
 				title: "User not connected",

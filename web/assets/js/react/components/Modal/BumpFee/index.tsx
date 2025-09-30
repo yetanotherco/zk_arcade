@@ -215,7 +215,8 @@ export const BumpFeeModal = ({
 			}
 		}
 
-		setOpen(false);
+		// Refresh the page to reflect the updated proofs, showing a success toast
+		window.location.href = window.location.pathname + "?message=proofs-bumped";
 	};
 
 	const handleSetCustomEth = (newValue: string) => {

@@ -271,8 +271,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     function getCurrentParityGame() public view returns (ParityGame memory, uint256 idx) {
         for (uint256 i = parityGames.length; i > 0; i--) {
             uint256 j = i - 1;
-            if (block.timestamp >= parityGames[j].startsAtTime && block.timestamp < parityGames[j].endsAtTime) {
-                return (parityGames[j], j);
+            ParityGame memory g = parityGames[j];
+            if (block.timestamp >= g.startsAtTime && block.timestamp < g.endsAtTime) {
+                return (g, j);
             }
         }
 

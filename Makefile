@@ -1,5 +1,5 @@
 
-# devnet | mainnet | holesky | holesky-stage
+# devnet | mainnet | holesky | holesky-stage | sepolia
 NETWORK ?= devnet
 
 __DEPENDENCIES__: ## ____

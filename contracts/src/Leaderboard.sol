@@ -67,6 +67,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error NoActiveBeastGame();
     error NoActiveParityGame();
     error GameEnded();
+    error GameNotStarted();
 
     // ======== Initialization & Upgrades ========
 
@@ -152,6 +153,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         BeastGame memory game = beastGames[gameIndex];
         if (block.timestamp >= game.endsAtTime) {
             revert GameEnded();
+        }
+        if (block.timestamp < game.startsAtTime) {
+            revert GameNotStarted();
         }
         if (game.gameConfig != gameConfig) {
             revert InvalidGame(game.gameConfig, gameConfig);

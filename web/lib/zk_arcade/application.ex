@@ -9,6 +9,8 @@ defmodule ZkArcade.Application do
   def start(_type, _args) do
     ZkArcade.MetricsExporter.setup()
 
+    ZkArcade.PrometheusMetrics.setup()
+
     children = [
       ZkArcadeWeb.Telemetry,
       {Cachex, name: :eth_price_cache},

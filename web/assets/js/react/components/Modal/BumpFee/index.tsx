@@ -24,6 +24,7 @@ type Props = {
 	open: boolean;
 	setOpen: (open: boolean) => void;
 	onClose?: () => void;
+	afterBump?: () => void;
 	proofsToBump: PendingProofToBump[];
 	proofsToBumpIsLoading: boolean;
 	paymentServiceAddr: Address;
@@ -36,6 +37,7 @@ export const BumpFeeModal = ({
 	proofsToBumpIsLoading,
 	paymentServiceAddr,
 	onClose,
+	afterBump,
 }: Props) => {
 	const { price } = useEthPrice();
 	const [choice, setChoice] = useState<BumpChoice>("suggested");
@@ -210,13 +212,15 @@ export const BumpFeeModal = ({
 				if (!response.ok) {
 					throw new Error(`Request failed: ${response.status}`);
 				}
+
+				setIsLoading(true);
 			} catch (error) {
 				setIsLoading(false);
 			}
 		}
 
-		// Refresh the page to reflect the updated proofs, showing a success toast
-		window.location.href = window.location.pathname + "?message=proofs-bumped";
+		afterBump && afterBump();
+		setOpen(false);
 	};
 
 	const handleSetCustomEth = (newValue: string) => {
@@ -260,7 +264,7 @@ export const BumpFeeModal = ({
 	};
 
 	return (
-		<Modal open={open} setOpen={setOpen} maxWidth={1000} onClose={onClose}>
+		<Modal open={open} setOpen={setOpen} maxWidth={1000}>
 			<div className="bg-contrast-100 p-10 rounded flex flex-col gap-6">
 				<BumpSelector
 					choice={choice}

@@ -1,5 +1,5 @@
 
-# devnet | mainnet | holesky | holesky-stage
+# devnet | mainnet | holesky | holesky-stage | sepolia
 NETWORK ?= devnet
 
 __DEPENDENCIES__: ## ____
@@ -59,7 +59,7 @@ beast_gen_levels:
 	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
 	
 beast_build:
-	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
 
 beast_write_program_vk:
 	@cd games/beast/beast1984/ && cargo run --release --bin write_program_vk

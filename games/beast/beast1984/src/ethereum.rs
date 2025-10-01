@@ -39,6 +39,9 @@ fn match_network_rpc_url() -> Option<&'static str> {
     #[cfg(feature = "mainnet")]
     return Some("https://ethereum-rpc.publicnode.com");
 
+    #[cfg(feature = "sepolia")]
+    return Some("https://ethereum-sepolia-rpc.publicnode.com");
+
     None
 }
 

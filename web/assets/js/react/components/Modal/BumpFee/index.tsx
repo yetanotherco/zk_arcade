@@ -23,7 +23,6 @@ import { useCSRFToken } from "../../../hooks/useCSRFToken";
 type Props = {
 	open: boolean;
 	setOpen: (open: boolean) => void;
-	onClose?: () => void;
 	afterBump?: () => void;
 	proofsToBump: PendingProofToBump[];
 	proofsToBumpIsLoading: boolean;
@@ -36,7 +35,6 @@ export const BumpFeeModal = ({
 	proofsToBump,
 	proofsToBumpIsLoading,
 	paymentServiceAddr,
-	onClose,
 	afterBump,
 }: Props) => {
 	const { price } = useEthPrice();
@@ -46,7 +44,6 @@ export const BumpFeeModal = ({
 	const [instantFeeWei, setInstantFeeWei] = useState<bigint | null>(null);
 	const [estimating, setEstimating] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [hasEstimatedOnce, setHasEstimatedOnce] = useState(false);
 	const [proofsBumpingResult, setProofsBumpingResult] = useState<
 		ProofBumpResult[]
 	>([]);
@@ -137,10 +134,7 @@ export const BumpFeeModal = ({
 		if (!proofsToBump.length) {
 			return;
 		}
-		if (!hasEstimatedOnce) {
-			estimateFees();
-			setHasEstimatedOnce(true);
-		}
+		estimateFees();
 	}, [estimateMaxFeeForBatchOfProofs, proofsToBump]);
 
 	const handleConfirm = async () => {
@@ -213,7 +207,7 @@ export const BumpFeeModal = ({
 					throw new Error(`Request failed: ${response.status}`);
 				}
 
-				setIsLoading(true);
+				setIsLoading(false);
 			} catch (error) {
 				setIsLoading(false);
 			}

@@ -468,7 +468,9 @@ export const SubmitProofStep = ({
 						setOpen={setBumpFeeOpen}
 						proofsToBumpIsLoading={proofsToBumpIsLoading}
 						paymentServiceAddr={payment_service_addr}
-						afterBump={() => refetch()}
+						afterBump={() => {
+							refetch();
+						}}
 					/>
 				)}
 			</div>

@@ -29,6 +29,7 @@ defmodule ZkArcadeWeb.Router do
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
     post "/proof/status/retry", ProofController, :retry_submit_proof
+    get "/csrf", ProofController, :show
 
     # API endpoint for wallet agreement status check
     get "/api/wallet/:address/agreement-status", ApiController, :check_agreement_status

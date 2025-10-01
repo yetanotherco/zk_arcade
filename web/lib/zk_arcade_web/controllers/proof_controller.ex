@@ -493,4 +493,8 @@ defmodule ZkArcadeWeb.ProofController do
    end
   end
 
+  def show(conn, _params) do
+    token = Plug.CSRFProtection.get_csrf_token()
+    json(conn, %{csrf_token: token})
+  end
 end

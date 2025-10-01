@@ -222,9 +222,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert GameEnded();
         }
 
-        // The circom program proves the user knows solutions to (3) parity games. 
-        // When fewer games are played, all public inputs for unplayed levels are set to 0. 
-        // This means only the first `levelCompleted` levels contain meaningful gameConfig data. 
+        // The circom program proves the user knows solutions to (3) parity games.
+        // When fewer games are played, all public inputs for unplayed levels are set to 0.
+        // This means only the first `levelCompleted` levels contain meaningful gameConfig data.
         // To compare configurations, we right-shift the data to discard the zero-filled remainder.
         uint256 shiftAmount = 256 - (80 * (levelCompleted));
         uint256 currentTruncatedConfig = currentGame.gameConfig >> shiftAmount;
@@ -360,9 +360,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function verifyAndReplaceInTop10(address user) internal {
         uint256 userScore = usersScore[user];
+        uint256 lastScore = top10Score[9] == address(0) ? 0 : usersScore[top10Score[9]];
 
         // early return to not run the whole alg if the user does not have enough points to be in the top 10
-        if (userScore <= usersScore[top10Score[9]]) {
+        if (top10Score[9] != user && userScore <= lastScore) {
             return;
         }
 

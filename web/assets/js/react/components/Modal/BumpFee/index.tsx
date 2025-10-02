@@ -206,13 +206,13 @@ export const BumpFeeModal = ({
 				if (!response.ok) {
 					throw new Error(`Request failed: ${response.status}`);
 				}
-
-				setIsLoading(false);
 			} catch (error) {
 				setIsLoading(false);
+				return;
 			}
 		}
 
+		setIsLoading(false);
 		afterBump && afterBump();
 		setOpen(false);
 	};

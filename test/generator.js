@@ -163,24 +163,39 @@ export async function generateCircomParityProof(user_address, userPositions, lev
     return JSON.stringify(submitProofMessage);
 }
 
+import { createPublicClient } from "viem";
+import { anvil } from "viem/chains";
+
+export const GAS_ESTIMATION = {
+	DEFAULT_CONSTANT_GAS_COST: BigInt(537500),
+	ADDITIONAL_SUBMISSION_GAS_COST_PER_PROOF: BigInt(2000),
+	GAS_PRICE_PERCENTAGE_MULTIPLIER: BigInt(110),
+	PERCENTAGE_DIVIDER: BigInt(100),
+};
+
 async function estimateMaxFeeForBatchOfProofs(numberProofsInBatch = 16) {
-    // TODO: Fetch gas price from an RPC
+    const client = createPublicClient({
+        chain: anvil,
+        transport: http("http://localhost:8545"),
+    });
 
-    // const totalGas =
-    //     GAS_ESTIMATION.DEFAULT_CONSTANT_GAS_COST +
-    //     GAS_ESTIMATION.ADDITIONAL_SUBMISSION_GAS_COST_PER_PROOF *
-    //         BigInt(numberProofsInBatch);
+    const gasPrice = await client.getGasPrice();
 
-    // const estimatedGasPerProof =
-    //     BigInt(totalGas) / BigInt(numberProofsInBatch);
+    const totalGas =
+        GAS_ESTIMATION.DEFAULT_CONSTANT_GAS_COST +
+        GAS_ESTIMATION.ADDITIONAL_SUBMISSION_GAS_COST_PER_PROOF *
+            BigInt(numberProofsInBatch);
 
-    // const feePerProof =
-    // (estimatedGasPerProof *
-    //     gasPrice *
-    //     BigInt(GAS_ESTIMATION.GAS_PRICE_PERCENTAGE_MULTIPLIER)) /
-    // BigInt(GAS_ESTIMATION.PERCENTAGE_DIVIDER);
+    const estimatedGasPerProof =
+        BigInt(totalGas) / BigInt(numberProofsInBatch);
 
-    return BigInt(593450004154150);
+    const feePerProof =
+    (estimatedGasPerProof *
+        gasPrice *
+        BigInt(GAS_ESTIMATION.GAS_PRICE_PERCENTAGE_MULTIPLIER)) /
+    BigInt(GAS_ESTIMATION.PERCENTAGE_DIVIDER);
+
+    return feePerProof;
 }
 
 // TODO: Move to a separate file

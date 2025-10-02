@@ -2,6 +2,8 @@ defmodule ZkArcade.BatcherConnection do
   require Logger
   require CBOR
 
+  alias ZkArcade.PrometheusMetrics
+
   def send_submit_proof_message(submit_proof_message, address) do
     batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
     batcher_port = Application.get_env(:zk_arcade, :batcher_port)
@@ -36,11 +38,17 @@ defmodule ZkArcade.BatcherConnection do
         receive do
           {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
             Logger.info("WebSocket upgrade successful!")
+
+            PrometheusMetrics.add_open_batcher_connection()
+
             message = build_submit_proof_message(submit_proof_message, address)
             binary = CBOR.encode(message)
             :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
-            handle_websocket_messages(conn_pid, stream_ref)
+            response = handle_websocket_messages(conn_pid, stream_ref)
 
+            PrometheusMetrics.remove_open_batcher_connection()
+
+            response
           {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
             Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
             close_connection(conn_pid, stream_ref)
@@ -131,7 +139,12 @@ defmodule ZkArcade.BatcherConnection do
       %{"InvalidProof" => reason} ->
         Logger.error("There was a problem with the submited proof: #{reason}")
         close_connection(conn_pid, stream_ref)
-        {:error, "Invalid proof - #{reason}"}
+        {:error, {:invalid_proof, reason}}
+
+      "ProofReplaced" ->
+        Logger.warning("Transaction replaced by higher fee")
+        close_connection(conn_pid, stream_ref)
+        {:error, :replaced_by_higher_fee}
 
       # There can be more error messages from the batcher, but they will enter on the other clause
       other ->
@@ -179,6 +192,10 @@ defmodule ZkArcade.BatcherConnection do
     :gun.ws_send(conn_pid, stream_ref, {:close, 1000, ""})
     receive do
       {:gun_ws, ^conn_pid, ^stream_ref, {:close, _code, _reason}} ->
+        :gun.close(conn_pid)
+    after
+      10_000 ->
+        Logger.warning("Close handshake timed out after 10 seconds; forcing socket close")
         :gun.close(conn_pid)
     end
   end

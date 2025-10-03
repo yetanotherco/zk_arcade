@@ -86,6 +86,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes32 _beastVkCommitment,
         bytes32 _parityVkCommitment
     ) public initializer {
+        require(_alignedServiceManager != address(0) &&
+            _alignedServiceManager.code.length > 0, "invalid alignedServiceManager");
+        require(_alignedBatcherPaymentService != address(0) &&
+            _alignedBatcherPaymentService.code.length > 0, "invalid alignedBatcherPaymentService");
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;

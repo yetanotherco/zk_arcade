@@ -6,6 +6,17 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.Proofs
   alias ZkArcade.EIP712Verifier
 
+  def get_pending_proofs_to_bump(conn, %{"address" => address}) do
+    case ZkArcade.Proofs.get_pending_proofs_to_bump(address) do
+      nil ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: "Failed to fetch pending proofs"})
+      proofs ->
+        conn |> json(proofs)
+    end
+  end
+
   @task_timeout 10_000
 
   defp bind({:ok, v}, fun), do: fun.(v)
@@ -365,16 +376,22 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   defp handle_batcher_failure(proof_id, reason, :initial) do
-    Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
-    case Proofs.update_proof_status_failed(proof_id) do
-      {:ok, _} ->
-        Logger.info("Proof #{proof_id} status updated to failed")
+    case reason do
+      :replaced_by_higher_fee ->
+        Logger.warning("Message has been replaced for other with a higher fee")
         {:error, reason}
+      _ ->
+        Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
+        case Proofs.update_proof_status_failed(proof_id) do
+          {:ok, _} ->
+            Logger.info("Proof #{proof_id} status updated to failed")
+            {:error, reason}
 
-      {:error, changeset} ->
-        Logger.error("Failed to update proof #{proof_id} status: #{inspect(changeset)}")
+          {:error, changeset} ->
+            Logger.error("Failed to update proof #{proof_id} status: #{inspect(changeset)}")
 
-        {:error, reason}
+            {:error, reason}
+        end
     end
   end
 

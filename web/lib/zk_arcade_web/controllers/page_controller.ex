@@ -178,7 +178,7 @@ defmodule ZkArcadeWeb.PageController do
       %{
         number: "11",
         question: "How often are new challenges released?",
-        answer: "There is available a new challenge everyday for each game!"
+        answer: "A new challenge is available every day for each game!"
       },
     ]
 

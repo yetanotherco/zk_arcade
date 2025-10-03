@@ -35,12 +35,12 @@ const GAMES: Game[] = [
 	{
 		id: "beast",
 		name: "Beast",
-		cover: "/images/beast.gif",
+		cover: "/images/beast.png",
 	},
 	{
 		id: "parity",
 		name: "Parity",
-		cover: "/images/parity.jpg",
+		cover: "/images/parity.png",
 	},
 ];
 
@@ -500,11 +500,11 @@ export const SubmitProofStep = ({
 		<div className="flex flex-col gap-6 justify-between h-full">
 			<div className="w-full flex flex-col gap-4">
 				<div className="flex flex-col overflow-x-auto p-2 max-w-[150px]">
-					<div className="">
+					<div className="w-full">
 						<img
 							src={gameData?.cover}
 							alt={gameData?.name}
-							className="w-[150px] h-[100px] object-cover rounded border-2"
+							className="w-auto h-[100px] rounded border-2"
 						/>
 					</div>
 					<div className="text-center">{gameData?.name}</div>

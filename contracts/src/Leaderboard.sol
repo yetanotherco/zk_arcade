@@ -67,6 +67,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error NoActiveBeastGame();
     error NoActiveParityGame();
     error GameEnded();
+    error GameNotStarted();
 
     // ======== Initialization & Upgrades ========
 
@@ -153,6 +154,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         if (block.timestamp >= game.endsAtTime) {
             revert GameEnded();
         }
+        if (block.timestamp < game.startsAtTime) {
+            revert GameNotStarted();
+        }
         if (game.gameConfig != gameConfig) {
             revert InvalidGame(game.gameConfig, gameConfig);
         }
@@ -221,6 +225,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         if (block.timestamp >= currentGame.endsAtTime) {
             revert GameEnded();
         }
+        if (block.timestamp < currentGame.startsAtTime) {
+            revert GameNotStarted();
+        }
 
         // The circom program proves the user knows solutions to (3) parity games. 
         // When fewer games are played, all public inputs for unplayed levels are set to 0. 
@@ -259,9 +266,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function getCurrentBeastGame() public view returns (BeastGame memory, uint256 idx) {
-        for (uint256 i = beastGames.length - 1; i >= 0; i--) {
-            if (block.timestamp >= beastGames[i].startsAtTime && block.timestamp < beastGames[i].endsAtTime) {
-                return (beastGames[i], i);
+        for (uint256 i = beastGames.length; i > 0; i--) {
+            uint256 j = i - 1;
+            BeastGame memory game = beastGames[j];
+            if (block.timestamp >= game.startsAtTime && block.timestamp < game.endsAtTime) {
+                return (game, j);
             }
         }
 

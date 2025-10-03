@@ -360,13 +360,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     // ======== Internal Helper Functions ========
 
     function getBeastKey(address user, uint256 game) internal pure returns (bytes32) {
-        bytes32 gameHash = keccak256(abi.encodePacked(game));
-        return keccak256(abi.encodePacked(user, gameHash));
+        return keccak256(abi.encode(user, game));
     }
 
     function getParityKey(address user, uint256 gameConfig) internal pure returns (bytes32) {
-        bytes32 gameHash = keccak256(abi.encodePacked(gameConfig));
-        return keccak256(abi.encodePacked(user, gameHash));
+        return keccak256(abi.encode(user, gameConfig));
     }
 
     function verifyAndReplaceInTop10(address user) internal {

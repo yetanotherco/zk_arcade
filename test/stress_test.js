@@ -1,5 +1,5 @@
 import solution from './solution.json' with { type: 'json' };
-import richAccountPrivateKeys from './rich_accounts.json' with { type: 'json' };
+import rawRichAccounts from './rich_accounts.json' with { type: 'json' };
 import signMessageFromPrivateKey from './sign_agreement.js';
 
 import { generateCircomParityProof } from './generator.js';
@@ -10,14 +10,45 @@ import { fetch } from "undici";
 import { privateKeyToAccount } from 'viem/accounts';
 
 const baseUrl = "http://localhost:4005";
-const CONCURRENCY = 5;
+const CONCURRENCY = 20;
 const DEPOSIT_WAIT_MS = 10_000;
 
-async function generateProofVerificationData(privateKey) {
+function normalizeAccounts(raw) {
+    if (!Array.isArray(raw)) {
+        throw new Error('rich_accounts.json debe ser un array');
+    }
+
+    if (raw.length > 0 && typeof raw[0] === 'string') {
+        return raw.map((pk) => {
+        const addr = privateKeyToAccount(pk).address;
+        return { address: addr, privateKey: pk };
+        });
+    }
+
+    return raw.map((item, idx) => {
+        if (!item || typeof item !== 'object') {
+        throw new Error(`Invalid element in rich_accounts.json at index ${idx}`);
+        }
+        if (!item.privateKey) {
+        throw new Error(`Missing privateKey at index ${idx}`);
+        }
+        const derived = privateKeyToAccount(item.privateKey).address;
+        const provided = item.address ?? derived;
+
+        if (item.address && provided.toLowerCase() !== derived.toLowerCase()) {
+        console.warn(
+            `[WARN] Provided address does not match the derived address from the PK at idx ${idx}.
+            provided=${provided} derived=${derived}. Using the derived address.`
+        );
+        }
+        return { address: derived, privateKey: item.privateKey };
+    });
+}
+
+async function generateProofVerificationData(address, privateKey) {
     const levelBoards = solution.levelsBoards || [];
     const userPositions = solution.userPositions || [];
 
-    const address = privateKeyToAccount(privateKey).address;
     console.log(`[${address}] Generating proof...`);
     const verificationData = await generateCircomParityProof(address, userPositions, levelBoards, privateKey);
     return {
@@ -87,8 +118,7 @@ async function getAgreementStatus(jar, csrf_token, address) {
 }
 
 // Executes the full flow for a single private key
-async function runForPrivateKey(privateKey) {
-    const address = privateKeyToAccount(privateKey).address;
+async function runForAccount({ address, privateKey }) {
     const jar = new CookieJar();
 
     try {
@@ -107,15 +137,15 @@ async function runForPrivateKey(privateKey) {
 
         // 3) Deposit
         await depositIntoAligned(privateKey);
-        console.log(`[${address}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS/1000}s...`);
-        await new Promise(r => setTimeout(r, DEPOSIT_WAIT_MS));
+        console.log(`[${address}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS / 1000}s...`);
+        await new Promise((r) => setTimeout(r, DEPOSIT_WAIT_MS));
 
         // 4) Agreement status
         const status = await getAgreementStatus(jar, csrf_token, address);
         console.log(`[${address}] Agreement status:`, status);
 
         // 5) Proof submission
-        const proofData = await generateProofVerificationData(privateKey);
+        const proofData = await generateProofVerificationData(address, privateKey);
         const params = {
             ...proofData,
             _csrf_token: csrf_token
@@ -132,14 +162,14 @@ async function runForPrivateKey(privateKey) {
 }
 
 // Executes in parallel with simple concurrency limit by batches
-async function runBatch(keys, concurrency = CONCURRENCY) {
+async function runBatch(accounts, concurrency = CONCURRENCY) {
     const results = [];
-    for (let i = 0; i < keys.length; i += concurrency) {
-        const batch = keys.slice(i, i + concurrency);
+    for (let i = 0; i < accounts.length; i += concurrency) {
+        const batch = accounts.slice(i, i + concurrency);
 
-        const withJitter = batch.map(async (k, idx) => {
-            await new Promise(r => setTimeout(r, Math.random() * 250 + idx * 10));
-            return runForPrivateKey(k);
+        const withJitter = batch.map(async (acc, idx) => {
+            await new Promise((r) => setTimeout(r, Math.random() * 250 + idx * 10));
+            return runForAccount(acc);
         });
 
         const batchResults = await Promise.allSettled(withJitter);
@@ -152,14 +182,15 @@ async function runBatch(keys, concurrency = CONCURRENCY) {
 }
 
 (async () => {
-    console.log(`Launching stress run for ${richAccountPrivateKeys.length} accounts with concurrency=${CONCURRENCY}`);
-    const results = await runBatch(richAccountPrivateKeys, CONCURRENCY);
+    const accounts = normalizeAccounts(rawRichAccounts);
+    console.log(`Launching stress run for ${accounts.length} accounts with concurrency=${CONCURRENCY}`);
+    const results = await runBatch(accounts, CONCURRENCY);
 
     const summary = {
         total: results.length,
-        success: results.filter(r => r.ok).length,
-        failed: results.filter(r => !r.ok).length,
-        failedAddresses: results.filter(r => !r.ok).map(r => r.address),
+        success: results.filter((r) => r.ok).length,
+        failed: results.filter((r) => !r.ok).length,
+        failedAddresses: results.filter((r) => !r.ok).map((r) => r.address),
     };
     console.log('SUMMARY:', summary);
 

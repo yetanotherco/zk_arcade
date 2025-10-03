@@ -10,13 +10,15 @@ import { fetch } from "undici";
 import { privateKeyToAccount } from 'viem/accounts';
 
 const baseUrl = "http://localhost:4005";
+const CONCURRENCY = 5;
+const DEPOSIT_WAIT_MS = 10_000;
 
 async function generateProofVerificationData(privateKey) {
     const levelBoards = solution.levelsBoards || [];
     const userPositions = solution.userPositions || [];
 
     const address = privateKeyToAccount(privateKey).address;
-    console.log(`Generating proof for address: ${address}`);
+    console.log(`[${address}] Generating proof...`);
     const verificationData = await generateCircomParityProof(address, userPositions, levelBoards, privateKey);
     return {
         submit_proof_message: verificationData,
@@ -24,8 +26,6 @@ async function generateProofVerificationData(privateKey) {
         game_idx: 0,
     };
 }
-
-const proofVerificationData = await Promise.all(richAccountPrivateKeys.map(privateKey => generateProofVerificationData(privateKey)));
 
 async function newSession(jar) {
     const csrfRes = await fetch(`${baseUrl}/csrf`, { method: "GET" });
@@ -47,7 +47,7 @@ async function doSignPost(jar, csrf_token, payload) {
     jar.absorb(getSetCookies(res));
     if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(`POST ${res.status} ${res.statusText} ${text.slice(0,200)}`);
+        throw new Error(`POST /wallet/sign ${res.status} ${res.statusText} ${text.slice(0,200)}`);
     }
     return res.json().catch(() => null);
 }
@@ -65,7 +65,7 @@ async function doSubmitPost(jar, csrf_token, payload) {
     jar.absorb(getSetCookies(res));
     if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(`POST ${res.status} ${res.statusText} ${text.slice(0,200)}`);
+        throw new Error(`POST /proof ${res.status} ${res.statusText} ${text.slice(0,200)}`);
     }
     return res.json().catch(() => null);
 }
@@ -86,46 +86,87 @@ async function getAgreementStatus(jar, csrf_token, address) {
     return res.json().catch(() => null);
 }
 
-(async () => {
-    const jar = new CookieJar();
-    const { csrf_token } = await newSession(jar);
-    console.log('New session initiated. Cookie:', jar.toHeader(), 'CSRF:', csrf_token);
-
-    const privateKey = richAccountPrivateKeys[0];
-    const signature = await signMessageFromPrivateKey(privateKey);
-
+// Executes the full flow for a single private key
+async function runForPrivateKey(privateKey) {
     const address = privateKeyToAccount(privateKey).address;
+    const jar = new CookieJar();
 
-    const signResp = await doSignPost(jar, csrf_token, {
-        address,
-        signature,
-        _csrf_token: csrf_token,
-    });
-    console.log('Response /wallet/sign:', signResp);
+    try {
+        // 1) New session + CSRF
+        const { csrf_token } = await newSession(jar);
+        console.log(`[${address}] Session OK. Cookie: ${jar.toHeader()} CSRF: ${csrf_token}`);
 
-    // Deposit into the batcher
-    depositIntoAligned(privateKey).catch((err) => {
-        console.error("Error depositing into Aligned:", err);
-    });
+        // 2) Sign
+        const signature = await signMessageFromPrivateKey(privateKey);
+        const signResp = await doSignPost(jar, csrf_token, {
+            address,
+            signature,
+            _csrf_token: csrf_token,
+        });
+        console.log(`[${address}] /wallet/sign →`, signResp);
 
-    console.log("Waiting 10 seconds to ensure deposit is processed...");
-    await new Promise(resolve => setTimeout(resolve, 10000));
+        // 3) Deposit
+        await depositIntoAligned(privateKey);
+        console.log(`[${address}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS/1000}s...`);
+        await new Promise(r => setTimeout(r, DEPOSIT_WAIT_MS));
 
-    const status = await getAgreementStatus(jar, csrf_token, address);
-    console.log('Agreement status:', status);
+        // 4) Agreement status
+        const status = await getAgreementStatus(jar, csrf_token, address);
+        console.log(`[${address}] Agreement status:`, status);
 
-    const params = {
-        submit_proof_message: proofVerificationData[0].submit_proof_message,
-        game: "Parity",
-        game_idx: 0,
-        _csrf_token: csrf_token
+        // 5) Proof submission
+        const proofData = await generateProofVerificationData(privateKey);
+        const params = {
+            ...proofData,
+            _csrf_token: csrf_token
+        };
+        console.log(`[${address}] Sending proof...`);
+        const submitResp = await doSubmitPost(jar, csrf_token, params);
+        console.log(`[${address}] /proof →`, submitResp);
+
+        return { address, ok: true, status, submitResp };
+    } catch (err) {
+        console.error(`[${address}] ERROR:`, err);
+        return { address, ok: false, error: String(err) };
+    }
+}
+
+// Executes in parallel with simple concurrency limit by batches
+async function runBatch(keys, concurrency = CONCURRENCY) {
+    const results = [];
+    for (let i = 0; i < keys.length; i += concurrency) {
+        const batch = keys.slice(i, i + concurrency);
+
+        const withJitter = batch.map(async (k, idx) => {
+            await new Promise(r => setTimeout(r, Math.random() * 250 + idx * 10));
+            return runForPrivateKey(k);
+        });
+
+        const batchResults = await Promise.allSettled(withJitter);
+        for (const r of batchResults) {
+            if (r.status === 'fulfilled') results.push(r.value);
+            else results.push({ address: 'unknown', ok: false, error: String(r.reason) });
+        }
+    }
+    return results;
+}
+
+(async () => {
+    console.log(`Launching stress run for ${richAccountPrivateKeys.length} accounts with concurrency=${CONCURRENCY}`);
+    const results = await runBatch(richAccountPrivateKeys, CONCURRENCY);
+
+    const summary = {
+        total: results.length,
+        success: results.filter(r => r.ok).length,
+        failed: results.filter(r => !r.ok).length,
+        failedAddresses: results.filter(r => !r.ok).map(r => r.address),
     };
+    console.log('SUMMARY:', summary);
 
-    console.log("Sending proof data:", params);
-
-    const submitResp = await doSubmitPost(jar, csrf_token, params);
-    console.log("Response /proof:", submitResp);
-})().catch((err) => {
-    console.error("Error in main flow:", err);
+    for (const r of results) {
+        console.log(`[${r.address}] → ${r.ok ? 'OK' : `FAIL: ${r.error}`}`);
+    }
+})().catch(err => {
+    console.error("Fatal error in batch run:", err);
     process.exit(1);
 });

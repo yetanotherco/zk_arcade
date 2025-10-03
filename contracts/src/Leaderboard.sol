@@ -67,6 +67,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error NoActiveBeastGame();
     error NoActiveParityGame();
     error GameEnded();
+    error GameNotStarted();
 
     // ======== Initialization & Upgrades ========
 
@@ -153,6 +154,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         if (block.timestamp >= game.endsAtTime) {
             revert GameEnded();
         }
+        if (block.timestamp < game.startsAtTime) {
+            revert GameNotStarted();
+        }
         if (game.gameConfig != gameConfig) {
             revert InvalidGame(game.gameConfig, gameConfig);
         }
@@ -220,6 +224,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         ParityGame memory currentGame = parityGames[gameIndex];
         if (block.timestamp >= currentGame.endsAtTime) {
             revert GameEnded();
+        }
+        if (block.timestamp < currentGame.startsAtTime) {
+            revert GameNotStarted();
         }
 
         // The circom program proves the user knows solutions to (3) parity games. 

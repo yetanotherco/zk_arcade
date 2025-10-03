@@ -4,6 +4,7 @@ import signMessageFromPrivateKey from './sign_agreement.js';
 
 import { generateCircomParityProof } from './generator.js';
 import { CookieJar, getSetCookies } from './cookie_utils.js';
+import { depositIntoAligned } from './deposit_into_aligned.js';
 
 import { fetch } from "undici";
 import { privateKeyToAccount } from 'viem/accounts';
@@ -101,6 +102,14 @@ async function getAgreementStatus(jar, csrf_token, address) {
         _csrf_token: csrf_token,
     });
     console.log('Response /wallet/sign:', signResp);
+
+    // Deposit into the batcher
+    depositIntoAligned(privateKey).catch((err) => {
+        console.error("Error depositing into Aligned:", err);
+    });
+
+    console.log("Waiting 10 seconds to ensure deposit is processed...");
+    await new Promise(resolve => setTimeout(resolve, 10000));
 
     const status = await getAgreementStatus(jar, csrf_token, address);
     console.log('Agreement status:', status);

@@ -1,18 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useAligned, useEthPrice } from "../../../hooks";
-import { useToast } from "../../../state/toast";
+import React from "react";
+import {
+	calculateUsdFromEthString,
+	ethStrToWei,
+	weiToEthNumber,
+} from "../../../utils/conversion";
 import { timeAgoInHs } from "../../../utils/date";
-import { Button } from "../../Button";
-
-type BumpChoice = "instant" | "default" | "custom";
-
-type Props = {
-	onConfirm: (chosenWei: bigint) => Promise<void> | void;
-	onCancel: () => void;
-	isConfirmLoading?: boolean;
-	previousMaxFee: string;
-	lastTimeSubmitted: string;
-};
+import { BumpChoice, getMinBumpValue } from "./helpers";
 
 const EthPriceWithTooltip = ({
 	wei,
@@ -39,136 +32,37 @@ const EthPriceWithTooltip = ({
 	);
 };
 
-export const BumpFee = ({
-	onConfirm,
-	isConfirmLoading = false,
-	previousMaxFee,
+type Props = {
+	choice: BumpChoice;
+	setChoice: (choice: BumpChoice) => void;
+	estimating: boolean;
+	maxFeeLimit: bigint;
+	price: number;
+	isLoading: boolean;
+	customEth: string;
+	setCustomEth: (value: string) => void;
+	instantFeeWei: bigint;
+	suggestedFeeWei: bigint;
+	lastTimeSubmitted: string;
+};
+
+export const BumpSelector = ({
+	choice,
+	estimating,
+	isLoading,
+	maxFeeLimit,
+	price,
+	setChoice,
+	customEth,
+	setCustomEth,
+	instantFeeWei,
+	suggestedFeeWei,
 	lastTimeSubmitted,
-	onCancel,
 }: Props) => {
-	const { price } = useEthPrice();
-	const [choice, setChoice] = useState<BumpChoice>("default");
-	const [customEth, setCustomEth] = useState<string>("");
-	const [defaultFeeWei, setDefaultFeeWei] = useState<bigint | null>(null);
-	const [instantFeeWei, setInstantFeeWei] = useState<bigint | null>(null);
-	const [estimating, setEstimating] = useState(false);
-	const [hasEstimatedOnce, setHasEstimatedOnce] = useState(false);
-
-	const { addToast } = useToast();
-	const { estimateMaxFeeForBatchOfProofs } = useAligned();
-
-	const previousMaxFeeWei = BigInt(previousMaxFee);
-
-	const ethStrToWei = (ethStr: string): bigint | null => {
-		const s = ethStr.trim();
-		if (!s) return null;
-		const [intPart, fracPart = ""] = s.split(".");
-		const fracPadded = (fracPart + "0".repeat(18)).slice(0, 18);
-		try {
-			return BigInt(intPart) * 10n ** 18n + BigInt(fracPadded);
-		} catch {
-			return null;
-		}
-	};
-
-	const weiToEthNumber = (wei: bigint) => Number(wei) / 1e18;
-
-	const calculateUsdFromEthString = (
-		ethStr: string,
-		ethPrice: number | null
-	): string => {
-		if (!ethStr || !ethPrice) return "0";
-
-		const wei = ethStrToWei(ethStr);
-		if (!wei) return "0";
-
-		const priceInWei = BigInt(Math.round(ethPrice * 1e18));
-		const usdInWei = (wei * priceInWei) / 10n ** 18n;
-		const usdValue = Number(usdInWei) / 1e18;
-
-		return usdValue.toLocaleString(undefined, {
-			maximumFractionDigits: 18,
-			minimumFractionDigits: 0,
-		});
-	};
-
 	const isCustomFeeValid = (customEthValue: string): boolean => {
 		const customWei = ethStrToWei(customEthValue);
 		if (!customWei) return false;
-		return customWei > previousMaxFeeWei;
-	};
-
-	const handleBumpError = (message: string) => {
-		addToast({
-			title: "Error",
-			desc: message,
-			type: "error",
-		});
-	};
-
-	const estimateFees = async () => {
-		try {
-			setEstimating(true);
-			const estimatedDefault = await estimateMaxFeeForBatchOfProofs(16);
-			const estimatedInstant = await estimateMaxFeeForBatchOfProofs(1);
-
-			if (!estimatedDefault) {
-				handleBumpError(
-					"Could not estimate the fee. Please try again in a few seconds."
-				);
-				return;
-			}
-
-			setDefaultFeeWei(estimatedDefault);
-			setInstantFeeWei(estimatedInstant);
-
-			if (!hasEstimatedOnce) {
-				setChoice("default");
-				setCustomEth("");
-				setHasEstimatedOnce(true);
-			}
-		} catch {
-			handleBumpError(
-				"Could not estimate the fee. Please try again in a few seconds."
-			);
-		} finally {
-			setEstimating(false);
-		}
-	};
-
-	useEffect(() => {
-		if (hasEstimatedOnce) {
-			setChoice("default");
-			setCustomEth("");
-		}
-		estimateFees();
-	}, [estimateMaxFeeForBatchOfProofs, hasEstimatedOnce]);
-
-	const handleConfirm = async () => {
-		let chosenWei: bigint | null = null;
-
-		if (choice === "default") {
-			chosenWei = defaultFeeWei;
-		} else if (choice === "instant") {
-			chosenWei = instantFeeWei;
-		} else if (choice === "custom") {
-			chosenWei = ethStrToWei(customEth);
-			if (!chosenWei || chosenWei <= previousMaxFeeWei) {
-				handleBumpError(
-					`The fee must be greater than the current fee of ${weiToEthNumber(
-						previousMaxFeeWei
-					)} ETH.`
-				);
-				return;
-			}
-		}
-
-		if (!chosenWei || chosenWei <= 0n) {
-			handleBumpError("Please enter a value greater than 0 ETH.");
-			return;
-		}
-
-		await onConfirm(chosenWei);
+		return customWei >= getMinBumpValue(maxFeeLimit);
 	};
 
 	const renderContent = () => {
@@ -180,32 +74,20 @@ export const BumpFee = ({
 			);
 		}
 
-		const currentFeeEth = weiToEthNumber(previousMaxFeeWei);
+		const currentFeeEth = weiToEthNumber(maxFeeLimit);
+		const minFeeEth = currentFeeEth * 1.1;
 		const isCustomFeeInputValid =
 			choice === "custom" ? isCustomFeeValid(customEth) : true;
 
 		return (
 			<div className="flex flex-col gap-3">
-				<div className="bg-contrast-100/10 rounded-lg">
-					<div className="text-sm opacity-80">
-						Previous submitted max fee:
-					</div>
-					<div className="font-medium">
-						<EthPriceWithTooltip
-							wei={previousMaxFeeWei}
-							ethPrice={price}
-						/>
-					</div>
-				</div>
-
 				<label
 					className={`cursor-pointer rounded-xl border p-3 transition-colors ${
 						choice === "instant"
 							? "border-accent-100"
 							: "border-contrast-100/40"
-					} ${
-						isConfirmLoading ? "opacity-50 pointer-events-none" : ""
-					}`}
+					} ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+					onClick={() => setChoice("instant")}
 				>
 					<div className="flex items-center justify-between gap-3">
 						<div className="flex items-center gap-2">
@@ -215,9 +97,9 @@ export const BumpFee = ({
 								className="cursor-pointer"
 								checked={choice === "instant"}
 								onChange={() =>
-									!isConfirmLoading && setChoice("instant")
+									!isLoading && setChoice("instant")
 								}
-								disabled={isConfirmLoading}
+								disabled={isLoading}
 							/>
 							<span className="font-medium relative group">
 								Instant
@@ -245,12 +127,11 @@ export const BumpFee = ({
 
 				<label
 					className={`cursor-pointer rounded-xl border p-3 transition-colors ${
-						choice === "default"
+						choice === "suggested"
 							? "border-accent-100"
 							: "border-contrast-100/40"
-					} ${
-						isConfirmLoading ? "opacity-50 pointer-events-none" : ""
-					}`}
+					} ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+					onClick={() => setChoice("suggested")}
 				>
 					<div className="flex items-center justify-between gap-3">
 						<div className="flex items-center gap-2">
@@ -258,14 +139,14 @@ export const BumpFee = ({
 								type="radio"
 								name="bump"
 								className="cursor-pointer"
-								checked={choice === "default"}
+								checked={choice === "suggested"}
 								onChange={() =>
-									!isConfirmLoading && setChoice("default")
+									!isLoading && setChoice("suggested")
 								}
-								disabled={isConfirmLoading}
+								disabled={isLoading}
 							/>
 							<span className="font-medium relative group">
-								Default
+								Suggested
 								<div
 									className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words whitespace-normal max-w-sm min-w-[200px] z-10 pointer-events-none"
 									style={{ minWidth: "400px" }}
@@ -276,9 +157,9 @@ export const BumpFee = ({
 							</span>
 						</div>
 						<span className="text-sm opacity-80">
-							{defaultFeeWei ? (
+							{suggestedFeeWei ? (
 								<EthPriceWithTooltip
-									wei={defaultFeeWei}
+									wei={suggestedFeeWei}
 									ethPrice={price}
 								/>
 							) : (
@@ -293,9 +174,7 @@ export const BumpFee = ({
 						choice === "custom"
 							? "border-accent-100"
 							: "border-contrast-100/40"
-					} ${
-						isConfirmLoading ? "opacity-50 pointer-events-none" : ""
-					} ${
+					} ${isLoading ? "opacity-50 pointer-events-none" : ""} ${
 						choice === "custom" &&
 						customEth &&
 						!isCustomFeeInputValid
@@ -303,16 +182,17 @@ export const BumpFee = ({
 							: ""
 					}`}
 				>
-					<label className="flex items-center gap-2 cursor-pointer">
+					<label
+						className="flex items-center gap-2 cursor-pointer"
+						onClick={() => setChoice("custom")}
+					>
 						<input
 							type="radio"
 							name="bump"
 							className="cursor-pointer"
 							checked={choice === "custom"}
-							onChange={() =>
-								!isConfirmLoading && setChoice("custom")
-							}
-							disabled={isConfirmLoading}
+							onChange={() => !isLoading && setChoice("custom")}
+							disabled={isLoading}
 						/>
 						<span className="font-medium relative group">
 							Custom
@@ -320,17 +200,20 @@ export const BumpFee = ({
 								className="absolute bottom-full left-0 mb-2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words whitespace-normal max-w-sm min-w-[200px] z-10 pointer-events-none"
 								style={{ minWidth: "400px" }}
 							>
-								Define your own max fee, that must be greater
-								than the current max fee of {currentFeeEth} ETH
+								Define your own max fee, that must be at least
+								10% higher than the current max fee of{" "}
+								{currentFeeEth} ETH
 							</div>
 						</span>
 					</label>
 					<div className="mt-2 flex items-center gap-2">
 						<input
 							type="number"
-							min={currentFeeEth}
+							min={minFeeEth}
 							step="0.000000000000000001"
-							placeholder={`Enter fee > ${currentFeeEth} ETH`}
+							placeholder={`Enter fee ≥ ${minFeeEth.toFixed(
+								9
+							)} ETH`}
 							className={`w-full rounded-lg bg-contrast-100/10 px-3 py-2 outline-none disabled:opacity-50 ${
 								choice === "custom" &&
 								customEth &&
@@ -340,12 +223,12 @@ export const BumpFee = ({
 							} [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]`}
 							value={customEth}
 							onChange={e => {
-								if (!isConfirmLoading) {
+								if (!isLoading) {
 									setChoice("custom");
 									setCustomEth(e.target.value);
 								}
 							}}
-							disabled={isConfirmLoading}
+							disabled={isLoading}
 						/>
 						<span className="text-sm opacity-80">ETH</span>
 					</div>
@@ -412,26 +295,6 @@ export const BumpFee = ({
 			</div>
 
 			<div className="">{renderContent()}</div>
-
-			<div className="mt-6 flex justify-end gap-8">
-				<Button variant="text" onClick={onCancel}>
-					Cancel
-				</Button>
-				<Button
-					variant="accent-fill"
-					onClick={handleConfirm}
-					isLoading={isConfirmLoading}
-					disabled={
-						isConfirmLoading ||
-						estimating ||
-						(choice === "custom" &&
-							(!ethStrToWei(customEth) ||
-								!isCustomFeeValid(customEth)))
-					}
-				>
-					Bump
-				</Button>
-			</div>
 		</div>
 	);
 };

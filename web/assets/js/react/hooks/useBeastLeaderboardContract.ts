@@ -12,7 +12,7 @@ import {
 	computeVerificationDataCommitment,
 	fetchProofVerificationData,
 } from "../utils/aligned";
-import { bytesToHex, keccak256, encodePacked } from "viem";
+import { bytesToHex, keccak256, encodeAbiParameters } from "viem";
 
 import { useToast } from "../state/toast";
 
@@ -25,9 +25,11 @@ function getBeastKey(user: `0x${string}`, game: bigint): `0x${string}` {
 	if (!user) {
 		return "0x0";
 	}
-	const gameHash = keccak256(encodePacked(["uint256"], [game]));
 	const beastKey = keccak256(
-		encodePacked(["address", "bytes32"], [user, gameHash])
+		encodeAbiParameters(
+			[{ type: "address" }, { type: "uint256" }],
+			[user, game]
+		)
 	);
 	return beastKey;
 }

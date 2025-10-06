@@ -3,7 +3,7 @@
 RPC_URL="http://localhost:8545"
 SENDER_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 AMOUNT="10ether"
-NUM_ACCOUNTS=100
+NUM_ACCOUNTS=$1
 OUTPUT_FILE="rich_accounts.json"
 
 echo "[" > "$OUTPUT_FILE"
@@ -42,7 +42,7 @@ for i in $(seq 1 $NUM_ACCOUNTS); do
         echo "  }," >> "$OUTPUT_FILE"
     fi
     
-    sleep 0.1
+    sleep 0.01
 done
 
 echo "]" >> "$OUTPUT_FILE"

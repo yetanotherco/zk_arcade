@@ -4,11 +4,11 @@ import { readFile } from "fs/promises";
 import { TextEncoder } from "util";
 import path from "path";
 
-import { encode as cborEncode, decode as cborDecode } from 'cbor2';
-import { hexToBigInt } from "viem";
-
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+
+import { estimateMaxFeeForBatchOfProofs } from "./estimate_max_fee.js";
+import { getBatcherNonce } from "./get_batcher_nonce.js";
 
 export const PARITY_MAX_MOVEMENTS = 55;
 
@@ -162,89 +162,6 @@ export async function generateCircomParityProof(user_address, userPositions, lev
 
     return JSON.stringify(submitProofMessage);
 }
-
-import { createPublicClient } from "viem";
-import { anvil } from "viem/chains";
-
-export const GAS_ESTIMATION = {
-	DEFAULT_CONSTANT_GAS_COST: BigInt(537500),
-	ADDITIONAL_SUBMISSION_GAS_COST_PER_PROOF: BigInt(2000),
-	GAS_PRICE_PERCENTAGE_MULTIPLIER: BigInt(110),
-	PERCENTAGE_DIVIDER: BigInt(100),
-};
-
-async function estimateMaxFeeForBatchOfProofs(numberProofsInBatch = 16) {
-    const client = createPublicClient({
-        chain: anvil,
-        transport: http("http://localhost:8545"),
-    });
-
-    const gasPrice = await client.getGasPrice();
-
-    const totalGas =
-        GAS_ESTIMATION.DEFAULT_CONSTANT_GAS_COST +
-        GAS_ESTIMATION.ADDITIONAL_SUBMISSION_GAS_COST_PER_PROOF *
-            BigInt(numberProofsInBatch);
-
-    const estimatedGasPerProof =
-        BigInt(totalGas) / BigInt(numberProofsInBatch);
-
-    const feePerProof =
-    (estimatedGasPerProof *
-        gasPrice *
-        BigInt(GAS_ESTIMATION.GAS_PRICE_PERCENTAGE_MULTIPLIER)) /
-    BigInt(GAS_ESTIMATION.PERCENTAGE_DIVIDER);
-
-    return feePerProof;
-}
-
-// TODO: Move to a separate file
-import WebSocket from "ws";
-
-export async function getBatcherNonce(batcher_url, address) {
-    return new Promise((resolve, reject) => {
-        if (!address) {
-            return reject(new Error("No address provided"));
-        }
-
-        const ws = new WebSocket(batcher_url);
-        ws.binaryType = "arraybuffer";
-
-        ws.onopen = () => {
-            console.log("WebSocket connection established");
-        };
-
-        ws.onmessage = (event) => {
-        try {
-            const cbor_data = event.data;
-            const data = cborDecode(new Uint8Array(cbor_data));
-
-            if (data?.ProtocolVersion) {
-                const message = { GetNonceForAddress: address };
-                const encoded = cborEncode(message).buffer;
-                ws.send(encoded);
-            } else if (data?.Nonce) {
-                ws.close();
-                resolve(hexToBigInt(data.Nonce));
-            } else if (data?.EthRpcError || data?.InvalidRequest) {
-                ws.close();
-                reject(new Error(JSON.stringify(data)));
-            }
-        } catch (e) {
-            ws.close();
-            reject(e);
-        }
-        };
-
-        ws.onerror = () => {
-            ws.close();
-            reject(new Error("WebSocket connection error"));
-        };
-
-        ws.onclose = () => {};
-    });
-}
-
 
 async function signVerificationData(
     privateKey,

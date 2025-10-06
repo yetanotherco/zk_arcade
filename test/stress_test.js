@@ -144,12 +144,14 @@ async function runForAccount({ address, privateKey }) {
         const status = await getAgreementStatus(jar, csrf_token, address);
         console.log(`[${address}] Agreement status:`, status);
 
-        // 5) Proof submission
+        // 5) Proof data generation
         const proofData = await generateProofVerificationData(address, privateKey);
         const params = {
             ...proofData,
             _csrf_token: csrf_token
         };
+
+        // 6) Proof submission
         console.log(`[${address}] Sending proof...`);
         const submitResp = await doSubmitPost(jar, csrf_token, params);
         console.log(`[${address}] /proof →`, submitResp);

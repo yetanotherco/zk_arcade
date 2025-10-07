@@ -3,6 +3,7 @@ import * as snarkjs from "snarkjs";
 import { readFile } from "fs/promises";
 import { TextEncoder } from "util";
 import path from "path";
+import { Keccak } from "sha3";
 
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -11,6 +12,10 @@ import { estimateMaxFeeForBatchOfProofs } from "./estimate_max_fee.js";
 import { getBatcherNonce } from "./get_batcher_nonce.js";
 
 export const PARITY_MAX_MOVEMENTS = 55;
+const BATCHER_URL = "http://localhost:8080";
+const CHAIN_ID = 31337; // Anvil chain id
+const PAYMENT_SERVICE_ADDRESS = "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650";
+const RPC_URL = 'http://localhost:8545'
 
 const toBytesFromJSON = (obj) =>
     new TextEncoder().encode(JSON.stringify(obj));
@@ -59,7 +64,7 @@ function makeEmptyLevel() {
 export async function generateCircomParityProof(user_address, userPositions, levelsBoards, privateKey) {
     let nonce = BigInt(0);
     try {
-        nonce = await getBatcherNonce("http://localhost:8080", user_address);
+        nonce = await getBatcherNonce(BATCHER_URL, user_address);
         console.log("Nonce:", nonce.toString());
     } catch (err) {
         console.error("Error:", err);
@@ -134,8 +139,8 @@ export async function generateCircomParityProof(user_address, userPositions, lev
 		return;
 	}
 
-    const chainId = 31337; // Anvil chain id
-    const payment_service_addr = getAddress("0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650");
+    const chainId = CHAIN_ID;
+    const payment_service_addr = getAddress(PAYMENT_SERVICE_ADDRESS);
 
     const noncedVerificationdata = {
         maxFee: toHex(maxFee, { size: 32 }),
@@ -170,7 +175,7 @@ async function signVerificationData(
     opts = {}
 ) {
     const account = privateKeyToAccount(privateKey);
-    const client = createWalletClient({ account, transport: http("http://localhost:8545") });
+    const client = createWalletClient({ account, transport: http(RPC_URL) });
 
     const toHex = (x) => {
         if (typeof x === "string") return x.startsWith("0x") ? x : `0x${Buffer.from(x, "utf8").toString("hex")}`;
@@ -204,8 +209,6 @@ async function signVerificationData(
 
     return { r, s, v, signature };
 }
-
-import { Keccak } from "sha3";
 
 export const provingSystemNameToByte = {
     GnarkPlonkBls12_381: 0,

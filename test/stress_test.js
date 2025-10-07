@@ -9,7 +9,7 @@ import { depositIntoAligned } from './deposit_into_aligned.js';
 import { fetch } from "undici";
 import { privateKeyToAccount } from 'viem/accounts';
 
-const baseUrl = "http://localhost:4005";
+const ZK_ARCADE_URL = "http://localhost:4005";
 const CONCURRENCY = 20;
 const DEPOSIT_WAIT_MS = 10_000;
 
@@ -59,14 +59,14 @@ async function generateProofVerificationData(address, privateKey) {
 }
 
 async function newSession(jar) {
-    const csrfRes = await fetch(`${baseUrl}/csrf`, { method: "GET" });
+    const csrfRes = await fetch(`${ZK_ARCADE_URL}/csrf`, { method: "GET" });
     jar.absorb(getSetCookies(csrfRes));
     const data = await csrfRes.json();
     return { csrf_token: data.csrf_token };
 }
 
 async function doSignPost(jar, csrf_token, payload) {
-    const res = await fetch(`${baseUrl}/wallet/sign`, {
+    const res = await fetch(`${ZK_ARCADE_URL}/wallet/sign`, {
         method: "POST",
         headers: {
             "content-type": "application/json",
@@ -84,7 +84,7 @@ async function doSignPost(jar, csrf_token, payload) {
 }
 
 async function doSubmitPost(jar, csrf_token, payload) {
-    const res = await fetch(`${baseUrl}/proof/`, {
+    const res = await fetch(`${ZK_ARCADE_URL}/proof/`, {
         method: "POST",
         headers: {
             "content-type": "application/json",
@@ -102,7 +102,7 @@ async function doSubmitPost(jar, csrf_token, payload) {
 }
 
 async function getAgreementStatus(jar, csrf_token, address) {
-    const res = await fetch(`${baseUrl}/api/wallet/${address}/agreement-status`, {
+    const res = await fetch(`${ZK_ARCADE_URL}/api/wallet/${address}/agreement-status`, {
         method: 'GET',
         headers: {
             "x-csrf-token": csrf_token,
@@ -133,7 +133,7 @@ async function runForAccount({ address, privateKey }) {
             signature,
             _csrf_token: csrf_token,
         });
-        console.log(`[${address}] /wallet/sign →`, signResp);
+        console.log(`[${address}] /wallet/sign`);
 
         // 3) Deposit
         await depositIntoAligned(privateKey);
@@ -154,7 +154,6 @@ async function runForAccount({ address, privateKey }) {
         // 6) Proof submission
         console.log(`[${address}] Sending proof...`);
         const submitResp = await doSubmitPost(jar, csrf_token, params);
-        console.log(`[${address}] /proof →`, submitResp);
 
         return { address, ok: true, status, submitResp };
     } catch (err) {

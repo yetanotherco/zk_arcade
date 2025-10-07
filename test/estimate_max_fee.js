@@ -2,6 +2,8 @@ import { createPublicClient } from "viem";
 import { anvil } from "viem/chains";
 import { http } from "viem";
 
+const RPC_URL = 'http://localhost:8545'
+
 export const GAS_ESTIMATION = {
 	DEFAULT_CONSTANT_GAS_COST: BigInt(537500),
 	ADDITIONAL_SUBMISSION_GAS_COST_PER_PROOF: BigInt(2000),
@@ -9,11 +11,10 @@ export const GAS_ESTIMATION = {
 	PERCENTAGE_DIVIDER: BigInt(100),
 };
 
-
 export async function estimateMaxFeeForBatchOfProofs(numberProofsInBatch = 16) {
     const client = createPublicClient({
         chain: anvil,
-        transport: http("http://localhost:8545"),
+        transport: http(RPC_URL),
     });
 
     const gasPrice = await client.getGasPrice();

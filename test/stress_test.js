@@ -121,6 +121,21 @@ async function doSubmitPost(jar, csrf_token, payload) {
     return res.json().catch(() => null);
 }
 
+async function getAgreementStatus(jar, csrf_token, address) {
+    const res = await fetch(`${ZK_ARCADE_URL}/api/wallet/${address}/agreement-status`, {
+        method: 'GET',
+        headers: {
+            "cookie": jar.toHeader(),
+        },
+    });
+    jar.absorb(getSetCookies(res));
+    if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`GET /agreement-status → ${res.status} ${res.statusText} ${text.slice(0, 200)}`);
+    }
+    return res.json().catch(() => null);
+}
+
 // Executes the full flow for a single private key
 async function runForAccount({ address, privateKey }) {
     const jar = new CookieJar();
@@ -148,18 +163,22 @@ async function runForAccount({ address, privateKey }) {
             await new Promise((r) => setTimeout(r, DEPOSIT_WAIT_MS));
         }
 
-        // 4) Proof data generation
+        // 4) Agreement status
+        const status = await getAgreementStatus(jar, csrf_token, address);
+        console.log(`[${address}] Agreement status:`, status);
+
+        // 5) Proof data generation
         const proofData = await generateProofVerificationData(address, privateKey);
         const params = {
             ...proofData,
             _csrf_token: csrf_token
         };
 
-        // 5) Proof submission
+        // 6) Proof submission
         console.log(`[${address}] Sending proof...`);
         const submitResp = await doSubmitPost(jar, csrf_token, params);
 
-        return { address, ok: true, submitResp };
+        return { address, ok: true, status, submitResp };
     } catch (err) {
         console.error(`[${address}] ERROR:`, err);
         return { address, ok: false, error: String(err) };

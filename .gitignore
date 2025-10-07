@@ -25,8 +25,6 @@ pkg
 /web/deps
 /web/priv/static/assets/
 node_modules
-package-lock.json
-package.json
 
 # Generated solution binaries
 *.bin

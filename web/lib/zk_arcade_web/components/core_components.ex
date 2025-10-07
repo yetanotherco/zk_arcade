@@ -492,11 +492,12 @@ defmodule ZkArcadeWeb.CoreComponents do
 
   def footer(assigns) do
     ~H"""
-    <div class="w-full border-t border-text-200/20 backdrop-blur-lg backdrop-saturate-200">
+    <div class="w-full border-t border-text-200/20 backdrop-blur-lg backdrop-saturate-200" >
       <div
-        class="w-full flex justify-center items-center flex-wrap p-5 py-10 gap-5 m-auto"
+        class="w-full  m-auto"
         style="max-width: 1000px;"
       >
+      <div class="flex justify-center items-center flex-wrap p-5 py-10 gap-5">
         <div class="hidden sm:inline-block flex-1">
           <p class="text-md">
             Powered By
@@ -518,6 +519,18 @@ defmodule ZkArcadeWeb.CoreComponents do
                 <% end %>
               </div>
             <% end %>
+          </div>
+        </div>
+      </div>
+
+        <div class="text-left pb-6 w-full">
+          <div class=" border-t border-text-200/50 mb-3 w-full"></div>
+          <div class="px-5">
+            <p class="text-[10px] text-text-200/50  mb-1">Acknowledgements</p>
+            <p class="text-[10px] text-text-200/50 italic">
+              “Happy Happy Game Show” Kevin MacLeod (incompetech.com)<br />
+              Licensed under CC BY 4.0
+            </p>
           </div>
         </div>
       </div>

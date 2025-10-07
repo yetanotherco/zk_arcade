@@ -4,6 +4,10 @@ import { privateKeyToAccount } from 'viem/accounts';
 import solution from './solution.json' with { type: 'json' };
 import rawRichAccounts from './rich_accounts.json' with { type: 'json' };
 
+import fs from 'fs/promises';
+import { parse } from 'csv-parse';
+
+
 import { generateCircomParityProof } from './generator.js';
 import signMessageFromPrivateKey from './sign_agreement.js';
 import { CookieJar, getSetCookies } from './cookie_utils.js';
@@ -198,8 +202,35 @@ async function runBatch(accounts, concurrency = CONCURRENCY) {
 }
 
 (async () => {
-    const accounts = normalizeAccounts(rawRichAccounts);
-    console.log(`Launching stress run for ${accounts.length} accounts with concurrency=${CONCURRENCY}`);
+    // Read accounts from the file named sepolia_rich_accounts.csv, if present
+    // Fallback to rich_accounts.json if the CSV is not present or empty
+    const csvData = await new Promise(async (resolve, reject) => {
+        const records = [];
+
+        const content = await fs.readFile('sepolia_rich_accounts.csv', 'utf-8');
+        parse(content, {
+                columns: true,
+                trim: true,
+                skip_empty_lines: true,
+        })
+        .on('data', (data) => records.push(data))
+        .on('end', () => resolve(records))
+        .on('error', (err) => reject(err));
+    });
+
+    let accounts = csvData.map((row, idx) => {
+        if (!row.privateKey || !row.address) {
+            throw new Error(`Missing privateKey or address in CSV at row ${idx + 1}`);
+        }
+
+        return { address: row.address, privateKey: row.privateKey };
+    });
+
+    if (accounts.length === 0) {
+        console.error("No accounts found to run the stress test. Using fallback rich_accounts.json");
+        accounts = normalizeAccounts(rawRichAccounts);
+    }
+
     const results = await runBatch(accounts, CONCURRENCY);
 
     const summary = {

@@ -262,6 +262,14 @@ defmodule ZkArcade.Proofs do
       %Proof{}
       |> Proof.changeset(attrs)
       |> Repo.insert()
+      |> case do
+        {:ok, _proof} = result ->
+          result
+
+        {:error, changeset} = error ->
+          PrometheusMetrics.record_proof_error(:create_proof_failed)
+          error
+      end
     end
   end
 
@@ -292,6 +300,7 @@ defmodule ZkArcade.Proofs do
         {:ok, updated_proof}
 
       {:error, changeset} ->
+        PrometheusMetrics.record_proof_error(:status_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
     end
@@ -314,6 +323,7 @@ defmodule ZkArcade.Proofs do
         {:ok, updated_proof}
 
       {:error, changeset} ->
+        PrometheusMetrics.record_proof_error(:status_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
     end
@@ -325,19 +335,21 @@ defmodule ZkArcade.Proofs do
     downcased_addr = String.downcase(address)
 
     if proof.wallet_address != downcased_addr do
+      PrometheusMetrics.record_proof_error(:ownership_mismatch)
       Logger.error("Failed to update proof #{proof_id} does not belong to address #{address}")
       {:error, %{}}
     else
       changeset = change_proof(proof, %{status: "claimed", claim_tx_hash: claim_tx_hash})
 
       case Repo.update(changeset) do
-        {:ok, updated_proof} ->
-          Logger.info("Updated proof #{proof_id} status to claimed")
-          {:ok, updated_proof}
+          {:ok, updated_proof} ->
+            Logger.info("Updated proof #{proof_id} status to claimed")
+            {:ok, updated_proof}
 
-        {:error, changeset} ->
-          Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
-          {:error, changeset}
+          {:error, changeset} ->
+            PrometheusMetrics.record_proof_error(:status_update_failed)
+            Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+            {:error, changeset}
       end
     end
   end
@@ -354,6 +366,7 @@ defmodule ZkArcade.Proofs do
         {:ok, updated_proof}
 
       {:error, changeset} ->
+        PrometheusMetrics.record_proof_error(:status_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
     end
@@ -377,6 +390,7 @@ defmodule ZkArcade.Proofs do
         {:ok, updated_proof}
 
       {:error, changeset} ->
+        PrometheusMetrics.record_proof_error(:status_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
     end
@@ -402,10 +416,15 @@ defmodule ZkArcade.Proofs do
       {:error, :not_found} ->
         case Accounts.create_wallet(%{address: address}) do
           {:ok, wallet} -> {:ok, wallet}
-          {:error, changeset} -> {:error, changeset}
+          {:error, changeset} ->
+            PrometheusMetrics.record_wallet_error(:wallet_creation_failed_for_proof)
+            {:error, changeset}
         end
     end
   end
 
-  defp get_or_create_wallet(_), do: {:error, :invalid_address}
+  defp get_or_create_wallet(_) do
+    PrometheusMetrics.record_proof_error(:invalid_wallet_address)
+    {:error, :invalid_address}
+  end
 end

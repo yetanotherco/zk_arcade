@@ -5,6 +5,7 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.BatcherConnection
   alias ZkArcade.Proofs
   alias ZkArcade.EIP712Verifier
+  alias ZkArcade.PrometheusMetrics
 
   def get_pending_proofs_to_bump(conn, %{"address" => address}) do
     case ZkArcade.Proofs.get_pending_proofs_to_bump(address) do
@@ -159,6 +160,7 @@ defmodule ZkArcadeWeb.ProofController do
         {:ok, pending_proof} ->
           {:ok, pending_proof}
         {:error, changeset} ->
+          PrometheusMetrics.record_proof_error(:create_pending_proof_failed)
           Logger.error("Failed to create proof: #{inspect(changeset)}")
           {:error, changeset}
       end
@@ -168,6 +170,7 @@ defmodule ZkArcadeWeb.ProofController do
   defp get_proof_for_retry(proof_id, address) do
     case Proofs.get_proof_by_id(proof_id) do
       nil ->
+        PrometheusMetrics.record_proof_error(:proof_not_found)
         Logger.error("Proof with ID #{proof_id} not found for wallet #{address}")
         {:error, :proof_not_found}
       proof ->
@@ -184,6 +187,7 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   defp handle_submission_error(conn, reason) do
+    PrometheusMetrics.record_proof_error(:submission_failed)
     Logger.error("Submission failed: #{inspect(reason)}")
 
     conn
@@ -196,6 +200,7 @@ defmodule ZkArcadeWeb.ProofController do
   end
 
   defp handle_retry_error(conn, reason) do
+    PrometheusMetrics.record_proof_error(:retry_failed)
     Logger.error("Retry failed: #{inspect(reason)}")
 
     conn
@@ -254,6 +259,7 @@ defmodule ZkArcadeWeb.ProofController do
               |> redirect(to: build_redirect_url(conn, "proof-sent", pending_proof.id))
 
             {:ok, {:error, reason}} ->
+              PrometheusMetrics.record_proof_error(:submit_to_batcher_failed)
               Logger.error("Failed to send proof to batcher: #{inspect(reason)}")
               # Remove the proof since it failed during batcher validation,
               # we don't want to count it as sent
@@ -350,15 +356,18 @@ defmodule ZkArcadeWeb.ProofController do
         handle_verification_failure(updated_proof.id, reason, attempt_type)
 
       nil ->
+        PrometheusMetrics.record_proof_error(:aligned_verification_unknown_error)
         Logger.error("Error without reason")
     end
   end
 
   defp handle_verification_failure(_proof_id, reason, :retry) do
+    PrometheusMetrics.record_proof_error(:aligned_verification_failed_retry)
     Logger.error("Bump fee transaction failed to verify proof with reason: #{inspect(reason)}")
   end
 
   defp handle_verification_failure(proof_id, reason, :initial) do
+    PrometheusMetrics.record_proof_error(:aligned_verification_failed)
     Logger.error("Failed to verify proof in aligned: #{inspect(reason)}")
 
     case Proofs.update_proof_status_failed(proof_id) do
@@ -381,6 +390,7 @@ defmodule ZkArcadeWeb.ProofController do
         Logger.warning("Message has been replaced for other with a higher fee")
         {:error, reason}
       _ ->
+        PrometheusMetrics.record_proof_error(:batcher_rejection)
         Logger.error("Failed to send proof to the batcher: #{inspect(reason)}")
         case Proofs.update_proof_status_failed(proof_id) do
           {:ok, _} ->
@@ -436,6 +446,7 @@ defmodule ZkArcadeWeb.ProofController do
               |> redirect(to: build_redirect_url(conn, "proof-sent", proof.id))
 
             {:ok, {:error, reason}} ->
+              PrometheusMetrics.record_proof_error(:retry_submit_failed)
               Logger.error("Failed to retry proof submission: #{inspect(reason)}")
 
               case reason do

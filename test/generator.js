@@ -1,22 +1,17 @@
-import { getAddress, pad, toBytes, toHex } from "viem";
+import { getAddress, pad, toBytes, toHex, createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import * as snarkjs from "snarkjs";
 import { readFile } from "fs/promises";
 import { TextEncoder } from "util";
 import path from "path";
 import { Keccak } from "sha3";
 
-import { BATCHER_PAYMENT_SERVICE_ADDR, RPC_URL } from "./constants.js";
-
-import { createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-
 import { estimateMaxFeeForBatchOfProofs } from "./estimate_max_fee.js";
 import { getBatcherNonce } from "./get_batcher_nonce.js";
+import { BATCHER_PAYMENT_SERVICE_ADDR, RPC_URL, USED_CHAIN, BATCHER_URL } from "./constants.js";
 
 const PARITY_MAX_MOVEMENTS = 55;
-
-const BATCHER_URL = "http://localhost:8080";
-const CHAIN_ID = 31337; // Anvil chain id
+const MaxLevels = 3;
 
 const toBytesFromJSON = (obj) =>
     new TextEncoder().encode(JSON.stringify(obj));
@@ -26,8 +21,6 @@ const fetchTextAsBytes = async (filePath) => {
   const text = await readFile(absPath, "utf-8"); 
   return new TextEncoder().encode(text);
 };
-
-const MaxLevels = 3;
 
 function clonePos(p) {
     return [p[0], p[1]];
@@ -140,7 +133,7 @@ export async function generateCircomParityProof(user_address, userPositions, lev
 		return;
 	}
 
-    const chainId = CHAIN_ID;
+    const chainId = USED_CHAIN.id;
     const payment_service_addr = getAddress(BATCHER_PAYMENT_SERVICE_ADDR);
 
     const noncedVerificationdata = {

@@ -1,6 +1,6 @@
-import { createPublicClient } from "viem";
+import { createPublicClient, http } from "viem";
 import { anvil } from "viem/chains";
-import { http } from "viem";
+
 import { RPC_URL } from "./constants.js";
 
 export const GAS_ESTIMATION = {

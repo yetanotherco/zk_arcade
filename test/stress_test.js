@@ -1,15 +1,16 @@
-import solution from './solution.json' with { type: 'json' };
-import rawRichAccounts from './rich_accounts.json' with { type: 'json' };
-import signMessageFromPrivateKey from './sign_agreement.js';
-
-import { generateCircomParityProof } from './generator.js';
-import { CookieJar, getSetCookies } from './cookie_utils.js';
-import { depositIntoAligned } from './deposit_into_aligned.js';
-
 import { fetch } from "undici";
 import { privateKeyToAccount } from 'viem/accounts';
 
-const ZK_ARCADE_URL = "http://localhost:4005";
+import solution from './solution.json' with { type: 'json' };
+import rawRichAccounts from './rich_accounts.json' with { type: 'json' };
+
+import { generateCircomParityProof } from './generator.js';
+import signMessageFromPrivateKey from './sign_agreement.js';
+import { CookieJar, getSetCookies } from './cookie_utils.js';
+import { depositIntoAligned } from './deposit_into_aligned.js';
+
+import { ZK_ARCADE_URL } from './constants.js';
+
 const CONCURRENCY = 20;
 const DEPOSIT_WAIT_MS = 10_000;
 

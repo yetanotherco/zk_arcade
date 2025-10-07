@@ -16,7 +16,6 @@ import { depositIntoAligned } from './deposit_into_aligned.js';
 
 import { ZK_ARCADE_URL, USED_CHAIN } from './constants.js';
 
-const CONCURRENCY = 20;
 const DEPOSIT_WAIT_MS = 10_000;
 
 function normalizeAccounts(raw) {
@@ -167,24 +166,19 @@ async function runForAccount({ address, privateKey }) {
     }
 }
 
-// Executes in parallel with simple concurrency limit by batches
-async function runBatch(accounts, concurrency = CONCURRENCY) {
-    const results = [];
-    for (let i = 0; i < accounts.length; i += concurrency) {
-        const batch = accounts.slice(i, i + concurrency);
+// Executes all accounts in parallel without concurrency limit
+async function runBatch(accounts) {
+    // Add a small random jitter to avoid bursts
+    const withJitter = accounts.map(async (acc, idx) => {
+        await new Promise((r) => setTimeout(r, Math.random() * 250 + idx * 10));
+        return runForAccount(acc);
+    });
 
-        const withJitter = batch.map(async (acc, idx) => {
-            await new Promise((r) => setTimeout(r, Math.random() * 250 + idx * 10));
-            return runForAccount(acc);
-        });
-
-        const batchResults = await Promise.allSettled(withJitter);
-        for (const r of batchResults) {
-            if (r.status === 'fulfilled') results.push(r.value);
-            else results.push({ address: 'unknown', ok: false, error: String(r.reason) });
-        }
-    }
-    return results;
+    const results = await Promise.allSettled(withJitter);
+    return results.map(r => {
+        if (r.status === 'fulfilled') return r.value;
+        else return { address: 'unknown', ok: false, error: String(r.reason) };
+    });
 }
 
 (async () => {
@@ -217,7 +211,7 @@ async function runBatch(accounts, concurrency = CONCURRENCY) {
         accounts = normalizeAccounts(rawRichAccounts);
     }
 
-    const results = await runBatch(accounts, CONCURRENCY);
+    const results = await runBatch(accounts);
 
     const summary = {
         total: results.length,

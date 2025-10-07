@@ -1,10 +1,9 @@
 import { createWalletClient, createPublicClient, http, parseAbi, parseEther } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { anvil } from 'viem/chains'
+import { RPC_URL, BATCHER_PAYMENT_SERVICE_ADDR } from './constants.js'
 
-const RPC_URL = 'http://localhost:8545'
 const CHAIN = anvil
-const contractAddress = '0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650'
 
 export async function depositIntoAligned(privateKey, valueEth = '0.1') {
   const account = privateKeyToAccount(privateKey)
@@ -12,7 +11,7 @@ export async function depositIntoAligned(privateKey, valueEth = '0.1') {
   const walletClient = createWalletClient({ account, chain: CHAIN, transport: http(RPC_URL) })
 
   const hash = await walletClient.sendTransaction({
-    to: contractAddress,
+    to: BATCHER_PAYMENT_SERVICE_ADDR,
     value: parseEther(valueEth),
   })
   console.log('Tx hash:', hash)
@@ -30,7 +29,7 @@ export async function readAlignedBalance(userAddress) {
   ])
 
   const balance = await publicClient.readContract({
-    address: contractAddress,
+    address: BATCHER_PAYMENT_SERVICE_ADDR,
     abi,
     functionName: 'user_balances',
     args: [userAddress],

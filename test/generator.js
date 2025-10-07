@@ -5,17 +5,18 @@ import { TextEncoder } from "util";
 import path from "path";
 import { Keccak } from "sha3";
 
+import { BATCHER_PAYMENT_SERVICE_ADDR, RPC_URL } from "./constants.js";
+
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 import { estimateMaxFeeForBatchOfProofs } from "./estimate_max_fee.js";
 import { getBatcherNonce } from "./get_batcher_nonce.js";
 
-export const PARITY_MAX_MOVEMENTS = 55;
+const PARITY_MAX_MOVEMENTS = 55;
+
 const BATCHER_URL = "http://localhost:8080";
 const CHAIN_ID = 31337; // Anvil chain id
-const PAYMENT_SERVICE_ADDRESS = "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650";
-const RPC_URL = 'http://localhost:8545'
 
 const toBytesFromJSON = (obj) =>
     new TextEncoder().encode(JSON.stringify(obj));
@@ -140,7 +141,7 @@ export async function generateCircomParityProof(user_address, userPositions, lev
 	}
 
     const chainId = CHAIN_ID;
-    const payment_service_addr = getAddress(PAYMENT_SERVICE_ADDRESS);
+    const payment_service_addr = getAddress(BATCHER_PAYMENT_SERVICE_ADDR);
 
     const noncedVerificationdata = {
         maxFee: toHex(maxFee, { size: 32 }),

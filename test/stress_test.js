@@ -1,5 +1,6 @@
 import { fetch } from "undici";
 import { privateKeyToAccount } from 'viem/accounts';
+import { sepolia } from 'viem/chains';
 
 import solution from './solution.json' with { type: 'json' };
 import rawRichAccounts from './rich_accounts.json' with { type: 'json' };
@@ -13,7 +14,7 @@ import signMessageFromPrivateKey from './sign_agreement.js';
 import { CookieJar, getSetCookies } from './cookie_utils.js';
 import { depositIntoAligned } from './deposit_into_aligned.js';
 
-import { ZK_ARCADE_URL } from './constants.js';
+import { ZK_ARCADE_URL, USED_CHAIN } from './constants.js';
 
 const CONCURRENCY = 20;
 const DEPOSIT_WAIT_MS = 10_000;
@@ -154,10 +155,14 @@ async function runForAccount({ address, privateKey }) {
         });
         console.log(`[${address}] /wallet/sign: `, signResp);
 
-        // 3) Deposit
-        await depositIntoAligned(privateKey);
-        console.log(`[${address}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS / 1000}s...`);
-        await new Promise((r) => setTimeout(r, DEPOSIT_WAIT_MS));
+        // 3) Deposit (skip in sepolia)
+        if (USED_CHAIN.id === sepolia.id) {
+            console.log(`[${address}] Deposit skipped (Sepolia)`);
+        } else {
+            await depositIntoAligned(privateKey);
+            console.log(`[${address}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS / 1000}s...`);
+            await new Promise((r) => setTimeout(r, DEPOSIT_WAIT_MS));
+        }
 
         // 4) Agreement status
         const status = await getAgreementStatus(jar, csrf_token, address);

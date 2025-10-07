@@ -60,10 +60,25 @@ async function generateProofVerificationData(address, privateKey) {
 }
 
 async function newSession(jar) {
-    const csrfRes = await fetch(`${ZK_ARCADE_URL}/csrf`, { method: "GET" });
-    jar.absorb(getSetCookies(csrfRes));
-    const data = await csrfRes.json();
-    return { csrf_token: data.csrf_token };
+    try {
+        // Tries to get the CSRF token from the main page headers
+        const homeRes = await fetch(`${ZK_ARCADE_URL}/`, { method: "GET" });
+        if (homeRes.ok) {
+            jar.absorb(getSetCookies(homeRes));
+            const htmlContent = await homeRes.text();
+            
+            const csrfMatch = htmlContent.match(/csrf-token["']\s*content=["']([^"']+)["']/i);
+            if (csrfMatch && csrfMatch[1]) {
+                console.log("CSRF token obtained from main page");
+                return { csrf_token: csrfMatch[1] };
+            }
+        }
+    } catch (error) {
+        console.warn("Could not obtain CSRF token from main page:", error.message);
+    }
+
+    // If all fails, throw an error instead of using an invalid fallback
+    throw new Error("Could not obtain a valid CSRF token. The backend requires CSRF and there is no way to obtain it.");
 }
 
 async function doSignPost(jar, csrf_token, payload) {
@@ -106,7 +121,6 @@ async function getAgreementStatus(jar, csrf_token, address) {
     const res = await fetch(`${ZK_ARCADE_URL}/api/wallet/${address}/agreement-status`, {
         method: 'GET',
         headers: {
-            "x-csrf-token": csrf_token,
             "cookie": jar.toHeader(),
         },
     });
@@ -134,7 +148,7 @@ async function runForAccount({ address, privateKey }) {
             signature,
             _csrf_token: csrf_token,
         });
-        console.log(`[${address}] /wallet/sign`);
+        console.log(`[${address}] /wallet/sign: `, signResp);
 
         // 3) Deposit
         await depositIntoAligned(privateKey);

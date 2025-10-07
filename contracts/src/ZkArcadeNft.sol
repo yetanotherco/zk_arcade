@@ -5,7 +5,6 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
@@ -39,12 +38,10 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(
-        address owner,
-        string memory name,
-        string memory symbol,
-        string memory baseURI
-    ) public initializer {
+    function initialize(address owner, string memory name, string memory symbol, string memory baseURI)
+        public
+        initializer
+    {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
         _baseTokenURI = baseURI;

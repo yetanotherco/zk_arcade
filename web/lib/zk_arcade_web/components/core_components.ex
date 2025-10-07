@@ -415,6 +415,10 @@ defmodule ZkArcadeWeb.CoreComponents do
         <p class="mt-2 text-xs text-text-100 bg-circom/20 border border-circom rounded w-fit px-3 font-bold">Circom</p>
       <% :sp1 -> %>
         <p class="mt-2 text-xs text-text-100 bg-sp1/20 border border-sp1 rounded w-fit px-3 font-bold">SP1</p>
+      <% :hard -> %>
+        <p class="mt-2 text-xs text-text-100 bg-red/20 border border-red rounded w-fit px-3 font-bold">Hard</p>
+      <% :easy -> %>
+        <p class="mt-2 text-xs text-text-100 bg-emerald-400/20 border border-emerald-400 rounded w-fit px-3 font-bold">Easy</p>
       <% _ -> %>
     <% end %>
     """

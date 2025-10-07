@@ -19,6 +19,7 @@
         <section class="section-spacer-md">
             <.section_header header="Description" />
             <p class="text-md text-text-200"><%= @game.full_desc %></p>
+            <img class="rounded mb-2 sm:h-[350px] mt-8 sm:w-auto w-full" src={~p"/images/beast.gif"} />
             <h3 class="mt-8 mb-2 text-lg">Acknowledgements:</h3>
              <%= for %{text: text, link: link} <- @game.acknowledgments do %>
              <div class="flex flex-row flex-wrap">

@@ -90,6 +90,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes32 _beastVkCommitment,
         bytes32 _parityVkCommitment
     ) public initializer {
+        require(_alignedServiceManager != address(0) &&
+            _alignedServiceManager.code.length > 0, "invalid alignedServiceManager");
+        require(_alignedBatcherPaymentService != address(0) &&
+            _alignedBatcherPaymentService.code.length > 0, "invalid alignedBatcherPaymentService");
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
@@ -367,13 +371,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     // ======== Internal Helper Functions ========
 
     function getBeastKey(address user, uint256 game) internal pure returns (bytes32) {
-        bytes32 gameHash = keccak256(abi.encodePacked(game));
-        return keccak256(abi.encodePacked(user, gameHash));
+        return keccak256(abi.encode(user, game));
     }
 
     function getParityKey(address user, uint256 gameConfig) internal pure returns (bytes32) {
-        bytes32 gameHash = keccak256(abi.encodePacked(gameConfig));
-        return keccak256(abi.encodePacked(user, gameHash));
+        return keccak256(abi.encode(user, gameConfig));
     }
 
     function verifyAndReplaceInTop10(address user) internal {

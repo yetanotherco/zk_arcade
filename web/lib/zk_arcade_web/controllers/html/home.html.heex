@@ -42,22 +42,22 @@
       <div class="mb-5">
         <p class="text-md mb-5 font-bold">Choose a game</p>
           <div class="flex w-full h-[180px] gap-5 overflow-scroll">
-            <.home_game_component_hero 
-              tags={[:cli, :sp1]} 
-              disabled="false" 
-              link="/games/beast" 
-              title="Beast 1984" 
-              desc="Terminal-based survival game. Each wave ramps up the pressure." 
-              img={~p"/images/beast.gif"} 
-            />
-
             <.home_game_component_hero
-              tags={[:browser, :circom]} 
+              tags={[:browser, :circom, :easy]} 
               disabled="false" 
               link="/games/parity" 
               title="Parity" 
               desc="Daily parity puzzles in your browser. Simple rules, tricky patterns." 
-              img={~p"/images/parity.jpg"} 
+              img={~p"/images/parity.png"} 
+            />
+
+            <.home_game_component_hero 
+              tags={[:cli, :sp1, :hard]} 
+              disabled="false" 
+              link="/games/beast" 
+              title="Beast 1984" 
+              desc="Terminal-based survival game. Each wave ramps up the pressure." 
+              img={~p"/images/beast.png"} 
             />
           </div>
         </div>

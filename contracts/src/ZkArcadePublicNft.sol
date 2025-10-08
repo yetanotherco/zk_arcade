@@ -74,11 +74,13 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         return tokenId;
     }
 
-    function transferFrom(address from, address to, uint256 tokenId) public override {
-        if (!transfersEnabled) {
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address from) {
+        from = _ownerOf(tokenId);
+        // only block actual transfers (not mint or burn)
+        if (!transfersEnabled && from != address(0) && to != address(0)) {
             revert TransfersPaused();
         }
-        super.transferFrom(from, to, tokenId);
+        return super._update(to, tokenId, auth);
     }
 
     // ======== View Functions ========

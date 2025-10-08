@@ -18,18 +18,18 @@ defmodule ZkArcade.BatcherConnection do
               {:ok, conn_pid}
 
             {:error, :timeout} ->
-              PrometheusMetrics.record_user_error(:batcher_connection_timeout)
+              PrometheusMetrics.record_user_error(:batcher_connection_error)
               Logger.info("Initial connection timed out")
               try_ipv6(batcher_host, batcher_port, connect_opts)
 
             {:error, reason} ->
-              PrometheusMetrics.record_user_error(:batcher_connection_failed)
+              PrometheusMetrics.record_user_error(:batcher_connection_error)
               Logger.info("Initial connection failed: #{inspect(reason)}")
               try_ipv6(batcher_host, batcher_port, connect_opts)
           end
 
         {:error, reason} ->
-          PrometheusMetrics.record_user_error(:batcher_connection_failed)
+          PrometheusMetrics.record_user_error(:batcher_connection_error)
           Logger.error("Initial connection failed immediately: #{inspect(reason)}")
           try_ipv6(batcher_host, batcher_port, connect_opts)
       end
@@ -53,20 +53,20 @@ defmodule ZkArcade.BatcherConnection do
 
             response
           {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
-            PrometheusMetrics.record_user_error(:batcher_upgrade_failed)
+            PrometheusMetrics.record_user_error(:batcher_connection_error)
             Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
             close_connection(conn_pid, stream_ref)
             {:error, :upgrade_failed}
         after
           25_000 ->
-            PrometheusMetrics.record_user_error(:batcher_upgrade_timeout)
+            PrometheusMetrics.record_user_error(:batcher_connection_error)
             Logger.error("Timeout during WebSocket upgrade")
             :gun.close(conn_pid)
             {:error, :upgrade_timeout}
         end
 
       {:error, reason} ->
-        PrometheusMetrics.record_user_error(:batcher_connection_failed)
+        PrometheusMetrics.record_user_error(:batcher_connection_error)
         Logger.error("Unable to connect via IPv4 or IPv6: #{inspect(reason)}")
         {:error, reason}
     end
@@ -82,17 +82,17 @@ defmodule ZkArcade.BatcherConnection do
               {:ok, _protocol} ->
                 {:ok, pid}
               {:error, reason} ->
-                PrometheusMetrics.record_user_error(:batcher_ipv6_connection_failed)
+                PrometheusMetrics.record_user_error(:batcher_connection_error)
                 Logger.error("IPv6 connection failed: #{inspect(reason)}")
                 {:error, reason}
             end
           {:error, reason} ->
-            PrometheusMetrics.record_user_error(:batcher_ipv6_open_failed)
+            PrometheusMetrics.record_user_error(:batcher_connection_error)
             Logger.error("IPv6 open failed: #{inspect(reason)}")
             {:error, reason}
         end
       {:error, reason} ->
-        PrometheusMetrics.record_user_error(:batcher_ipv6_resolution_failed)
+        PrometheusMetrics.record_user_error(:batcher_connection_error)
         Logger.error("Failed to resolve IPv6 address: #{inspect(reason)}")
         {:error, reason}
     end

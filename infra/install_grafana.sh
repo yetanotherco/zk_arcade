@@ -14,4 +14,7 @@ sudo apt-get update
 sudo apt-get install grafana
 
 sudo cp -rf grafana/provisioning/* /etc/grafana/provisioning/
+
+sudo bash -c "cat infra/.env.grafana >> /etc/default/grafana-server"
+
 sudo systemctl restart grafana-server

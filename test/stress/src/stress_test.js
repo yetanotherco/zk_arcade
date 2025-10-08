@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 import { parse } from 'csv-parse';
 
 import { generateCircomParityProof } from './circom_proof_generator.js';
-import signMessageFromPrivateKey from './sign_agreement.js';
+import signMessageFromPrivateKey from './utils/sign_agreement.js';
 import { CookieJar, getSetCookies } from './utils/cookie_utils.js';
 import { depositIntoAligned } from './aligned.js';
 

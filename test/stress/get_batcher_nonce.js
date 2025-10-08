@@ -13,7 +13,7 @@ export async function getBatcherNonce(batcher_url, address) {
         ws.binaryType = "arraybuffer";
 
         ws.onopen = () => {
-            console.log("WebSocket connection established");
+            console.log(`[${address} - ${idx}] Established connection to the batcher to get nonce`);
         };
 
         ws.onmessage = (event) => {

@@ -12,10 +12,9 @@ export async function depositIntoAligned(privateKey, valueEth = '0.1') {
     to: BATCHER_PAYMENT_SERVICE_ADDR,
     value: parseEther(valueEth),
   })
-  console.log('Tx hash:', hash)
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash })
-  console.log('Deposit status:', receipt.status)
+
   return { hash, receipt }
 }
 

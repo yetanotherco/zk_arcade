@@ -8,7 +8,6 @@ import rawRichAccounts from './rich_accounts.json' with { type: 'json' };
 import fs from 'fs/promises';
 import { parse } from 'csv-parse';
 
-
 import { generateCircomParityProof } from './generator.js';
 import signMessageFromPrivateKey from './sign_agreement.js';
 import { CookieJar, getSetCookies } from './cookie_utils.js';
@@ -20,42 +19,42 @@ const DEPOSIT_WAIT_MS = 10_000;
 
 function normalizeAccounts(raw) {
     if (!Array.isArray(raw)) {
-        throw new Error('rich_accounts.json debe ser un array');
+        throw new Error('rich_accounts.json must be an array');
     }
 
     if (raw.length > 0 && typeof raw[0] === 'string') {
         return raw.map((pk) => {
-        const addr = privateKeyToAccount(pk).address;
-        return { address: addr, privateKey: pk };
+            const addr = privateKeyToAccount(pk).address;
+            return { address: addr, privateKey: pk };
         });
     }
 
     return raw.map((item, idx) => {
         if (!item || typeof item !== 'object') {
-        throw new Error(`Invalid element in rich_accounts.json at index ${idx}`);
+            throw new Error(`Invalid element in rich_accounts.json at index ${idx}`);
         }
         if (!item.privateKey) {
-        throw new Error(`Missing privateKey at index ${idx}`);
+            throw new Error(`Missing privateKey at index ${idx}`);
         }
         const derived = privateKeyToAccount(item.privateKey).address;
         const provided = item.address ?? derived;
 
         if (item.address && provided.toLowerCase() !== derived.toLowerCase()) {
-        console.warn(
-            `[WARN] Provided address does not match the derived address from the PK at idx ${idx}.
-            provided=${provided} derived=${derived}. Using the derived address.`
-        );
+            console.warn(
+                `[WARN] Provided address does not match the derived address from the PK at idx ${idx}.
+                provided=${provided} derived=${derived}. Using the derived address.`
+            );
         }
         return { address: derived, privateKey: item.privateKey };
     });
 }
 
-async function generateProofVerificationData(address, privateKey) {
+async function generateProofVerificationData(address, privateKey, idx) {
     const levelBoards = solution.levelsBoards || [];
     const userPositions = solution.userPositions || [];
 
     console.log(`[${address}] Generating proof...`);
-    const verificationData = await generateCircomParityProof(address, userPositions, levelBoards, privateKey);
+    const verificationData = await generateCircomParityProof(address, userPositions, levelBoards, privateKey, idx);
     return {
         submit_proof_message: verificationData,
         game: "Parity",
@@ -63,7 +62,7 @@ async function generateProofVerificationData(address, privateKey) {
     };
 }
 
-async function newSession(jar) {
+async function createNewSession(jar) {
     try {
         // Tries to get the CSRF token from the main page headers
         const homeRes = await fetch(`${ZK_ARCADE_URL}/`, { method: "GET" });
@@ -73,7 +72,6 @@ async function newSession(jar) {
             
             const csrfMatch = htmlContent.match(/csrf-token["']\s*content=["']([^"']+)["']/i);
             if (csrfMatch && csrfMatch[1]) {
-                console.log("CSRF token obtained from main page");
                 return { csrf_token: csrfMatch[1] };
             }
         }
@@ -121,7 +119,7 @@ async function doSubmitPost(jar, csrf_token, payload) {
     return res.json().catch(() => null);
 }
 
-async function getAgreementStatus(jar, csrf_token, address) {
+async function getAgreementStatus(jar, address) {
     const res = await fetch(`${ZK_ARCADE_URL}/api/wallet/${address}/agreement-status`, {
         method: 'GET',
         headers: {
@@ -137,50 +135,51 @@ async function getAgreementStatus(jar, csrf_token, address) {
 }
 
 // Executes the full flow for a single private key
-async function runForAccount({ address, privateKey }) {
+async function runForAccount({ address, privateKey }, idx) {
     const jar = new CookieJar();
 
     try {
         // 1) New session + CSRF
-        const { csrf_token } = await newSession(jar);
-        console.log(`[${address}] Session OK. Cookie: ${jar.toHeader()} CSRF: ${csrf_token}`);
+        const { csrf_token } = await createNewSession(jar);
+        console.log(`[${address} - ${idx}] Obtained CSRF token after new session.`);
 
         // 2) Sign
         const signature = await signMessageFromPrivateKey(privateKey);
-        const signResp = await doSignPost(jar, csrf_token, {
+        await doSignPost(jar, csrf_token, {
             address,
             signature,
             _csrf_token: csrf_token,
         });
-        console.log(`[${address}] /wallet/sign: `, signResp);
+        console.log(`[${address} - ${idx}] Signed service agreement`);
 
         // 3) Deposit (skip in sepolia)
         if (USED_CHAIN.id === sepolia.id) {
-            console.log(`[${address}] Deposit skipped (Sepolia)`);
+            console.log(`[${address} - ${idx}] Deposit skipped (Sepolia)`);
         } else {
             await depositIntoAligned(privateKey);
-            console.log(`[${address}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS / 1000}s...`);
+            console.log(`[${address} - ${idx}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS / 1000}s for the deposit to be processed...`);
             await new Promise((r) => setTimeout(r, DEPOSIT_WAIT_MS));
         }
 
         // 4) Agreement status
-        const status = await getAgreementStatus(jar, csrf_token, address);
-        console.log(`[${address}] Agreement status:`, status);
+        const status = await getAgreementStatus(jar, address);
+        console.log(`[${address} - ${idx}] Fetched agreement status to keep the session alive.`);
 
         // 5) Proof data generation
-        const proofData = await generateProofVerificationData(address, privateKey);
+        const proofData = await generateProofVerificationData(address, privateKey, idx);
         const params = {
             ...proofData,
             _csrf_token: csrf_token
         };
+        console.log(`[${address} - ${idx}] Generated proof, sending it to the server...`);
 
         // 6) Proof submission
-        console.log(`[${address}] Sending proof...`);
         const submitResp = await doSubmitPost(jar, csrf_token, params);
+        console.log(`[${address} - ${idx}] Proof submitted successfully`);
 
         return { address, ok: true, status, submitResp };
     } catch (err) {
-        console.error(`[${address}] ERROR:`, err);
+        console.error(`[${address} - ${idx}] ERROR:`, err);
         return { address, ok: false, error: String(err) };
     }
 }
@@ -190,7 +189,7 @@ async function runBatch(accounts) {
     // Add a small random jitter to avoid bursts
     const withJitter = accounts.map(async (acc, idx) => {
         await new Promise((r) => setTimeout(r, Math.random() * 250 + idx * 10));
-        return runForAccount(acc);
+        return runForAccount(acc, idx);
     });
 
     const results = await Promise.allSettled(withJitter);
@@ -226,7 +225,7 @@ async function runBatch(accounts) {
     });
 
     if (accounts.length === 0) {
-        console.error("No accounts found to run the stress test. Using fallback rich_accounts.json");
+        console.warn("No accounts found to run the stress test. Using fallback rich_accounts.json");
         accounts = normalizeAccounts(rawRichAccounts);
     }
 
@@ -241,7 +240,7 @@ async function runBatch(accounts) {
     console.log('SUMMARY:', summary);
 
     for (const r of results) {
-        console.log(`[${r.address}] → ${r.ok ? 'OK' : `FAIL: ${r.error}`}`);
+        console.log(`[${r.address}] → ${r.ok ? 'Sent' : `Failed: ${r.error}`}`);
     }
 })().catch(err => {
     console.error("Fatal error in batch run:", err);

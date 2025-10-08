@@ -55,13 +55,13 @@ function makeEmptyLevel() {
     };
 }
 
-export async function generateCircomParityProof(user_address, userPositions, levelsBoards, privateKey) {
+export async function generateCircomParityProof(user_address, userPositions, levelsBoards, privateKey, idx) {
     let nonce = BigInt(0);
     try {
-        nonce = await getBatcherNonce(BATCHER_URL, user_address);
-        console.log("Nonce:", nonce.toString());
+        nonce = await getBatcherNonce(BATCHER_URL, user_address, idx);
+        console.log(`[${user_address} - ${idx}] Nonce:`, nonce.toString());
     } catch (err) {
-        console.error("Error:", err);
+        console.error(`[${user_address} - ${idx}] Error:`, err);
     }
 
     const allUserPositions = [];
@@ -114,7 +114,6 @@ export async function generateCircomParityProof(user_address, userPositions, lev
         bytes.forEach(byte => publicInputsBytes.push(byte));
     });
 
-    console.log("vkeyPath", vkeyPath);
     const vKeyBytes = await fetchTextAsBytes(vkeyPath);
 
     // Create verification data

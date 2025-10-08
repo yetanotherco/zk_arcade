@@ -1,7 +1,7 @@
 import { createPublicClient, http } from "viem";
 import { anvil } from "viem/chains";
 
-import { RPC_URL } from "./constants.js";
+import { RPC_URL } from "../constants.js";
 
 export const GAS_ESTIMATION = {
 	DEFAULT_CONSTANT_GAS_COST: BigInt(537500),

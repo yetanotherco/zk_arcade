@@ -6,8 +6,8 @@ import { TextEncoder } from "util";
 import path from "path";
 import { Keccak } from "sha3";
 
-import { estimateMaxFeeForBatchOfProofs } from "./estimate_max_fee.js";
-import { getBatcherNonce } from "./get_batcher_nonce.js";
+import { estimateMaxFeeForBatchOfProofs } from "./utils/estimate_max_fee.js";
+import { getBatcherNonce } from "./batcher.js";
 import { BATCHER_PAYMENT_SERVICE_ADDR, RPC_URL, USED_CHAIN, BATCHER_URL } from "./constants.js";
 
 const PARITY_MAX_MOVEMENTS = 55;

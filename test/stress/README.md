@@ -10,7 +10,7 @@ The stress test simulates a multi-user load by sending proofs to the backend con
 
 ### Main files
 
-#### 1. `stress_test.js`
+#### 1. `src/stress_test.js`
 
 Contains the main logic for each user, which consists of:
 
@@ -21,24 +21,24 @@ Contains the main logic for each user, which consists of:
   5. Generating the Circom proof (a computationally heavy task)  
   6. Sending the proof to the system  
 
-#### 2. `generator.js`
+#### 2. `src/circom_proof_generator.js`
 
 Generates the verification data to be sent to the batcher, using Circom and the `snark.js` library to generate the inner proof from the solution.
 
-#### 3. `deposit_into_aligned.js`
+#### 3. `src/aligned.js`
 
 Handles deposits to the Aligned batcher payment service contract.
 
-#### 4. `sign_agreement.js`
+#### 4. `src/utils/sign_agreement.js`
 
 Contains the logic to sign the service agreement and send it to the ZK Arcade backend.
 
 #### 5. Other utility files
 
-- **`cookie_utils.js`**: Manages cookies between HTTP calls to preserve each session’s data.  
-- **`constants.js`**: Contains configuration specific to the selected network.  
-- **`estimate_max_fee.js`**: Contains logic to estimate the maximum fee sent to the batcher in the proof submission message.  
-- **`get_batcher_nonce.js`**: Retrieves the user’s nonce from the batcher via an RPC call.  
+- **`src/utils/cookie_utils.js`**: Manages cookies between HTTP calls to preserve each session’s data.  
+- **`src/constants.js`**: Contains configuration specific to the selected network.  
+- **`src/utils/estimate_max_fee.js`**: Contains logic to estimate the maximum fee sent to the batcher in the proof submission message.  
+- **`src/utils/batcher.js`**: Retrieves the user’s nonce from the batcher via an RPC call.  
 
 ## Data Configuration
 
@@ -46,13 +46,13 @@ Contains the logic to sign the service agreement and send it to the ZK Arcade ba
 
 The system supports two file formats for providing funded test accounts:
 
-- The first is a CSV file (`sepolia_rich_accounts.csv`) with the private key and address in the header.  
-- The second is a JSON file (`rich_accounts.json`), which consists of an array of objects containing `address` and `privateKey` fields.  
+- The first is a CSV file (`data/sepolia_rich_accounts.csv`) with the private key and address in the header.  
+- The second is a JSON file (`data/rich_accounts.json`), which consists of an array of objects containing `address` and `privateKey` fields.  
 
 ### Game solution file
 
 The test requires a solution to generate the Circom proof that certifies users have completed the game.  
-The solution is read from the `solution.json` file, which contains the level boards and user positions for each level in JSON format.  
+The solution is read from the `data/solution.json` file, which contains the level boards and user positions for each level in JSON format.  
 
 You can copy this data from the browser’s local storage variable `parity-game-data`, which contains the solution played by the user for that specific game configuration.
 
@@ -90,12 +90,12 @@ The test requires the following Node.js dependencies:
     npm install
     ```
 
-2. Add your funded account for the tested network in either `sepolia_rich_accounts.csv` or `rich_accounts.json`.
+2. Add your funded account for the tested network in either `data/sepolia_rich_accounts.csv` or `data/rich_accounts.json`.
     - If needed, you can generate test accounts for Devnet using the generate_rich_wallets.sh script: `./generate_rich_wallets.sh <accounts_number>`
-3. Make sure that `solution.json` contains a valid solution. Note that it does not need to be updated between runs.
+3. Make sure that `data/solution.json` contains a valid solution. Note that it does not need to be updated between runs.
 
 4. Run the Test
 
     ```bash
-    node stress_test.js
+    node src/stress_test.js
     ```

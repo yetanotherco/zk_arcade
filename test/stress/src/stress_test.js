@@ -2,16 +2,16 @@ import { fetch } from "undici";
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
 
-import solution from './solution.json' with { type: 'json' };
-import rawRichAccounts from './rich_accounts.json' with { type: 'json' };
+import solution from '../data/solution.json' with { type: 'json' };
+import rawRichAccounts from '../data/rich_accounts.json' with { type: 'json' };
 
 import fs from 'fs/promises';
 import { parse } from 'csv-parse';
 
-import { generateCircomParityProof } from './generator.js';
+import { generateCircomParityProof } from './circom_proof_generator.js';
 import signMessageFromPrivateKey from './sign_agreement.js';
-import { CookieJar, getSetCookies } from './cookie_utils.js';
-import { depositIntoAligned } from './deposit_into_aligned.js';
+import { CookieJar, getSetCookies } from './utils/cookie_utils.js';
+import { depositIntoAligned } from './aligned.js';
 
 import { ZK_ARCADE_URL, USED_CHAIN } from './constants.js';
 
@@ -205,7 +205,7 @@ async function runBatch(accounts) {
     const csvData = await new Promise(async (resolve, reject) => {
         const records = [];
 
-        const content = await fs.readFile('sepolia_rich_accounts.csv', 'utf-8');
+        const content = await fs.readFile('data/sepolia_rich_accounts.csv', 'utf-8');
         parse(content, {
                 columns: true,
                 trim: true,

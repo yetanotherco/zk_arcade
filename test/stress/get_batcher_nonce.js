@@ -3,7 +3,7 @@ import WebSocket from "ws";
 import { encode as cborEncode, decode as cborDecode } from 'cbor2';
 import { hexToBigInt } from "viem";
 
-export async function getBatcherNonce(batcher_url, address) {
+export async function getBatcherNonce(batcher_url, address, idx) {
     return new Promise((resolve, reject) => {
         if (!address) {
             return reject(new Error("No address provided"));

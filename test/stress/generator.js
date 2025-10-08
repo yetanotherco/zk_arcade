@@ -93,9 +93,9 @@ export async function generateCircomParityProof(user_address, userPositions, lev
         userAddress: user_address,
     };
 
-    const wasmPath = "../web/priv/static/artifacts/parity.wasm";
-    const zkeyPath = "../web/priv/static/artifacts/parity_final.zkey";
-    const vkeyPath = "../web/priv/static/artifacts/verification_key.json";
+    const wasmPath = "../../web/priv/static/artifacts/parity.wasm";
+    const zkeyPath = "../../web/priv/static/artifacts/parity_final.zkey";
+    const vkeyPath = "../../web/priv/static/artifacts/verification_key.json";
 
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(
         input,

@@ -44,20 +44,8 @@ defmodule ZkArcade.PrometheusMetrics do
     Counter.inc(name: :bumped_proofs_count)
   end
 
-  def record_batcher_error(type) do
-    increment_with_label(:batcher_errors_total, type)
-  end
-
-  def record_proof_error(stage) do
-    increment_with_label(:proof_errors_total, stage)
-  end
-
-  def record_wallet_error(type) do
-    increment_with_label(:wallet_errors_total, type)
-  end
-
-  def record_eth_price_error(source) do
-    increment_with_label(:eth_price_errors_total, source)
+  def record_user_error(type) do
+    increment_with_label(:user_errors_total, type)
   end
 
   defp increment_with_label(counter_name, label) do

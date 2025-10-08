@@ -1,6 +1,7 @@
 defmodule ZkArcade.IpTracker do
   require Logger
   @api_base "https://api.ipinfo.io/lite/"
+  @ipgeolocation_api_base "https://api.ipgeolocation.io/v2/ipgeo"
 
 
   def get_country_from_conn(conn) do
@@ -10,6 +11,13 @@ defmodule ZkArcade.IpTracker do
   end
 
   def get_country(ip) when is_binary(ip) do
+    case get_country_from_ipinfo(ip) do
+      {:ok, country} -> {:ok, country}
+      {:error, _reason} -> get_country_from_ipgeolocation(ip)
+    end
+  end
+
+  defp get_country_from_ipinfo(ip) do
     token = Application.get_env(:zk_arcade, :ip_info_api_key)
     url = "#{@api_base}/#{ip}?token=#{token}"
 
@@ -18,6 +26,28 @@ defmodule ZkArcade.IpTracker do
         with {:ok, decoded} <- Jason.decode(body),
              %{"country" => country} <- decoded do
           {:ok, country}
+        else
+          _ -> {:error, :unexpected_response}
+        end
+
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+        {:error, {:http_error, code, body}}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, reason}
+    end
+  end
+
+  defp get_country_from_ipgeolocation(ip) do
+    api_key = Application.get_env(:zk_arcade, :ipgeolocation_api_key)
+    url = "#{@ipgeolocation_api_base}?apiKey=#{api_key}&ip=#{ip}&fields=location&output=json"
+
+    case HTTPoison.get(url, [], recv_timeout: 5_000) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        with {:ok, decoded} <- Jason.decode(body),
+             %{"location" => location} <- decoded,
+             %{"country_name" => country_name} <- location do
+          {:ok, country_name}
         else
           _ -> {:error, :unexpected_response}
         end

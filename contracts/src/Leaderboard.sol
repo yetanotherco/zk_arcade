@@ -47,6 +47,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     address public zkArcadePublicNft;
     bool public useWhitelist;
 
+    uint256 constant MAX_PARITY_LEVELS = 3; // Must match circom circuit
+    uint256 constant BITS_PER_PARITY_LEVEL = 80; // 10 bytes per level
+
     event BeastPointsClaimed(address user, uint256 level, uint256 score);
     event ParityPointsClaimed(address user, uint256 level, uint256 score);
     event BeastGamesUpdated(BeastGame[] beastGames);
@@ -68,6 +71,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error NoActiveParityGame();
     error GameEnded();
     error GameNotStarted();
+    error ParityLevelTooLarge();
 
     // ======== Initialization & Upgrades ========
 
@@ -201,6 +205,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert UserIsNotWhitelisted(userAddress);
         }
 
+        if (levelCompleted > MAX_PARITY_LEVELS) revert ParityLevelTooLarge();
+
         bytes32 pubInputCommitment = keccak256(publicInputs);
         (bool callWasSuccessful, bytes memory proofIsIncluded) = alignedServiceManager.staticcall(
             abi.encodeWithSignature(
@@ -233,11 +239,12 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert GameNotStarted();
         }
 
-        // The circom program proves the user knows solutions to (3) parity games. 
-        // When fewer games are played, all public inputs for unplayed levels are set to 0. 
-        // This means only the first `levelCompleted` levels contain meaningful gameConfig data. 
+        // The circom program proves the user knows solutions to (3) parity games.
+        // When fewer games are played, all public inputs for unplayed levels are set to 0.
+        // This means only the first `levelCompleted` levels contain meaningful gameConfig data.
         // To compare configurations, we right-shift the data to discard the zero-filled remainder.
-        uint256 shiftAmount = 256 - (80 * (levelCompleted));
+        uint256 bits = BITS_PER_PARITY_LEVEL * levelCompleted;
+        uint256 shiftAmount = 256 - bits;
         uint256 currentTruncatedConfig = currentGame.gameConfig >> shiftAmount;
         uint256 newTruncatedConfig = gameConfig >> shiftAmount;
 
@@ -373,9 +380,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
     function verifyAndReplaceInTop10(address user) internal {
         uint256 userScore = usersScore[user];
+        uint256 lastScore = top10Score[9] == address(0) ? 0 : usersScore[top10Score[9]];
 
         // early return to not run the whole alg if the user does not have enough points to be in the top 10
-        if (userScore <= usersScore[top10Score[9]]) {
+        if (top10Score[9] != user && userScore <= lastScore) {
             return;
         }
 

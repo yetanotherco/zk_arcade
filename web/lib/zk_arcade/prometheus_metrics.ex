@@ -7,14 +7,9 @@ defmodule ZkArcade.PrometheusMetrics do
     Gauge.declare(name: :open_batcher_connections, help: "Active Batcher Connections")
     Counter.declare(name: :bumped_proofs_count, help: "Total Bumped Proofs")
     Counter.declare(
-      name: :batcher_errors_total,
-      help: "Batcher communication errors by type",
+      name: :user_errors_total,
+      help: "User errors by type",
       labels: [:type]
-    )
-    Counter.declare(
-      name: :proof_errors_total,
-      help: "Proof pipeline errors by stage",
-      labels: [:stage]
     )
 
     # Summary.declare(

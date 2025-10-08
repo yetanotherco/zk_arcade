@@ -1,7 +1,6 @@
 defmodule ZkArcade.SubmissionPoller do
   use GenServer
   require Logger
-  alias ZkArcade.PrometheusMetrics
 
   @beastTopic "0x" <>
            Base.encode16(
@@ -47,14 +46,12 @@ defmodule ZkArcade.SubmissionPoller do
         {:noreply, new_state}
       else
         error ->
-          PrometheusMetrics.record_proof_error(:submission_poll_failed)
           Logger.error("Polling failed: #{inspect(error)}")
           schedule_poll()
           {:noreply, state}
       end
     else
       error ->
-        PrometheusMetrics.record_proof_error(:submission_poll_failed)
         Logger.error("Polling failed: #{inspect(error)}")
         schedule_poll()
         {:noreply, state}
@@ -113,7 +110,6 @@ defmodule ZkArcade.SubmissionPoller do
         Logger.info("Leaderboard entry created/updated successfully for #{event_type}.")
 
       {:error, changeset} ->
-        PrometheusMetrics.record_proof_error(:leaderboard_update_failed)
         Logger.error("Failed to create/update leaderboard entry: #{inspect(changeset)}")
     end
   end

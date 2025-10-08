@@ -262,14 +262,6 @@ defmodule ZkArcade.Proofs do
       %Proof{}
       |> Proof.changeset(attrs)
       |> Repo.insert()
-      |> case do
-        {:ok, _proof} = result ->
-          result
-
-        {:error, changeset} = error ->
-          PrometheusMetrics.record_proof_error(:create_proof_failed)
-          error
-      end
     end
   end
 

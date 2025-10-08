@@ -273,3 +273,10 @@ create_service:
 	export $(cat config/.env.zk_arcade | xargs)
 	systemctl --user daemon-reload
 	systemctl --user enable --now zk_arcade
+
+## Monitoring
+install_prometheus:
+	@./infra/install_prometheus.sh
+
+install_grafana:
+	@./infra/install_grafana.sh

@@ -280,3 +280,6 @@ install_prometheus:
 
 install_grafana:
 	@./infra/install_grafana.sh
+
+update_grafana_dashboards:
+	@./infra/update_grafana_dashboards.sh

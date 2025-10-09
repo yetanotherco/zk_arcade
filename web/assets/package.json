@@ -4,14 +4,14 @@
 		"@sentry/react": "^8.47.0",
 		"@tanstack/react-query": "^5.62.8",
 		"cbor2": "^2.0.1",
-		"connectkit": "^1.8.2",
+		"connectkit": "^1.9.1",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
 		"remount": "^1.0.0",
 		"sha3": "^2.1.4",
 		"snarkjs": "^0.7.5",
-		"viem": "^2.21.55",
-		"wagmi": "^2.14.3"
+		"viem": "^2.38.0",
+		"wagmi": "^2.17.5"
 	},
 	"devDependencies": {
 		"@types/node": "^24.0.14",

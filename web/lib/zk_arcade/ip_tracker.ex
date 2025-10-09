@@ -13,7 +13,15 @@ defmodule ZkArcade.IpTracker do
   def get_country(ip) when is_binary(ip) do
     case get_country_from_ipinfo(ip) do
       {:ok, country} -> {:ok, country}
-      {:error, _reason} -> get_country_from_ipgeolocation(ip)
+      {:error, reason} ->
+        Logger.warning("Primary IP service (ipinfo) failed for IP #{ip}: #{inspect(reason)}. Proceeding to check with fallback service.")
+
+        case get_country_from_ipgeolocation(ip) do
+          {:ok, country} -> {:ok, country}
+          {:error, fallback_reason} ->
+            Logger.error("Both IP services failed for IP #{ip}. Primary: #{inspect(reason)}, Fallback: #{inspect(fallback_reason)}")
+            {:error, fallback_reason}
+        end
     end
   end
 

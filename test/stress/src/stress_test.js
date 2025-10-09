@@ -17,6 +17,43 @@ import { ZK_ARCADE_URL, USED_CHAIN } from './constants.js';
 
 const DEPOSIT_WAIT_MS = 10_000;
 
+const HTTP_TIMEOUT_MS = 120_000;
+
+const MAX_RETRIES = 3;
+const RETRY_BASE_DELAY_MS = 3_000;
+
+// Helper function to implement exponential backoff retry logic
+async function withRetry(asyncFn, maxRetries = MAX_RETRIES, baseDelay = RETRY_BASE_DELAY_MS) {
+    let lastError;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await asyncFn();
+        } catch (error) {
+            lastError = error;
+            
+            // Check if it's a timeout error worth retrying
+            const isRetryableError = error.message.includes('timeout') || 
+                                   error.message.includes('TIMEOUT') ||
+                                   error.message.includes('UND_ERR_CONNECT_TIMEOUT') ||
+                                   error.message.includes('fetch failed') ||
+                                   error.message.includes('AbortError') ||
+                                   error.message.includes('WebSocket connection error');
+            
+            if (attempt === maxRetries || !isRetryableError) {
+                throw lastError;
+            }
+            
+            // Exponential backoff with jitter for high concurrency
+            const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 3000;
+            console.log(`[Retry ${attempt + 1}/${maxRetries}] Waiting ${Math.round(delay)}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+    
+    throw lastError;
+}
+
 function normalizeAccounts(raw) {
     if (!Array.isArray(raw)) {
         throw new Error('rich_accounts.json must be an array');
@@ -67,7 +104,10 @@ async function generateProofVerificationData(address, privateKey, idx) {
 async function createNewSession(jar) {
     try {
         // Tries to get the CSRF token from the main page headers
-        const homeRes = await fetch(`${ZK_ARCADE_URL}/`, { method: "GET" });
+        const homeRes = await fetch(`${ZK_ARCADE_URL}/`, { 
+            method: "GET",
+            signal: AbortSignal.timeout(HTTP_TIMEOUT_MS)
+        });
         if (homeRes.ok) {
             jar.absorb(getSetCookies(homeRes));
             const htmlContent = await homeRes.text();
@@ -93,7 +133,8 @@ async function doSignPost(jar, csrf_token, payload) {
             "x-csrf-token": csrf_token,
             "cookie": jar.toHeader()
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(HTTP_TIMEOUT_MS)
     });
     jar.absorb(getSetCookies(res));
     if (!res.ok) {
@@ -111,7 +152,8 @@ async function doSubmitPost(jar, csrf_token, payload) {
             "x-csrf-token": csrf_token,
             "cookie": jar.toHeader(),
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(HTTP_TIMEOUT_MS)
     });
     jar.absorb(getSetCookies(res));
     if (!res.ok) {
@@ -127,6 +169,7 @@ async function getAgreementStatus(jar, address) {
         headers: {
             "cookie": jar.toHeader(),
         },
+        signal: AbortSignal.timeout(HTTP_TIMEOUT_MS)
     });
     jar.absorb(getSetCookies(res));
     if (!res.ok) {
@@ -139,7 +182,7 @@ async function getAgreementStatus(jar, address) {
 async function createSessionForAccount({ address, privateKey }, idx) {
     const jar = new CookieJar();
     try {
-        const { csrf_token } = await createNewSession(jar);
+        const { csrf_token } = await withRetry(() => createNewSession(jar));
 
         if (idx % 100 === 0) {
             console.log(`[${address} - ${idx}] Obtained CSRF token after new session.`);
@@ -157,11 +200,11 @@ async function signAgreementForAccount(sessionData) {
     
     try {
         const signature = await signMessageFromPrivateKey(sessionData.privateKey);
-        await doSignPost(jar, csrf_token, {
+        await withRetry(() => doSignPost(jar, csrf_token, {
             address,
             signature,
             _csrf_token: csrf_token,
-        });
+        }));
         if (idx % 100 === 0) {
             console.log(`[${address} - ${idx}] Signed service agreement`);
         }
@@ -200,7 +243,7 @@ async function checkAgreementForAccount(sessionData) {
     if (!sessionData.ok) return sessionData;
     
     try {
-        const status = await getAgreementStatus(jar, address);
+        const status = await withRetry(() => getAgreementStatus(jar, address));
         if (idx % 100 === 0) {
             console.log(`[${address} - ${idx}] Fetched agreement status to keep the session alive.`);
         }
@@ -236,7 +279,7 @@ async function submitProofForAccount(sessionData) {
     if (!sessionData.ok) return sessionData;
     
     try {
-        const submitResp = await doSubmitPost(jar, csrf_token, proofParams);
+        const submitResp = await withRetry(() => doSubmitPost(jar, csrf_token, proofParams));
         if (idx % 100 === 0) {
             console.log(`[${address} - ${idx}] Proof submitted successfully`);
         }
@@ -247,7 +290,7 @@ async function submitProofForAccount(sessionData) {
     }
 }
 
-// Executes all accounts step by step, waiting for all accounts to complete each step
+// Executes all accounts step by step, with improved jitter and retries to handle timeouts
 async function runBatch(accounts) {
     console.log(`Starting stress test with ${accounts.length} accounts...`);
     
@@ -260,10 +303,13 @@ async function runBatch(accounts) {
 
     // Step 1: Create sessions for all accounts
     console.log('\n=== STEP 1: Creating sessions for all accounts ===');
-    // Introduce a small jitter to avoid overwhelming the server
+    // Use larger, more distributed jitter for high concurrency
     const sessionPromises = accountsData.map((acc, idx) => {
-        const jitter = Math.random() * 3000;
-        return new Promise(resolve => setTimeout(() => resolve(createSessionForAccount(acc, idx)), jitter));
+        // Larger jitter spread to distribute load over more time
+        const baseJitter = Math.random() * 20000; // 0-20 seconds
+        const progressiveDelay = (idx / accountsData.length) * 30000; // 0-30 seconds based on position
+        const totalJitter = baseJitter + progressiveDelay;
+        return new Promise(resolve => setTimeout(() => resolve(createSessionForAccount(acc, idx)), totalJitter));
     });
     accountsData = await Promise.all(sessionPromises);
     
@@ -272,10 +318,11 @@ async function runBatch(accounts) {
 
     // Step 2: Sign agreements for all accounts with successful sessions
     console.log('\n=== STEP 2: Signing agreements for all accounts ===');
-    // Introduce a small jitter to avoid overwhelming the server
     const signPromises = accountsData.map((acc, idx) => {
-        const jitter = Math.random() * 3000;
-        return new Promise(resolve => setTimeout(() => resolve(signAgreementForAccount(acc)), jitter));
+        const baseJitter = Math.random() * 15000; // 0-15 seconds
+        const progressiveDelay = (idx / accountsData.length) * 25000; // 0-25 seconds based on position
+        const totalJitter = baseJitter + progressiveDelay;
+        return new Promise(resolve => setTimeout(() => resolve(signAgreementForAccount(acc)), totalJitter));
     });
     accountsData = await Promise.all(signPromises);
 
@@ -285,8 +332,10 @@ async function runBatch(accounts) {
     // Step 3: Handle deposits for all accounts
     console.log('\n=== STEP 3: Handling deposits for all accounts ===');
     const depositPromises = accountsData.map((acc, idx) => {
-        const jitter = Math.random() * 3000;
-        return new Promise(resolve => setTimeout(() => resolve(handleDepositForAccount(acc)), jitter));
+        const baseJitter = Math.random() * 10000; // 0-10 seconds
+        const progressiveDelay = (idx / accountsData.length) * 15000; // 0-15 seconds based on position
+        const totalJitter = baseJitter + progressiveDelay;
+        return new Promise(resolve => setTimeout(() => resolve(handleDepositForAccount(acc)), totalJitter));
     });
     accountsData = await Promise.all(depositPromises);
     
@@ -296,8 +345,10 @@ async function runBatch(accounts) {
     // Step 4: Check agreement status for all accounts
     console.log('\n=== STEP 4: Checking agreement status for all accounts ===');
     const statusPromises = accountsData.map((acc, idx) => {
-        const jitter = Math.random() * 3000;
-        return new Promise(resolve => setTimeout(() => resolve(checkAgreementForAccount(acc)), jitter));
+        const baseJitter = Math.random() * 12000; // 0-12 seconds
+        const progressiveDelay = (idx / accountsData.length) * 20000; // 0-20 seconds based on position
+        const totalJitter = baseJitter + progressiveDelay;
+        return new Promise(resolve => setTimeout(() => resolve(checkAgreementForAccount(acc)), totalJitter));
     });
     accountsData = await Promise.all(statusPromises);
     
@@ -307,8 +358,10 @@ async function runBatch(accounts) {
     // Step 5: Generate proofs for all accounts
     console.log('\n=== STEP 5: Generating proofs for all accounts ===');
     const proofPromises = accountsData.map((acc, idx) => {
-        const jitter = Math.random() * 3000;
-        return new Promise(resolve => setTimeout(() => resolve(generateProofForAccount(acc)), jitter));
+        const baseJitter = Math.random() * 15000; // 0-15 seconds
+        const progressiveDelay = (idx / accountsData.length) * 25000; // 0-25 seconds based on position
+        const totalJitter = baseJitter + progressiveDelay;
+        return new Promise(resolve => setTimeout(() => resolve(generateProofForAccount(acc)), totalJitter));
     });
     accountsData = await Promise.all(proofPromises);
     
@@ -318,8 +371,11 @@ async function runBatch(accounts) {
     // Step 6: Submit proofs for all accounts
     console.log('\n=== STEP 6: Submitting proofs for all accounts ===');
     const submitPromises = accountsData.map((acc, idx) => {
-        const jitter = Math.random() * 3000;
-        return new Promise(resolve => setTimeout(() => resolve(submitProofForAccount(acc)), jitter));
+        // This is the most critical step, so use the largest jitter distribution
+        const baseJitter = Math.random() * 25000; // 0-25 seconds
+        const progressiveDelay = (idx / accountsData.length) * 40000; // 0-40 seconds based on position
+        const totalJitter = baseJitter + progressiveDelay;
+        return new Promise(resolve => setTimeout(() => resolve(submitProofForAccount(acc)), totalJitter));
     });
     accountsData = await Promise.all(submitPromises);
     

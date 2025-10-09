@@ -386,11 +386,6 @@ async function runBatch(accounts) {
             console.log(`  ${r.address}: ${r.error}`);
         }
     }
-    
-    console.log('\nDetailed results:');
-    for (const r of results) {
-        console.log(`[${r.address}] → ${r.ok ? 'SUCCESS' : `FAILED: ${r.error}`}`);
-    }
 })().catch(err => {
     console.error("Fatal error in batch run:", err);
     process.exit(1);

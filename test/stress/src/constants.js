@@ -1,4 +1,8 @@
 import { anvil, sepolia, mainnet } from 'viem/chains'
+import { config } from 'dotenv'
+
+// Load environment variables from .env file
+config({ path: '../.env' })
 
 // Reads from .env file, but defaults to devnet if not set
 export const RPC_URL = process.env.RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';

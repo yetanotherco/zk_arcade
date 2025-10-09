@@ -8,7 +8,6 @@ import rawRichAccounts from '../data/rich_accounts.json' with { type: 'json' };
 import fs from 'fs/promises';
 import { parse } from 'csv-parse';
 
-import { generateCircomParityProof } from './circom_proof_generator.js';
 import signMessageFromPrivateKey from './utils/sign_agreement.js';
 import { CookieJar, getSetCookies } from './utils/cookie_utils.js';
 import { depositIntoAligned } from './aligned.js';
@@ -52,7 +51,7 @@ async function withRetry(asyncFn, maxRetries = MAX_RETRIES, baseDelay = RETRY_BA
             }
             
             // Exponential backoff with jitter for high concurrency
-            const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 3000;
+            const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 4000;
             console.log(`[Retry ${attempt + 1}/${maxRetries}] Waiting ${Math.round(delay)}ms before retry...`);
             await new Promise(resolve => setTimeout(resolve, delay));
         }

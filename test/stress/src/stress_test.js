@@ -60,7 +60,7 @@ async function generateProofVerificationData(address, privateKey, idx) {
     return {
         submit_proof_message: verificationData,
         game: "Parity",
-        game_idx: 0, // Note: to be able to submit the same proof multiple times for testing, this value should change on each run
+        game_idx: 112, // Note: to be able to submit the same proof multiple times for testing, this value should change on each run
     };
 }
 
@@ -260,7 +260,11 @@ async function runBatch(accounts) {
 
     // Step 1: Create sessions for all accounts
     console.log('\n=== STEP 1: Creating sessions for all accounts ===');
-    const sessionPromises = accountsData.map(acc => createSessionForAccount(acc, acc.idx));
+    // Introduce a small jitter to avoid overwhelming the server
+    const sessionPromises = accountsData.map((acc, idx) => {
+        const jitter = Math.random() * 3000;
+        return new Promise(resolve => setTimeout(() => resolve(createSessionForAccount(acc, idx)), jitter));
+    });
     accountsData = await Promise.all(sessionPromises);
     
     const successfulSessions = accountsData.filter(acc => acc.ok).length;
@@ -268,15 +272,22 @@ async function runBatch(accounts) {
 
     // Step 2: Sign agreements for all accounts with successful sessions
     console.log('\n=== STEP 2: Signing agreements for all accounts ===');
-    const signPromises = accountsData.map(acc => signAgreementForAccount(acc));
+    // Introduce a small jitter to avoid overwhelming the server
+    const signPromises = accountsData.map((acc, idx) => {
+        const jitter = Math.random() * 3000;
+        return new Promise(resolve => setTimeout(() => resolve(signAgreementForAccount(acc)), jitter));
+    });
     accountsData = await Promise.all(signPromises);
-    
+
     const successfulSigns = accountsData.filter(acc => acc.ok).length;
     console.log(`Agreement signing completed: ${successfulSigns}/${accountsData.length} successful`);
 
     // Step 3: Handle deposits for all accounts
     console.log('\n=== STEP 3: Handling deposits for all accounts ===');
-    const depositPromises = accountsData.map(acc => handleDepositForAccount(acc));
+    const depositPromises = accountsData.map((acc, idx) => {
+        const jitter = Math.random() * 3000;
+        return new Promise(resolve => setTimeout(() => resolve(handleDepositForAccount(acc)), jitter));
+    });
     accountsData = await Promise.all(depositPromises);
     
     const successfulDeposits = accountsData.filter(acc => acc.ok).length;
@@ -284,7 +295,10 @@ async function runBatch(accounts) {
 
     // Step 4: Check agreement status for all accounts
     console.log('\n=== STEP 4: Checking agreement status for all accounts ===');
-    const statusPromises = accountsData.map(acc => checkAgreementForAccount(acc));
+    const statusPromises = accountsData.map((acc, idx) => {
+        const jitter = Math.random() * 3000;
+        return new Promise(resolve => setTimeout(() => resolve(checkAgreementForAccount(acc)), jitter));
+    });
     accountsData = await Promise.all(statusPromises);
     
     const successfulStatuses = accountsData.filter(acc => acc.ok).length;
@@ -292,7 +306,10 @@ async function runBatch(accounts) {
 
     // Step 5: Generate proofs for all accounts
     console.log('\n=== STEP 5: Generating proofs for all accounts ===');
-    const proofPromises = accountsData.map(acc => generateProofForAccount(acc));
+    const proofPromises = accountsData.map((acc, idx) => {
+        const jitter = Math.random() * 3000;
+        return new Promise(resolve => setTimeout(() => resolve(generateProofForAccount(acc)), jitter));
+    });
     accountsData = await Promise.all(proofPromises);
     
     const successfulProofs = accountsData.filter(acc => acc.ok).length;
@@ -300,7 +317,10 @@ async function runBatch(accounts) {
 
     // Step 6: Submit proofs for all accounts
     console.log('\n=== STEP 6: Submitting proofs for all accounts ===');
-    const submitPromises = accountsData.map(acc => submitProofForAccount(acc));
+    const submitPromises = accountsData.map((acc, idx) => {
+        const jitter = Math.random() * 3000;
+        return new Promise(resolve => setTimeout(() => resolve(submitProofForAccount(acc)), jitter));
+    });
     accountsData = await Promise.all(submitPromises);
     
     const successfulSubmissions = accountsData.filter(acc => acc.ok).length;

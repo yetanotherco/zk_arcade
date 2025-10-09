@@ -134,69 +134,169 @@ async function getAgreementStatus(jar, address) {
     return res.json().catch(() => null);
 }
 
-// Executes the full flow for a single private key
-async function runForAccount({ address, privateKey }, idx) {
+async function createSessionForAccount({ address, privateKey }, idx) {
     const jar = new CookieJar();
-
     try {
-        // 1) New session + CSRF
         const { csrf_token } = await createNewSession(jar);
         console.log(`[${address} - ${idx}] Obtained CSRF token after new session.`);
+        return { address, privateKey, idx, jar, csrf_token, ok: true };
+    } catch (err) {
+        console.error(`[${address} - ${idx}] ERROR in session creation:`, err);
+        return { address, privateKey, idx, ok: false, error: String(err) };
+    }
+}
 
-        // 2) Sign
-        const signature = await signMessageFromPrivateKey(privateKey);
+async function signAgreementForAccount(sessionData) {
+    const { address, idx, jar, csrf_token } = sessionData;
+    if (!sessionData.ok) return sessionData;
+    
+    try {
+        const signature = await signMessageFromPrivateKey(sessionData.privateKey);
         await doSignPost(jar, csrf_token, {
             address,
             signature,
             _csrf_token: csrf_token,
         });
         console.log(`[${address} - ${idx}] Signed service agreement`);
+        return { ...sessionData, ok: true };
+    } catch (err) {
+        console.error(`[${address} - ${idx}] ERROR in signing:`, err);
+        return { ...sessionData, ok: false, error: String(err) };
+    }
+}
 
-        // 3) Deposit (skip in sepolia)
+async function handleDepositForAccount(sessionData) {
+    const { address, idx } = sessionData;
+    if (!sessionData.ok) return sessionData;
+    
+    try {
         if (USED_CHAIN.id === sepolia.id) {
             console.log(`[${address} - ${idx}] Deposit skipped (Sepolia)`);
         } else {
-            await depositIntoAligned(privateKey);
+            await depositIntoAligned(sessionData.privateKey);
             console.log(`[${address} - ${idx}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS / 1000}s for the deposit to be processed...`);
             await new Promise((r) => setTimeout(r, DEPOSIT_WAIT_MS));
         }
+        return { ...sessionData, ok: true };
+    } catch (err) {
+        console.error(`[${address} - ${idx}] ERROR in deposit:`, err);
+        return { ...sessionData, ok: false, error: String(err) };
+    }
+}
 
-        // 4) Agreement status
+async function checkAgreementForAccount(sessionData) {
+    const { address, idx, jar } = sessionData;
+    if (!sessionData.ok) return sessionData;
+    
+    try {
         const status = await getAgreementStatus(jar, address);
         console.log(`[${address} - ${idx}] Fetched agreement status to keep the session alive.`);
+        return { ...sessionData, status, ok: true };
+    } catch (err) {
+        console.error(`[${address} - ${idx}] ERROR in agreement check:`, err);
+        return { ...sessionData, ok: false, error: String(err) };
+    }
+}
 
-        // 5) Proof data generation
-        const proofData = await generateProofVerificationData(address, privateKey, idx);
+async function generateProofForAccount(sessionData) {
+    const { address, idx, csrf_token } = sessionData;
+    if (!sessionData.ok) return sessionData;
+    
+    try {
+        const proofData = await generateProofVerificationData(address, sessionData.privateKey, idx);
         const params = {
             ...proofData,
             _csrf_token: csrf_token
         };
         console.log(`[${address} - ${idx}] Generated proof, sending it to the server...`);
-
-        // 6) Proof submission
-        const submitResp = await doSubmitPost(jar, csrf_token, params);
-        console.log(`[${address} - ${idx}] Proof submitted successfully`);
-
-        return { address, ok: true, status, submitResp };
+        return { ...sessionData, proofParams: params, ok: true };
     } catch (err) {
-        console.error(`[${address} - ${idx}] ERROR:`, err);
-        return { address, ok: false, error: String(err) };
+        console.error(`[${address} - ${idx}] ERROR in proof generation:`, err);
+        return { ...sessionData, ok: false, error: String(err) };
     }
 }
 
-// Executes all accounts in parallel without concurrency limit
-async function runBatch(accounts) {
-    // Add a small random jitter to avoid bursts
-    const withJitter = accounts.map(async (acc, idx) => {
-        await new Promise((r) => setTimeout(r, Math.random() * 250 + idx * 10));
-        return runForAccount(acc, idx);
-    });
+async function submitProofForAccount(sessionData) {
+    const { address, idx, jar, csrf_token, proofParams } = sessionData;
+    if (!sessionData.ok) return sessionData;
+    
+    try {
+        const submitResp = await doSubmitPost(jar, csrf_token, proofParams);
+        console.log(`[${address} - ${idx}] Proof submitted successfully`);
+        return { ...sessionData, submitResp, ok: true };
+    } catch (err) {
+        console.error(`[${address} - ${idx}] ERROR in proof submission:`, err);
+        return { ...sessionData, ok: false, error: String(err) };
+    }
+}
 
-    const results = await Promise.allSettled(withJitter);
-    return results.map(r => {
-        if (r.status === 'fulfilled') return r.value;
-        else return { address: 'unknown', ok: false, error: String(r.reason) };
-    });
+// Executes all accounts step by step, waiting for all accounts to complete each step
+async function runBatch(accounts) {
+    console.log(`Starting stress test with ${accounts.length} accounts...`);
+    
+    // Initialize account data with private keys
+    let accountsData = accounts.map((acc, idx) => ({
+        ...acc,
+        idx,
+        ok: true
+    }));
+
+    // Step 1: Create sessions for all accounts
+    console.log('\n=== STEP 1: Creating sessions for all accounts ===');
+    const sessionPromises = accountsData.map(acc => createSessionForAccount(acc, acc.idx));
+    accountsData = await Promise.all(sessionPromises);
+    
+    const successfulSessions = accountsData.filter(acc => acc.ok).length;
+    console.log(`Session creation completed: ${successfulSessions}/${accountsData.length} successful`);
+
+    // Step 2: Sign agreements for all accounts with successful sessions
+    console.log('\n=== STEP 2: Signing agreements for all accounts ===');
+    const signPromises = accountsData.map(acc => signAgreementForAccount(acc));
+    accountsData = await Promise.all(signPromises);
+    
+    const successfulSigns = accountsData.filter(acc => acc.ok).length;
+    console.log(`Agreement signing completed: ${successfulSigns}/${accountsData.length} successful`);
+
+    // Step 3: Handle deposits for all accounts
+    console.log('\n=== STEP 3: Handling deposits for all accounts ===');
+    const depositPromises = accountsData.map(acc => handleDepositForAccount(acc));
+    accountsData = await Promise.all(depositPromises);
+    
+    const successfulDeposits = accountsData.filter(acc => acc.ok).length;
+    console.log(`Deposit handling completed: ${successfulDeposits}/${accountsData.length} successful`);
+
+    // Step 4: Check agreement status for all accounts
+    console.log('\n=== STEP 4: Checking agreement status for all accounts ===');
+    const statusPromises = accountsData.map(acc => checkAgreementForAccount(acc));
+    accountsData = await Promise.all(statusPromises);
+    
+    const successfulStatuses = accountsData.filter(acc => acc.ok).length;
+    console.log(`Agreement status check completed: ${successfulStatuses}/${accountsData.length} successful`);
+
+    // Step 5: Generate proofs for all accounts
+    console.log('\n=== STEP 5: Generating proofs for all accounts ===');
+    const proofPromises = accountsData.map(acc => generateProofForAccount(acc));
+    accountsData = await Promise.all(proofPromises);
+    
+    const successfulProofs = accountsData.filter(acc => acc.ok).length;
+    console.log(`Proof generation completed: ${successfulProofs}/${accountsData.length} successful`);
+
+    // Step 6: Submit proofs for all accounts
+    console.log('\n=== STEP 6: Submitting proofs for all accounts ===');
+    const submitPromises = accountsData.map(acc => submitProofForAccount(acc));
+    accountsData = await Promise.all(submitPromises);
+    
+    const successfulSubmissions = accountsData.filter(acc => acc.ok).length;
+    console.log(`Proof submission completed: ${successfulSubmissions}/${accountsData.length} successful`);
+
+    // Convert to the expected result format
+    return accountsData.map(acc => ({
+        address: acc.address,
+        ok: acc.ok,
+        error: acc.error,
+        status: acc.status,
+        submitResp: acc.submitResp
+    }));
 }
 
 (async () => {
@@ -237,10 +337,22 @@ async function runBatch(accounts) {
         failed: results.filter((r) => !r.ok).length,
         failedAddresses: results.filter((r) => !r.ok).map((r) => r.address),
     };
-    console.log('SUMMARY:', summary);
-
+    
+    console.log('\n=== FINAL SUMMARY ===');
+    console.log(`Total accounts: ${summary.total}`);
+    console.log(`Successful completions: ${summary.success}`);
+    console.log(`Failed completions: ${summary.failed}`);
+    
+    if (summary.failed > 0) {
+        console.log('\nFailed accounts:');
+        for (const r of results.filter(r => !r.ok)) {
+            console.log(`  ${r.address}: ${r.error}`);
+        }
+    }
+    
+    console.log('\nDetailed results:');
     for (const r of results) {
-        console.log(`[${r.address}] → ${r.ok ? 'Sent' : `Failed: ${r.error}`}`);
+        console.log(`[${r.address}] → ${r.ok ? 'SUCCESS' : `FAILED: ${r.error}`}`);
     }
 })().catch(err => {
     console.error("Fatal error in batch run:", err);

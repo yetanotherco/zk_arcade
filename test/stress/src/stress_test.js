@@ -13,6 +13,13 @@ import signMessageFromPrivateKey from './utils/sign_agreement.js';
 import { CookieJar, getSetCookies } from './utils/cookie_utils.js';
 import { depositIntoAligned } from './aligned.js';
 
+import { cpus } from 'os';
+import { ProcessWorkerPool } from './process_worker_pool.js';
+
+const WORKER_POOL_SIZE = Math.max(1, cpus().length - 1);
+
+let proofWorkerPool;
+
 import { ZK_ARCADE_URL, USED_CHAIN } from './constants.js';
 
 const DEPOSIT_WAIT_MS = 10_000;
@@ -87,17 +94,27 @@ function normalizeAccounts(raw) {
 }
 
 async function generateProofVerificationData(address, privateKey, idx) {
-    const levelBoards = solution.levelsBoards || [];
+    const levelsBoards = solution.levelsBoards || [];
     const userPositions = solution.userPositions || [];
 
     if (idx % 100 === 0) {
-        console.log(`[${address} - ${idx}] Generating proof...`);
+        console.log(`[${address} - ${idx}] Generating proof using process worker...`);
+        const stats = proofWorkerPool.getStats();
+        console.log(`  Worker pool stats: ${stats.activeWorkers}/${stats.poolSize} active, ${stats.queuedTasks} queued`);
     }
-    const verificationData = await generateCircomParityProof(address, userPositions, levelBoards, privateKey, idx);
+    
+    const result = await proofWorkerPool.exec({
+        address,
+        privateKey,
+        userPositions,
+        levelsBoards,
+        idx
+    });
+    
     return {
-        submit_proof_message: verificationData,
+        submit_proof_message: result.result,
         game: "Parity",
-        game_idx: 112, // Note: to be able to submit the same proof multiple times for testing, this value should change on each run
+        game_idx: 182, // Note: to be able to submit the same proof multiple times for testing, this value should change on each run
     };
 }
 
@@ -305,11 +322,8 @@ async function runBatch(accounts) {
     console.log('\n=== STEP 1: Creating sessions for all accounts ===');
     // Use larger, more distributed jitter for high concurrency
     const sessionPromises = accountsData.map((acc, idx) => {
-        // Larger jitter spread to distribute load over more time
-        const baseJitter = Math.random() * 20000; // 0-20 seconds
-        const progressiveDelay = (idx / accountsData.length) * 30000; // 0-30 seconds based on position
-        const totalJitter = baseJitter + progressiveDelay;
-        return new Promise(resolve => setTimeout(() => resolve(createSessionForAccount(acc, idx)), totalJitter));
+        const progressiveDelay = (idx / accountsData.length) * 3000;
+        return new Promise(resolve => setTimeout(() => resolve(createSessionForAccount(acc, idx)), progressiveDelay));
     });
     accountsData = await Promise.all(sessionPromises);
     
@@ -319,10 +333,8 @@ async function runBatch(accounts) {
     // Step 2: Sign agreements for all accounts with successful sessions
     console.log('\n=== STEP 2: Signing agreements for all accounts ===');
     const signPromises = accountsData.map((acc, idx) => {
-        const baseJitter = Math.random() * 15000; // 0-15 seconds
-        const progressiveDelay = (idx / accountsData.length) * 25000; // 0-25 seconds based on position
-        const totalJitter = baseJitter + progressiveDelay;
-        return new Promise(resolve => setTimeout(() => resolve(signAgreementForAccount(acc)), totalJitter));
+        const progressiveDelay = (idx / accountsData.length) * 2500;
+        return new Promise(resolve => setTimeout(() => resolve(signAgreementForAccount(acc)), progressiveDelay));
     });
     accountsData = await Promise.all(signPromises);
 
@@ -332,10 +344,8 @@ async function runBatch(accounts) {
     // Step 3: Handle deposits for all accounts
     console.log('\n=== STEP 3: Handling deposits for all accounts ===');
     const depositPromises = accountsData.map((acc, idx) => {
-        const baseJitter = Math.random() * 10000; // 0-10 seconds
-        const progressiveDelay = (idx / accountsData.length) * 15000; // 0-15 seconds based on position
-        const totalJitter = baseJitter + progressiveDelay;
-        return new Promise(resolve => setTimeout(() => resolve(handleDepositForAccount(acc)), totalJitter));
+        const progressiveDelay = (idx / accountsData.length) * 1500;
+        return new Promise(resolve => setTimeout(() => resolve(handleDepositForAccount(acc)), progressiveDelay));
     });
     accountsData = await Promise.all(depositPromises);
     
@@ -345,10 +355,8 @@ async function runBatch(accounts) {
     // Step 4: Check agreement status for all accounts
     console.log('\n=== STEP 4: Checking agreement status for all accounts ===');
     const statusPromises = accountsData.map((acc, idx) => {
-        const baseJitter = Math.random() * 12000; // 0-12 seconds
-        const progressiveDelay = (idx / accountsData.length) * 20000; // 0-20 seconds based on position
-        const totalJitter = baseJitter + progressiveDelay;
-        return new Promise(resolve => setTimeout(() => resolve(checkAgreementForAccount(acc)), totalJitter));
+        const progressiveDelay = (idx / accountsData.length) * 2000;
+        return new Promise(resolve => setTimeout(() => resolve(checkAgreementForAccount(acc)), progressiveDelay));
     });
     accountsData = await Promise.all(statusPromises);
     
@@ -358,10 +366,8 @@ async function runBatch(accounts) {
     // Step 5: Generate proofs for all accounts
     console.log('\n=== STEP 5: Generating proofs for all accounts ===');
     const proofPromises = accountsData.map((acc, idx) => {
-        const baseJitter = Math.random() * 15000; // 0-15 seconds
-        const progressiveDelay = (idx / accountsData.length) * 25000; // 0-25 seconds based on position
-        const totalJitter = baseJitter + progressiveDelay;
-        return new Promise(resolve => setTimeout(() => resolve(generateProofForAccount(acc)), totalJitter));
+        const progressiveDelay = (idx / accountsData.length) * 1000;
+        return new Promise(resolve => setTimeout(() => resolve(generateProofForAccount(acc)), progressiveDelay));
     });
     accountsData = await Promise.all(proofPromises);
     
@@ -371,11 +377,8 @@ async function runBatch(accounts) {
     // Step 6: Submit proofs for all accounts
     console.log('\n=== STEP 6: Submitting proofs for all accounts ===');
     const submitPromises = accountsData.map((acc, idx) => {
-        // This is the most critical step, so use the largest jitter distribution
-        const baseJitter = Math.random() * 25000; // 0-25 seconds
-        const progressiveDelay = (idx / accountsData.length) * 40000; // 0-40 seconds based on position
-        const totalJitter = baseJitter + progressiveDelay;
-        return new Promise(resolve => setTimeout(() => resolve(submitProofForAccount(acc)), totalJitter));
+        const progressiveDelay = (idx / accountsData.length) * 4000;
+        return new Promise(resolve => setTimeout(() => resolve(submitProofForAccount(acc)), progressiveDelay));
     });
     accountsData = await Promise.all(submitPromises);
     
@@ -393,56 +396,65 @@ async function runBatch(accounts) {
 }
 
 (async () => {
-    // Read accounts from the file named sepolia_rich_accounts.csv, if present
-    // Fallback to rich_accounts.json if the CSV is not present or empty
-    const csvData = await new Promise(async (resolve, reject) => {
-        const records = [];
+    try {
+        console.log(`Initializing process worker pool with ${WORKER_POOL_SIZE} workers...`);
+        proofWorkerPool = new ProcessWorkerPool('./src/proof_worker_process.js', WORKER_POOL_SIZE);
+        
+        const csvData = await new Promise(async (resolve, reject) => {
+            const records = [];
+            const content = await fs.readFile('data/sepolia_rich_accounts.csv', 'utf-8');
+            parse(content, {
+                    columns: true,
+                    trim: true,
+                    skip_empty_lines: true,
+            })
+            .on('data', (data) => records.push(data))
+            .on('end', () => resolve(records))
+            .on('error', (err) => reject(err));
+        });
 
-        const content = await fs.readFile('data/sepolia_rich_accounts.csv', 'utf-8');
-        parse(content, {
-                columns: true,
-                trim: true,
-                skip_empty_lines: true,
-        })
-        .on('data', (data) => records.push(data))
-        .on('end', () => resolve(records))
-        .on('error', (err) => reject(err));
-    });
+        let accounts = csvData.map((row, idx) => {
+            if (!row.privateKey || !row.address) {
+                throw new Error(`Missing privateKey or address in CSV at row ${idx + 1}`);
+            }
+            return { address: row.address, privateKey: row.privateKey };
+        });
 
-    let accounts = csvData.map((row, idx) => {
-        if (!row.privateKey || !row.address) {
-            throw new Error(`Missing privateKey or address in CSV at row ${idx + 1}`);
+        if (accounts.length === 0) {
+            console.warn("No accounts found to run the stress test. Using fallback rich_accounts.json");
+            accounts = normalizeAccounts(rawRichAccounts);
         }
 
-        return { address: row.address, privateKey: row.privateKey };
-    });
+        const results = await runBatch(accounts);
 
-    if (accounts.length === 0) {
-        console.warn("No accounts found to run the stress test. Using fallback rich_accounts.json");
-        accounts = normalizeAccounts(rawRichAccounts);
-    }
-
-    const results = await runBatch(accounts);
-
-    const summary = {
-        total: results.length,
-        success: results.filter((r) => r.ok).length,
-        failed: results.filter((r) => !r.ok).length,
-        failedAddresses: results.filter((r) => !r.ok).map((r) => r.address),
-    };
-    
-    console.log('\n=== FINAL SUMMARY ===');
-    console.log(`Total accounts: ${summary.total}`);
-    console.log(`Successful completions: ${summary.success}`);
-    console.log(`Failed completions: ${summary.failed}`);
-    
-    if (summary.failed > 0) {
-        console.log('\nFailed accounts:');
-        for (const r of results.filter(r => !r.ok)) {
-            console.log(`  ${r.address}: ${r.error}`);
+        const summary = {
+            total: results.length,
+            success: results.filter((r) => r.ok).length,
+            failed: results.filter((r) => !r.ok).length,
+            failedAddresses: results.filter((r) => !r.ok).map((r) => r.address),
+        };
+        
+        console.log('\n=== FINAL SUMMARY ===');
+        console.log(`Total accounts: ${summary.total}`);
+        console.log(`Successful completions: ${summary.success}`);
+        console.log(`Failed completions: ${summary.failed}`);
+        
+        if (summary.failed > 0) {
+            console.log('\nFailed accounts:');
+            for (const r of results.filter(r => !r.ok)) {
+                console.log(`  ${r.address}: ${r.error}`);
+            }
         }
+        
+        console.log('\nTerminating process worker pool...');
+        await proofWorkerPool.terminate();
+        console.log('Process worker pool terminated.');
+        
+    } catch (err) {
+        console.error("Fatal error in batch run:", err);
+        if (proofWorkerPool) {
+            await proofWorkerPool.terminate();
+        }
+        process.exit(1);
     }
-})().catch(err => {
-    console.error("Fatal error in batch run:", err);
-    process.exit(1);
-});
+})();

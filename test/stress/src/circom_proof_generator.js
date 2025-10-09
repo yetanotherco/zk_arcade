@@ -59,7 +59,9 @@ export async function generateCircomParityProof(user_address, userPositions, lev
     let nonce = BigInt(0);
     try {
         nonce = await getBatcherNonce(BATCHER_URL, user_address, idx);
-        console.log(`[${user_address} - ${idx}] Nonce:`, nonce.toString());
+        if (idx % 100 === 0) {
+            console.log(`[${user_address} - ${idx}] Nonce:`, nonce.toString());
+        }
     } catch (err) {
         console.error(`[${user_address} - ${idx}] Error:`, err);
     }

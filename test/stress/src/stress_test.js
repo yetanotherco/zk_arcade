@@ -53,7 +53,9 @@ async function generateProofVerificationData(address, privateKey, idx) {
     const levelBoards = solution.levelsBoards || [];
     const userPositions = solution.userPositions || [];
 
-    console.log(`[${address}] Generating proof...`);
+    if (idx % 100 === 0) {
+        console.log(`[${address} - ${idx}] Generating proof...`);
+    }
     const verificationData = await generateCircomParityProof(address, userPositions, levelBoards, privateKey, idx);
     return {
         submit_proof_message: verificationData,
@@ -138,7 +140,10 @@ async function createSessionForAccount({ address, privateKey }, idx) {
     const jar = new CookieJar();
     try {
         const { csrf_token } = await createNewSession(jar);
-        console.log(`[${address} - ${idx}] Obtained CSRF token after new session.`);
+
+        if (idx % 100 === 0) {
+            console.log(`[${address} - ${idx}] Obtained CSRF token after new session.`);
+        }
         return { address, privateKey, idx, jar, csrf_token, ok: true };
     } catch (err) {
         console.error(`[${address} - ${idx}] ERROR in session creation:`, err);
@@ -157,7 +162,9 @@ async function signAgreementForAccount(sessionData) {
             signature,
             _csrf_token: csrf_token,
         });
-        console.log(`[${address} - ${idx}] Signed service agreement`);
+        if (idx % 100 === 0) {
+            console.log(`[${address} - ${idx}] Signed service agreement`);
+        }
         return { ...sessionData, ok: true };
     } catch (err) {
         console.error(`[${address} - ${idx}] ERROR in signing:`, err);
@@ -171,10 +178,14 @@ async function handleDepositForAccount(sessionData) {
     
     try {
         if (USED_CHAIN.id === sepolia.id) {
-            console.log(`[${address} - ${idx}] Deposit skipped (Sepolia)`);
+            if (idx % 100 === 0) {
+                console.log(`[${address} - ${idx}] Deposit skipped (Sepolia)`);
+            }
         } else {
             await depositIntoAligned(sessionData.privateKey);
-            console.log(`[${address} - ${idx}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS / 1000}s for the deposit to be processed...`);
+            if (idx % 100 === 0) {
+                console.log(`[${address} - ${idx}] Deposit dispatched. Waiting ${DEPOSIT_WAIT_MS / 1000}s for the deposit to be processed...`);
+            }
             await new Promise((r) => setTimeout(r, DEPOSIT_WAIT_MS));
         }
         return { ...sessionData, ok: true };
@@ -190,7 +201,9 @@ async function checkAgreementForAccount(sessionData) {
     
     try {
         const status = await getAgreementStatus(jar, address);
-        console.log(`[${address} - ${idx}] Fetched agreement status to keep the session alive.`);
+        if (idx % 100 === 0) {
+            console.log(`[${address} - ${idx}] Fetched agreement status to keep the session alive.`);
+        }
         return { ...sessionData, status, ok: true };
     } catch (err) {
         console.error(`[${address} - ${idx}] ERROR in agreement check:`, err);
@@ -208,7 +221,9 @@ async function generateProofForAccount(sessionData) {
             ...proofData,
             _csrf_token: csrf_token
         };
-        console.log(`[${address} - ${idx}] Generated proof, sending it to the server...`);
+        if (idx % 100 === 0) {
+            console.log(`[${address} - ${idx}] Generated proof, sending it to the server...`);
+        }
         return { ...sessionData, proofParams: params, ok: true };
     } catch (err) {
         console.error(`[${address} - ${idx}] ERROR in proof generation:`, err);
@@ -222,7 +237,9 @@ async function submitProofForAccount(sessionData) {
     
     try {
         const submitResp = await doSubmitPost(jar, csrf_token, proofParams);
-        console.log(`[${address} - ${idx}] Proof submitted successfully`);
+        if (idx % 100 === 0) {
+            console.log(`[${address} - ${idx}] Proof submitted successfully`);
+        }
         return { ...sessionData, submitResp, ok: true };
     } catch (err) {
         console.error(`[${address} - ${idx}] ERROR in proof submission:`, err);

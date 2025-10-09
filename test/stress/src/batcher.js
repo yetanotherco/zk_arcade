@@ -13,7 +13,9 @@ export async function getBatcherNonce(batcher_url, address, idx) {
         ws.binaryType = "arraybuffer";
 
         ws.onopen = () => {
-            console.log(`[${address} - ${idx}] Established connection to the batcher to get nonce`);
+            if (idx % 100 === 0) {
+                console.log(`[${address} - ${idx}] Established connection to the batcher to get nonce`);
+            }
         };
 
         ws.onmessage = (event) => {

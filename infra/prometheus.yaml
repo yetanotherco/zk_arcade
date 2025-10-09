@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s
+
+# A scrape configuration containing exactly one endpoint to scrape.
+scrape_configs:
+  - job_name: "zk_arcade"
+    scrape_interval: 15s
+    static_configs:
+      - targets: [""]
+        labels:
+          bot: "zk_arcade"

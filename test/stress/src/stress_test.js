@@ -58,7 +58,7 @@ async function generateProofVerificationData(address, privateKey, idx) {
     return {
         submit_proof_message: verificationData,
         game: "Parity",
-        game_idx: 0,
+        game_idx: 0, // Note: to be able to submit the same proof multiple times for testing, this value should change on each run
     };
 }
 

@@ -7,6 +7,7 @@ defmodule ZkArcade.Accounts do
   alias ZkArcade.Repo
 
   alias ZkArcade.Accounts.Wallet
+  alias ZkArcade.PrometheusMetrics
 
   @doc """
   Returns the total count of wallet.
@@ -81,9 +82,17 @@ defmodule ZkArcade.Accounts do
     username = create_random_name()
     attrs = attrs |> Map.put_new(:username, username)
 
-    %Wallet{}
-    |> Wallet.changeset(attrs)
-    |> Repo.insert()
+    result = %Wallet{}
+             |> Wallet.changeset(attrs)
+             |> Repo.insert()
+
+    case result do
+      {:ok, wallet} ->
+        PrometheusMetrics.user_registered()
+        {:ok, wallet}
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   @doc """

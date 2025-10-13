@@ -5,7 +5,6 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
@@ -39,12 +38,10 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(
-        address owner,
-        string memory name,
-        string memory symbol,
-        string memory baseURI
-    ) public initializer {
+    function initialize(address owner, string memory name, string memory symbol, string memory baseURI)
+        public
+        initializer
+    {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
         _baseTokenURI = baseURI;
@@ -81,12 +78,13 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
         return tokenId;
     }
 
-    function transferFrom(address from, address to, uint256 tokenId) public override {
-        if (!transfersEnabled) {
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address from) {
+        from = _ownerOf(tokenId);
+        // only block actual transfers (not mint or burn)
+        if (!transfersEnabled && from != address(0) && to != address(0)) {
             revert TransfersPaused();
         }
-
-        super.transferFrom(from, to, tokenId);
+        return super._update(to, tokenId, auth);
     }
 
     function _baseURI() internal view override returns (string memory) {

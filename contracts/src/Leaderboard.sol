@@ -47,6 +47,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     address public zkArcadePublicNft;
     bool public useWhitelist;
 
+    uint256 constant MAX_PARITY_LEVELS = 3; // Must match circom circuit
+    uint256 constant BITS_PER_PARITY_LEVEL = 80; // 10 bytes per level
+
     event BeastPointsClaimed(address user, uint256 level, uint256 score);
     event ParityPointsClaimed(address user, uint256 level, uint256 score);
     event BeastGamesUpdated(BeastGame[] beastGames);
@@ -67,6 +70,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     error NoActiveBeastGame();
     error NoActiveParityGame();
     error GameEnded();
+    error GameNotStarted();
+    error ParityLevelTooLarge();
 
     // ======== Initialization & Upgrades ========
 
@@ -85,6 +90,10 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes32 _beastVkCommitment,
         bytes32 _parityVkCommitment
     ) public initializer {
+        require(_alignedServiceManager != address(0) &&
+            _alignedServiceManager.code.length > 0, "invalid alignedServiceManager");
+        require(_alignedBatcherPaymentService != address(0) &&
+            _alignedBatcherPaymentService.code.length > 0, "invalid alignedBatcherPaymentService");
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
@@ -153,6 +162,9 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         if (block.timestamp >= game.endsAtTime) {
             revert GameEnded();
         }
+        if (block.timestamp < game.startsAtTime) {
+            revert GameNotStarted();
+        }
         if (game.gameConfig != gameConfig) {
             revert InvalidGame(game.gameConfig, gameConfig);
         }
@@ -193,6 +205,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
             revert UserIsNotWhitelisted(userAddress);
         }
 
+        if (levelCompleted > MAX_PARITY_LEVELS) revert ParityLevelTooLarge();
+
         bytes32 pubInputCommitment = keccak256(publicInputs);
         (bool callWasSuccessful, bytes memory proofIsIncluded) = alignedServiceManager.staticcall(
             abi.encodeWithSignature(
@@ -221,12 +235,16 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         if (block.timestamp >= currentGame.endsAtTime) {
             revert GameEnded();
         }
+        if (block.timestamp < currentGame.startsAtTime) {
+            revert GameNotStarted();
+        }
 
-        // The circom program proves the user knows solutions to (3) parity games. 
-        // When fewer games are played, all public inputs for unplayed levels are set to 0. 
-        // This means only the first `levelCompleted` levels contain meaningful gameConfig data. 
+        // The circom program proves the user knows solutions to (3) parity games.
+        // When fewer games are played, all public inputs for unplayed levels are set to 0.
+        // This means only the first `levelCompleted` levels contain meaningful gameConfig data.
         // To compare configurations, we right-shift the data to discard the zero-filled remainder.
-        uint256 shiftAmount = 256 - (80 * (levelCompleted));
+        uint256 bits = BITS_PER_PARITY_LEVEL * levelCompleted;
+        uint256 shiftAmount = 256 - bits;
         uint256 currentTruncatedConfig = currentGame.gameConfig >> shiftAmount;
         uint256 newTruncatedConfig = gameConfig >> shiftAmount;
 
@@ -259,9 +277,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function getCurrentBeastGame() public view returns (BeastGame memory, uint256 idx) {
-        for (uint256 i = beastGames.length - 1; i >= 0; i--) {
-            if (block.timestamp >= beastGames[i].startsAtTime && block.timestamp < beastGames[i].endsAtTime) {
-                return (beastGames[i], i);
+        for (uint256 i = beastGames.length; i > 0; i--) {
+            uint256 j = i - 1;
+            BeastGame memory game = beastGames[j];
+            if (block.timestamp >= game.startsAtTime && block.timestamp < game.endsAtTime) {
+                return (game, j);
             }
         }
 
@@ -269,9 +289,11 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function getCurrentParityGame() public view returns (ParityGame memory, uint256 idx) {
-        for (uint256 i = parityGames.length - 1; i >= 0; i--) {
-            if (block.timestamp >= parityGames[i].startsAtTime && block.timestamp < parityGames[i].endsAtTime) {
-                return (parityGames[i], i);
+        for (uint256 i = parityGames.length; i > 0; i--) {
+            uint256 j = i - 1;
+            ParityGame memory game = parityGames[j];
+            if (block.timestamp >= game.startsAtTime && block.timestamp < game.endsAtTime) {
+                return (game, j);
             }
         }
 
@@ -349,20 +371,19 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     // ======== Internal Helper Functions ========
 
     function getBeastKey(address user, uint256 game) internal pure returns (bytes32) {
-        bytes32 gameHash = keccak256(abi.encodePacked(game));
-        return keccak256(abi.encodePacked(user, gameHash));
+        return keccak256(abi.encode(user, game));
     }
 
     function getParityKey(address user, uint256 gameConfig) internal pure returns (bytes32) {
-        bytes32 gameHash = keccak256(abi.encodePacked(gameConfig));
-        return keccak256(abi.encodePacked(user, gameHash));
+        return keccak256(abi.encode(user, gameConfig));
     }
 
     function verifyAndReplaceInTop10(address user) internal {
         uint256 userScore = usersScore[user];
+        uint256 lastScore = top10Score[9] == address(0) ? 0 : usersScore[top10Score[9]];
 
         // early return to not run the whole alg if the user does not have enough points to be in the top 10
-        if (userScore <= usersScore[top10Score[9]]) {
+        if (top10Score[9] != user && userScore <= lastScore) {
             return;
         }
 

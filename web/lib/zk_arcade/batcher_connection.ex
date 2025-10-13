@@ -2,6 +2,8 @@ defmodule ZkArcade.BatcherConnection do
   require Logger
   require CBOR
 
+  alias ZkArcade.PrometheusMetrics
+
   def send_submit_proof_message(submit_proof_message, address) do
     batcher_host = String.to_charlist(Application.get_env(:zk_arcade, :batcher_host))
     batcher_port = Application.get_env(:zk_arcade, :batcher_port)
@@ -16,15 +18,18 @@ defmodule ZkArcade.BatcherConnection do
               {:ok, conn_pid}
 
             {:error, :timeout} ->
+              PrometheusMetrics.record_user_error(:batcher_connection_error)
               Logger.info("Initial connection timed out")
               try_ipv6(batcher_host, batcher_port, connect_opts)
 
             {:error, reason} ->
+              PrometheusMetrics.record_user_error(:batcher_connection_error)
               Logger.info("Initial connection failed: #{inspect(reason)}")
               try_ipv6(batcher_host, batcher_port, connect_opts)
           end
 
         {:error, reason} ->
+          PrometheusMetrics.record_user_error(:batcher_connection_error)
           Logger.error("Initial connection failed immediately: #{inspect(reason)}")
           try_ipv6(batcher_host, batcher_port, connect_opts)
       end
@@ -36,23 +41,32 @@ defmodule ZkArcade.BatcherConnection do
         receive do
           {:gun_upgrade, ^conn_pid, ^stream_ref, ["websocket"], _headers} ->
             Logger.info("WebSocket upgrade successful!")
+
+            PrometheusMetrics.add_open_batcher_connection()
+
             message = build_submit_proof_message(submit_proof_message, address)
             binary = CBOR.encode(message)
             :gun.ws_send(conn_pid, stream_ref, {:binary, binary})
-            handle_websocket_messages(conn_pid, stream_ref)
+            response = handle_websocket_messages(conn_pid, stream_ref)
 
+            PrometheusMetrics.remove_open_batcher_connection()
+
+            response
           {:gun_response, ^conn_pid, ^stream_ref, _, status, headers} ->
+            PrometheusMetrics.record_user_error(:batcher_connection_error)
             Logger.error("Upgrade failed: #{status}, headers: #{inspect(headers)}")
             close_connection(conn_pid, stream_ref)
             {:error, :upgrade_failed}
         after
           25_000 ->
+            PrometheusMetrics.record_user_error(:batcher_connection_error)
             Logger.error("Timeout during WebSocket upgrade")
             :gun.close(conn_pid)
             {:error, :upgrade_timeout}
         end
 
       {:error, reason} ->
+        PrometheusMetrics.record_user_error(:batcher_connection_error)
         Logger.error("Unable to connect via IPv4 or IPv6: #{inspect(reason)}")
         {:error, reason}
     end
@@ -68,14 +82,17 @@ defmodule ZkArcade.BatcherConnection do
               {:ok, _protocol} ->
                 {:ok, pid}
               {:error, reason} ->
+                PrometheusMetrics.record_user_error(:batcher_connection_error)
                 Logger.error("IPv6 connection failed: #{inspect(reason)}")
                 {:error, reason}
             end
           {:error, reason} ->
+            PrometheusMetrics.record_user_error(:batcher_connection_error)
             Logger.error("IPv6 open failed: #{inspect(reason)}")
             {:error, reason}
         end
       {:error, reason} ->
+        PrometheusMetrics.record_user_error(:batcher_connection_error)
         Logger.error("Failed to resolve IPv6 address: #{inspect(reason)}")
         {:error, reason}
     end
@@ -90,6 +107,7 @@ defmodule ZkArcade.BatcherConnection do
             handle_server_message(decoded, conn_pid, stream_ref)
 
           {:error, reason} ->
+            PrometheusMetrics.record_user_error(:batcher_decode_error)
             Logger.error("Failed to decode CBOR message: #{inspect(reason)}")
             Logger.error("Raw message: #{inspect(msg)}")
             close_connection(conn_pid, stream_ref)
@@ -124,17 +142,25 @@ defmodule ZkArcade.BatcherConnection do
         {:ok, {:batch_inclusion, batch_data}}
 
       %{"InsufficientBalance" => address} ->
+        PrometheusMetrics.record_user_error(:batcher_insufficient_balance)
         Logger.error("Insufficient balance for address #{address}")
         close_connection(conn_pid, stream_ref)
         {:error, {:insufficient_balance, address}}
 
       %{"InvalidProof" => reason} ->
+        PrometheusMetrics.record_user_error(:batcher_invalid_proof)
         Logger.error("There was a problem with the submited proof: #{reason}")
         close_connection(conn_pid, stream_ref)
-        {:error, "Invalid proof - #{reason}"}
+        {:error, {:invalid_proof, reason}}
+
+      "ProofReplaced" ->
+        Logger.warning("Transaction replaced by higher fee")
+        close_connection(conn_pid, stream_ref)
+        {:error, :replaced_by_higher_fee}
 
       # There can be more error messages from the batcher, but they will enter on the other clause
       other ->
+        PrometheusMetrics.record_user_error(:batcher_unrecognized_message)
         Logger.error("Unrecognized message from batcher: #{inspect(other)}")
         close_connection(conn_pid, stream_ref)
         {:error, {:unrecognized_message, other}}
@@ -179,6 +205,10 @@ defmodule ZkArcade.BatcherConnection do
     :gun.ws_send(conn_pid, stream_ref, {:close, 1000, ""})
     receive do
       {:gun_ws, ^conn_pid, ^stream_ref, {:close, _code, _reason}} ->
+        :gun.close(conn_pid)
+    after
+      10_000 ->
+        Logger.warning("Close handshake timed out after 10 seconds; forcing socket close")
         :gun.close(conn_pid)
     end
   end

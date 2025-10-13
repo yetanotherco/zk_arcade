@@ -1,5 +1,5 @@
 
-# devnet | mainnet | holesky | holesky-stage
+# devnet | mainnet | holesky | holesky-stage | sepolia
 NETWORK ?= devnet
 
 __DEPENDENCIES__: ## ____
@@ -16,26 +16,31 @@ web_deps:
 	cd assets && npm install
 
 web_db:
-	@cd web/ && \
-	docker compose up -d db --wait && \
-	mix ecto.migrate
+	@docker compose up -d db --wait && \
+		cd web/ && \
+		mix ecto.migrate
+
+web_metrics:
+	@docker compose up -d prometheus grafana --wait
+
+web_metrics_stop:
+	@docker stop zk_arcade_prometheus zk_arcade_grafana || true  && \
+		docker rm zk_arcade_prometheus zk_arcade_grafana || true
 
 web_migrate:
 	@cd web/ && \
 	mix ecto.migrate
 
-web_run: web_deps web_db
+web_run: web_deps web_db web_metrics
 	@cd web/ && \
 	iex -S mix phx.server
 
 web_remove_db_container:
-	@cd web && \
-		docker stop zk_arcade_db || true  && \
+	@docker stop zk_arcade_db || true  && \
 		docker rm zk_arcade_db || true
 
 web_clean_db: web_remove_db_container
-	@cd web && \
-		docker volume rm zkarcade-postgres-data || true
+	@docker volume rm zkarcade-postgres-data || true
 
 
 __GAME__:
@@ -54,7 +59,7 @@ beast_gen_levels:
 	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
 	
 beast_build:
-	@cd games/beast/beast1984 && cargo build --release --bin beast --features holesky
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
 
 beast_write_program_vk:
 	@cd games/beast/beast1984/ && cargo run --release --bin write_program_vk
@@ -277,3 +282,13 @@ create_service:
 	export $(cat config/.env.zk_arcade | xargs)
 	systemctl --user daemon-reload
 	systemctl --user enable --now zk_arcade
+
+## Monitoring
+install_prometheus:
+	@./infra/install_prometheus.sh
+
+install_grafana:
+	@./infra/install_grafana.sh
+
+update_grafana_dashboards:
+	@./infra/update_grafana_dashboards.sh

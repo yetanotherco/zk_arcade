@@ -35,6 +35,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
+      - PROMETHEUS_URL=http://prometheus:9090
       - RPC_URL=http://host.docker.internal:8545
       # PostgreSQL datasource configuration
       - POSTGRES_HOST=db

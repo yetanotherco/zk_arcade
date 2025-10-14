@@ -182,20 +182,18 @@ export const WalletInfo = ({
 
 					{balance.data != undefined && balance.data > 0n && (
 						<div className="flex flex-col items-start gap-2 border rounded p-3 bg-green-500/20 border-green-500 text-green">
-							<p>You have successfully claimed your NFT!</p>
-
 							{imageUrls.length > 0 && (
 								<div className="flex flex-col gap-2">
 									<p>Your NFT:</p>
-									<ul className="list-disc list-inside">
 										{imageUrls.map((url, _) => (
 											<img
 												src={url}
 												alt="Ticket"
-												style={{ borderRadius: "8px", maxWidth: "50px" }}
+												style={{ maxWidth: "50px" }}
+												onClick={() => window.open(url, "_blank")}
+												className="hover:cursor-pointer"
 											/>
 										))}
-									</ul>
 								</div>
 							)}
 						</div>

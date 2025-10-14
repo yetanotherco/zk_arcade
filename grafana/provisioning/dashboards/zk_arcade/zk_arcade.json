@@ -1434,7 +1434,7 @@
       },
       "gridPos": {
         "h": 15,
-        "w": 18,
+        "w": 19,
         "x": 0,
         "y": 39
       },
@@ -1492,6 +1492,6 @@
   "timezone": "",
   "title": "ZK Arcade",
   "uid": "ec4ebfb9-8757-4fde-9b2b-99917dc9b706",
-  "version": 11,
+  "version": 9,
   "weekStart": ""
 }

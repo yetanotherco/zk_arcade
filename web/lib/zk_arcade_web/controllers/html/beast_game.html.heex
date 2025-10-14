@@ -12,6 +12,11 @@
                     <.tag variant={variant} />
                 <% end %>
             </div>
+            <div class="flex gap-2">
+                <%= for variant <- @game.secondary_tags do %>
+                    <.tag variant={variant} />
+                <% end %>
+            </div>
         </div>
     </div>
     

@@ -5,6 +5,7 @@ import {
 	useReadContract,
 	useWaitForTransactionReceipt,
 	useWriteContract,
+	usePublicClient,
 } from "wagmi";
 import { useToast } from "../state/toast";
 import { zkArcadeNftAbi } from "../constants/aligned";
@@ -52,6 +53,7 @@ function processRawMerkleProof(input: Proof): `0x${string}`[] {
 export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 	const chainId = useChainId();
 	const { addToast } = useToast();
+	const publicClient = usePublicClient();
 
 	const balance = useReadContract({
 		address: contractAddress,
@@ -117,7 +119,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		});
 
 		return hash;
-	}, [userAddress, contractAddress, writeContractAsync, chainId]);
+	}, [userAddress, contractAddress, writeContractAsync, chainId, addToast]);
 
 	useEffect(() => {
 		if (txRest.isError) {
@@ -149,6 +151,81 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 	}, [receipt.isSuccess, receipt.isError]);
 
 	const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
+
+	const [tokenURIs, setTokenURIs] = React.useState<string[]>([]);
+
+	// Fetch events Transfer(from, to, tokenId) where to == userAddress
+	// When the user has a balance > 0, we check the blockchain logs to see the NFTs they have received
+	// Note: We are supposing the user has received exactly 'balance.data' NFTs
+	useEffect(() => {
+		if (!userAddress || !balanceMoreThanZero) return;
+
+		const fetchEvents = async () => {
+			try {
+				if (!publicClient) {
+					console.error("Wagmi publicClient not initialized");
+					return;
+				}
+
+				const events = await publicClient.getLogs({
+					address: contractAddress,
+					event: {
+						anonymous: false,
+						inputs: [
+							{ indexed: true, internalType: "address", name: "from", type: "address" },
+							{ indexed: true, internalType: "address", name: "to", type: "address" },
+							{ indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" }
+						],
+						name: "Transfer",
+						type: "event"
+					},
+					args: {
+						to: userAddress,
+					},
+					fromBlock: 0n,
+					toBlock: "latest",
+				});
+
+				const fetchTokenURIs = async () => {
+					try {
+						if (!publicClient) {
+							console.error("Wagmi publicClient not initialized");
+							return;
+						}
+
+						const uris: string[] = [];
+						for (let i = 0; i < (balance.data || 0n); i++) {
+							const tokenId = events[i]?.args?.tokenId;
+
+							if (tokenId === undefined) {
+								console.warn(`No tokenId found for event index ${i}`);
+								continue;
+							}
+
+							const tokenURI = await publicClient.readContract({
+								address: contractAddress,
+								abi: zkArcadeNftAbi,
+								functionName: "tokenURI",
+								args: [tokenId],
+							});
+
+							console.log(`Fetched tokenURI for tokenId ${tokenId}: ${tokenURI}`);
+
+							uris.push(tokenURI);
+						}
+						setTokenURIs(uris);
+					} catch (e) {
+						console.error("Error fetching token URIs:", e);
+					}
+				};
+				fetchTokenURIs();
+			} catch (e) {
+				console.error("Error fetching Transfer events:", e);
+			}
+		};
+
+		fetchEvents();
+	}, [userAddress, balanceMoreThanZero, publicClient, balance.data, contractAddress]);
 
 	return {
 		balance,

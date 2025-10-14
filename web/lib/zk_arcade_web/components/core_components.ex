@@ -208,7 +208,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     <div class="w-full flex justify-between flex-wrap">
       <div class="max-w-[500px]">
         <img class="rounded mb-2 w-full sm:h-[170px]" src={@img} width={280} height={180}/>
-        <div class="mb flex gap-2">
+        <div class="flex gap-2">
           <%= for variant <- @tags do %>
             <.tag variant={variant} />
           <% end %>

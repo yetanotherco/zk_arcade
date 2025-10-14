@@ -195,19 +195,28 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 
 						const uris: string[] = [];
 						for (let i = 0; i < (balance.data || 0n); i++) {
-							const tokenId = events[i]?.args?.tokenId;
+							// const tokenId = events[i]?.args?.tokenId;
+
+							// HARDCODED: if tokenId is 0, increase it to 1
+							const tokenId = events[i]?.args?.tokenId === 0n ? 1n : events[i]?.args?.tokenId;
 
 							if (tokenId === undefined) {
 								console.warn(`No tokenId found for event index ${i}`);
 								continue;
 							}
 
-							const tokenURI = await publicClient.readContract({
+							let tokenURI = await publicClient.readContract({
 								address: contractAddress,
 								abi: zkArcadeNftAbi,
 								functionName: "tokenURI",
 								args: [tokenId],
 							});
+
+							// HARDCODED: replace bafkreifhkee23fhenp2x3uk6kwbzlpccofwqd74hyc7xftn4dblkr6wnay for bafybeie4an7i3rey27sbcewdjya74eyag27es5aozekphe2dvzbpmsvwym
+							tokenURI = tokenURI.replace("bafkreifhkee23fhenp2x3uk6kwbzlpccofwqd74hyc7xftn4dblkr6wnay", "bafybeie4an7i3rey27sbcewdjya74eyag27es5aozekphe2dvzbpmsvwym");
+
+							// Replace the initial ipfs:// in url for the ipfs gateway we use
+							tokenURI = tokenURI.replace("ipfs://", "https://gateway.lighthouse.storage/ipfs/");
 
 							console.log(`Fetched tokenURI for tokenId ${tokenId}: ${tokenURI}`);
 
@@ -233,5 +242,6 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		receipt,
 		tx: { hash: txHash, ...txRest },
 		balanceMoreThanZero,
+		tokenURIs,
 	};
 }

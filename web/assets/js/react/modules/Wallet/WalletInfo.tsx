@@ -23,6 +23,27 @@ type Props = {
 	is_eligible: boolean;
 };
 
+async function getImageUrl(jsonUrl: string): Promise<string> {
+	try {
+		const response = await fetch(jsonUrl);
+		if (!response.ok) {
+			throw new Error(`Error al obtener el JSON: ${response.status}`);
+		}
+
+		const data = await response.json();
+
+		const imageUrl = data.image;
+		if (!imageUrl) {
+			throw new Error('El JSON no contiene un campo "image".');
+		}
+
+		return imageUrl;
+	} catch (error) {
+		console.error('Error:', error);
+		throw error;
+	}
+}
+
 export const WalletInfo = ({
 	payment_service_address,
 	nft_contract_address,
@@ -38,11 +59,13 @@ export const WalletInfo = ({
 	const formRef = useRef<HTMLFormElement>(null);
 	const [claimed, setClaimed] = useState(false);
 	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
-	const { balance, claimNft, receipt } = useNftContract({
+	const { balance, claimNft, receipt, tokenURIs } = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
 	const { disconnect } = useDisconnect();
+
+	const [imageUrls, setImageUrls] = useState<string[]>([]);
 
 	const handleDisconnect = () => {
 		disconnect();
@@ -61,6 +84,30 @@ export const WalletInfo = ({
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
 		: "You are not currently eligible to mint the NFT and participate in the contest.";
+
+	useEffect(() => {
+		const fetchImageUrls = async () => {
+			if (tokenURIs.length === 0) return;
+
+			const urls = await Promise.all(
+				tokenURIs.map(async (uri) => {
+					try {
+						const imageUrl = await getImageUrl(uri);
+
+						const ipfsHash = imageUrl.split("ipfs://")[1];
+						return `https://ipfs.io/ipfs/${ipfsHash}`;
+					} catch (error) {
+						console.error(`Error fetching image URL for ${uri}:`, error);
+						return "";
+					}
+				})
+			);
+
+			setImageUrls(urls.filter(url => url !== ""));
+		};
+
+		fetchImageUrls();
+	}, [tokenURIs]);
 
 	return (
 		<div className="sm:relative group">
@@ -130,6 +177,27 @@ export const WalletInfo = ({
 								balance={balance.data || 0n}
 								isLoading={receipt.isLoading}
 							/>
+						</div>
+					)}
+
+					{balance.data != undefined && balance.data > 0n && (
+						<div className="flex flex-col items-start gap-2 border rounded p-3 bg-green-500/20 border-green-500 text-green">
+							<p>You have successfully claimed your NFT!</p>
+
+							{imageUrls.length > 0 && (
+								<div className="flex flex-col gap-2">
+									<p>Your NFT:</p>
+									<ul className="list-disc list-inside">
+										{imageUrls.map((url, _) => (
+											<img
+												src={url}
+												alt="Ticket"
+												style={{ borderRadius: "8px", maxWidth: "50px" }}
+											/>
+										))}
+									</ul>
+								</div>
+							)}
 						</div>
 					)}
 

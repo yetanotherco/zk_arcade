@@ -362,12 +362,12 @@ defmodule ZkArcadeWeb.CoreComponents do
     ~H"""
     <%= if @disabled == "true" do %>
       <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
-        <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
+        <.game_content_hero tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
       <.link href={@link} class="w-[350px] h-full shrink-0">
         <div class="w-full h-full flex flex-col cursor-pointer bg-contrast-300 rounded p-5 group">
-          <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
+          <.game_content_hero tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
         </div>
       </.link>
     <% end %>
@@ -386,6 +386,11 @@ defmodule ZkArcadeWeb.CoreComponents do
         </h3>
       <div class="flex gap-2">
         <%= for variant <- @tags do %>
+          <.tag variant={variant} />
+        <% end %>
+      </div>
+      <div class="flex gap-2">
+        <%= for variant <- @secondary_tags do %>
           <.tag variant={variant} />
         <% end %>
       </div>

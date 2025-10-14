@@ -104,3 +104,4 @@ config :zk_arcade, :beast_windows_download_url, "https://github.com/yetanotherco
 config :zk_arcade, :nft_contract_address, "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe"
 
 config :zk_arcade, :ip_info_api_key, "<IP_INFO_API_KEY>"
+config :zk_arcade, :ipgeolocation_api_key, "<IPGEOLOCATION_API_KEY>"

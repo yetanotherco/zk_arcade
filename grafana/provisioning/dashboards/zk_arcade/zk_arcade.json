@@ -412,7 +412,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 220
+                "value": 180
               }
             ]
           },
@@ -424,7 +424,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 243
+                "value": 193
               }
             ]
           }
@@ -1279,11 +1279,24 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "COUNTRY"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 232
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 13,
-        "w": 5,
+        "w": 7,
         "x": 12,
         "y": 24
       },
@@ -1298,7 +1311,8 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": []
       },
       "pluginVersion": "10.1.10",
       "targets": [
@@ -1331,7 +1345,7 @@
           }
         }
       ],
-      "title": "Panel Title",
+      "title": "Users by Country",
       "type": "table"
     },
     {
@@ -1420,7 +1434,7 @@
       },
       "gridPos": {
         "h": 15,
-        "w": 17,
+        "w": 18,
         "x": 0,
         "y": 39
       },
@@ -1478,6 +1492,6 @@
   "timezone": "",
   "title": "ZK Arcade",
   "uid": "ec4ebfb9-8757-4fde-9b2b-99917dc9b706",
-  "version": 4,
+  "version": 11,
   "weekStart": ""
 }

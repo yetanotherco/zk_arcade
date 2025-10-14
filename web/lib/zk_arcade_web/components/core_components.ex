@@ -191,12 +191,12 @@ defmodule ZkArcadeWeb.CoreComponents do
     ~H"""
     <%= if @disabled == "true" do %>
       <div class="w-full opacity-75 sm:max-w-280">
-        <.games_game_content tags={@tags} title={@title} desc={@desc} img={@img} />
+        <.games_game_content tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
       <.link href={@link}>
         <div class="cursor-pointer group w-full sm:max-w-280">
-          <.games_game_content tags={@tags} title={@title} desc={@desc} img={@img} />
+          <.games_game_content tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
         </div>
       </.link>
     <% end %>
@@ -208,8 +208,13 @@ defmodule ZkArcadeWeb.CoreComponents do
     <div class="w-full flex justify-between flex-wrap">
       <div class="max-w-[500px]">
         <img class="rounded mb-2 w-full sm:h-[170px]" src={@img} width={280} height={180}/>
-        <div class="mb-2 flex gap-2">
+        <div class="mb flex gap-2">
           <%= for variant <- @tags do %>
+            <.tag variant={variant} />
+          <% end %>
+        </div>
+        <div class="mb-2 flex gap-2">
+          <%= for variant <- @secondary_tags do %>
             <.tag variant={variant} />
           <% end %>
         </div>
@@ -419,6 +424,10 @@ defmodule ZkArcadeWeb.CoreComponents do
         <p class="mt-2 text-xs text-text-100 bg-red/20 border border-red rounded w-fit px-3 font-bold">Hard</p>
       <% :easy -> %>
         <p class="mt-2 text-xs text-text-100 bg-emerald-400/20 border border-emerald-400 rounded w-fit px-3 font-bold">Easy</p>
+      <% :three_daily_points -> %>
+        <p class="mt-2 text-xs text-text-100 bg-yellow/20 border border-yellow rounded w-fit px-3 font-bold">3 daily points</p>
+      <% :eight_daily_points -> %>
+        <p class="mt-2 text-xs text-text-100 bg-purple-500/20 border border-purple-500 rounded w-fit px-3 font-bold">8 daily points</p>
       <% _ -> %>
     <% end %>
     """

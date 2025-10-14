@@ -5,8 +5,8 @@ import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
-import { useNftContract } from "../../hooks/useNftContract";
-import { EligibilityModal } from "../../components/Modal/EligibilityModal";
+import { useNftContract, getNftMetadata, NftMetadata } from "../../hooks/useNftContract";
+import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 
 type Props = {
@@ -23,27 +23,6 @@ type Props = {
 	is_eligible: boolean;
 };
 
-async function getImageUrl(jsonUrl: string): Promise<string> {
-	try {
-		const response = await fetch(jsonUrl);
-		if (!response.ok) {
-			throw new Error(`Error al obtener el JSON: ${response.status}`);
-		}
-
-		const data = await response.json();
-
-		const imageUrl = data.image;
-		if (!imageUrl) {
-			throw new Error('El JSON no contiene un campo "image".');
-		}
-
-		return imageUrl;
-	} catch (error) {
-		console.error('Error:', error);
-		throw error;
-	}
-}
-
 export const WalletInfo = ({
 	payment_service_address,
 	nft_contract_address,
@@ -59,13 +38,21 @@ export const WalletInfo = ({
 	const formRef = useRef<HTMLFormElement>(null);
 	const [claimed, setClaimed] = useState(false);
 	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
-	const { balance, claimNft, receipt, tokenURIs } = useNftContract({
+	const { 
+		balance, 
+		claimNft, 
+		receipt, 
+		tokenURIs,
+		showSuccessModal,
+		setShowSuccessModal,
+		claimedNftMetadata,
+	} = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
 	const { disconnect } = useDisconnect();
 
-	const [imageUrls, setImageUrls] = useState<string[]>([]);
+	const [nftMetadataList, setNftMetadataList] = useState<NftMetadata[]>([]);
 
 	const handleDisconnect = () => {
 		disconnect();
@@ -86,27 +73,24 @@ export const WalletInfo = ({
 		: "You are not currently eligible to mint the NFT and participate in the contest.";
 
 	useEffect(() => {
-		const fetchImageUrls = async () => {
+		const fetchNftMetadata = async () => {
 			if (tokenURIs.length === 0) return;
 
-			const urls = await Promise.all(
+			const metadataList = await Promise.all(
 				tokenURIs.map(async (uri) => {
 					try {
-						const imageUrl = await getImageUrl(uri);
-
-						const ipfsHash = imageUrl.split("ipfs://")[1];
-						return `https://ipfs.io/ipfs/${ipfsHash}`;
+						return await getNftMetadata(uri);
 					} catch (error) {
-						console.error(`Error fetching image URL for ${uri}:`, error);
-						return "";
+						console.error(`Error fetching metadata for ${uri}:`, error);
+						return null;
 					}
 				})
 			);
 
-			setImageUrls(urls.filter(url => url !== ""));
+			setNftMetadataList(metadataList.filter((metadata): metadata is NftMetadata => metadata !== null));
 		};
 
-		fetchImageUrls();
+		fetchNftMetadata();
 	}, [tokenURIs]);
 
 	return (
@@ -182,18 +166,24 @@ export const WalletInfo = ({
 
 					{balance.data != undefined && balance.data > 0n && (
 						<div className="flex flex-col items-start gap-2 border rounded p-3 bg-green-500/20 border-green-500 text-green">
-							{imageUrls.length > 0 && (
+							{nftMetadataList.length > 0 && (
 								<div className="flex flex-col gap-2">
-									<p>Your NFT:</p>
-										{imageUrls.map((url, _) => (
+									<p>Your NFT{nftMetadataList.length > 1 ? 's' : ''}:</p>
+									{nftMetadataList.map((metadata, index) => (
+										<div key={index} className="flex flex-col gap-1">
 											<img
-												src={url}
-												alt="Ticket"
+												src={metadata.image}
+												alt={metadata.name || "NFT"}
+												title={metadata.name}
 												style={{ maxWidth: "50px" }}
-												onClick={() => window.open(url, "_blank")}
+												onClick={() => window.open(metadata.image, "_blank")}
 												className="hover:cursor-pointer"
 											/>
-										))}
+											{metadata.name && (
+												<p className="text-xs text-green-300">{metadata.name}</p>
+											)}
+										</div>
+									))}
 								</div>
 							)}
 						</div>
@@ -217,6 +207,12 @@ export const WalletInfo = ({
 					/>
 				</div>
 			</div>
+
+			<NftSuccessModal
+				open={showSuccessModal}
+				setOpen={setShowSuccessModal}
+				nftMetadata={claimedNftMetadata}
+			/>
 		</div>
 	);
 };

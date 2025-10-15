@@ -49,7 +49,10 @@ const NFTView = ({
 
                             <p className="mb-6"><strong>Token ID:</strong> {Number(nft_metadata.tokenId || 0n)}</p>
 
-                            <p className="mb-6"><strong>Contract Address:</strong> {nft_metadata.address}</p>
+                            <p className="mb-6">
+                                {/* TODO: Also support mainnet explorer link */}
+                                Contract Address: <a className="hover:underline" href={`https://etherscan.io/address/${nft_metadata.address}`} target="_blank" rel="noopener noreferrer">{nft_metadata.address}</a>
+                            </p>
                         </div>
                     </div>
                 </div>

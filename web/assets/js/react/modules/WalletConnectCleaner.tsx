@@ -54,10 +54,31 @@ export const WalletConnectCleaner = () => {
 						const getReq = store.get(key);
 						getReq.onsuccess = () => {
 							if (getReq.result !== undefined) {
-								const delReq = store.delete(key);
-								delReq.onsuccess = () => {
-									deletedAny = true;
-								};
+								try {
+									let value = getReq.result;
+									if (typeof value === "string") {
+										try {
+											value = JSON.parse(value);
+										} catch {
+											/* not JSON, leave as-is */
+										}
+									}
+
+									const isEmpty = (v: any) =>
+										Array.isArray(v)
+											? v.length === 0
+											: v !== null &&
+											  typeof v === "object"
+											? Object.keys(v).length === 0
+											: false;
+
+									if (!isEmpty(value)) {
+										const delReq = store.delete(key);
+										delReq.onsuccess = () => {
+											deletedAny = true;
+										};
+									}
+								} catch {}
 							}
 						};
 					}

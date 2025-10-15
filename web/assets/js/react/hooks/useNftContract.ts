@@ -22,9 +22,11 @@ export type NftMetadata = {
 	name: string;
 	description: string;
 	image: string;
+	tokenId?: bigint;
+	address?: Address;
 };
 
-async function fetchNftMetadata(jsonUrl: string): Promise<NftMetadata> {
+async function fetchNftMetadata(jsonUrl: string, nftContractAddress: Address): Promise<NftMetadata> {
 	try {
 		const response = await fetch(jsonUrl);
 		if (!response.ok) {
@@ -40,10 +42,15 @@ async function fetchNftMetadata(jsonUrl: string): Promise<NftMetadata> {
 		// Convert IPFS URL to gateway URL if needed
 		const imageUrl = processImageUrl(data.image);
 
+		// Get the tokenID from url last digits (separated by /)
+		const tokenId = data.image.split('/').pop()?.split('.')[0];
+
 		return {
 			name: data.name,
 			description: data.description,
 			image: imageUrl,
+			tokenId: tokenId,
+			address: nftContractAddress,
 		};
 	} catch (error) {
 		console.error('Error fetching NFT metadata:', error);
@@ -61,14 +68,14 @@ export function processImageUrl(imageUrl: string): string {
 }
 
 // Helper function to get complete NFT metadata from JSON metadata URL
-export async function getNftMetadata(jsonUrl: string): Promise<NftMetadata> {
-	return await fetchNftMetadata(jsonUrl);
+export async function getNftMetadata(jsonUrl: string, nftContractAddress: Address): Promise<NftMetadata> {
+	return await fetchNftMetadata(jsonUrl, nftContractAddress);
 }
 
 // Helper function to get just the image URL from JSON metadata (for backwards compatibility)
-export async function getImageUrl(jsonUrl: string): Promise<string> {
+export async function getImageUrl(jsonUrl: string, nftContractAddress: Address): Promise<string> {
 	try {
-		const metadata = await fetchNftMetadata(jsonUrl);
+		const metadata = await fetchNftMetadata(jsonUrl, nftContractAddress);
 		return metadata.image;
 	} catch (error) {
 		console.error('Error:', error);
@@ -284,7 +291,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 							const tokenURI = await getTokenURI(publicClient, contractAddress, tokenId);
 							
 							// Fetch the metadata
-							const metadata = await fetchNftMetadata(tokenURI);
+							const metadata = await fetchNftMetadata(tokenURI, contractAddress);
 							setClaimedNftMetadata(metadata);
 							setShowSuccessModal(true);
 						}

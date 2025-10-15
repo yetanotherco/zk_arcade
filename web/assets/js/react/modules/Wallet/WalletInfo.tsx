@@ -79,7 +79,7 @@ export const WalletInfo = ({
 			const metadataList = await Promise.all(
 				tokenURIs.map(async (uri) => {
 					try {
-						return await getNftMetadata(uri);
+						return await getNftMetadata(uri, nft_contract_address);
 					} catch (error) {
 						console.error(`Error fetching metadata for ${uri}:`, error);
 						return null;

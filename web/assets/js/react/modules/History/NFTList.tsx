@@ -32,12 +32,26 @@ const NFTView = ({
                 maxWidth={1000}
             >
                 <div className="bg-contrast-100 w-full p-10 rounded flex flex-col gap-8 max-h-[90vh]">
-                    <img
-                        src={nft_metadata?.image}
-                        alt={nft_metadata?.name || "NFT"}
-                        title={nft_metadata?.name}
-                        style={{ maxWidth: "30px" }}
-                    />
+                    <div className="flex justify-between gap-8">
+                        <img
+                            src={nft_metadata?.image}
+                            alt={nft_metadata?.name || "NFT"}
+                            title={nft_metadata?.name}
+                            style={{ maxWidth: "300px" }}
+                        />
+
+                        <hr className="my-4 border-t border-white/300" />
+
+                        <div>
+                            <h1 className="text-lg font-bold mt-4 mb-6">{nft_metadata.name}</h1>
+
+                            <p className="mb-28" style={{color:"#898d94"}}>{nft_metadata.description}</p>
+
+                            <p className="mb-6"><strong>Token ID:</strong> {Number(nft_metadata.tokenId || 0n)}</p>
+
+                            <p className="mb-6"><strong>Contract Address:</strong> {nft_metadata.address}</p>
+                        </div>
+                    </div>
                 </div>
             </Modal>
         </>
@@ -66,7 +80,7 @@ const NFTList = ({
             const metadataList = await Promise.all(
                 tokenURIs.map(async (uri) => {
                     try {
-                        return await getNftMetadata(uri);
+                        return await getNftMetadata(uri, nft_contract_address);
                     } catch (error) {
                         console.error(`Error fetching metadata for ${uri}:`, error);
                         return null;

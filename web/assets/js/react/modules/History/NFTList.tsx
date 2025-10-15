@@ -4,6 +4,7 @@ import Web3EthProvider from "../../providers/web3-eth-provider";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { getNftMetadata, NftMetadata, useNftContract } from "../../hooks/useNftContract";
+import { Modal } from "../../components";
 
 type Props = {
     network: string;
@@ -12,7 +13,35 @@ type Props = {
     is_eligible: string;
 };
 
+const NFTView = ({
+    nft_metadata,
+    openNFTModal,
+    setOpenNFTModal
+}: {
+    nft_metadata?: NftMetadata;
+    openNFTModal: boolean;
+    setOpenNFTModal: any; // TODO: Use the right type
+}) => {
 
+    return (
+        <>
+            <Modal
+                open={openNFTModal}
+                setOpen={setOpenNFTModal}
+                maxWidth={1000}
+            >
+                <div className="bg-contrast-100 w-full p-10 rounded flex flex-col gap-8 max-h-[90vh]">
+                    <img
+                        src={nft_metadata?.image}
+                        alt={nft_metadata?.name || "NFT"}
+                        title={nft_metadata?.name}
+                        style={{ maxWidth: "30px" }}
+                    />
+                </div>
+            </Modal>
+        </>
+    );
+}
 
 const NFTList = ({
 	is_eligible,
@@ -25,6 +54,8 @@ const NFTList = ({
     });
 
     const [nftMetadataList, setNftMetadataList] = useState<NftMetadata[]>([]);
+
+    const [openNFTModal, setOpenNFTModal] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchNftMetadata = async () => {
@@ -70,7 +101,7 @@ const NFTList = ({
 										alt={metadata.name || "NFT"}
 										title={metadata.name}
 										style={{ maxWidth: "200px" }}
-										onClick={() => window.open(metadata.image, "_blank")}
+										onClick={() => setOpenNFTModal(true)}
 										className="hover:cursor-pointer m-8"
 									/>
 								</div>
@@ -79,6 +110,12 @@ const NFTList = ({
 					)}
 				</div>
 			)}
+
+            <NFTView
+                nft_metadata={nftMetadataList.at(0)} // TODO: add an onclick that opens the modal with the right metadata
+                openNFTModal={openNFTModal}
+                setOpenNFTModal={setOpenNFTModal}
+            />
         </>
     )
 }

@@ -43,7 +43,7 @@ async function fetchNftMetadata(jsonUrl: string, nftContractAddress: Address): P
 		const imageUrl = processImageUrl(data.image);
 
 		// Get the tokenID from url last digits (separated by /)
-		const tokenId = data.image.split('/').pop()?.split('.')[0];
+		const tokenId = BigInt(jsonUrl.split("/").pop() || 0);
 
 		return {
 			name: data.name,

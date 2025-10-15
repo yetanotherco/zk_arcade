@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider } from "connectkit";
-import { getConfigs } from "../config";
+import { configs } from "../config";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -14,19 +14,17 @@ const queryClient = new QueryClient({
 });
 
 const configSelector = (config_name: string) => {
-	const { ConfigAnvil, ConfigHolesky, ConfigSepolia, ConfigMainnet } =
-		getConfigs();
 	switch (config_name) {
 		case "anvil":
-			return ConfigAnvil;
+			return configs.ConfigAnvil();
 		case "sepolia":
-			return ConfigSepolia;
+			return configs.ConfigSepolia();
 		case "mainnet":
-			return ConfigMainnet;
+			return configs.ConfigMainnet();
 		case "holesky":
-			return ConfigHolesky;
+			return configs.ConfigHolesky();
 		default:
-			return ConfigAnvil;
+			return configs.ConfigAnvil();
 	}
 };
 
@@ -44,7 +42,6 @@ const Web3EthProvider = ({
 
 	useEffect(() => {
 		const handleChange = () => {
-			console.log("HELLO WORLD!", w["__wc_cleanup_done__"]);
 			setFlagValue(w[FLAG]);
 		};
 
@@ -65,7 +62,7 @@ const Web3EthProvider = ({
 					mode="light"
 					options={{
 						initialChainId: 0,
-						walletConnectName: "ZK Arcade",
+						walletConnectName: "Wallet Connect",
 						enforceSupportedChains: true,
 						disclaimer:
 							"By connecting your wallet, you agree to the Terms of Service and Privacy Policy.",

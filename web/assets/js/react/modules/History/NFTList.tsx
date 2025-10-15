@@ -18,10 +18,11 @@ const NFTView = ({
     openNFTModal,
     setOpenNFTModal
 }: {
-    nft_metadata?: NftMetadata;
+    nft_metadata: NftMetadata | null;
     openNFTModal: boolean;
-    setOpenNFTModal: any; // TODO: Use the right type
+    setOpenNFTModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+    if (!nft_metadata) return null;
 
     return (
         <>
@@ -56,6 +57,7 @@ const NFTList = ({
     const [nftMetadataList, setNftMetadataList] = useState<NftMetadata[]>([]);
 
     const [openNFTModal, setOpenNFTModal] = useState<boolean>(false);
+    const [selectedMetadata, setSelectedMetadata] = useState<NftMetadata | null>(null);
 
     useEffect(() => {
         const fetchNftMetadata = async () => {
@@ -101,7 +103,12 @@ const NFTList = ({
 										alt={metadata.name || "NFT"}
 										title={metadata.name}
 										style={{ maxWidth: "200px" }}
-										onClick={() => setOpenNFTModal(true)}
+										onClick={() => 
+                                            {
+                                                setSelectedMetadata(metadata)
+                                                setOpenNFTModal(true)
+                                            }
+                                        }
 										className="hover:cursor-pointer m-8"
 									/>
 								</div>
@@ -112,7 +119,7 @@ const NFTList = ({
 			)}
 
             <NFTView
-                nft_metadata={nftMetadataList.at(0)} // TODO: add an onclick that opens the modal with the right metadata
+                nft_metadata={selectedMetadata}
                 openNFTModal={openNFTModal}
                 setOpenNFTModal={setOpenNFTModal}
             />

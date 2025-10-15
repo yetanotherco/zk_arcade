@@ -1,5 +1,8 @@
 import React, { useEffect } from "react";
 
+const FLAG = "__wc_cleanup_done__";
+const w = window as any;
+
 export const WalletConnectCleaner = () => {
 	useEffect(() => {
 		const cleanupWalletConnectDB = async () => {
@@ -17,18 +20,28 @@ export const WalletConnectCleaner = () => {
 				} catch {}
 			}
 
-			if (!dbExists) return;
+			if (!dbExists) {
+				w[FLAG] = true;
+				window.dispatchEvent(new Event("flagChange"));
+				return;
+			}
 
 			const openReq = indexedDB.open(DB_NAME);
 
 			openReq.onsuccess = e => {
 				const tg = e.target as { result: any } | null;
 				const db = tg?.result;
-				if (!db) return;
+				if (!db) {
+					w[FLAG] = true;
+					window.dispatchEvent(new Event("flagChange"));
+					return;
+				}
 
 				const storeNames = Array.from(db.objectStoreNames || []);
 				if (!storeNames.length) {
 					db.close();
+					w[FLAG] = true;
+					window.dispatchEvent(new Event("flagChange"));
 					return;
 				}
 
@@ -55,10 +68,14 @@ export const WalletConnectCleaner = () => {
 					if (deletedAny) {
 						console.log("Removed stale WalletConnect entries");
 					}
+					w[FLAG] = true;
+					window.dispatchEvent(new Event("flagChange"));
 				};
 
 				tx.onerror = () => {
 					db.close();
+					w[FLAG] = true;
+					window.dispatchEvent(new Event("flagChange"));
 				};
 			};
 		};

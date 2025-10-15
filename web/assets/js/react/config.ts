@@ -7,42 +7,44 @@ const common_config = {
 	appName: "Zk Arcade",
 };
 
-export const ConfigAnvil = createConfig(
-	getDefaultConfig({
-		chains: [anvil],
-		transports: {
-			[anvil.id]: http(),
-		},
-		...common_config,
-	})
-);
+export const getConfigs = () => ({
+	ConfigAnvil: createConfig(
+		getDefaultConfig({
+			chains: [anvil],
+			transports: {
+				[anvil.id]: http(),
+			},
+			...common_config,
+		})
+	),
 
-export const ConfigSepolia = createConfig(
-	getDefaultConfig({
-		chains: [sepolia],
-		transports: {
-			[sepolia.id]: http(),
-		},
-		...common_config,
-	})
-);
+	ConfigSepolia: createConfig(
+		getDefaultConfig({
+			chains: [sepolia],
+			transports: {
+				[sepolia.id]: http(),
+			},
+			...common_config,
+		})
+	),
 
-export const ConfigMainnet = createConfig(
-	getDefaultConfig({
-		chains: [mainnet],
-		transports: {
-			[mainnet.id]: http(),
-		},
-		...common_config,
-	})
-);
+	ConfigMainnet: createConfig(
+		getDefaultConfig({
+			chains: [mainnet],
+			transports: {
+				[mainnet.id]: http(),
+			},
+			...common_config,
+		})
+	),
 
-export const ConfigHolesky = createConfig(
-	getDefaultConfig({
-		chains: [holesky],
-		transports: {
-			[holesky.id]: http(),
-		},
-		...common_config,
-	})
-);
+	ConfigHolesky: createConfig(
+		getDefaultConfig({
+			chains: [holesky],
+			transports: {
+				[holesky.id]: http(),
+			},
+			...common_config,
+		})
+	),
+});

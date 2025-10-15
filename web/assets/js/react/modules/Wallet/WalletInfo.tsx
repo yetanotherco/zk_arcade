@@ -112,14 +112,27 @@ export const WalletInfo = ({
 					className="overflow-scroll flex flex-col gap-8 p-8 absolute max-sm:left-0 sm:w-[450px] w-full sm:right-0 shadow-2xl bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10"
 					style={{ maxHeight: 450 }}
 				>
-					<div className="flex gap-2 items-center">
-						<span className="hero-user" />
-						<a href="/history" className="text-lg hover:underline">
-							{username}{" "}
-							{user_position === null
-								? "(#None)"
-								: `(#${user_position})`}
-						</a>
+					<div className="flex gap-2 items-center justify-between w-full">
+						<div className="flex gap-2 items-center">
+							{balance.data != undefined && balance.data >0n ?
+								(
+									<img
+										src={nftMetadataList.at(0)?.image}
+										alt={nftMetadataList.at(0)?.name || "NFT"}
+										title={nftMetadataList.at(0)?.name}
+										style={{ maxWidth: "30px" }}
+									/>
+								) : (
+									<span className="hero-user" />
+								)
+							}
+							<a href="/history" className="text-lg hover:underline">
+								{username}{" "}
+								{user_position === null
+									? "(#None)"
+									: `(#${user_position})`}
+							</a>
+						</div>
 						<div>
 							<form
 								ref={formRef}
@@ -161,31 +174,6 @@ export const WalletInfo = ({
 								balance={balance.data || 0n}
 								isLoading={receipt.isLoading}
 							/>
-						</div>
-					)}
-
-					{balance.data != undefined && balance.data > 0n && (
-						<div className="flex flex-col items-start gap-2 border rounded p-3 bg-green-500/20 border-green-500 text-green">
-							{nftMetadataList.length > 0 && (
-								<div className="flex flex-col gap-2">
-									<p>Your NFT{nftMetadataList.length > 1 ? 's' : ''}:</p>
-									{nftMetadataList.map((metadata, index) => (
-										<div key={index} className="flex flex-col gap-1">
-											<img
-												src={metadata.image}
-												alt={metadata.name || "NFT"}
-												title={metadata.name}
-												style={{ maxWidth: "50px" }}
-												onClick={() => window.open(metadata.image, "_blank")}
-												className="hover:cursor-pointer"
-											/>
-											{metadata.name && (
-												<p className="text-xs text-green-300">{metadata.name}</p>
-											)}
-										</div>
-									))}
-								</div>
-							)}
 						</div>
 					)}
 

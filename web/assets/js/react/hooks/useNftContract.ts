@@ -143,8 +143,7 @@ async function getTransferEvents(
 
 // Helper function to process and normalize tokenURI
 function processTokenURI(tokenURI: string): string {
-	// HARDCODED: replace bafkreifhkee23fhenp2x3uk6kwbzlpccofwqd74hyc7xftn4dblkr6wnay for bafybeie4an7i3rey27sbcewdjya74eyag27es5aozekphe2dvzbpmsvwym
-	let processedURI = tokenURI.replace("bafkreifhkee23fhenp2x3uk6kwbzlpccofwqd74hyc7xftn4dblkr6wnay", "bafybeie4an7i3rey27sbcewdjya74eyag27es5aozekphe2dvzbpmsvwym");
+	let processedURI = tokenURI;
 
 	// Replace the initial ipfs:// in url for the ipfs gateway we use
 	processedURI = processedURI.replace("ipfs://", "https://gateway.lighthouse.storage/ipfs/");

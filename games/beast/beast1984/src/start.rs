@@ -18,7 +18,8 @@ use game_logic::{ANSI_RESET_FONT, BOARD_HEIGHT, BOARD_WIDTH};
 #[cfg(windows)]
 fn enable_ansi_support() {
     use winapi::um::{
-        wincon::{GetConsoleMode, SetConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING},
+        consoleapi::{GetConsoleMode, SetConsoleMode},
+        wincon::ENABLE_VIRTUAL_TERMINAL_PROCESSING,
         processenv::GetStdHandle,
         winbase::STD_OUTPUT_HANDLE,
         handleapi::INVALID_HANDLE_VALUE,
@@ -31,7 +32,7 @@ fn enable_ansi_support() {
         }
         
         let mut console_mode: u32 = 0;
-        if winapi::um::wincon::GetConsoleMode(console_handle, &mut console_mode) != 0 {
+        if GetConsoleMode(console_handle, &mut console_mode) != 0 {
             // Enable Virtual Terminal Processing to support ANSI escape sequences
             console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
             SetConsoleMode(console_handle, console_mode);

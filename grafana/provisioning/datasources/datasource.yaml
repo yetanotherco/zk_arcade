@@ -6,9 +6,39 @@ datasources:
     uid: prometheus
     access: proxy
     orgId: 1
-    url: http://prometheus:9090
+    url: ${PROMETHEUS_URL}
     basicAuth: false
     isDefault: true
     editable: true
     jsonData:
       timeInterval: 15s
+
+  - name: PostgreSQL
+    type: postgres
+    uid: postgres
+    access: proxy
+    orgId: 1
+    url: ${POSTGRES_HOST}:${POSTGRES_PORT}
+    database: ${POSTGRES_DB}
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    basicAuth: false
+    isDefault: false
+    editable: true
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600
+
+  - name: "Ethereum RPC"
+    type: "yesoreyeram-infinity-datasource"
+    typeName: "Infinity"
+    uid: "ethereum_rpc"
+    access: "proxy"
+    url: "${RPC_URL}"
+    isDefault: false
+    jsonData:
+      global_queries: []
+    readOnly: false
+    editable: true
+    basicAuth: false

@@ -46,6 +46,11 @@ export const WalletInfo = ({
 
 	const handleDisconnect = () => {
 		disconnect();
+		Object.keys(localStorage).forEach(key => {
+			if (key.startsWith("wagmi.") || key.startsWith("wc@")) {
+				localStorage.removeItem(key);
+			}
+		});
 		formRef.current?.submit();
 	};
 

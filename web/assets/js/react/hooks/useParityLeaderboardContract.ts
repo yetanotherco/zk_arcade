@@ -6,7 +6,7 @@ import {
 } from "wagmi";
 import { Address } from "../types/blockchain";
 import { leaderboardAbi } from "../constants/aligned";
-import { bytesToHex, encodePacked, keccak256 } from "viem";
+import { bytesToHex, encodeAbiParameters, keccak256 } from "viem";
 import { useCallback, useEffect, useState } from "react";
 import { ProofSubmission } from "../types/aligned";
 import {
@@ -24,9 +24,11 @@ function getParitytKey(user: `0x${string}`, game: bigint): `0x${string}` {
 	if (!user) {
 		return "0x0";
 	}
-	const gameHash = keccak256(encodePacked(["uint256"], [game]));
 	const parityKey = keccak256(
-		encodePacked(["address", "bytes32"], [user, gameHash])
+		encodeAbiParameters(
+			[{ type: "address" }, { type: "uint256" }],
+			[user, game]
+		)
 	);
 	return parityKey;
 }

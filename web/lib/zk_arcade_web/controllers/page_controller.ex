@@ -178,7 +178,7 @@ defmodule ZkArcadeWeb.PageController do
       %{
         number: "11",
         question: "How often are new challenges released?",
-        answer: "There is available a new challenge everyday for each game!"
+        answer: "A new challenge is available every day for each game!"
       },
     ]
 
@@ -238,14 +238,14 @@ defmodule ZkArcadeWeb.PageController do
 
     game_idx = ZkArcade.LeaderboardContract.get_current_game_idx("Beast")
 
-    highest_level_reached_proof = ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Beast")
+    highest_level_reached_proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Beast") else nil end
 
     conn
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:wallet, wallet)
       |> assign(:eligible, eligible)
       |> assign(:game, %{
-        image: "/images/beast.gif",
+        image: "/images/beast.png",
         name: "Beast 1984",
         desc: "Survive across waves of enemies",
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
@@ -275,7 +275,7 @@ defmodule ZkArcadeWeb.PageController do
         Uninstall: Remove Beast anytime with: <span class="code-block">rm $(which beast)</span>
         """,
         acknowledgments: acknowledgements,
-        tags: [:cli, :risc0, :sp1]
+        tags: [:cli, :sp1, :hard]
       })
       |> assign(:username, username)
       |> assign(:user_position, position)
@@ -297,13 +297,13 @@ defmodule ZkArcadeWeb.PageController do
 
     game_idx = ZkArcade.LeaderboardContract.get_current_game_idx("Parity")
 
-    highest_level_reached_proof = ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Parity")
+    highest_level_reached_proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Parity") else nil end
 
     conn
       |> assign(:wallet, wallet)
       |> assign(:eligible, eligible)
       |> assign(:game, %{
-        image: "/images/parity.jpg",
+        image: "/images/parity.png",
         name: "Parity",
         desc: "Daily parity puzzles in your browser. Simple rules, tricky patterns. Test your logic and stay sharp as difficulty builds.",
         full_desc: "The game is played by moving a cursor with WASD around the board to select different squares in a grid. Each time you select a select a cell by moving the cursor with the arrow keys, the number inside that cell increases by one.
@@ -311,7 +311,7 @@ defmodule ZkArcadeWeb.PageController do
 The goal of the game is to make each number on the board equal.
 ",
         acknowledgments: acknowledgements,
-        tags: [:browser, :circom]
+        tags: [:browser, :circom, :easy]
       })
       |> assign(:username, username)
       |> assign(:submitted_proofs, Jason.encode!(proofs))

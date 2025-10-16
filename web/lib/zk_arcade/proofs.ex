@@ -123,6 +123,25 @@ defmodule ZkArcade.Proofs do
     |> Repo.aggregate(:count, :id)
   end
 
+  def get_pending_proofs_to_bump(nil), do: []
+  def get_pending_proofs_to_bump(address) do
+    downcased_addr = String.downcase(address)
+
+    Proof
+      |> where([p], p.wallet_address == ^downcased_addr and p.status == "pending")
+      |> order_by([p], asc: p.inserted_at)
+      |> select([p], %{
+        id: p.id,
+        status: p.status,
+        inserted_at: p.inserted_at,
+        updated_at: p.updated_at,
+        submitted_max_fee: p.submitted_max_fee,
+        game: p.game,
+        level_reached: p.level_reached
+      })
+      |> Repo.all()
+  end
+
   def get_proof_submission(proof_id) do
     query =
       from p in Proof,
@@ -273,6 +292,7 @@ defmodule ZkArcade.Proofs do
         {:ok, updated_proof}
 
       {:error, changeset} ->
+        PrometheusMetrics.record_user_error(:proof_submitted_status_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
     end
@@ -282,6 +302,11 @@ defmodule ZkArcade.Proofs do
     Logger.info("Updating proof #{proof_id} status to verified")
     proof = get_proof!(proof_id)
 
+    # time_diff_seconds =
+    #   DateTime.diff(DateTime.utc_now(), DateTime.from_naive!(proof.inserted_at, "Etc/UTC"), :second)
+    # time_diff_seconds = if time_diff_seconds <= 0, do: 1, else: time_diff_seconds
+    # PrometheusMetrics.time_to_verify_seconds(time_diff_seconds)
+
     changeset = change_proof(proof, %{status: "verified"})
 
     case Repo.update(changeset) do
@@ -290,6 +315,7 @@ defmodule ZkArcade.Proofs do
         {:ok, updated_proof}
 
       {:error, changeset} ->
+        PrometheusMetrics.record_user_error(:proof_verified_status_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
     end
@@ -307,13 +333,14 @@ defmodule ZkArcade.Proofs do
       changeset = change_proof(proof, %{status: "claimed", claim_tx_hash: claim_tx_hash})
 
       case Repo.update(changeset) do
-        {:ok, updated_proof} ->
-          Logger.info("Updated proof #{proof_id} status to claimed")
-          {:ok, updated_proof}
+          {:ok, updated_proof} ->
+            Logger.info("Updated proof #{proof_id} status to claimed")
+            {:ok, updated_proof}
 
-        {:error, changeset} ->
-          Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
-          {:error, changeset}
+          {:error, changeset} ->
+            PrometheusMetrics.record_user_error(:proof_claim_status_update_failed)
+            Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+            {:error, changeset}
       end
     end
   end
@@ -330,12 +357,15 @@ defmodule ZkArcade.Proofs do
         {:ok, updated_proof}
 
       {:error, changeset} ->
+        PrometheusMetrics.record_user_error(:proof_failed_status_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
     end
   end
 
   def update_proof_retry(proof_id, max_fee) do
+    PrometheusMetrics.bumped_proof()
+
     proof = get_proof!(proof_id)
 
     changeset = change_proof(proof, %{
@@ -351,6 +381,7 @@ defmodule ZkArcade.Proofs do
         {:ok, updated_proof}
 
       {:error, changeset} ->
+        PrometheusMetrics.record_user_error(:proof_max_fee_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
     end
@@ -381,5 +412,8 @@ defmodule ZkArcade.Proofs do
     end
   end
 
-  defp get_or_create_wallet(_), do: {:error, :invalid_address}
+  defp get_or_create_wallet(_) do
+    PrometheusMetrics.record_user_error(:invalid_wallet_address)
+    {:error, :invalid_address}
+  end
 end

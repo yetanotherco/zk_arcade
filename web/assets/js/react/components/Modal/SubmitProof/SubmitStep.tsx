@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FormInput } from "../../Form";
 import { useCSRFToken } from "../../../hooks/useCSRFToken";
 import {
-	BeastProofClaimed,
 	NoncedVerificationdata,
 	ProofSubmission,
 	ProvingSystem,
@@ -22,9 +21,9 @@ import { useToast } from "../../../state/toast";
 import { formatEther, toHex } from "viem";
 import { useChainId } from "wagmi";
 import { Button } from "../../Button";
-import { BumpFee } from "./BumpFee";
-import { fetchProofVerificationData } from "../../../utils/aligned";
+import { BumpFeeModal } from "../../Modal/BumpFee";
 import { ProgressBar } from "../../ProgressBar";
+import { usePendingProofsToBump } from "../../../hooks/usePendingProofsToBump";
 
 type Game = {
 	id: "beast" | string;
@@ -36,12 +35,12 @@ const GAMES: Game[] = [
 	{
 		id: "beast",
 		name: "Beast",
-		cover: "/images/beast.gif",
+		cover: "/images/beast.png",
 	},
 	{
 		id: "parity",
 		name: "Parity",
-		cover: "/images/parity.jpg",
+		cover: "/images/parity.png",
 	},
 ];
 
@@ -115,6 +114,13 @@ export const SubmitProofStep = ({
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
 	const [gameIdx, setGameIdx] = useState(initialGameIdx);
 	const { price: ethPrice } = useEthPrice();
+	const {
+		proofsToBump,
+		isLoading: proofsToBumpIsLoading,
+		refetch,
+	} = usePendingProofsToBump({
+		user_address: user_address,
+	});
 
 	const [parsedPublicInputs, setParsedPublicInputs] = useState<
 		| {
@@ -348,64 +354,6 @@ export const SubmitProofStep = ({
 		]
 	);
 
-	const [bumpLoading, setBumpLoading] = useState(false);
-	const formRetryRef = useRef<HTMLFormElement>(null);
-	const handleBump = async (chosenWei: bigint) => {
-		try {
-			setBumpLoading(true);
-
-			const res = await fetchProofVerificationData(
-				proofSubmission?.id || ""
-			);
-			if (!res) {
-				setBumpLoading(false);
-				addToast({
-					title: "There was a problem while sending the proof",
-					desc: "Please try again.",
-					type: "error",
-				});
-				return;
-			}
-			const noncedVerificationData: NoncedVerificationdata =
-				res.verification_data;
-
-			noncedVerificationData.maxFee = toHex(chosenWei, { size: 32 });
-
-			const { r, s, v } = await signVerificationData(
-				noncedVerificationData,
-				payment_service_addr
-			);
-
-			const submitProofMessage: SubmitProof = {
-				verificationData: noncedVerificationData,
-				signature: {
-					r,
-					s,
-					v: Number(v),
-				},
-			};
-
-			setSubmitProofMessage(JSON.stringify(submitProofMessage));
-
-			addToast({
-				title: "Retrying submission",
-				desc: "Retrying proof submission using the newly selected fee.",
-				type: "success",
-			});
-
-			window.setTimeout(() => {
-				formRetryRef.current?.submit();
-			}, 1000);
-		} catch (error) {
-			setBumpLoading(false);
-			addToast({
-				title: "Could not apply the bump",
-				desc: "Please try again in a few seconds.",
-				type: "error",
-			});
-		}
-	};
-
 	useEffect(() => {
 		if (
 			proofSubmission?.status === "pending" ||
@@ -504,7 +452,9 @@ export const SubmitProofStep = ({
 					<Button
 						className=""
 						variant="text-accent"
-						onClick={() => setBumpFeeOpen(prev => !prev)}
+						onClick={() => {
+							setBumpFeeOpen(true);
+						}}
 					>
 						Bump fee
 					</Button>
@@ -512,44 +462,17 @@ export const SubmitProofStep = ({
 
 				{(proofStatus === "pending" ||
 					proofStatus === "underpriced") && (
-					<form
-						ref={formRetryRef}
-						action="/proof/status/retry"
-						method="post"
-						className="hidden"
-					>
-						<input
-							type="hidden"
-							name="_csrf_token"
-							value={csrfToken}
-						/>
-						<input
-							type="hidden"
-							name="submit_proof_message"
-							value={submitProofMessage}
-						/>
-						<input
-							type="hidden"
-							name="proof_id"
-							value={proofSubmission?.id}
-						/>
-					</form>
+					<BumpFeeModal
+						open={bumpFeeOpen}
+						proofsToBump={proofsToBump}
+						setOpen={setBumpFeeOpen}
+						proofsToBumpIsLoading={proofsToBumpIsLoading}
+						paymentServiceAddr={payment_service_addr}
+						afterBump={() => {
+							refetch();
+						}}
+					/>
 				)}
-
-				{(proofStatus === "pending" || proofStatus === "underpriced") &&
-					bumpFeeOpen && (
-						<BumpFee
-							onCancel={() => setBumpFeeOpen(false)}
-							onConfirm={handleBump}
-							isConfirmLoading={bumpLoading}
-							previousMaxFee={
-								proofSubmission?.submitted_max_fee || "0x0"
-							}
-							lastTimeSubmitted={
-								proofSubmission?.inserted_at || "0"
-							}
-						/>
-					)}
 			</div>
 		);
 	}
@@ -577,11 +500,11 @@ export const SubmitProofStep = ({
 		<div className="flex flex-col gap-6 justify-between h-full">
 			<div className="w-full flex flex-col gap-4">
 				<div className="flex flex-col overflow-x-auto p-2 max-w-[150px]">
-					<div className="">
+					<div className="w-full">
 						<img
 							src={gameData?.cover}
 							alt={gameData?.name}
-							className="w-[150px] h-[100px] object-cover rounded border-2"
+							className="w-auto h-[100px] rounded border-2"
 						/>
 					</div>
 					<div className="text-center">{gameData?.name}</div>

@@ -71,17 +71,6 @@ export async function getNftMetadata(jsonUrl: string, nftContractAddress: Addres
 	return await fetchNftMetadata(jsonUrl, nftContractAddress);
 }
 
-// Helper function to get just the image URL from JSON metadata (for backwards compatibility)
-export async function getImageUrl(jsonUrl: string, nftContractAddress: Address): Promise<string> {
-	try {
-		const metadata = await fetchNftMetadata(jsonUrl, nftContractAddress);
-		return metadata.image;
-	} catch (error) {
-		console.error('Error:', error);
-		throw error;
-	}
-}
-
 // This function normalizes the proof input into an array of bytes32 strings.
 function processRawMerkleProof(input: Proof): `0x${string}`[] {
 	if (Array.isArray(input)) {

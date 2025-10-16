@@ -2,7 +2,7 @@
 	"permissions": {
 		"owner": "0x771C1aB81C81A774B66C4386Eb50D6DFC8538106"
 	},
-	"beastVKCommitment": "0x17d1f38bfbf17d1c9dd4d9dabe58c6d6a1f1a2b7a7fa8d01a422c7e1af7c7342",
+	"beastVKCommitment": "0x137c1be1f603edbf600025935baec7aed4442459f6b919d2ec40069c5daa9753",
 	"parityVKCommitment": "0x949446f1e2cd049ac9bec14482e4386015db6e2e8bf3b7160b31292434e6edeb",
 	"alignedServiceManager": "0xFf731AB7b3653dc66878DC77E851D174f472d137",
 	"alignedBatcherPaymentService": "0x403dE630751e148bD71BFFcE762E5667C0825399",

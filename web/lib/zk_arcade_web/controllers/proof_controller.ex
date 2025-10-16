@@ -515,5 +515,4 @@ defmodule ZkArcadeWeb.ProofController do
       Logger.warning("Could not resolve country for address #{address}: #{inspect(reason)}")
    end
   end
-
 end

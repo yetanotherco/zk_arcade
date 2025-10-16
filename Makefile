@@ -237,6 +237,8 @@ create_env_mainnet:
 	@echo "EXPLORER_URL=https://explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 	@echo "FEEDBACK_FORM_URL=" >> /home/app/config/.env.zk_arcade
 	@echo "BEAST_WINDOWS_DOWNLOAD_URL=https://github.com/yetanotherco/zk_arcade/releases/download/v0.6.0/beast.exe" >> /home/app/config/.env.zk_arcade
+	@echo "IP_INFO_API_KEY=${IP_INFO_API_KEY}" >> /home/app/config/.env.zk_arcade
+	@echo "IPGEOLOCATION_API_KEY=${IPGEOLOCATION_API_KEY}" >> /home/app/config/.env.zk_arcade
 
 create_env_holesky:
 	@truncate -s0 /home/app/config/.env.zk_arcade

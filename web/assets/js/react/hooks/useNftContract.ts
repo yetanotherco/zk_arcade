@@ -53,7 +53,6 @@ async function fetchNftMetadata(jsonUrl: string, nftContractAddress: Address): P
 			address: nftContractAddress,
 		};
 	} catch (error) {
-		console.error('Error fetching NFT metadata:', error);
 		throw error;
 	}
 }
@@ -333,7 +332,6 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 				const fetchTokenURIs = async () => {
 					try {
 						if (!publicClient) {
-							console.error("Wagmi publicClient not initialized");
 							return;
 						}
 
@@ -342,7 +340,6 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 							const tokenId = normalizeTokenId(events[i]?.args?.tokenId);
 
 							if (tokenId === undefined) {
-								console.warn(`No tokenId found for event index ${i}`);
 								continue;
 							}
 
@@ -353,12 +350,10 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 						}
 						setTokenURIs(uris);
 					} catch (e) {
-						console.error("Error fetching token URIs:", e);
 					}
 				};
 				fetchTokenURIs();
 			} catch (e) {
-				console.error("Error fetching Transfer events:", e);
 			}
 		};
 

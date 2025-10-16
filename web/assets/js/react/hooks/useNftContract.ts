@@ -348,7 +348,6 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 
 							const tokenURI = await getTokenURI(publicClient, contractAddress, tokenId);
 
-							console.log(`Fetched tokenURI for tokenId ${tokenId}: ${tokenURI}`);
 
 							uris.push(tokenURI);
 						}

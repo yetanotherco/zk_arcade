@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Address } from "viem";
+import { Address, Log } from "viem";
 import {
 	useChainId,
 	useReadContract,
@@ -26,7 +26,71 @@ export type NftMetadata = {
 	address?: Address;
 };
 
-async function fetchNftMetadata(jsonUrl: string, nftContractAddress: Address): Promise<NftMetadata> {
+export async function getUserTokenIds(publicClient: any, userAddress: Address, contractAddress: Address): Promise<bigint[]> {
+	if (!publicClient) return [];
+
+	const [received, sent] = await Promise.all([
+		publicClient.getLogs({
+			address: contractAddress,
+			event: {
+				anonymous: false,
+				inputs: [
+					{ indexed: true, internalType: "address", name: "from", type: "address" },
+					{ indexed: true, internalType: "address", name: "to", type: "address" },
+					{ indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" },
+				],
+				name: "Transfer",
+				type: "event",
+			},
+			args: { to: userAddress },
+			fromBlock: 0n,
+			toBlock: "latest",
+		}),
+		publicClient.getLogs({
+			address: contractAddress,
+			event: {
+				anonymous: false,
+				inputs: [
+					{ indexed: true, internalType: "address", name: "from", type: "address" },
+					{ indexed: true, internalType: "address", name: "to", type: "address" },
+					{ indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" },
+				],
+				name: "Transfer",
+				type: "event",
+			},
+			args: { from: userAddress },
+			fromBlock: 0n,
+			toBlock: "latest",
+		}),
+	]);
+
+	const events = [...received, ...sent] as any;
+
+	events.sort((a: any, b: any) => {
+		const ab = (a.blockNumber ?? 0n);
+		const bb = (b.blockNumber ?? 0n);
+		if (ab !== bb) return ab < bb ? -1 : 1;
+
+		const ai = Number((a as any).logIndex ?? 0);
+		const bi = Number((b as any).logIndex ?? 0);
+		return ai - bi;
+	});
+
+	// Note: A way to do this without filtering is requesting to the owner of the token to the contract
+	const owned = new Set<bigint>();
+	for (const ev of events) {
+		const { from, to, tokenId } = ev.args;
+		if (to?.toLowerCase() === userAddress.toLowerCase()) {
+			owned.add(tokenId);
+		} else if (from?.toLowerCase() === userAddress.toLowerCase()) {
+			owned.delete(tokenId);
+		}
+	}
+
+	return Array.from(owned);
+}
+
+export async function getNftMetadata(jsonUrl: string, nftContractAddress: Address): Promise<NftMetadata> {
 	try {
 		const response = await fetch(jsonUrl);
 		if (!response.ok) {
@@ -66,11 +130,6 @@ export function processImageUrl(imageUrl: string): string {
 	return imageUrl;
 }
 
-// Helper function to get complete NFT metadata from JSON metadata URL
-export async function getNftMetadata(jsonUrl: string, nftContractAddress: Address): Promise<NftMetadata> {
-	return await fetchNftMetadata(jsonUrl, nftContractAddress);
-}
-
 // This function normalizes the proof input into an array of bytes32 strings.
 function processRawMerkleProof(input: Proof): `0x${string}`[] {
 	if (Array.isArray(input)) {
@@ -103,43 +162,7 @@ function processRawMerkleProof(input: Proof): `0x${string}`[] {
 	);
 }
 
-// Helper function to get Transfer events for a user
-async function getTransferEvents(
-	publicClient: any,
-	contractAddress: Address,
-	userAddress: Address
-) {
-	return await publicClient.getLogs({
-		address: contractAddress,
-		event: {
-			anonymous: false,
-			inputs: [
-				{ indexed: true, internalType: "address", name: "from", type: "address" },
-				{ indexed: true, internalType: "address", name: "to", type: "address" },
-				{ indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" }
-			],
-			name: "Transfer",
-			type: "event"
-		},
-		args: {
-			to: userAddress,
-		},
-		fromBlock: 0n,
-		toBlock: "latest",
-	});
-}
-
-// Helper function to process and normalize tokenURI
-function processTokenURI(tokenURI: string): string {
-	let processedURI = tokenURI;
-
-	// Replace the initial ipfs:// in url for the ipfs gateway we use
-	processedURI = processedURI.replace("ipfs://", "https://gateway.lighthouse.storage/ipfs/");
-
-	return processedURI;
-}
-
-// Helper function to get tokenURI from contract
+// Gets the specific token URI requesting it to the NFT contract
 async function getTokenURI(
 	publicClient: any,
 	contractAddress: Address,
@@ -152,10 +175,10 @@ async function getTokenURI(
 		args: [tokenId],
 	});
 
-	return processTokenURI(tokenURI);
+	return tokenURI.replace("ipfs://", "https://gateway.lighthouse.storage/ipfs/");
 }
 
-// Helper function to normalize tokenId (handle the hardcoded case)
+// TODO: Remove this function after setting the 0 index file at IPFS folder
 function normalizeTokenId(tokenId: bigint | undefined): bigint | undefined {
 	if (tokenId === undefined) return undefined;
 	// HARDCODED: if tokenId is 0, increase it to 1
@@ -267,18 +290,18 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 				try {
 					if (!publicClient) return;
 
-					const events = await getTransferEvents(publicClient, contractAddress, userAddress);
+					const userTokenIds = await getUserTokenIds(publicClient, userAddress, contractAddress);
 
-					if (events.length > 0) {
+					if (userTokenIds.length > 0) {
 						// Get the latest event (most recent NFT)
-						const latestEvent = events[events.length - 1];
-						const tokenId = normalizeTokenId(latestEvent.args?.tokenId);
+						const latestTokenId = userTokenIds[userTokenIds.length - 1];
+						const tokenId = normalizeTokenId(latestTokenId);
 
 						if (tokenId !== undefined) {
 							const tokenURI = await getTokenURI(publicClient, contractAddress, tokenId);
 							
 							// Fetch the metadata
-							const metadata = await fetchNftMetadata(tokenURI, contractAddress);
+							const metadata = await getNftMetadata(tokenURI, contractAddress);
 							setClaimedNftMetadata(metadata);
 							setShowSuccessModal(true);
 						}
@@ -316,7 +339,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 					return;
 				}
 
-				const events = await getTransferEvents(publicClient, contractAddress, userAddress);
+				const userTokenIds = await getUserTokenIds(publicClient, userAddress, contractAddress);
 
 				const fetchTokenURIs = async () => {
 					try {
@@ -326,14 +349,13 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 
 						const uris: string[] = [];
 						for (let i = 0; i < (balance.data || 0n); i++) {
-							const tokenId = normalizeTokenId(events[i]?.args?.tokenId);
+							const tokenId = normalizeTokenId(userTokenIds[i]);
 
 							if (tokenId === undefined) {
 								continue;
 							}
 
 							const tokenURI = await getTokenURI(publicClient, contractAddress, tokenId);
-
 
 							uris.push(tokenURI);
 						}

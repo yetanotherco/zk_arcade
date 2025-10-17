@@ -15,6 +15,9 @@ jobs:
             artifact_name: x86
           - os: macos-latest
             artifact_name: arm64
+          - os: ubuntu-latest
+            artifact_name: windows
+            target: x86_64-pc-windows-gnu
 
     runs-on: ${{ matrix.os }}
 
@@ -30,6 +33,13 @@ jobs:
           override: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Windows cross-compilation dependencies
+        if: matrix.target == 'x86_64-pc-windows-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64
+          rustup target add x86_64-pc-windows-gnu
 
       - name: Install risc0 toolchain
         run: |
@@ -47,19 +57,51 @@ jobs:
           source ~/.bashrc
            ~/.sp1/bin/sp1up --version v5.0.0 
       
-      - name: Build Beast
-        run: make beast_build
+      - name: Build Beast Sepolia
+        run: |
+          if [[ "${{ matrix.target }}" == "x86_64-pc-windows-gnu" ]]; then
+            make beast_build_sepolia_windows
+          else
+            make beast_build_sepolia
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Rename Beast binary
-        run: mv games/beast/target/release/beast beast_${{ matrix.artifact_name }}
+      - name: Rename Beast Sepolia binary
+        run: |
+          if [[ "${{ matrix.target }}" == "x86_64-pc-windows-gnu" ]]; then
+            mv games/beast/target/x86_64-pc-windows-gnu/release/beast.exe beast_sepolia_${{ matrix.artifact_name }}.exe
+          else
+            mv games/beast/target/release/beast beast_sepolia_${{ matrix.artifact_name }}
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Beast Mainnet
+        run: |
+          if [[ "${{ matrix.target }}" == "x86_64-pc-windows-gnu" ]]; then
+            make beast_build_mainnet_windows
+          else
+            make beast_build_mainnet
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Rename Beast Mainnet binary
+        run: |
+          if [[ "${{ matrix.target }}" == "x86_64-pc-windows-gnu" ]]; then
+            mv games/beast/target/x86_64-pc-windows-gnu/release/beast.exe beast_${{ matrix.artifact_name }}.exe
+          else
+            mv games/beast/target/release/beast beast_${{ matrix.artifact_name }}
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: beast_${{ matrix.artifact_name }}
+          files: |
+            beast_sepolia_${{ matrix.artifact_name }}${{ matrix.target == 'x86_64-pc-windows-gnu' && '.exe' || '' }}
+            beast_${{ matrix.artifact_name }}${{ matrix.target == 'x86_64-pc-windows-gnu' && '.exe' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

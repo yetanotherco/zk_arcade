@@ -72,7 +72,7 @@ const Web3EthProvider = ({ children, network }) => {
 						mode="light"
 						options={{
 							initialChainId: 0,
-							walletConnectName: "ZK Arcade",
+							walletConnectName: "Wallet Connect",
 							enforceSupportedChains: true,
 							disclaimer:
 								"By connecting your wallet, you agree to the Terms of Service and Privacy Policy.",

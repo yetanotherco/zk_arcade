@@ -7,16 +7,16 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # At this point we are in scripts/contracts/
 cd "$parent_path"
 
-# cd to merkle_tree/
-cd ../../merkle_tree/
+# cd to root
+cd ../../
 
-# Generate the merkle root and the merkle proof for each address of the whitelist
-cargo run -- ../contracts/script/deploy/config/devnet/nft.json merkle_output.json $MERKLE_ROOT_INDEX
-
-merkle_root=$(jq -r '.root' merkle_output.json)
+make preprocess_whitelist WHITELIST_PATH=whitelist_addresses.csv
+make generate_merkle_data MERKLE_ROOT_INDEX=0 WHITELIST_PATH=data/new_addresses.csv
 
 # cd to contracts/
-cd ../contracts/
+cd contracts/
+
+merkle_root=$(jq -r '.root' ../merkle_tree/merkle_output.json)
 
 # Deploy NFT Contract with Merkle Tree
 CMD="forge script script/deploy/NftContractDeployer.s.sol:NftContractDeployer \

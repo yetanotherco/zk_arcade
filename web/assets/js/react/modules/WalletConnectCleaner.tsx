@@ -104,5 +104,9 @@ export const WalletConnectCleaner = () => {
 		cleanupWalletConnectDB();
 	}, []);
 
+	window.onunhandledrejection = event => {
+		console.warn(`UNHANDLED PROMISE REJECTION: ${event.reason}`, event);
+	};
+
 	return null;
 };

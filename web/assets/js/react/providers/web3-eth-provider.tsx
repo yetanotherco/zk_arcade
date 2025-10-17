@@ -44,7 +44,6 @@ const Web3EthProvider = ({ children, network }) => {
 		const MATCH = /No matching key\. history:?/i;
 		const originalError = console.error;
 		console.error = (...args) => {
-			console.log("CONSOLE ERROR ARGS", args);
 			try {
 				const text = args
 					.map(a => (typeof a === "string" ? a : a?.message || ""))

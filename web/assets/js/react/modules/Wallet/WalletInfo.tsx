@@ -5,9 +5,10 @@ import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
-import { useNftContract, getNftMetadata, NftMetadata } from "../../hooks/useNftContract";
+import { useNftContract } from "../../hooks/useNftContract";
 import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
+import { useNftTokenIds, getNftMetadata, NftMetadata } from "../../hooks/useNftTokenIds";
 
 type Props = {
 	network: string;
@@ -41,15 +42,17 @@ export const WalletInfo = ({
 	const { 
 		balance, 
 		claimNft, 
-		receipt, 
-		tokenURIs,
-		showSuccessModal,
-		setShowSuccessModal,
-		claimedNftMetadata,
+		receipt,
 	} = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
+
+	const { tokenURIs , showSuccessModal, setShowSuccessModal, claimedNftMetadata } = useNftTokenIds({
+		contractAddress: nft_contract_address,
+		userAddress: user_address,
+	});
+
 	const { disconnect } = useDisconnect();
 
 	const [nftMetadataList, setNftMetadataList] = useState<NftMetadata[]>([]);
@@ -87,7 +90,7 @@ export const WalletInfo = ({
 				})
 			);
 
-			setNftMetadataList(metadataList.filter((metadata): metadata is NftMetadata => metadata !== null));
+			setNftMetadataList(metadataList.filter((metadata: any): metadata is NftMetadata => metadata !== null));
 		};
 
 		fetchNftMetadata();

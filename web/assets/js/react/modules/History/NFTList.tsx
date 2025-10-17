@@ -3,8 +3,8 @@ import { Address } from "../../types/blockchain";
 import Web3EthProvider from "../../providers/web3-eth-provider";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
-import { getNftMetadata, NftMetadata, useNftContract } from "../../hooks/useNftContract";
 import { Modal } from "../../components";
+import { useNftTokenIds, NftMetadata, getNftMetadata } from "../../hooks/useNftTokenIds";
 
 type Props = {
     network: string;
@@ -66,7 +66,7 @@ const NFTList = ({
 	nft_contract_address,
 	user_address,
 }: Omit<Props, "network">) => {
-    const { balance, tokenURIs, } = useNftContract({
+    const { balance, tokenURIs, } = useNftTokenIds({
         contractAddress: nft_contract_address,
         userAddress: user_address,
     });

@@ -57,7 +57,10 @@ CAMPAIGN_DAYS ?= 1
 BEAST_SUBMISSION_OFFSET_MINUTES ?= 720
 beast_gen_levels:
 	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
-	
+
+beast_build_elf:
+	@cd games/beast/beast1984/sp1_program && cargo prove build --output-directory ./elf --binaries beast_1984_program
+
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
 

@@ -225,6 +225,14 @@ debian_setup_postgres: ## Requires DB_PASSWORD
 	sudo -u postgres psql -U postgres -c "CREATE USER "zk_arcade_user" WITH PASSWORD '$(DB_PASSWORD)';"
 	sudo -u postgres psql -U postgres -c "CREATE DATABASE "zk_arcade_db" OWNER 'zk_arcade_user';"
 
+debian_setup_read_only_user: ## Requires DB_READ_ONLY_PASSWORD
+	sudo -u postgres psql -U postgres -c "CREATE USER "grafana" WITH PASSWORD '$(DB_READ_ONLY_PASSWORD)';"
+	sudo -u postgres psql -U postgres -c "GRANT pg_read_all_data TO "grafana";"
+
+debian_setup_vpn_connections_to_db:
+	sudo bash -c 'echo "listen_addresses = '*'" >> /etc/postgresql/16/main/postgresql.conf'
+	sudo bash -c 'echo "host all all 100.64.0.0/10" >> /etc/postgresql/16/main/pg_hba.conf'
+
 debian_deps: debian_create_dirs debian_install_deps debian_apply_firewall debian_install_erlang debian_install_elixir debian_install_nodejs user_install_rust debian_install_postgres debian_setup_postgres
 
 create_env_mainnet:

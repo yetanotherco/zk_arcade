@@ -104,8 +104,32 @@ export const WalletConnectCleaner = () => {
 		cleanupWalletConnectDB();
 	}, []);
 
-	window.onunhandledrejection = event => {
-		console.warn(`UNHANDLED PROMISE REJECTION: ${event.reason}`, event);
+	const MATCH = /No matching key\. history:?/i;
+	let lastToast = 0;
+
+	function notify() {
+		const now = Date.now();
+		if (now - lastToast > 4000) {
+			lastToast = now;
+			// Replace with your own toast system:
+			// e.g., window.myToast.error('Connection hiccup …')
+			alert("Connection hiccup. Try again or reconnect your wallet."); // placeholder
+		}
+	}
+
+	const originalError = console.error;
+	console.error = (...args) => {
+		console.log("WASAAAA");
+		try {
+			const text = args
+				.map(a => (typeof a === "string" ? a : a?.message || ""))
+				.join(" ");
+			if (MATCH.test(text)) {
+				notify();
+				return;
+			}
+		} catch {}
+		originalError(...args);
 	};
 
 	return null;

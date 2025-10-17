@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
 	},
 });
 
-const configSelector = config_name => {
+const configSelector = (config_name: string) => {
 	switch (config_name) {
 		case "anvil":
 			return ConfigAnvil;
@@ -33,7 +33,13 @@ const configSelector = config_name => {
 	}
 };
 
-const Web3EthProvider = ({ children, network }) => {
+const Web3EthProvider = ({
+	children,
+	network,
+}: {
+	children: React.ReactNode;
+	network: string;
+}) => {
 	const unpatchRef = useRef<(() => void) | null>(null);
 
 	useEffect(() => {

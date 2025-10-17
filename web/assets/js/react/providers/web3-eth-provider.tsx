@@ -59,6 +59,7 @@ const Web3EthProvider = ({
 					.join(" ");
 
 				if (MATCH.test(text)) {
+					originalError(...args);
 					const now = Date.now();
 					if (now - lastNotifiedAt > 3000) {
 						alert("Wallet connect error, try again");

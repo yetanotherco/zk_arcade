@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Address } from "viem";
 import {
 	useChainId,
@@ -52,6 +52,8 @@ function processRawMerkleProof(input: Proof): `0x${string}`[] {
 export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 	const chainId = useChainId();
 	const { addToast } = useToast();
+
+	const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
 
 	const balance = useReadContract({
 		address: contractAddress,
@@ -117,7 +119,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		});
 
 		return hash;
-	}, [userAddress, contractAddress, writeContractAsync, chainId]);
+	}, [userAddress, contractAddress, writeContractAsync, chainId, addToast]);
 
 	useEffect(() => {
 		if (txRest.isError) {
@@ -131,22 +133,12 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		}
 	}, [txRest.isSuccess, txRest.isError]);
 
+	// Reset processed hash when starting a new transaction
 	useEffect(() => {
-		if (receipt.isError) {
-			addToast({
-				title: "Problem with confirmation",
-				desc: "Could not confirm the transaction status. Check your wallet or the block explorer.",
-				type: "error",
-			});
+		if (txHash && processedTxHash && processedTxHash !== txHash) {
+			setProcessedTxHash(null);
 		}
-		if (receipt.isSuccess) {
-			addToast({
-				title: "NFT claimed successfully!",
-				desc: "Your NFT has been confirmed on the blockchain. It should appear in your wallet shortly.",
-				type: "success",
-			});
-		}
-	}, [receipt.isSuccess, receipt.isError]);
+	}, [txHash, processedTxHash]);
 
 	const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
 

@@ -12,6 +12,7 @@ import InitialModals from "./modules/InitialModals";
 import { ParityGame } from "./modules/Parity";
 import { BackgroundMusicPromptBtn } from "./modules/BackgroundMusic/BackgroundMusicPrompt";
 import { MuteBackgroundBtn } from "./modules/BackgroundMusic/MuteBtn";
+import { WalletConnectCleaner } from "./modules/WalletConnectCleaner";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -152,4 +153,9 @@ define(
 define(
 	{ "x-app-background-music-mute-btn": MuteBackgroundBtn },
 	{ attributes: [] }
+);
+
+define(
+	{ "x-app-wallet-connect-cleaner": WalletConnectCleaner },
+	{ attribytes: [] }
 );

@@ -1,13 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider } from "connectkit";
-import {
-	ConfigAnvil,
-	ConfigSepolia,
-	ConfigMainnet,
-	ConfigHolesky,
-} from "../config";
+import { configs } from "../config";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -18,43 +13,67 @@ const queryClient = new QueryClient({
 	},
 });
 
-const configSelector = config_name => {
+const configSelector = (config_name: string) => {
 	switch (config_name) {
 		case "anvil":
-			return ConfigAnvil;
+			return configs.ConfigAnvil();
 		case "sepolia":
-			return ConfigSepolia;
+			return configs.ConfigSepolia();
 		case "mainnet":
-			return ConfigMainnet;
+			return configs.ConfigMainnet();
 		case "holesky":
-			return ConfigHolesky;
+			return configs.ConfigHolesky();
 		default:
-			return ConfigAnvil;
+			return configs.ConfigAnvil();
 	}
 };
 
-const Web3EthProvider = ({ children, network }) => {
+const FLAG = "__wc_cleanup_done__";
+const w = window as any;
+
+const Web3EthProvider = ({
+	children,
+	network,
+}: {
+	children: React.ReactNode;
+	network: string;
+}) => {
+	const [flagValue, setFlagValue] = useState(w[FLAG]);
+
+	useEffect(() => {
+		const handleChange = () => {
+			setFlagValue(w[FLAG]);
+		};
+
+		window.addEventListener("flagChange", handleChange);
+
+		return () => {
+			window.removeEventListener("flagChange", handleChange);
+		};
+	}, []);
+
+	if (!flagValue) return null;
+
 	return (
-		<>
-			<WagmiProvider config={configSelector(network)}>
-				<QueryClientProvider client={queryClient}>
-					<ConnectKitProvider 
-						theme="auto"
-						mode="light"
-						options={{
-							initialChainId: 0,
-							walletConnectName: "ZK Arcade",
-							enforceSupportedChains: true,
-							disclaimer: "By connecting your wallet, you agree to the Terms of Service and Privacy Policy.",
-							overlayBlur: 0,
-							embedGoogleFonts: false,
-						}}
-					>
-						{children}
-					</ConnectKitProvider>
-				</QueryClientProvider>
-			</WagmiProvider>
-		</>
+		<WagmiProvider config={configSelector(network)}>
+			<QueryClientProvider client={queryClient}>
+				<ConnectKitProvider
+					theme="auto"
+					mode="light"
+					options={{
+						initialChainId: 0,
+						walletConnectName: "Wallet Connect",
+						enforceSupportedChains: true,
+						disclaimer:
+							"By connecting your wallet, you agree to the Terms of Service and Privacy Policy.",
+						overlayBlur: 0,
+						embedGoogleFonts: false,
+					}}
+				>
+					{children}
+				</ConnectKitProvider>
+			</QueryClientProvider>
+		</WagmiProvider>
 	);
 };
 

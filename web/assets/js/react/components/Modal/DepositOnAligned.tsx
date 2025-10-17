@@ -52,6 +52,10 @@ export const DepositOnAlignedModal = ({
 
 	useEffect(() => {
 		if (sendFunds.transaction.isError) {
+			console.log(
+				"SEND FUNDS ERROR LOOKS LIKE",
+				sendFunds.transaction.error
+			);
 			const errorMessage =
 				sendFunds.transaction.error?.message ||
 				"Something went wrong with the transaction.";
@@ -81,7 +85,7 @@ export const DepositOnAlignedModal = ({
 	const handleBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
 		const numValue = Number(value);
-		
+
 		if (numValue > ALIGNED_DEPOSIT_LIMIT) {
 			setBalanceValue(ALIGNED_DEPOSIT_LIMIT.toString());
 		} else {

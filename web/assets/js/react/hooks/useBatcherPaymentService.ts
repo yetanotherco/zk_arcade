@@ -24,7 +24,13 @@ export const useBatcherPaymentService = ({
 		data: depositHash,
 		sendTransactionAsync,
 		...depositTransactionData
-	} = useSendTransaction();
+	} = useSendTransaction({
+		mutation: {
+			onError(error) {
+				console.log("ERROR ON SEND TRANSACTION ASSYNC MUTATION", error);
+			},
+		},
+	});
 
 	const depositReceiptData = useWaitForTransactionReceipt({
 		hash: depositHash,

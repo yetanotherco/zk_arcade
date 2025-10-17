@@ -57,17 +57,37 @@ jobs:
           source ~/.bashrc
            ~/.sp1/bin/sp1up --version v5.0.0 
       
-      - name: Build Beast
+      - name: Build Beast Sepolia
         run: |
           if [[ "${{ matrix.target }}" == "x86_64-pc-windows-gnu" ]]; then
-            cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia --target x86_64-pc-windows-gnu
+            make beast_build_sepolia_windows
           else
-            make beast_build
+            make beast_build_sepolia
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Rename Beast binary
+      - name: Rename Beast Sepolia binary
+        run: |
+          if [[ "${{ matrix.target }}" == "x86_64-pc-windows-gnu" ]]; then
+            mv games/beast/target/x86_64-pc-windows-gnu/release/beast.exe beast_sepolia_${{ matrix.artifact_name }}.exe
+          else
+            mv games/beast/target/release/beast beast_sepolia_${{ matrix.artifact_name }}
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Beast Mainnet
+        run: |
+          if [[ "${{ matrix.target }}" == "x86_64-pc-windows-gnu" ]]; then
+            make beast_build_mainnet_windows
+          else
+            make beast_build_mainnet
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Rename Beast Mainnet binary
         run: |
           if [[ "${{ matrix.target }}" == "x86_64-pc-windows-gnu" ]]; then
             mv games/beast/target/x86_64-pc-windows-gnu/release/beast.exe beast_${{ matrix.artifact_name }}.exe
@@ -81,6 +101,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
+            beast_sepolia_${{ matrix.artifact_name }}${{ matrix.target == 'x86_64-pc-windows-gnu' && '.exe' || '' }}
             beast_${{ matrix.artifact_name }}${{ matrix.target == 'x86_64-pc-windows-gnu' && '.exe' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

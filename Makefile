@@ -61,6 +61,18 @@ beast_gen_levels:
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
 
+beast_build_sepolia:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
+
+beast_build_mainnet:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features mainnet
+
+beast_build_sepolia_windows:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia --target x86_64-pc-windows-gnu
+
+beast_build_mainnet_windows:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features mainnet --target x86_64-pc-windows-gnu
+
 beast_write_program_vk:
 	@cd games/beast/beast1984/ && cargo run --release --bin write_program_vk
 

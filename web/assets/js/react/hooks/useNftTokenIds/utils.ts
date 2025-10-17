@@ -2,6 +2,8 @@ import React from "react";
 import { Address } from "viem";
 import { zkArcadeNftAbi } from "../../constants/aligned";
 
+// Gets all the token IDs owned by the user by processing Transfer events. The token IDs returned are the
+// difference between received and sent tokens.
 export async function getUserTokenIds(publicClient: any, userAddress: Address, contractAddress: Address): Promise<bigint[]> {
     if (!publicClient) return [];
 
@@ -89,8 +91,8 @@ export async function getTokenURI(
     return tokenURI.replace("ipfs://", "https://gateway.lighthouse.storage/ipfs/");
 }
 
-// Helper function to process IPFS URLs and convert them to gateway URLs
-export function processImageUrl(imageUrl: string): string {
+// Receives an ipfs URL and processes it to return a HTTP URL
+export function convertIpfsToHttpUrl(imageUrl: string): string {
     if (imageUrl.startsWith('ipfs://')) {
         const ipfsHash = imageUrl.split("ipfs://")[1];
         return `https://ipfs.io/ipfs/${ipfsHash}`;

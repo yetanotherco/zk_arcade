@@ -3,7 +3,7 @@ import { Address } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { useToast } from "../../state/toast";
 import { zkArcadeNftAbi } from "../../constants/aligned";
-import { processImageUrl, getUserTokenIds, normalizeTokenId, getTokenURI } from "./utils";
+import { convertIpfsToHttpUrl, getUserTokenIds, normalizeTokenId, getTokenURI } from "./utils";
 
 type HookArgs = {
     userAddress: Address;
@@ -18,6 +18,7 @@ export type NftMetadata = {
     address?: Address;
 };
 
+// Fetches the NFT metadata from a given JSON URL and the NFT contract address
 export async function getNftMetadata(jsonUrl: string, nftContractAddress: Address): Promise<NftMetadata> {
     try {
         const response = await fetch(jsonUrl);
@@ -32,7 +33,7 @@ export async function getNftMetadata(jsonUrl: string, nftContractAddress: Addres
         }
 
         // Convert IPFS URL to gateway URL if needed
-        const imageUrl = processImageUrl(data.image);
+        const imageUrl = convertIpfsToHttpUrl(data.image);
 
         // Get the tokenID from url last digits (separated by /)
         const tokenId = BigInt(jsonUrl.split("/").pop() || 0);
@@ -49,6 +50,7 @@ export async function getNftMetadata(jsonUrl: string, nftContractAddress: Addres
     }
 }
 
+// Main hook to get the NFT token IDs and related data for a user
 export function useNftTokenIds({ userAddress, contractAddress }: HookArgs) {
     const publicClient = usePublicClient();
 	const { addToast } = useToast();
@@ -119,7 +121,6 @@ export function useNftTokenIds({ userAddress, contractAddress }: HookArgs) {
 
 	// Fetch events Transfer(from, to, tokenId) where to == userAddress
 	// When the user has a balance > 0, we check the blockchain logs to see the NFTs they have received
-	// Note: We are supposing the user has received exactly 'balance.data' NFTs
 	useEffect(() => {
 		if (!userAddress || !balanceMoreThanZero) return;
 

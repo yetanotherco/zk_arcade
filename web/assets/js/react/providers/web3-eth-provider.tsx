@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider } from "connectkit";
@@ -34,18 +34,42 @@ const configSelector = config_name => {
 };
 
 const Web3EthProvider = ({ children, network }) => {
+	const notifyWalletConnectError = () => {
+		alert("Wallet connect error, try again");
+	};
+
+	useEffect(() => {
+		const MATCH = /No matching key\. history:?/i;
+		const originalError = console.error;
+		console.error = (...args) => {
+			console.log(args);
+			try {
+				const text = args
+					.map(a => (typeof a === "string" ? a : a?.message || ""))
+					.join(" ");
+
+				if (MATCH.test(text)) {
+					notifyWalletConnectError();
+					return;
+				}
+			} catch {}
+			originalError(...args);
+		};
+	}, []);
+
 	return (
 		<>
 			<WagmiProvider config={configSelector(network)}>
 				<QueryClientProvider client={queryClient}>
-					<ConnectKitProvider 
+					<ConnectKitProvider
 						theme="auto"
 						mode="light"
 						options={{
 							initialChainId: 0,
 							walletConnectName: "ZK Arcade",
 							enforceSupportedChains: true,
-							disclaimer: "By connecting your wallet, you agree to the Terms of Service and Privacy Policy.",
+							disclaimer:
+								"By connecting your wallet, you agree to the Terms of Service and Privacy Policy.",
 							overlayBlur: 0,
 							embedGoogleFonts: false,
 						}}

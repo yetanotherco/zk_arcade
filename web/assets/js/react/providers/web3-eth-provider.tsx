@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider } from "connectkit";
@@ -34,6 +34,8 @@ const configSelector = config_name => {
 };
 
 const Web3EthProvider = ({ children, network }) => {
+	const [errorLogOverriden, setErrorLogOverriden] = useState(false);
+
 	const notifyWalletConnectError = () => {
 		alert("Wallet connect error, try again");
 	};
@@ -55,11 +57,15 @@ const Web3EthProvider = ({ children, network }) => {
 			} catch {}
 			originalError(...args);
 		};
+
+		setErrorLogOverriden(true);
 	}, []);
+
+	if (!errorLogOverriden) return null;
 
 	return (
 		<>
-			<WagmiProvider config={configSelector(network)}>
+			<WagmiProvider config={configSelector(network)()}>
 				<QueryClientProvider client={queryClient}>
 					<ConnectKitProvider
 						theme="auto"

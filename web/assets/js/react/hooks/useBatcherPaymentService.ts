@@ -87,11 +87,15 @@ export const useBatcherPaymentService = ({
 	const sendFunds = useCallback(
 		async (amountToDepositInEther: string) => {
 			const value = parseEther(amountToDepositInEther);
-			await sendTransactionAsync({
-				to: contractAddress,
-				value,
-				chainId,
-			});
+			try {
+				await sendTransactionAsync({
+					to: contractAddress,
+					value,
+					chainId,
+				});
+			} catch (err) {
+				console.log("SEND FUNDS ERROR IN CATCH", err);
+			}
 		},
 		[sendTransactionAsync, contractAddress, chainId]
 	);

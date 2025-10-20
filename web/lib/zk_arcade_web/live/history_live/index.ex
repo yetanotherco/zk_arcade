@@ -27,8 +27,6 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
     has_prev = page > 1
     has_next = page < total_pages
 
-    proofs = get_proofs(wallet, page, entries_per_page)
-
     {username, position} = get_username_and_position(wallet)
     proofs = if wallet, do: get_proofs(wallet, 1, 20), else: []
 
@@ -36,7 +34,6 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
 
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
     batcher_url = Application.get_env(:zk_arcade, :batcher_url)
-    eligible = get_user_eligibility(wallet)
 
     socket =
       socket

@@ -16,19 +16,30 @@
                     />
                 </div>
                 <p class="text-lg text-text-200 ellipsis">Address: <span class="text-text-100"><%= @wallet %></span></p>
-                <div class="flex sm:gap-8 flex-wrap items-center">
-                    <p class="text-lg text-text-200">Balance on Aligned: <span class="text-text-100" id="history-balance">...</span></p>
-                    <x-app-history-deposit-on-aligned-btn  
-                        network={@network} 
-                        payment_service_address={@payment_service_address} 
-                        user_address={@wallet} 
-                    />
-                    <x-app-history-withdraw-from-aligned-btn 
-                        network={@network} 
-                        payment_service_address={@payment_service_address} 
-                        user_address={@wallet} 
-                    />
+                <div id="aligned-actions" phx-update="ignore" class="flex sm:gap-8 flex-wrap items-center">
+                    <p class="text-lg text-text-200">
+                        Balance on Aligned: <span class="text-text-100" id="history-balance">...</span>
+                    </p>
+
+                    <div id="deposit-on-aligned-wrap" phx-update="ignore">
+                        <x-app-history-deposit-on-aligned-btn
+                            id="deposit-on-aligned"
+                            network={@network}
+                            payment_service_address={@payment_service_address}
+                            user_address={@wallet}
+                        />
+                    </div>
+
+                    <div id="withdraw-on-aligned-wrap" phx-update="ignore">
+                        <x-app-history-withdraw-from-aligned-btn
+                            id="withdraw-on-aligned"
+                            network={@network}
+                            payment_service_address={@payment_service_address}
+                            user_address={@wallet}
+                        />
+                    </div>
                 </div>
+
                 <p class="text-lg text-text-200">Score: <span class="text-text-100" id="history-score">...</span></p>
                 <p class="text-lg text-text-200">Proofs sent: <span class="text-text-100"><%= @proofs_sent_total %></span></p>
             </div>
@@ -49,7 +60,10 @@
                     Here you can view your submitted proofs and their status.
                 </p>
             </div>
+
             <x-app-history
+                id={"history-root-#{@wallet}"}
+                phx-update="ignore"
                 network={@network}
                 proofs={@submitted_proofs}
                 leaderboard_address={@leaderboard_address}
@@ -67,7 +81,7 @@
                 />
             <% else %>
                 <div class="text-center">
-                    <p className="text-text-200 mt-10">
+                    <p class="text-text-200 mt-10">
                         You haven't submitted any proofs yet. Play a game and submit your first proof!
                     </p>
                 </div>

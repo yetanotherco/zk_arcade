@@ -155,7 +155,3 @@ define(
 	{ attributes: [] }
 );
 
-define(
-	{ "x-simple-username-btn": SimpleUsernameBtn },
-	{ attributes: ["network", "username"] }
-);

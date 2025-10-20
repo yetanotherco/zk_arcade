@@ -10,10 +10,12 @@
             <div class="flex flex-col gap-4 w-full">
                 <div class="flex items-end">
                     <p class="text-lg text-text-200 mr-2">Username: </p>
-                    <x-app-history-update-username-btn
-                        network={@network}
-                        username={@username}
-                    />
+                    <div id="update-username-btn-wrap" phx-update="ignore">
+                        <x-app-history-update-username-btn
+                            network={@network}
+                            username={@username}
+                        />
+                    </div>
                 </div>
                 <p class="text-lg text-text-200 ellipsis">Address: <span class="text-text-100"><%= @wallet %></span></p>
                 <div id="aligned-actions" phx-update="ignore" class="flex sm:gap-8 flex-wrap items-center">

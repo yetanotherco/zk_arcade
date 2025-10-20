@@ -3,7 +3,7 @@ import { Address } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { useToast } from "../../state/toast";
 import { zkArcadeNftAbi } from "../../constants/aligned";
-import { convertIpfsToHttpUrl, getUserTokenIds, normalizeTokenId, getTokenURI } from "./utils";
+import { convertIpfsToHttpUrl, getUserTokenIds, getTokenURI } from "./utils";
 
 type HookArgs = {
     userAddress: Address;
@@ -96,8 +96,7 @@ export function useNftTokenIds({ userAddress, contractAddress }: HookArgs) {
 
                     if (userTokenIds.length > 0) {
                         // Get the latest event (most recent NFT)
-                        const latestTokenId = userTokenIds[userTokenIds.length - 1];
-                        const tokenId = normalizeTokenId(latestTokenId);
+                        const tokenId = userTokenIds[userTokenIds.length - 1];
 
                         if (tokenId !== undefined) {
                             const tokenURI = await getTokenURI(publicClient, contractAddress, tokenId);
@@ -141,7 +140,7 @@ export function useNftTokenIds({ userAddress, contractAddress }: HookArgs) {
 
 						const uris: string[] = [];
 						for (let i = 0; i < (balance.data || 0n); i++) {
-							const tokenId = normalizeTokenId(userTokenIds[i]);
+							const tokenId = userTokenIds[i];
 
 							if (tokenId === undefined) {
 								continue;

@@ -68,13 +68,6 @@ export async function getUserTokenIds(publicClient: any, userAddress: Address, c
     return Array.from(owned);
 }
 
-// TODO: Remove this function after setting the 0 index file at IPFS folder
-export function normalizeTokenId(tokenId: bigint | undefined): bigint | undefined {
-    if (tokenId === undefined) return undefined;
-    // HARDCODED: if tokenId is 0, increase it to 1
-    return tokenId === 0n ? 1n : tokenId;
-}
-
 // Gets the specific token URI requesting it to the NFT contract
 export async function getTokenURI(
     publicClient: any,

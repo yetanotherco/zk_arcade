@@ -16,7 +16,7 @@ defmodule ZkArcadeWeb.Router do
     get "/", PageController, :home
     get "/games/", PageController, :games
     get "/games/:name", PageController, :game
-    get "/history", PageController, :history
+    live "/history", HistoryLive.Index, :index
     post "/wallet/sign", WalletController, :connect_wallet
     get "/wallet/disconnect", WalletController, :disconnect_wallet
     post "/wallet/username", WalletController, :set_username

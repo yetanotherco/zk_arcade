@@ -1,0 +1,78 @@
+<div class="w-full" style="margin-top: 150px">
+    <div class="section-width section-spacer-md">
+        <div class="flex flex-col gap-8 w-full">
+            <div>
+                <h1 class="text-3xl text-text-100 font-normal mb-4">Hello, {@username} 👋</h1>
+                <p class="text-md text-text-200">
+                    This is you.
+                </p>
+            </div>
+            <div class="flex flex-col gap-4 w-full">
+                <div class="flex items-end">
+                    <p class="text-lg text-text-200 mr-2">Username: </p>
+                    <x-app-history-update-username-btn
+                        network={@network}
+                        username={@username}
+                    />
+                </div>
+                <p class="text-lg text-text-200 ellipsis">Address: <span class="text-text-100"><%= @wallet %></span></p>
+                <div class="flex sm:gap-8 flex-wrap items-center">
+                    <p class="text-lg text-text-200">Balance on Aligned: <span class="text-text-100" id="history-balance">...</span></p>
+                    <x-app-history-deposit-on-aligned-btn  
+                        network={@network} 
+                        payment_service_address={@payment_service_address} 
+                        user_address={@wallet} 
+                    />
+                    <x-app-history-withdraw-from-aligned-btn 
+                        network={@network} 
+                        payment_service_address={@payment_service_address} 
+                        user_address={@wallet} 
+                    />
+                </div>
+                <p class="text-lg text-text-200">Score: <span class="text-text-100" id="history-score">...</span></p>
+                <p class="text-lg text-text-200">Proofs sent: <span class="text-text-100"><%= @proofs_sent_total %></span></p>
+            </div>
+            <x-app-history-claim-nft 
+                network={@network}
+                user_address={@wallet}
+                nft_contract_address={@nft_contract_address}
+                is_eligible={@eligible}
+            />
+        </div>
+    </div>
+
+    <div class="section-width section-spacer-md">
+        <div class="flex flex-col gap-8 w-full">
+            <div>
+                <h1 class="text-3xl text-text-100 font-normal mb-4">Your History</h1>
+                <p class="text-md text-text-200">
+                    Here you can view your submitted proofs and their status.
+                </p>
+            </div>
+            <x-app-history
+                network={@network}
+                proofs={@submitted_proofs}
+                leaderboard_address={@leaderboard_address}
+                payment_service_address={@payment_service_address}
+                user_address={@wallet}
+                explorer_url={@explorer_url}
+                batcher_url={@batcher_url}
+                nft_contract_address={@nft_contract_address}
+            />
+
+            <%= if @proofs_sent_total > 0 do %>
+                <.history_section 
+                    pagination={@pagination}
+                    show_pagination={true}
+                />
+            <% else %>
+                <div class="text-center">
+                    <p className="text-text-200 mt-10">
+                        You haven't submitted any proofs yet. Play a game and submit your first proof!
+                    </p>
+                </div>
+            <% end %>
+        </div>
+    </div>
+
+</div>

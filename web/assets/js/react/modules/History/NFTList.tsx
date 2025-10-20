@@ -96,6 +96,58 @@ const NFTView = ({
 	);
 };
 
+const NFTCard = ({
+	metadata,
+	index,
+	onSelect,
+}: {
+	metadata: NftMetadata;
+	index: number;
+	onSelect: (metadata: NftMetadata) => void;
+}) => {
+	return (
+		<button
+			type="button"
+			onClick={() => onSelect(metadata)}
+			className="group relative flex w-full max-w-[300px] flex-col overflow-hidden rounded-xl bg-black/75 p-3 text-left shadow-[0_18px_45px_-35px_rgba(24,255,127,0.8)] transition-transform duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-100/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_left,rgba(24,255,127,0.2),transparent_65%)] before:opacity-55 before:transition-opacity before:duration-300 after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(135deg,rgba(24,255,127,0.16),transparent_45%)] after:opacity-35 after:transition-opacity after:duration-300 hover:before:opacity-85 hover:after:opacity-60"
+		>
+			<div className="relative z-10 flex flex-col gap-3">
+				<div className="relative mx-auto w-full max-w-[90px] overflow-hidden rounded-xl bg-gradient-to-br from-black via-[#0b0b0d] to-[#040404] ring-[0.5px] ring-accent-100/35">
+					{metadata.image ? (
+						<img
+							src={metadata.image}
+							alt={metadata.name || "NFT"}
+							title={metadata.name || undefined}
+							className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.015]"
+						/>
+					) : (
+						<div className="grid aspect-square w-full place-items-center text-sm text-accent-100/70">
+							Image unavailable
+						</div>
+					)}
+					<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(24,255,127,0.28),transparent_75%)] opacity-0 transition-opacity duration-300 group-hover:opacity-60" />
+				</div>
+
+				<div className="flex flex-col gap-1.5">
+					<div className="flex items-start justify-between gap-2">
+						<h3 className="max-w-[68%] truncate text-xs font-semibold uppercase tracking-[0.24em] text-text-100">
+							{metadata.name || `NFT #${index + 1}`}
+						</h3>
+						<span className="rounded-full bg-accent-100/10 px-1.5 py-[2px] text-[9px] font-medium uppercase tracking-[0.3em] text-accent-100/80">
+							View
+						</span>
+					</div>
+
+					<div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.28em] text-text-200/70">
+						<span className="inline-block h-1 w-1 rounded-full bg-accent-100/70" />
+						Token #{Number(metadata.tokenId || 0n)}
+					</div>
+				</div>
+			</div>
+		</button>
+	);
+};
+
 const NFTList = ({
 	is_eligible,
 	nft_contract_address,
@@ -155,66 +207,21 @@ const NFTList = ({
 								Here you can view your nfts that allow you to
 								participate
 							</p>
-
 							{nftMetadataList.length > 0 && (
 								<div className="grid w-full justify-items-center gap-4 sm:grid-cols-2 lg:grid-cols-3">
 									{nftMetadataList.map((metadata, index) => (
-										<button
-											type="button"
-											key={index}
-											onClick={() => {
-												setSelectedMetadata(metadata);
+										<NFTCard
+											key={
+												metadata.tokenId?.toString() ??
+												index
+											}
+											metadata={metadata}
+											index={index}
+											onSelect={selected => {
+												setSelectedMetadata(selected);
 												setOpenNFTModal(true);
 											}}
-											className="group relative flex w-full max-w-[300px] flex-col overflow-hidden rounded-xl bg-black/75 p-3 text-left shadow-[0_18px_45px_-35px_rgba(24,255,127,0.8)] transition-transform duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-100/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_left,rgba(24,255,127,0.2),transparent_65%)] before:opacity-55 before:transition-opacity before:duration-300 after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(135deg,rgba(24,255,127,0.16),transparent_45%)] after:opacity-35 after:transition-opacity after:duration-300 hover:before:opacity-85 hover:after:opacity-60"
-										>
-											<div className="relative z-10 flex flex-col gap-3">
-												<div className="relative mx-auto w-full max-w-[90px] overflow-hidden rounded-xl bg-gradient-to-br from-black via-[#0b0b0d] to-[#040404] ring-[0.5px] ring-accent-100/35">
-													{metadata.image ? (
-														<img
-															src={metadata.image}
-															alt={
-																metadata.name ||
-																"NFT"
-															}
-															title={
-																metadata.name ||
-																undefined
-															}
-															className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.015]"
-														/>
-													) : (
-														<div className="grid aspect-square w-full place-items-center text-sm text-accent-100/70">
-															Image unavailable
-														</div>
-													)}
-													<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(24,255,127,0.28),transparent_75%)] opacity-0 transition-opacity duration-300 group-hover:opacity-60" />
-												</div>
-
-												<div className="flex flex-col gap-1.5">
-													<div className="flex items-start justify-between gap-2">
-														<h3 className="max-w-[68%] truncate text-xs font-semibold uppercase tracking-[0.24em] text-text-100">
-															{metadata.name ||
-																`NFT #${
-																	index + 1
-																}`}
-														</h3>
-														<span className="rounded-full bg-accent-100/10 px-1.5 py-[2px] text-[9px] font-medium uppercase tracking-[0.3em] text-accent-100/80">
-															View
-														</span>
-													</div>
-
-													<div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.28em] text-text-200/70">
-														<span className="inline-block h-1 w-1 rounded-full bg-accent-100/70" />
-														Token #
-														{Number(
-															metadata.tokenId ||
-																0n
-														)}
-													</div>
-												</div>
-											</div>
-										</button>
+										/>
 									))}
 								</div>
 							)}

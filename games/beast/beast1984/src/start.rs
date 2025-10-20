@@ -16,6 +16,31 @@ use dotenv::dotenv;
 use game_logic::{ANSI_RESET_FONT, BOARD_HEIGHT, BOARD_WIDTH};
 
 #[cfg(windows)]
+fn enable_ansi_support() {
+    use winapi::um::{
+        consoleapi::{GetConsoleMode, SetConsoleMode},
+        wincon::ENABLE_VIRTUAL_TERMINAL_PROCESSING,
+        processenv::GetStdHandle,
+        winbase::STD_OUTPUT_HANDLE,
+        handleapi::INVALID_HANDLE_VALUE,
+    };
+    
+    unsafe {
+        let console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+        if console_handle == INVALID_HANDLE_VALUE {
+            return;
+        }
+        
+        let mut console_mode: u32 = 0;
+        if GetConsoleMode(console_handle, &mut console_mode) != 0 {
+            // Enable Virtual Terminal Processing to support ANSI escape sequences
+            console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(console_handle, console_mode);
+        }
+    }
+}
+
+#[cfg(windows)]
 fn try_resize_console(min_width: usize, min_height: usize) {
     use winapi::um::{
         wincon::{SetConsoleScreenBufferSize, SetConsoleWindowInfo, GetConsoleScreenBufferInfo, CONSOLE_SCREEN_BUFFER_INFO, COORD, SMALL_RECT},
@@ -97,6 +122,10 @@ fn pause_and_exit(code: i32) {
 }
 
 pub fn start() {
+    // Enable ANSI color support on Windows to fix character rendering issues on Windows 10
+    #[cfg(windows)]
+    enable_ansi_support();
+    
     let cli_flags = env::args().skip(1).collect::<Vec<String>>();
     if cli_flags.contains(&String::from("--version"))
         || cli_flags.contains(&String::from("-v"))

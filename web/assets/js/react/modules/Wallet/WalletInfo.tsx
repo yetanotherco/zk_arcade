@@ -7,7 +7,11 @@ import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
 import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
-import { useNftContract, getNftMetadata, NftMetadata } from "../../hooks/useNftContract";
+import {
+	useNftContract,
+	getNftMetadata,
+	NftMetadata,
+} from "../../hooks/useNftContract";
 
 type Props = {
 	network: string;
@@ -38,14 +42,14 @@ export const WalletInfo = ({
 	const formRef = useRef<HTMLFormElement>(null);
 	const [claimed, setClaimed] = useState(false);
 	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
-	const { 
-		balance, 
-		claimNft, 
+	const {
+		balance,
+		claimNft,
 		receipt,
 		tokenURIs,
 		showSuccessModal,
 		setShowSuccessModal,
-		claimedNftMetadata
+		claimedNftMetadata,
 	} = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
@@ -78,21 +82,31 @@ export const WalletInfo = ({
 			if (tokenURIs.length === 0) return;
 
 			const metadataList = await Promise.all(
-				tokenURIs.map(async (uri) => {
+				tokenURIs.map(async uri => {
 					try {
 						return await getNftMetadata(uri, nft_contract_address);
 					} catch (error) {
-						console.error(`Error fetching metadata for ${uri}:`, error);
+						console.error(
+							`Error fetching metadata for ${uri}:`,
+							error
+						);
 						return null;
 					}
 				})
 			);
 
-			setNftMetadataList(metadataList.filter((metadata: any): metadata is NftMetadata => metadata !== null));
+			setNftMetadataList(
+				metadataList.filter(
+					(metadata: any): metadata is NftMetadata =>
+						metadata !== null
+				)
+			);
 		};
 
 		fetchNftMetadata();
 	}, [tokenURIs]);
+
+	console.log(nftMetadataList);
 
 	return (
 		<div className="sm:relative group">
@@ -115,19 +129,20 @@ export const WalletInfo = ({
 				>
 					<div className="flex gap-2 items-center justify-between w-full">
 						<div className="flex gap-2 items-center">
-							{balance.data != undefined && balance.data >0n ?
-								(
-									<img
-										src={nftMetadataList.at(0)?.image}
-										alt={nftMetadataList.at(0)?.name || "NFT"}
-										title={nftMetadataList.at(0)?.name}
-										style={{ maxWidth: "30px" }}
-									/>
-								) : (
-									<span className="hero-user" />
-								)
-							}
-							<a href="/history" className="text-lg hover:underline">
+							{balance.data != undefined && balance.data > 0n ? (
+								<img
+									src={nftMetadataList.at(0)?.image}
+									alt={nftMetadataList.at(0)?.name || "NFT"}
+									title={nftMetadataList.at(0)?.name}
+									style={{ maxWidth: "30px" }}
+								/>
+							) : (
+								<span className="hero-user" />
+							)}
+							<a
+								href="/history"
+								className="text-lg hover:underline"
+							>
 								{username}{" "}
 								{user_position === null
 									? "(#None)"
@@ -198,9 +213,16 @@ export const WalletInfo = ({
 			</div>
 
 			<NftSuccessModal
-				open={showSuccessModal}
+				open={true}
 				setOpen={setShowSuccessModal}
-				nftMetadata={claimedNftMetadata}
+				nftMetadata={{
+					name: "Aligned ZK Arcade - Testnet ONLY - Premium Ticket #0",
+					address: "0xC9a43158891282A2B1475592D5719c001986Aaec",
+					description:
+						"Your - Testnet ONLY - ticket to the future of ethereum.",
+					image: "https://ipfs.io/ipfs/bafkreiabklbmsnqwhjktmz55i4kyk6efypf7565n7nfkbkpevcsfsujb6i",
+					tokenId: 0n,
+				}}
 			/>
 		</div>
 	);

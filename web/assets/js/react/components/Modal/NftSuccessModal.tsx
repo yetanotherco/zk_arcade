@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal } from "./Modal";
 import { Button } from "..";
-import { NftMetadata } from "../../hooks/useNftTokenIds";
+import { NftMetadata } from "../../hooks/useNftContract";
 
 type Props = {
 	open: boolean;

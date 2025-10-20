@@ -5,10 +5,9 @@ import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
-import { useNftContract } from "../../hooks/useNftContract";
 import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
-import { useNftTokenIds, getNftMetadata, NftMetadata } from "../../hooks/useNftTokenIds";
+import { useNftContract, getNftMetadata, NftMetadata } from "../../hooks/useNftContract";
 
 type Props = {
 	network: string;
@@ -43,12 +42,11 @@ export const WalletInfo = ({
 		balance, 
 		claimNft, 
 		receipt,
+		tokenURIs,
+		showSuccessModal,
+		setShowSuccessModal,
+		claimedNftMetadata
 	} = useNftContract({
-		contractAddress: nft_contract_address,
-		userAddress: user_address,
-	});
-
-	const { tokenURIs , showSuccessModal, setShowSuccessModal, claimedNftMetadata } = useNftTokenIds({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});

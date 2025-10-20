@@ -4,7 +4,7 @@ import Web3EthProvider from "../../providers/web3-eth-provider";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { Modal } from "../../components";
-import { useNftTokenIds, NftMetadata, getNftMetadata } from "../../hooks/useNftTokenIds";
+import { NftMetadata, getNftMetadata, useNftContract } from "../../hooks/useNftContract";
 
 type Props = {
     network: string;
@@ -66,7 +66,7 @@ const NFTList = ({
 	nft_contract_address,
 	user_address,
 }: Omit<Props, "network">) => {
-    const { balance, tokenURIs, } = useNftTokenIds({
+    const { balance, tokenURIs, } = useNftContract({
         contractAddress: nft_contract_address,
         userAddress: user_address,
     });

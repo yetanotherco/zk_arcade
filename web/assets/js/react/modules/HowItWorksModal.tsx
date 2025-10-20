@@ -19,7 +19,7 @@ export const HowItWorksModal = () => {
 		}
 
 		document
-			.querySelectorAll("#how-it-works-nav-btn")
+			.querySelectorAll("#how-it-works-nav-btn-desktop, #how-it-works-nav-btn-mobile")
 			.forEach(el => el.addEventListener("click", () => setOpen(true)));
 	}, [setOpen]);
 

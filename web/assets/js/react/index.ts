@@ -77,6 +77,7 @@ define(
 	{ attributes: ["network", "username"] }
 );
 
+
 define(
 	{ "x-app-history-claim-nft": HistoryClaimNFT },
 	{
@@ -152,4 +153,9 @@ define(
 define(
 	{ "x-app-background-music-mute-btn": MuteBackgroundBtn },
 	{ attributes: [] }
+);
+
+define(
+	{ "x-simple-username-btn": SimpleUsernameBtn },
+	{ attributes: ["network", "username"] }
 );

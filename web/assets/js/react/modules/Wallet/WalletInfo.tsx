@@ -106,8 +106,6 @@ export const WalletInfo = ({
 		fetchNftMetadata();
 	}, [tokenURIs]);
 
-	console.log(nftMetadataList);
-
 	return (
 		<div className="sm:relative group">
 			<div className="flex flex-row items-center gap-3">
@@ -213,16 +211,9 @@ export const WalletInfo = ({
 			</div>
 
 			<NftSuccessModal
-				open={true}
+				open={showSuccessModal}
 				setOpen={setShowSuccessModal}
-				nftMetadata={{
-					name: "Aligned ZK Arcade - Testnet ONLY - Premium Ticket #0",
-					address: "0xC9a43158891282A2B1475592D5719c001986Aaec",
-					description:
-						"Your - Testnet ONLY - ticket to the future of ethereum.",
-					image: "https://ipfs.io/ipfs/bafkreiabklbmsnqwhjktmz55i4kyk6efypf7565n7nfkbkpevcsfsujb6i",
-					tokenId: 0n,
-				}}
+				nftMetadata={claimedNftMetadata}
 			/>
 		</div>
 	);

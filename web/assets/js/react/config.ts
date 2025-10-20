@@ -21,7 +21,7 @@ export const ConfigSepolia = createConfig(
 	getDefaultConfig({
 		chains: [sepolia],
 		transports: {
-			[sepolia.id]: http(),
+			[sepolia.id]: http('https://ethereum-sepolia-rpc.publicnode.com'),
 		},
 		...common_config,
 	})

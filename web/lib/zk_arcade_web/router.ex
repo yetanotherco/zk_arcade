@@ -13,7 +13,7 @@ defmodule ZkArcadeWeb.Router do
   scope "/", ZkArcadeWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", HomeLive.Index, :index
     get "/games/", PageController, :games
     get "/games/:name", PageController, :game
     live "/history", HistoryLive.Index, :index

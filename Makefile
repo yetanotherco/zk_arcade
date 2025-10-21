@@ -57,9 +57,24 @@ CAMPAIGN_DAYS ?= 1
 BEAST_SUBMISSION_OFFSET_MINUTES ?= 720
 beast_gen_levels:
 	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
-	
+
+beast_build_elf:
+	@cd games/beast/beast1984/sp1_program && cargo prove build --output-directory ./elf --binaries beast_1984_program
+
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
+
+beast_build_sepolia:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
+
+beast_build_mainnet:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features mainnet
+
+beast_build_sepolia_windows:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia --target x86_64-pc-windows-gnu
+
+beast_build_mainnet_windows:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features mainnet --target x86_64-pc-windows-gnu
 
 beast_write_program_vk:
 	@cd games/beast/beast1984/ && cargo run --release --bin write_program_vk
@@ -213,10 +228,19 @@ debian_setup_postgres: ## Requires DB_PASSWORD
 	sudo -u postgres psql -U postgres -c "CREATE USER "zk_arcade_user" WITH PASSWORD '$(DB_PASSWORD)';"
 	sudo -u postgres psql -U postgres -c "CREATE DATABASE "zk_arcade_db" OWNER 'zk_arcade_user';"
 
+debian_setup_read_only_user: ## Requires DB_READ_ONLY_PASSWORD
+	sudo -u postgres psql -U postgres -c "CREATE USER "grafana" WITH PASSWORD '$(DB_READ_ONLY_PASSWORD)';"
+	sudo -u postgres psql -U postgres -c "GRANT pg_read_all_data TO "grafana";"
+
+debian_setup_vpn_connections_to_db:
+	sudo bash -c 'echo "listen_addresses = '*'" >> /etc/postgresql/16/main/postgresql.conf'
+	sudo bash -c 'echo "host all all 100.64.0.0/10" >> /etc/postgresql/16/main/pg_hba.conf'
+
 debian_deps: debian_create_dirs debian_install_deps debian_apply_firewall debian_install_erlang debian_install_elixir debian_install_nodejs user_install_rust debian_install_postgres debian_setup_postgres
 
 create_env_mainnet:
 	@truncate -s0 /home/app/config/.env.zk_arcade
+	@echo "MIX_ENV=prod" >> /home/app/config/.env.zk_arcade
 	@echo "PHX_SERVER=true" >> /home/app/config/.env.zk_arcade
 	@echo "DATABASE_URL=ecto://zk_arcade_user:${DB_PASSWORD}@127.0.0.1/zk_arcade_db" >> /home/app/config/.env.zk_arcade
 	@echo "POOL_SIZE=64" >> /home/app/config/.env.zk_arcade
@@ -224,12 +248,24 @@ create_env_mainnet:
 	@echo "PHX_HOST=${PHX_HOST}" >> /home/app/config/.env.zk_arcade
 	@echo "KEYFILE_PATH=/home/app/.ssl/key.pem" >> /home/app/config/.env.zk_arcade
 	@echo "CERTFILE_PATH=/home/app/.ssl/cert.pem" >> /home/app/config/.env.zk_arcade
+	@echo "RPC_URL=${RPC_URL}" >> /home/app/config/.env.zk_arcade
 	@echo "ZK_ARCADE_NETWORK=mainnet" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_PAYMENT_SERVICE_ADDRESS=0xb0567184A52cB40956df6333510d6eF35B89C8de" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_SERVICE_MANAGER_ADDRESS=0xeF2A435e5EE44B2041100EF8cbC8ae035166606c" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_NFT_CONTRACT_ADDRESS=" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_HOST=mainnet.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_PORT=443" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_URL=wss://mainnet.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 	@echo "EXPLORER_URL=https://explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "FEEDBACK_FORM_URL=" >> /home/app/config/.env.zk_arcade
+	@echo "BEAST_WINDOWS_DOWNLOAD_URL=https://github.com/yetanotherco/zk_arcade/releases/download/v0.6.0/beast.exe" >> /home/app/config/.env.zk_arcade
+	@echo "IP_INFO_API_KEY=${IP_INFO_API_KEY}" >> /home/app/config/.env.zk_arcade
+	@echo "IPGEOLOCATION_API_KEY=${IPGEOLOCATION_API_KEY}" >> /home/app/config/.env.zk_arcade
 
-create_env_stage:
+create_env_holesky:
 	@truncate -s0 /home/app/config/.env.zk_arcade
-	@truncate -s0 /home/app/config/.env.zk_arcade
+	@echo "MIX_ENV=prod" >> /home/app/config/.env.zk_arcade
 	@echo "PHX_SERVER=true" >> /home/app/config/.env.zk_arcade
 	@echo "DATABASE_URL=ecto://zk_arcade_user:${DB_PASSWORD}@127.0.0.1/zk_arcade_db" >> /home/app/config/.env.zk_arcade
 	@echo "POOL_SIZE=64" >> /home/app/config/.env.zk_arcade
@@ -239,14 +275,16 @@ create_env_stage:
 	@echo "CERTFILE_PATH=/home/app/.ssl/cert.pem" >> /home/app/config/.env.zk_arcade
 	@echo "RPC_URL=${RPC_URL}" >> /home/app/config/.env.zk_arcade
 	@echo "ZK_ARCADE_NETWORK=holesky" >> /home/app/config/.env.zk_arcade
-	@echo "ALIGNED_PAYMENT_SERVICE_ADDRESS=0x7577Ec4ccC1E6C529162ec8019A49C13F6DAd98b" >> /home/app/config/.env.zk_arcade
-	@echo "ALIGNED_SERVICE_MANAGER_ADDRESS=0x9C5231FC88059C086Ea95712d105A2026048c39B" >> /home/app/config/.env.zk_arcade
-	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=0x02792Dab0272BB69fEa61a69b934b44c69fD7b33" >> /home/app/config/.env.zk_arcade
-	@echo "BATCHER_HOST=stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_PAYMENT_SERVICE_ADDRESS=0x815aeCA64a974297942D2Bbf034ABEe22a38A003" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_SERVICE_MANAGER_ADDRESS=0x58F280BeBE9B34c9939C3C39e0890C81f163B623" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=0xA8FED3cEEd5E5f5c8B862730E668f4585aD72fE0" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_NFT_CONTRACT_ADDRESS=0xF0c8CD5Aaf19bdD63eC353AA342a6518D4458B8F" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_HOST=batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_PORT=443" >> /home/app/config/.env.zk_arcade
-	@echo "BATCHER_URL=wss://stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
-	@echo "EXPLORER_URL=https://stage.explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
-
+	@echo "BATCHER_URL=wss://batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "EXPLORER_URL=https://holesky.explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "FEEDBACK_FORM_URL=" >> /home/app/config/.env.zk_arcade
+	@echo "BEAST_WINDOWS_DOWNLOAD_URL=https://github.com/yetanotherco/zk_arcade/releases/download/v0.6.0/beast.exe" >> /home/app/config/.env.zk_arcade
 
 ## Deploy
 release: export MIX_ENV=prod
@@ -273,3 +311,13 @@ create_service:
 	export $(cat config/.env.zk_arcade | xargs)
 	systemctl --user daemon-reload
 	systemctl --user enable --now zk_arcade
+
+## Monitoring
+install_prometheus:
+	@./infra/install_prometheus.sh
+
+install_grafana:
+	@./infra/install_grafana.sh
+
+update_grafana_dashboards:
+	@./infra/update_grafana_dashboards.sh

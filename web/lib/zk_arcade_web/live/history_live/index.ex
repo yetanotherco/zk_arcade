@@ -53,7 +53,6 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:batcher_url, batcher_url)
-      |> assign(:notifications, [])
       |> assign(:pagination, %{
         current_page: page,
         total_pages: total_pages,
@@ -68,37 +67,14 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
 
   @impl true
   def handle_info({:proof_claimed, proof_data}, socket) do
-    notification = %{
-      id: System.unique_integer([:positive]),
-      type: :proof_claimed,
-      username: proof_data.username || "Anonymous",
-      game: proof_data.game,
-      level: proof_data.level_reached,
-      timestamp: DateTime.utc_now(),
-      proof_id: proof_data.proof_id
-    }
-
-    notifications =
-      [notification | socket.assigns.notifications]
-      |> Enum.take(5)
-
-    socket = assign(socket, :notifications, notifications)
-
-    # Send notification via push_event to avoid DOM conflicts
-    {:noreply,
-     socket
-     |> push_event("show_toast", %{
-       type: "success",
-       message: "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!"
-     })
-     |> push_event("new_notification", %{notification: notification})}
-  end
-
-  @impl true
-  def handle_event("dismiss_notification", %{"id" => id}, socket) do
-    notification_id = String.to_integer(id)
-    notifications = Enum.reject(socket.assigns.notifications, &(&1.id == notification_id))
-    {:noreply, assign(socket, :notifications, notifications)}
+    # Handle the PubSub event - refresh stats and show toast via push_event
+    socket =
+      socket
+      |> push_event("show_toast", %{
+        type: "success",
+        message: "#{proof_data.username} just claimed a proof for level #{proof_data.level_reached} in #{proof_data.game}!"
+      })
+    {:noreply, socket}
   end
 
   @impl true

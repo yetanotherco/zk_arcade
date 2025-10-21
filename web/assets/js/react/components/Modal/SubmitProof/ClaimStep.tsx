@@ -68,7 +68,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 				)}
 				{showExpiryInfo && (
 					<div className="rounded border border-accent-100/25 bg-black/60 px-4 py-3 text-sm text-text-200">
-						Proof expires in{" "}
+						Claim expires in{" "}
 						<span className="font-semibold text-accent-100">
 							{claimExpiryLabel}
 						</span>

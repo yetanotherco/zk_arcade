@@ -1,9 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Modal, ModalProps } from "../Modal";
 import { Address, formatEther } from "viem";
 import { ProofSubmission, VerificationData } from "../../../types/aligned";
 import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentService";
 import { useNftContract } from "../../../hooks/useNftContract";
+import { useBeastLeaderboardContract } from "../../../hooks/useBeastLeaderboardContract";
+import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboardContract";
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
@@ -94,6 +96,83 @@ export const SubmitProofModal = ({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
+	const { currentGame: beastCurrentGame } = useBeastLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address,
+	});
+	const { currentGame: parityCurrentGame } = useParityLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address,
+	});
+
+	const activeGameName = (gameName || proof?.game || "").toLowerCase();
+	const beastEndsAt = beastCurrentGame.game?.endsAtTime;
+	const parityEndsAt = parityCurrentGame.game?.endsAtTime;
+
+	const claimExpiryTimestampSeconds = useMemo(() => {
+		const dayInSeconds = 24 * 60 * 60;
+
+		if (activeGameName === "beast") {
+			const endsAt = beastEndsAt;
+			return endsAt && endsAt > 0n
+				? Number(endsAt) + dayInSeconds
+				: null;
+		}
+
+		if (activeGameName === "parity") {
+			const endsAt = parityEndsAt;
+			return endsAt && endsAt > 0n
+				? Number(endsAt) + dayInSeconds
+				: null;
+		}
+
+		return null;
+	}, [activeGameName, beastEndsAt, parityEndsAt]);
+
+	const [expiresInLabel, setExpiresInLabel] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (!claimExpiryTimestampSeconds) {
+			setExpiresInLabel(null);
+			return;
+		}
+
+		const updateLabel = () => {
+			const diffMs =
+				claimExpiryTimestampSeconds * 1000 - Date.now();
+
+			if (diffMs <= 0) {
+				setExpiresInLabel("Expired");
+				return;
+			}
+
+			const totalSeconds = Math.floor(diffMs / 1000);
+			const days = Math.floor(totalSeconds / 86400);
+			const hours = Math.floor((totalSeconds % 86400) / 3600);
+			const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+			const parts: string[] = [];
+			if (days > 0) parts.push(`${days}d`);
+			if (hours > 0 || days > 0) parts.push(`${hours}h`);
+			parts.push(`${minutes}m`);
+
+			setExpiresInLabel(parts.join(" "));
+		};
+
+		updateLabel();
+
+		const timer = setInterval(updateLabel, 60_000);
+		return () => clearInterval(timer);
+	}, [claimExpiryTimestampSeconds]);
+
+	const claimExpiryDate = useMemo(() => {
+		if (!claimExpiryTimestampSeconds) return null;
+		return new Date(claimExpiryTimestampSeconds * 1000);
+	}, [claimExpiryTimestampSeconds]);
+	const claimExpiryDateUtc = useMemo(() => {
+		if (!claimExpiryDate) return null;
+		return claimExpiryDate.toUTCString();
+	}, [claimExpiryDate]);
 
 	const updateState = useCallback(() => {
 		if (proof) {
@@ -214,16 +293,18 @@ export const SubmitProofModal = ({
 				currentLevelReached={currentLevelReached}
 			/>
 		),
-		claim: () =>
-			proof && (
-				<ClaimStep
-					setOpen={modal.setOpen}
-					proofSubmission={proof}
-					user_address={user_address}
-					leaderboard_address={leaderboard_address}
-					proofStatus={proofStatus}
-				/>
-			),
+			claim: () =>
+				proof && (
+					<ClaimStep
+						setOpen={modal.setOpen}
+						proofSubmission={proof}
+						user_address={user_address}
+						leaderboard_address={leaderboard_address}
+						proofStatus={proofStatus}
+						claimExpiryLabel={expiresInLabel}
+						claimExpiryUtc={claimExpiryDateUtc}
+					/>
+				),
 	};
 
 	useEffect(() => {
@@ -318,7 +399,7 @@ export const SubmitProofModal = ({
 						<p className="text-center">Loading...</p>
 					)}
 				</div>
-			</div>
-		</Modal>
-	);
-};
+				</div>
+			</Modal>
+		);
+	};

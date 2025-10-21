@@ -15,6 +15,8 @@ type ClaimComponentProps = {
 	onCancel: () => void;
 	isLoading: boolean;
 	claimTxHash: string;
+	claimExpiryLabel?: string | null;
+	claimExpiryUtc?: string | null;
 };
 
 const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
@@ -26,30 +28,55 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 			onCancel,
 			isLoading,
 			claimTxHash,
+			claimExpiryLabel,
+			claimExpiryUtc,
 		},
 		formRef
 	) => {
 		const { csrfToken } = useCSRFToken();
 		const proofStatus = proofSubmission.status;
+		const claimWindowExpired =
+			claimExpiryLabel !== undefined &&
+			claimExpiryLabel !== null &&
+			claimExpiryLabel === "Expired";
+		const showExpiryInfo =
+			!claimWindowExpired &&
+			!gameHasExpired &&
+			proofStatus === "verified" &&
+			claimExpiryLabel &&
+			claimExpiryUtc;
+		const canClaim =
+			!gameHasExpired &&
+			!claimWindowExpired &&
+			proofStatus === "verified";
+
 		return (
 			<div className="flex flex-col gap-4 justify-between h-full">
-				{gameHasExpired && proofStatus === "verified" && (
-					<p className="bg-red/20 rounded p-2 text-red">
-						The game has expired. You didn't claim the points in
-						time, try again.
-					</p>
-				)}
-				{!gameHasExpired && proofStatus === "verified" && (
+				{canClaim && (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
 						The proof was verified and it is ready to claim the
 						points.
 					</p>
 				)}
-				{proofStatus === "claimed" && (
-					<p className="bg-blue/20 rounded p-2 text-blue">
-						Your points have been claimed successfully
+				{(gameHasExpired ||
+					(claimWindowExpired && proofStatus === "verified")) && (
+					<p className="bg-red/20 rounded p-2 text-red">
+						Claim window expired. You can't claim these points
+						anymore.
 					</p>
 				)}
+				{showExpiryInfo && (
+					<div className="rounded border border-accent-100/25 bg-black/60 px-4 py-3 text-sm text-text-200">
+						Proof expires in{" "}
+						<span className="font-semibold text-accent-100">
+							{claimExpiryLabel}
+						</span>
+						<div className="mt-1 text-xs text-text-300">
+							UTC {claimExpiryUtc}
+						</div>
+					</div>
+				)}
+
 				<div className="flex flex-col gap-2">
 					<p>Game: {proofSubmission.game}</p>
 					<p>Daily Quest: {Number(proofSubmission.game_idx) + 1}</p>
@@ -71,7 +98,10 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						variant="accent-fill"
 						onClick={handleClaim}
 						isLoading={isLoading}
-						disabled={gameHasExpired && proofStatus !== "claimed"}
+						disabled={
+							(gameHasExpired || claimWindowExpired) &&
+							proofStatus !== "claimed"
+						}
 					>
 						{proofStatus === "claimed"
 							? "Share on twitter"
@@ -106,6 +136,8 @@ type ClaimProps = {
 	proofSubmission: ProofSubmission;
 	user_address: Address;
 	leaderboard_address: Address;
+	claimExpiryLabel?: string | null;
+	claimExpiryUtc?: string | null;
 };
 
 const BeastClaim = ({
@@ -113,6 +145,8 @@ const BeastClaim = ({
 	user_address,
 	proofSubmission,
 	setOpen,
+	claimExpiryLabel,
+	claimExpiryUtc,
 }: ClaimProps) => {
 	const chainId = useChainId();
 	const { submitSolution } = useBeastLeaderboardContract({
@@ -169,6 +203,8 @@ const BeastClaim = ({
 			proofSubmission={proofSubmission}
 			ref={formRef}
 			claimTxHash={claimTxHash}
+			claimExpiryLabel={claimExpiryLabel}
+			claimExpiryUtc={claimExpiryUtc}
 		/>
 	);
 };
@@ -178,6 +214,8 @@ const ParityClaim = ({
 	leaderboard_address,
 	proofSubmission,
 	setOpen,
+	claimExpiryLabel,
+	claimExpiryUtc,
 }: ClaimProps) => {
 	const chainId = useChainId();
 
@@ -233,6 +271,8 @@ const ParityClaim = ({
 			proofSubmission={proofSubmission}
 			ref={formRef}
 			claimTxHash={submitSolution.tx.hash || ""}
+			claimExpiryLabel={claimExpiryLabel}
+			claimExpiryUtc={claimExpiryUtc}
 		/>
 	);
 };

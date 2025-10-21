@@ -77,7 +77,6 @@ define(
 	{ attributes: ["network", "username"] }
 );
 
-
 define(
 	{ "x-app-history-claim-nft": HistoryClaimNFT },
 	{
@@ -154,36 +153,3 @@ define(
 	{ "x-app-background-music-mute-btn": MuteBackgroundBtn },
 	{ attributes: [] }
 );
-
-declare global {
-	interface Window {
-		ReactToastSystem?: {
-			addToast: (toast: any) => void;
-		};
-	}
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-	// Function to expose the toast system to LiveView
-	function setupToastBridge() {
-		const toastContainers = document.querySelectorAll('[data-toast-container]');
-		
-		if (toastContainers.length > 0) {
-			// If there is at least one toast container, we assume the React toast system is active
-			window.ReactToastSystem = {
-				addToast: (toast: any) => {
-					// We create and dispatch a custom event to notify the React toast system
-					const event = new CustomEvent('liveview-toast', { 
-						detail: toast 
-					});
-					document.dispatchEvent(event);
-				}
-			};
-		}
-	}
-	
-	// Add a delay to ensure React components are mounted
-	setupToastBridge();
-	setTimeout(setupToastBridge, 1000);
-});
-

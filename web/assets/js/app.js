@@ -1,7 +1,6 @@
 import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
-import topbar from "../vendor/topbar"
 import "./react/index";
 import "./navbar";
 
@@ -43,30 +42,7 @@ window.changeMuteState = changeMuteState
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
-let Hooks = {}
-Hooks.AutoDismissToast = {
-    mounted() {
-        const dismissAfter = parseInt(this.el.dataset.dismissAfter) || 5000
-        this.timer = setTimeout(() => {
-            this.el.style.opacity = '0'
-            this.el.style.transform = 'translateX(100%)'
-            setTimeout(() => {
-                this.el.style.display = 'none'
-            }, 300)
-        }, dismissAfter)
-    },
-    destroyed() {
-        if (this.timer) {
-            clearTimeout(this.timer)
-        }
-    }
-}
-
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks})
-
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
-window.addEventListener("phx:page-loading-start", info => topbar.show())
-window.addEventListener("phx:page-loading-stop", info => topbar.hide())
+let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
 
 liveSocket.connect();
 window.liveSocket = liveSocket;

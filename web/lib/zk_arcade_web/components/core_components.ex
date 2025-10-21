@@ -826,9 +826,7 @@ defmodule ZkArcadeWeb.CoreComponents do
     <div
       :if={@flash_value}
       id={@toast_id}
-      class="fixed top-20 right-4 z-[9999] max-w-sm transition-all duration-300"
-      phx-hook="AutoDismissToast"
-      data-dismiss-after="5000"
+      class="fixed top-20 right-4 z-[9999] max-w-sm toast-enter"
       phx-update="ignore"
     >
       <div class={[

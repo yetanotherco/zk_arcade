@@ -336,3 +336,23 @@ thead {
 		opacity: 1;
 	}
 }
+
+/* Toast slide out animation */
+@keyframes slideOutToRight {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+}
+
+.toast-enter {
+	animation: slideInFromRight 0.3s ease-out;
+}
+
+.toast-exit {
+	animation: slideOutToRight 0.3s ease-in;
+}

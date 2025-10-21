@@ -16,8 +16,6 @@ defmodule ZkArcadeWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  alias Phoenix.LiveView.JS
-
   defp classes(list) when is_list(list) do
     list
     |> Enum.reject(&is_nil/1)
@@ -801,21 +799,5 @@ defmodule ZkArcadeWeb.CoreComponents do
       </.table>
     </div>
     """
-  end
-
-  @doc """
-  Renders flash notices as toast notifications.
-
-  ## Examples
-
-      <.flash_toast flash={@flash} />
-      <.flash_toast flash={@flash} kind={:info} />
-  """
-  attr :flash, :map, default: %{}, doc: "the flash assigns"
-  attr :kind, :atom, values: [:info, :error], default: :info
-
-  def flash_toast(assigns) do
-    # This component now does nothing - toasts are handled via push_event
-    ~H""
   end
 end

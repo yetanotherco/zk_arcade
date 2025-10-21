@@ -15,6 +15,10 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
 
   @impl true
   def mount(params, session, socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(ZkArcade.PubSub, "proof_claims")
+    end
+
     wallet = get_wallet_from_session(session)
 
     entries_per_page = 5
@@ -49,6 +53,7 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:batcher_url, batcher_url)
+      |> assign(:notifications, [])
       |> assign(:pagination, %{
         current_page: page,
         total_pages: total_pages,
@@ -59,6 +64,44 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
       })
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_info({:proof_claimed, proof_data}, socket) do
+    notification = %{
+      id: System.unique_integer([:positive]),
+      type: :proof_claimed,
+      username: proof_data.username || "Anonymous",
+      game: proof_data.game,
+      level: proof_data.level_reached,
+      timestamp: DateTime.utc_now(),
+      proof_id: proof_data.proof_id
+    }
+
+    notifications =
+      [notification | socket.assigns.notifications]
+      |> Enum.take(5)
+
+    socket = assign(socket, :notifications, notifications)
+
+    toast_data = %{
+      title: "Proof Claimed!",
+      desc: "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game} (Level #{proof_data.level_reached})",
+      type: "success"
+    }
+
+    {:noreply,
+     socket
+     |> put_flash(:info, "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!")
+     |> push_event("new_notification", %{notification: notification})
+     |> push_event("show_toast", toast_data)}
+  end
+
+  @impl true
+  def handle_event("dismiss_notification", %{"id" => id}, socket) do
+    notification_id = String.to_integer(id)
+    notifications = Enum.reject(socket.assigns.notifications, &(&1.id == notification_id))
+    {:noreply, assign(socket, :notifications, notifications)}
   end
 
   @impl true

@@ -59,7 +59,7 @@ defmodule ZkArcadeWeb.CoreComponents do
           </div>
         </div>
 
-        <div class="flex gap-6 items-center">
+        <div id="submit-proof" class="flex gap-6 items-center" phx-update="ignore">
           <x-app-submit-proof
               network={@network}
               payment_service_address={@payment_service_address}

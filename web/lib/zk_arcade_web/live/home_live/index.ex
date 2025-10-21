@@ -18,26 +18,20 @@ defmodule ZkArcadeWeb.HomeLive.Index do
 
   @impl true
   def handle_info({:proof_claimed, proof_data}, socket) do
-    notification = %{
-      id: System.unique_integer([:positive]),
-      type: :proof_claimed,
-      username: proof_data.username || "Anonymous",
-      game: proof_data.game,
-      level: proof_data.level_reached,
-      timestamp: DateTime.utc_now(),
-      proof_id: proof_data.proof_id
-    }
+    socket =
+      socket
+      |> assign_home_stats()
+      |> put_flash(:info, "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!")
 
-    notifications =
-      [notification | socket.assigns.notifications]
-      |> Enum.take(5)
+    # Schedule flash clearing after the toast is shown
+    Process.send_after(self(), :clear_flash, 6000)
 
-    socket = assign(socket, :notifications, notifications)
+    {:noreply, socket}
+  end
 
-    {:noreply,
-     socket
-     |> put_flash(:info, "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!")
-     |> push_event("new_notification", %{notification: notification})}
+  @impl true
+  def handle_info(:clear_flash, socket) do
+    {:noreply, clear_flash(socket)}
   end
 
   @impl true

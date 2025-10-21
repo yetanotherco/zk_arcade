@@ -51,9 +51,7 @@ Hooks.AutoDismissToast = {
             this.el.style.opacity = '0'
             this.el.style.transform = 'translateX(100%)'
             setTimeout(() => {
-                if (this.el.parentNode) {
-                    this.el.parentNode.removeChild(this.el)
-                }
+                this.el.style.display = 'none'
             }, 300)
         }, dismissAfter)
     },

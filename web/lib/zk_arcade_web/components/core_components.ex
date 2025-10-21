@@ -815,19 +815,21 @@ defmodule ZkArcadeWeb.CoreComponents do
   attr :kind, :atom, values: [:info, :error], default: :info
 
   def flash_toast(assigns) do
+    flash_value = Phoenix.Flash.get(assigns.flash, assigns.kind)
+
     assigns =
       assigns
-      |> assign(:flash_value, Phoenix.Flash.get(assigns.flash, assigns.kind))
-      |> assign(:toast_id, "flash-toast-#{assigns.kind}")
+      |> assign(:flash_value, flash_value)
+      |> assign(:toast_id, "flash-toast-#{assigns.kind}-#{System.unique_integer([:positive])}")
 
     ~H"""
     <div
       :if={@flash_value}
       id={@toast_id}
       class="fixed top-20 right-4 z-[9999] max-w-sm transition-all duration-300"
-      phx-click={JS.hide(to: "##{@toast_id}")}
       phx-hook="AutoDismissToast"
       data-dismiss-after="5000"
+      phx-update="ignore"
     >
       <div class={[
         "relative flex cursor-pointer items-center gap-4 rounded-lg px-6 py-4 shadow-lg border-2",
@@ -838,7 +840,11 @@ defmodule ZkArcadeWeb.CoreComponents do
           <p class="text-sm font-medium"><%= @flash_value %></p>
         </div>
 
-        <button type="button" class="ml-2 opacity-70 hover:opacity-100">
+        <button
+          type="button"
+          class="ml-2 opacity-70 hover:opacity-100"
+          phx-click={JS.hide(to: "##{@toast_id}")}
+        >
           ✕
         </button>
       </div>

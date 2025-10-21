@@ -54,8 +54,9 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 			<div className="flex flex-col gap-4 justify-between h-full">
 				{canClaim && (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
-						The proof was verified and it is ready to claim the
-						points.
+						Your proof was verified using Aligned. You can now claim
+						your points—this will cost gas and initiate a
+						transaction from your wallet.
 					</p>
 				)}
 				{(gameHasExpired ||

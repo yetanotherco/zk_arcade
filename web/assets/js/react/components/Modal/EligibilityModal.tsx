@@ -89,6 +89,36 @@ export const EligibilityModal = ({
 						<p className="text-text-100 text-center">
 							This wallet isn’t eligible to participate right now.
 						</p>
+						<p className="text-text-200 text-center text-sm leading-relaxed">
+							Follow{" "}
+							<a
+								href="https://x.com/alignedlayer"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-accent-100 hover:underline"
+							>
+								Aligned on X
+							</a>
+							, subscribe to our{" "}
+							<a
+								href="https://blog.alignedlayer.com/"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-accent-100 hover:underline"
+							>
+								newsletter
+							</a>
+							, and join the{" "}
+							<a
+								href="https://discord.gg/alignedlayer"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-accent-100 hover:underline"
+							>
+								Discord
+							</a>{" "}
+							to hear when the next wave of access opens up.
+						</p>
 						<div className="flex w-full justify-center relative group">
 							<span className="text-white text-sm underline cursor-help">
 								What is this?

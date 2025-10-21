@@ -16,6 +16,8 @@ defmodule ZkArcadeWeb.CoreComponents do
   """
   use Phoenix.Component
 
+  alias Phoenix.LiveView.JS
+
   defp classes(list) when is_list(list) do
     list
     |> Enum.reject(&is_nil/1)
@@ -797,6 +799,49 @@ defmodule ZkArcadeWeb.CoreComponents do
           <% end %>
         </:col>
       </.table>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders flash notices as toast notifications.
+
+  ## Examples
+
+      <.flash_toast flash={@flash} />
+      <.flash_toast flash={@flash} kind={:info} />
+  """
+  attr :flash, :map, default: %{}, doc: "the flash assigns"
+  attr :kind, :atom, values: [:info, :error], default: :info
+
+  def flash_toast(assigns) do
+    assigns =
+      assigns
+      |> assign(:flash_value, Phoenix.Flash.get(assigns.flash, assigns.kind))
+      |> assign(:toast_id, "flash-toast-#{assigns.kind}")
+
+    ~H"""
+    <div
+      :if={@flash_value}
+      id={@toast_id}
+      class="fixed top-20 right-4 z-[9999] max-w-sm transition-all duration-300"
+      phx-click={JS.hide(to: "##{@toast_id}")}
+      phx-hook="AutoDismissToast"
+      data-dismiss-after="5000"
+    >
+      <div class={[
+        "relative flex cursor-pointer items-center gap-4 rounded-lg px-6 py-4 shadow-lg border-2",
+        @kind == :info && "bg-green-100 border-green-400 text-green-800",
+        @kind == :error && "bg-red-100 border-red-400 text-red-800"
+      ]}>
+        <div class="flex-1">
+          <p class="text-sm font-medium"><%= @flash_value %></p>
+        </div>
+
+        <button type="button" class="ml-2 opacity-70 hover:opacity-100">
+          ✕
+        </button>
+      </div>
     </div>
     """
   end

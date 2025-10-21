@@ -318,3 +318,21 @@ thead {
 	background: hsl(0 0% 0% / 0.15);
 	transform: translateY(2px);
 }
+
+/* Toast progress bar animation */
+@keyframes shrink {
+	from { width: 100%; }
+	to { width: 0%; }
+}
+
+/* Toast slide in animation */
+@keyframes slideInFromRight {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}

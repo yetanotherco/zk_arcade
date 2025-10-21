@@ -84,17 +84,10 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
 
     socket = assign(socket, :notifications, notifications)
 
-    toast_data = %{
-      title: "Proof Claimed!",
-      desc: "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game} (Level #{proof_data.level_reached})",
-      type: "success"
-    }
-
     {:noreply,
      socket
      |> put_flash(:info, "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!")
-     |> push_event("new_notification", %{notification: notification})
-     |> push_event("show_toast", toast_data)}
+     |> push_event("new_notification", %{notification: notification})}
   end
 
   @impl true

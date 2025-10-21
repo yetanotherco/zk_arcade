@@ -256,9 +256,11 @@ defmodule ZkArcadeWeb.PageController do
           - Linux/MacOS: Run the following command:
           <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url)} | bash</span>
 
-        2. Start playing: Run the game with the command: <span class="code-block">#{Application.get_env(:zk_arcade, :beast_bash_command)}</span>
+        2. Start playing: Run the game with the command: <span class="code-block">#{Application.get_env(:zk_arcade, :beast_bash_command)}</span>. When prompted, enter the same Ethereum address you use on ZK Arcade (the wallet that holds your Ticket NFT).
 
-        3. Find your proof: After completing levels, locate the generated proof file on your system
+        3. Find your proof: After completing levels, locate the generated proof file on your system.
+           - macOS/Linux (curl installer): The proof file is written to the directory where you launched <span class="code-block">beast</span> (for most people that's the home folder, e.g. <span class="code-block">~/sp1_solution_YYYY-MM-DD_HH-MM-SS.bin</span>).
+           - Windows portable build: The proof file is saved alongside <span class="code-block">beast.exe</span> (for example <span class="code-block">C:\\Users\\&lt;you&gt;\\Downloads\\beast\\sp1_solution_YYYY-MM-DD_HH-MM-SS.bin</span>).
 
         4. Fund verification: Deposit ETH into <span class="text-accent-100">ALIGNED</span> to pay for proof verification
 

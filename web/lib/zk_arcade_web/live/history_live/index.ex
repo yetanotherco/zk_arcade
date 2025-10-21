@@ -84,18 +84,14 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
 
     socket = assign(socket, :notifications, notifications)
 
-    # Schedule flash clearing after the toast is shown
-    Process.send_after(self(), :clear_flash, 6000)
-
+    # Send notification via push_event to avoid DOM conflicts
     {:noreply,
      socket
-     |> put_flash(:info, "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!")
+     |> push_event("show_toast", %{
+       type: "success",
+       message: "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!"
+     })
      |> push_event("new_notification", %{notification: notification})}
-  end
-
-  @impl true
-  def handle_info(:clear_flash, socket) do
-    {:noreply, clear_flash(socket)}
   end
 
   @impl true

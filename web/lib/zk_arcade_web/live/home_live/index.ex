@@ -18,20 +18,21 @@ defmodule ZkArcadeWeb.HomeLive.Index do
 
   @impl true
   def handle_info({:proof_claimed, proof_data}, socket) do
+    # Handle the PubSub event - refresh stats and show toast via push_event
     socket =
       socket
       |> assign_home_stats()
-      |> put_flash(:info, "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!")
-
-    # Schedule flash clearing after the toast is shown
-    Process.send_after(self(), :clear_flash, 6000)
+      |> push_event("show_toast", %{
+        message: "#{proof_data.username || "Someone"} just claimed a proof in #{proof_data.game}!",
+        type: "info"
+      })
 
     {:noreply, socket}
   end
 
   @impl true
   def handle_info(:clear_flash, socket) do
-    {:noreply, clear_flash(socket)}
+    {:noreply, socket}
   end
 
   @impl true

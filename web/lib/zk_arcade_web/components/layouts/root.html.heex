@@ -11,6 +11,8 @@
     <%!-- <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="01c845e9-d8cd-4b06-ab7d-dd0e25baa513";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script> --%>
   </head>
   <body class="text-text-100 antialiased">
+    <!-- Global toast container - outside LiveView scope -->
+    <div id="toast-container" class="fixed top-20 right-4 z-[9999] pointer-events-none"></div>
     {@inner_content}
   </body>
 </html>

@@ -254,9 +254,9 @@ defmodule ZkArcadeWeb.PageController do
           - Windows: Download the portable executable:
           #{Application.get_env(:zk_arcade, :beast_windows_download_url)}
           - Linux/MacOS: Run the following command:
-          <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
+          <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url)} | bash</span>
 
-        2. Start playing: Run the game with the command: <span class="code-block">beast</span>
+        2. Start playing: Run the game with the command: <span class="code-block">#{Application.get_env(:zk_arcade, :beast_bash_command)}</span>
 
         3. Find your proof: After completing levels, locate the generated proof file on your system
 

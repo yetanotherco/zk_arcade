@@ -7,6 +7,7 @@ import { useCSRFToken } from "../../../hooks/useCSRFToken";
 import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboardContract";
 import { useChainId, useReadContract } from "wagmi";
 import { leaderboardAbi } from "../../../constants/aligned";
+import { SocialLinks } from "../../SocialLinks";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
@@ -70,6 +71,16 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						</div>
 					</div>
 				)}
+
+				{!canClaim && !gameHasExpired && proofStatus !== "claimed" && (
+					<div className="rounded border border-contrast-100/40 bg-black/60 px-4 py-3">
+						<p className="text-sm text-text-200 text-center mb-2">
+							We're still verifying your proof. Stay tuned on our
+							channels for the latest status updates.
+						</p>
+					</div>
+				)}
+				<SocialLinks className="text-xs text-text-300" />
 
 				<div className="flex flex-col gap-2">
 					<p>Game: {proofSubmission.game}</p>

@@ -24,6 +24,7 @@ import { Button } from "../../Button";
 import { BumpFeeModal } from "../../Modal/BumpFee";
 import { ProgressBar } from "../../ProgressBar";
 import { usePendingProofsToBump } from "../../../hooks/usePendingProofsToBump";
+import { SocialLinks } from "../../SocialLinks";
 
 type Game = {
 	id: "beast" | string;
@@ -473,6 +474,7 @@ export const SubmitProofStep = ({
 						}}
 					/>
 				)}
+				<SocialLinks className="text-xs text-text-200 mt-4" />
 			</div>
 		);
 	}

@@ -7,11 +7,8 @@ import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
 import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
-import {
-	useNftContract,
-	getNftMetadata,
-	NftMetadata,
-} from "../../hooks/useNftContract";
+import { useNftContract, NftMetadata } from "../../hooks/useNftContract";
+import { getNftMetadata } from "../../hooks/useNftContract/utils";
 
 type Props = {
 	network: string;

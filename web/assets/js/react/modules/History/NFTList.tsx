@@ -4,11 +4,8 @@ import Web3EthProvider from "../../providers/web3-eth-provider";
 import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { Modal } from "../../components";
-import {
-	NftMetadata,
-	getNftMetadata,
-	useNftContract,
-} from "../../hooks/useNftContract";
+import { NftMetadata, useNftContract } from "../../hooks/useNftContract";
+import { getNftMetadata } from "../../hooks/useNftContract/utils";
 
 type Props = {
 	network: string;

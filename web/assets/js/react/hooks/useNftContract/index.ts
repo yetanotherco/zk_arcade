@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Address } from "viem";
 import {
 	useChainId,
@@ -10,14 +10,17 @@ import {
 import { useToast } from "../../state/toast";
 import { zkArcadeNftAbi } from "../../constants/aligned";
 import { fetchMerkleProofForAddress } from "../../utils/aligned";
-import { getUserTokenIds, getTokenURI, convertIpfsToHttpUrl } from "./utils";
+import {
+	getUserTokenIds,
+	getTokenURI,
+	processRawMerkleProof,
+	getNftMetadata,
+} from "./utils";
 
 type HookArgs = {
 	userAddress: Address;
 	contractAddress: Address;
 };
-
-type Proof = `0x${string}`[] | `0x${string}` | string;
 
 export type NftMetadata = {
 	name: string;
@@ -27,77 +30,14 @@ export type NftMetadata = {
 	address?: Address;
 };
 
-// Fetches the NFT metadata from a given JSON URL and the NFT contract address
-export async function getNftMetadata(jsonUrl: string, nftContractAddress: Address): Promise<NftMetadata> {
-	try {
-		const response = await fetch(jsonUrl);
-		if (!response.ok) {
-			throw new Error(`Error fetching metadata: ${response.status}`);
-		}
-
-		const data = await response.json();
-
-		if (!data.name || !data.description || !data.image) {
-			throw new Error('Invalid metadata format');
-		}
-
-		// Convert IPFS URL to gateway URL if needed
-		const imageUrl = convertIpfsToHttpUrl(data.image);
-
-		// Get the tokenID from url last digits (separated by /)
-		const tokenId = BigInt(jsonUrl.split("/").pop() || 0);
-
-		return {
-			name: data.name,
-			description: data.description,
-			image: imageUrl,
-			tokenId: tokenId,
-			address: nftContractAddress,
-		};
-	} catch (error) {
-		throw error;
-	}
-}
-
-// This function normalizes the proof input into an array of bytes32 strings.
-function processRawMerkleProof(input: Proof): `0x${string}`[] {
-	if (Array.isArray(input)) {
-		return input as `0x${string}`[];
-	}
-
-	if (typeof input === "string") {
-		const trimmed = input.trim();
-		if (!trimmed) throw new Error("The merkle proof is empty");
-
-		// Remove all 0x internal prefixes
-		const hex = trimmed.replace(/0x/gi, "");
-
-		if (hex.length % 64 !== 0) {
-			throw new Error(
-				"Invalid format: the proof must be a multiple of 64 hexadecimal characters"
-			);
-		}
-
-		// Gets each bytes32 chunk and pushes it into the vec
-		const result: `0x${string}`[] = [];
-		for (let i = 0; i < hex.length; i += 64) {
-			result.push(`0x${hex.slice(i, i + 64)}` as `0x${string}`);
-		}
-		return result;
-	}
-
-	throw new Error(
-		"Unsupported proof format, use an array or hexadecimal string."
-	);
-}
-
 export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 	const chainId = useChainId();
 	const { addToast } = useToast();
 	const publicClient = usePublicClient();
-	
+
 	const [showSuccessModal, setShowSuccessModal] = useState(false);
-	const [claimedNftMetadata, setClaimedNftMetadata] = useState<NftMetadata | null>(null);
+	const [claimedNftMetadata, setClaimedNftMetadata] =
+		useState<NftMetadata | null>(null);
 	const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
 	const [tokenURIs, setTokenURIs] = useState<string[]>([]);
 
@@ -167,17 +107,29 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		return hash;
 	}, [userAddress, contractAddress, writeContractAsync, chainId, addToast]);
 
+	const lastErrorMessage = useRef<string | null>(null);
 	useEffect(() => {
-		if (txRest.isError) {
-			addToast({
-				title: "Claim failed",
-				desc: txRest.error
-					? String(txRest.error.message || txRest.error)
-					: "Transaction failed.",
-				type: "error",
-			});
+		if (!txRest.isError) {
+			lastErrorMessage.current = null;
+			return;
 		}
-	}, [txRest.isSuccess, txRest.isError, addToast]);
+
+		const message = txRest.error
+			? String(txRest.error.message || txRest.error)
+			: "Transaction failed.";
+
+		if (lastErrorMessage.current === message) {
+			return;
+		}
+
+		lastErrorMessage.current = message;
+
+		addToast({
+			title: "Claim failed",
+			desc: message,
+			type: "error",
+		});
+	}, [txRest.isError, txRest.error, addToast]);
 
 	useEffect(() => {
 		if (receipt.isError) {
@@ -187,27 +139,39 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 				type: "error",
 			});
 		}
-		
+
 		// Only process success if we haven't already processed this transaction
 		if (receipt.isSuccess && txHash && processedTxHash !== txHash) {
 			setProcessedTxHash(txHash);
-			
+
 			// Fetch the latest NFT metadata and show modal
 			const fetchLatestNftMetadata = async () => {
 				try {
 					if (!publicClient) return;
 
-					const userTokenIds = await getUserTokenIds(publicClient, userAddress, contractAddress);
+					const userTokenIds = await getUserTokenIds(
+						publicClient,
+						userAddress,
+						contractAddress
+					);
 
 					if (userTokenIds.length > 0) {
 						// Get the latest event (most recent NFT)
-						const latestTokenId = userTokenIds[userTokenIds.length - 1];
+						const latestTokenId =
+							userTokenIds[userTokenIds.length - 1];
 
 						if (latestTokenId !== undefined) {
-							const tokenURI = await getTokenURI(publicClient, contractAddress, latestTokenId);
-							
+							const tokenURI = await getTokenURI(
+								publicClient,
+								contractAddress,
+								latestTokenId
+							);
+
 							// Fetch the metadata
-							const metadata = await getNftMetadata(tokenURI, contractAddress);
+							const metadata = await getNftMetadata(
+								tokenURI,
+								contractAddress
+							);
 							setClaimedNftMetadata(metadata);
 							setShowSuccessModal(true);
 						}
@@ -219,7 +183,16 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 
 			fetchLatestNftMetadata();
 		}
-	}, [receipt.isSuccess, receipt.isError, txHash, processedTxHash, publicClient, contractAddress, userAddress, addToast]);
+	}, [
+		receipt.isSuccess,
+		receipt.isError,
+		txHash,
+		processedTxHash,
+		publicClient,
+		contractAddress,
+		userAddress,
+		addToast,
+	]);
 
 	// Reset processed hash when starting a new transaction
 	useEffect(() => {
@@ -242,7 +215,11 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 					return;
 				}
 
-				const userTokenIds = await getUserTokenIds(publicClient, userAddress, contractAddress);
+				const userTokenIds = await getUserTokenIds(
+					publicClient,
+					userAddress,
+					contractAddress
+				);
 
 				const fetchTokenURIs = async () => {
 					try {
@@ -258,7 +235,11 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 								continue;
 							}
 
-							const tokenURI = await getTokenURI(publicClient, contractAddress, tokenId);
+							const tokenURI = await getTokenURI(
+								publicClient,
+								contractAddress,
+								tokenId
+							);
 
 							uris.push(tokenURI);
 						}
@@ -274,7 +255,13 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		};
 
 		fetchEvents();
-	}, [userAddress, balanceMoreThanZero, publicClient, balance.data, contractAddress]);
+	}, [
+		userAddress,
+		balanceMoreThanZero,
+		publicClient,
+		balance.data,
+		contractAddress,
+	]);
 
 	return {
 		balance,

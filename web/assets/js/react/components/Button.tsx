@@ -64,7 +64,7 @@ export const Button = ({
 		if (!muted) {
 			const audio = new Audio("/audio/mouse-click.mp3");
 			audio.currentTime = 0;
-			audio.volume = 0.2;
+			audio.volume = 0.4;
 			audio.play();
 		}
 	};

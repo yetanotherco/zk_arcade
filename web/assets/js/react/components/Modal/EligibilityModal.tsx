@@ -83,12 +83,16 @@ export const EligibilityModal = ({
 					</>
 				) : (
 					<>
-						<h3 className="text-xl font-semibold text-center">
-							Not eligible yet
-						</h3>
-						<p className="text-text-100 text-center">
-							This wallet isn’t eligible to participate right now.
-						</p>
+						<div>
+							<h3 className="text-xl mb-1 font-semibold text-center">
+								You are not eligible yet,
+								<br />
+								but don't worry
+							</h3>
+							<p className="text-text-100 text-center">
+								More waves are incoming
+							</p>
+						</div>
 						<p className="text-text-200 text-center text-sm leading-relaxed">
 							Follow{" "}
 							<a

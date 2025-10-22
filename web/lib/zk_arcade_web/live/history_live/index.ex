@@ -30,11 +30,15 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
   @impl true
   def handle_info({:proof_claimed, proof_data}, socket) do
     # Handle the PubSub event - show toast via push_event
+
+    # Note: Change here in case the points per level logic changes
+    points_claimed = proof_data.level_reached
+
     socket =
       socket
       |> push_event("show_toast", %{
         type: "success",
-        message: "#{proof_data.username} just claimed a proof for level #{proof_data.level_reached} in #{proof_data.game}!"
+        message: "#{proof_data.username} just claimed #{points_claimed} points!",
       })
     {:noreply, socket}
   end

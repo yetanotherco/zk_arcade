@@ -321,38 +321,38 @@ thead {
 
 /* Toast progress bar animation */
 @keyframes shrink {
-	from { width: 100%; }
-	to { width: 0%; }
+	from { height: 0%; }
+	to { height: 100%; }
 }
 
 /* Toast slide in animation */
-@keyframes slideInFromRight {
+@keyframes slideInFromTop {
 	from {
-		transform: translateX(100%);
+		transform: translateY(-100%);
 		opacity: 0;
 	}
 	to {
-		transform: translateX(0);
+		transform: translateY(0);
 		opacity: 1;
 	}
 }
 
 /* Toast slide out animation */
-@keyframes slideOutToRight {
+@keyframes slideOutToBottom {
 	from {
-		transform: translateX(0);
+		transform: translateY(0);
 		opacity: 1;
 	}
 	to {
-		transform: translateX(100%);
+		transform: translateY(100%);
 		opacity: 0;
 	}
 }
 
 .toast-enter {
-	animation: slideInFromRight 0.3s ease-out;
+	animation: slideInFromTop 0.3s ease-out;
 }
 
 .toast-exit {
-	animation: slideOutToRight 0.3s ease-in;
+	animation: slideOutToBottom 0.3s ease-in;
 }

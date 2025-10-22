@@ -57,17 +57,12 @@ function showToast(message, type = 'info') {
     // Create toast element
     const toast = document.createElement('div')
     toast.className = `max-w-sm toast-enter pointer-events-auto mb-4`
-    
-    const bgClass = type === 'info' ? 'bg-green-100 border-green-400 text-green-800' : 'bg-red-100 border-red-400 text-red-800'
-    
+
     toast.innerHTML = `
-        <div class="relative flex cursor-pointer items-center gap-4 rounded-lg px-6 py-4 shadow-lg border-2 ${bgClass}">
-            <div class="flex-1">
-                <p class="text-sm font-medium">${message}</p>
-            </div>
-            <button type="button" class="ml-2 opacity-70 hover:opacity-100" onclick="this.parentElement.parentElement.remove()">
-                ✕
-            </button>
+        <div class="bg-accent-200 border-accent-200 text-black relative flex cursor-pointer items-center gap-4 rounded-lg border-2 px-3 py-2 shadow-lg">
+        <div class="flex-1">
+            <p class="text-xs font-medium text-center">${message}</p>
+        </div>
         </div>
     `
 

@@ -187,6 +187,17 @@ export const ParityBoard = ({
 					</Button>
 				</div>
 			</div>
+			<p className="text-xs text-center text-text-200 sm:text-left sm:w-auto w-full">
+				<span className="block sm:inline">
+					Use <span className="font-semibold">W</span>,{" "}
+					<span className="font-semibold">A</span>,{" "}
+					<span className="font-semibold">S</span>,{" "}
+					<span className="font-semibold">D</span> to move.
+				</span>
+				<span className="block sm:inline">
+					Press <span className="font-semibold">R</span> to reset.
+				</span>
+			</p>
 		</div>
 	);
 };

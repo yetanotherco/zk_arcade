@@ -25,7 +25,7 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
 
     case get_wallet_from_session(session) do
       nil ->
-        {:ok, redirect(to: build_redirect_url(socket, "user-not-connected"))}
+        {:ok, redirect(socket, to: build_redirect_url(socket, "user-not-connected"))}
       wallet_address ->
         socket =
           socket

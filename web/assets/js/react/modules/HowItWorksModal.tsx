@@ -26,25 +26,25 @@ export const HowItWorksModal = () => {
 	const steps = [
 		{
 			title: "Connect your wallet",
-			},
+		},
 		{
 			title: "Check eligibility",
-			},
+		},
 		{
 			title: "Deposit money on Aligned to pay for proof verification",
-			},
+		},
 		{
 			title: "Play a game and generate a zk proof",
-			},
+		},
 		{
 			title: "Submit your proof for verification",
-			},
+		},
 		{
 			title: "Claim your points",
-			},
+		},
 		{
 			title: "Play and climb the leaderboard",
-			},
+		},
 	];
 
 	return (

@@ -27,7 +27,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
       socket
       |> assign_home_stats()
       |> push_event("show_toast", %{
-        message: "#{proof_data.username} just claimed #{points_claimed} points!",
+        message: "<span class=\"font-bold\">#{proof_data.username}</span> just claimed <span class=\"font-bold\">#{points_claimed} points!</span>",
         type: "info"
       })
 

@@ -47,7 +47,7 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
       socket
       |> push_event("show_toast", %{
         type: "success",
-        message: "#{proof_data.username} just claimed #{points_claimed} points!",
+        message: "<span class=\"font-bold\">#{proof_data.username}</span> just claimed <span class=\"font-bold\">#{points_claimed} points!</span>",
       })
     {:noreply, socket}
   end

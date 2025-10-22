@@ -542,8 +542,7 @@ defmodule ZkArcadeWeb.CoreComponents do
           <div class="px-5">
             <p class="text-[10px] text-text-200/50  mb-1">Acknowledgements</p>
             <p class="text-[10px] text-text-200/50 italic">
-              “Happy Happy Game Show” Kevin MacLeod (incompetech.com)<br />
-              Licensed under CC BY 4.0
+              Music: "Arcadewave" - Lupus Nocte<br />
             </p>
           </div>
         </div>

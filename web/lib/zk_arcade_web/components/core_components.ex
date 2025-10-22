@@ -50,11 +50,11 @@ defmodule ZkArcadeWeb.CoreComponents do
             </p>
           </.link>
           <div class="lg:flex hidden w-full gap-10">
-              <.link href="/games" class="transition hover:text-accent-100 hover:underline">Games</.link>
+              <%!-- <.link href="/games" class="transition hover:text-accent-100 hover:underline">Games</.link> --%>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
               <button class="transition hover:text-accent-100 hover:underline" id="how-it-works-nav-btn-desktop">
-                Tutorial
+                How it Works
               </button>
           </div>
         </div>
@@ -132,10 +132,10 @@ defmodule ZkArcadeWeb.CoreComponents do
           >
             <div class="h-dvh flex flex-col gap-y-10 text-2xl justify-end items-center p-12">
                 <.link href="/" class="text-text-100 transition hover:text-accent-100 hover:underline">Home</.link>
-                <.link href="/games" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link>
+                <%!-- <.link href="/games" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link> --%>
                 <.link href="/leaderboard" class="text-text-100 transition hover:text-accent-100 hover:underline">Leaderboard</.link>
                 <.link href="/history" class="text-text-100 transition hover:text-accent-100 hover:underline">Profile</.link>
-                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn-mobile">Tutorial</p>
+                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn-mobile">How it Works</p>
                 <.link href="#faq" class="text-text-100 transition hover:text-accent-100 hover:underline">FAQ</.link>
                 <.link href={Application.get_env(:zk_arcade, :feedback_form_url)} target="_blank" rel="noopener noreferrer" class="text-text-100 transition hover:text-accent-100 hover:underline">Give us Feedback</.link>
                 <x-app-background-music-mute-btn />

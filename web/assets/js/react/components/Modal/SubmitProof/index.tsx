@@ -110,20 +110,14 @@ export const SubmitProofModal = ({
 	const parityEndsAt = parityCurrentGame.game?.endsAtTime;
 
 	const claimExpiryTimestampSeconds = useMemo(() => {
-		const dayInSeconds = 24 * 60 * 60;
-
 		if (activeGameName === "beast") {
 			const endsAt = beastEndsAt;
-			return endsAt && endsAt > 0n
-				? Number(endsAt) + dayInSeconds
-				: null;
+			return endsAt && endsAt > 0n ? Number(endsAt) : null;
 		}
 
 		if (activeGameName === "parity") {
 			const endsAt = parityEndsAt;
-			return endsAt && endsAt > 0n
-				? Number(endsAt) + dayInSeconds
-				: null;
+			return endsAt && endsAt > 0n ? Number(endsAt) : null;
 		}
 
 		return null;
@@ -138,8 +132,7 @@ export const SubmitProofModal = ({
 		}
 
 		const updateLabel = () => {
-			const diffMs =
-				claimExpiryTimestampSeconds * 1000 - Date.now();
+			const diffMs = claimExpiryTimestampSeconds * 1000 - Date.now();
 
 			if (diffMs <= 0) {
 				setExpiresInLabel("Expired");
@@ -169,6 +162,7 @@ export const SubmitProofModal = ({
 		if (!claimExpiryTimestampSeconds) return null;
 		return new Date(claimExpiryTimestampSeconds * 1000);
 	}, [claimExpiryTimestampSeconds]);
+
 	const claimExpiryDateUtc = useMemo(() => {
 		if (!claimExpiryDate) return null;
 		return claimExpiryDate.toUTCString();
@@ -293,18 +287,18 @@ export const SubmitProofModal = ({
 				currentLevelReached={currentLevelReached}
 			/>
 		),
-			claim: () =>
-				proof && (
-					<ClaimStep
-						setOpen={modal.setOpen}
-						proofSubmission={proof}
-						user_address={user_address}
-						leaderboard_address={leaderboard_address}
-						proofStatus={proofStatus}
-						claimExpiryLabel={expiresInLabel}
-						claimExpiryUtc={claimExpiryDateUtc}
-					/>
-				),
+		claim: () =>
+			proof && (
+				<ClaimStep
+					setOpen={modal.setOpen}
+					proofSubmission={proof}
+					user_address={user_address}
+					leaderboard_address={leaderboard_address}
+					proofStatus={proofStatus}
+					claimExpiryLabel={expiresInLabel}
+					claimExpiryUtc={claimExpiryDateUtc}
+				/>
+			),
 	};
 
 	useEffect(() => {
@@ -399,7 +393,7 @@ export const SubmitProofModal = ({
 						<p className="text-center">Loading...</p>
 					)}
 				</div>
-				</div>
-			</Modal>
-		);
-	};
+			</div>
+		</Modal>
+	);
+};

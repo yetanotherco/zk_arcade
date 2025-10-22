@@ -11,6 +11,7 @@ import { leaderboardAbi } from "../../../constants/aligned";
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
 	proofSubmission: ProofSubmission;
+	proofStatus: ProofSubmission["status"];
 	handleClaim: () => void;
 	onCancel: () => void;
 	isLoading: boolean;
@@ -23,6 +24,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 	(
 		{
 			gameHasExpired,
+			proofStatus,
 			proofSubmission,
 			handleClaim,
 			onCancel,
@@ -34,21 +36,13 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 		formRef
 	) => {
 		const { csrfToken } = useCSRFToken();
-		const proofStatus = proofSubmission.status;
-		const claimWindowExpired =
-			claimExpiryLabel !== undefined &&
-			claimExpiryLabel !== null &&
-			claimExpiryLabel === "Expired";
 		const showExpiryInfo =
-			!claimWindowExpired &&
 			!gameHasExpired &&
 			proofStatus === "verified" &&
 			claimExpiryLabel &&
 			claimExpiryUtc;
-		const canClaim =
-			!gameHasExpired &&
-			!claimWindowExpired &&
-			proofStatus === "verified";
+
+		const canClaim = !gameHasExpired && proofStatus === "verified";
 
 		return (
 			<div className="flex flex-col gap-4 justify-between h-full">
@@ -59,8 +53,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						transaction from your wallet.
 					</p>
 				)}
-				{(gameHasExpired ||
-					(claimWindowExpired && proofStatus === "verified")) && (
+				{gameHasExpired && (
 					<p className="bg-red/20 rounded p-2 text-red">
 						Claim window expired. You can't claim these points
 						anymore.
@@ -99,10 +92,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						variant="accent-fill"
 						onClick={handleClaim}
 						isLoading={isLoading}
-						disabled={
-							(gameHasExpired || claimWindowExpired) &&
-							proofStatus !== "claimed"
-						}
+						disabled={gameHasExpired && proofStatus !== "claimed"}
 					>
 						{proofStatus === "claimed"
 							? "Share on twitter"
@@ -135,6 +125,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 type ClaimProps = {
 	setOpen: (prev: boolean) => void;
 	proofSubmission: ProofSubmission;
+	proofStatus?: ProofSubmission["status"];
 	user_address: Address;
 	leaderboard_address: Address;
 	claimExpiryLabel?: string | null;
@@ -145,6 +136,7 @@ const BeastClaim = ({
 	leaderboard_address,
 	user_address,
 	proofSubmission,
+	proofStatus,
 	setOpen,
 	claimExpiryLabel,
 	claimExpiryUtc,
@@ -201,6 +193,7 @@ const BeastClaim = ({
 			handleClaim={handleClaim}
 			isLoading={submitSolution.isLoading}
 			onCancel={() => setOpen(false)}
+			proofStatus={proofStatus}
 			proofSubmission={proofSubmission}
 			ref={formRef}
 			claimTxHash={claimTxHash}
@@ -214,6 +207,7 @@ const ParityClaim = ({
 	user_address,
 	leaderboard_address,
 	proofSubmission,
+	proofStatus,
 	setOpen,
 	claimExpiryLabel,
 	claimExpiryUtc,
@@ -270,6 +264,7 @@ const ParityClaim = ({
 			isLoading={submitSolution.isLoading}
 			onCancel={() => setOpen(false)}
 			proofSubmission={proofSubmission}
+			proofStatus={proofStatus}
 			ref={formRef}
 			claimTxHash={submitSolution.tx.hash || ""}
 			claimExpiryLabel={claimExpiryLabel}

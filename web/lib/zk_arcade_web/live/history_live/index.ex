@@ -57,7 +57,7 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
     {:noreply, socket}
   end
 
-  defp assign_initial_data(socket, session, params, wallet) do
+  defp assign_initial_data(socket, _session, params, wallet) do
     {username, position} = get_username_and_position(wallet)
     eligible = get_user_eligibility(wallet)
 

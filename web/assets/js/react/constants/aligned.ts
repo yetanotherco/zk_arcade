@@ -256,6 +256,17 @@ export const zkArcadeNftAbi = [
 		],
 		outputs: [],
 	},
+	{
+		type:"function",
+		stateMutability:"view",
+		name:"tokenURI",
+		inputs:[
+			{ name:"tokenId", type:"uint256", internalType:"uint256" }
+		],
+		outputs:[
+			{ name:"", type:"string", internalType:"string" }
+		],
+	}
 ] as const;
 
 export const eip712Domain = (

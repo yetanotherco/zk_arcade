@@ -201,7 +201,7 @@ const NFTList = ({
 								Your NFTs:
 							</h1>
 							<p className="text-md text-text-200 mb-8">
-								Here you can view your nfts that allow you to
+								Here you can view your NFTs that allow you to
 								participate
 							</p>
 							{nftMetadataList.length > 0 && (

@@ -13,18 +13,27 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
     end
   end
 
+  defp build_redirect_url(_socket, message) do
+    "/?message=" <> URI.encode(message)
+  end
+
   @impl true
   def mount(params, session, socket) do
     if connected?(socket) do
       Phoenix.PubSub.subscribe(ZkArcade.PubSub, "proof_claims")
     end
 
-    socket =
-      socket
-      |> assign_initial_data(session, params)
-      |> assign_history_stats()
+    case get_wallet_from_session(session) do
+      nil ->
+        {:ok, redirect(to: build_redirect_url(socket, "user-not-connected"))}
+      wallet_address ->
+        socket =
+          socket
+          |> assign_initial_data(session, params)
+          |> assign_history_stats()
 
-    {:ok, socket}
+        {:ok, socket}
+    end
   end
 
   @impl true

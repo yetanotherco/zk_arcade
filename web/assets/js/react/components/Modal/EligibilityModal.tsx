@@ -55,12 +55,8 @@ export const EligibilityModal = ({
 															opacity-0 group-hover:opacity-100 transition-opacity duration-200 
 															break-words whitespace-normal max-w-sm min-w-[400px] pointer-events-none"
 								>
-									Minting this free NFT proves your
-									eligibility and unlocks access to ZK Arcade.
-									It acts as your participation ticket,
-									letting you submit proofs and earn points on
-									the leaderboard. You only need to mint it
-									once.
+									Minting this NFT proves your eligibility and
+									unlocks access to ZK Arcade.
 								</div>
 							</div>
 						</div>
@@ -99,12 +95,8 @@ export const EligibilityModal = ({
 															opacity-0 group-hover:opacity-100 transition-opacity duration-200 
 															break-words whitespace-normal max-w-sm min-w-[400px] pointer-events-none"
 								>
-									This NFT acts as your participation ticket
-									for ZK Arcade, linking your wallet to the
-									game so you can earn points on the
-									leaderboard. Your wallet isn’t eligible to
-									mint right now, but keep an eye out for
-									upcoming campaigns where you may qualify.
+									Minting this NFT proves your eligibility and
+									unlocks access to claim points in ZK Arcade.
 								</div>
 							</div>
 						</div>

@@ -17,31 +17,33 @@ defmodule ZkArcade.SubmissionPoller do
   def start_link(opts \\ []), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
   def init(_opts) do
-    state = %{last_block: nil}
+    contract_address = Application.get_env(:zk_arcade, :leaderboard_address)
+    rpc_url = Application.get_env(:ethereumex, :url)
+
+    {:ok, latest_block} = Ethereumex.HttpClient.eth_block_number(url: rpc_url)
+    latest_block_int = String.to_integer(String.trim_leading(latest_block, "0x"), 16)
+    state = %{from_block: latest_block_int}
+
     schedule_poll()
     {:ok, state}
   end
 
   # This function is called periodically to poll for new events. It fetches logs from the blockchain, decodes
   # them, and handles the events. If an error occurs, it logs the error and resets the poll cycle.
-  def handle_info(:poll, %{last_block: last_block} = state) do
+  def handle_info(:poll, %{from_block: from_block} = state) do
     contract_address = Application.get_env(:zk_arcade, :leaderboard_address)
 
     rpc_url = Application.get_env(:ethereumex, :url)
 
     with {:ok, latest_block} <- Ethereumex.HttpClient.eth_block_number(url: rpc_url),
-         latest_block_int <- String.to_integer(String.trim_leading(latest_block, "0x"), 16) do
-      from_block =
-        if last_block do
-          last_block + 1
-        else
-          latest_block_int - 20
-        end
+         to_block <- String.to_integer(String.trim_leading(latest_block, "0x"), 16) do
 
-      with {:ok, logs} <- fetch_logs(from_block, latest_block_int, contract_address) do
+      Logger.info("Polling Claim Events from block #{from_block} to #{to_block}")
+
+      with {:ok, logs} <- fetch_logs(from_block, to_block, contract_address) do
         decode_and_handle_events(logs, contract_address)
 
-        new_state = %{state | last_block: latest_block_int}
+        new_state = %{state | from_block: to_block}
         schedule_poll()
         {:noreply, new_state}
       else

@@ -187,6 +187,10 @@ export const ParityBoard = ({
 					</Button>
 				</div>
 			</div>
+			<p className="text-sm text-center text-text-200 sm:text-left sm:w-auto w-full">
+				Move <span className="font-bold">[WASD]</span> - Reset{" "}
+				<span className="font-bold">[R]</span>
+			</p>
 		</div>
 	);
 };

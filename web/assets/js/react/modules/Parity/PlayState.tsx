@@ -115,21 +115,6 @@ export const PlayState = ({
 				<h2 className="text-2xl font-normal text-center">
 					{currentLevel !== null ? "Parity" : "Select level"}
 				</h2>
-
-				{currentLevel !== null && (
-					<div className="ml-5 relative self-end relative">
-						<span className="font-medium text-left group border rounded-full px-1">
-							?
-							<div
-								className="absolute left-1/2 -translate-x-1/2 px-2 mt-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 transition-opacity break-words z-10"
-								style={{ width: "300px" }}
-							>
-								Use W, A, S or D to slide the tiles. To restart,
-								press R.
-							</div>
-						</span>
-					</div>
-				)}
 			</div>
 			{currentLevel === null && (
 				<p className="text-text-200 text-center">

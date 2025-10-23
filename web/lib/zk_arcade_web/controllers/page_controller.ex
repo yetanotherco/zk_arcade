@@ -427,4 +427,54 @@ The goal of the game is to make each number on the board equal.
     })
     |> render(:leaderboard)
   end
+
+
+  def mint(conn, params) do
+    wallet = get_wallet_from_session(conn)
+    eligible = get_user_eligibility(wallet)
+    proofs = get_proofs(wallet, 1, 10)
+
+    entries_per_page = 10
+
+    page = String.to_integer(params["page"] || "1")
+    offset = (page - 1) * entries_per_page
+
+    top_users = ZkArcade.Leaderboard.get_top_users(entries_per_page, offset)
+
+    total_users = ZkArcade.Leaderboard.get_total_users()
+    total_pages = ceil(total_users / entries_per_page)
+    has_prev = page > 1
+    has_next = page < total_pages
+
+    user_in_current_page? = Enum.any?(top_users, fn u -> u.address == wallet end)
+
+    {username, position} = get_username_and_position(wallet)
+
+    user_data =
+      if !user_in_current_page? && wallet do
+        case ZkArcade.Leaderboard.get_user_and_position(wallet) do
+          %{user: user, position: position} ->
+            %{address: wallet, position: position, score: user.score, username: username}
+          _ ->
+            nil
+        end
+      else
+        nil
+      end
+
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+
+    conn
+    |> assign(:network, Application.get_env(:zk_arcade, :network))
+    |> assign(:wallet, wallet)
+    |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+    |> assign(:eligible, eligible)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:top_users, top_users)
+    |> assign(:user_data, user_data)
+    |> assign(:username, username)
+    |> assign(:user_position, position)
+    |> assign(:explorer_url, explorer_url)
+    |> render(:mint)
+  end
 end

@@ -1,0 +1,12 @@
+<div class="w-full" style="margin-top: 130px"> 
+    <div class="section-width">
+        <div class="section-spacer-md flex flex-col gap-10" style="width: 100%;">
+            <x-app-mint 
+                network={@network}
+                user_address={@wallet}
+                nft_contract_address={@nft_contract_address}
+                is_eligible={@eligible}        
+            />
+        </div>
+    </div>
+</div>

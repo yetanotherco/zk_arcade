@@ -85,7 +85,7 @@ defmodule ZkArcadeWeb.ApiController do
   end
 
   def get_terms_message(conn, %{"address" => address}) do
-    message = "Zk Arcade wants you to sign and accept the Terms of Service and Privacy Policy \n\nYour address: " <> address <> "\n\nClick to sign in and accept the Zk Arcade Terms of Service (https://zkarcade.com/tos) and Privacy Policy (https://zkarcade.com/privacy).\n"
+    message = ZkArcade.VerifySignature.get_terms_message(address)
     conn |> json(%{terms_message: message})
   end
 end

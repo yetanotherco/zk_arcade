@@ -14,6 +14,8 @@ defmodule ZkArcadeWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "tos", PageController, :terms_of_service
+    get "privacy", PageController, :privacy_policy
     get "/games/", PageController, :games
     get "/games/:name", PageController, :game
     get "/history", PageController, :history

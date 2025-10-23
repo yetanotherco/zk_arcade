@@ -110,7 +110,7 @@ export const SignAgreement = () => {
 					<label className="flex items-center gap-4">
 						<input
 							type="checkbox"
-							className="mr-2"
+							className="mr-2 w-4 h-4 rounded-sm"
 							checked={termsAccepted}
 							onChange={(e) => setTermsAccepted(e.target.checked)}
 						/>

@@ -17,7 +17,6 @@ defmodule ZkArcade.SubmissionPoller do
   def start_link(opts \\ []), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
   def init(_opts) do
-    contract_address = Application.get_env(:zk_arcade, :leaderboard_address)
     rpc_url = Application.get_env(:ethereumex, :url)
 
     {:ok, latest_block} = Ethereumex.HttpClient.eth_block_number(url: rpc_url)

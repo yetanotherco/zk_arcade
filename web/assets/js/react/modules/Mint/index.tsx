@@ -3,7 +3,7 @@ import { ConnectKitButton } from "connectkit";
 import { useAccount } from "wagmi";
 import { Address } from "viem";
 import Web3EthProvider from "../../providers/web3-eth-provider";
-import { Button, SocialMediaLinks } from "../../components";
+import { Button, SocialLinks } from "../../components";
 import { NftSuccessModal } from "../../components/Modal";
 import { ToastContainer } from "../../components/Toast";
 import { ToastsProvider } from "../../state/toast";
@@ -238,7 +238,7 @@ const MintClaimSection = ({
 					</p>
 				)}
 				{status === "ineligible" && (
-					<SocialMediaLinks className="text-center" />
+					<SocialLinks className="text-center" />
 				)}
 			</div>
 

@@ -203,11 +203,6 @@ export const ProofHistory = ({
 					{ text: "Speed up" },
 				]}
 			>
-				<hr
-					className="border-text-200 w-full"
-					style={{ minWidth: 1000 }}
-				/>
-
 				{proofs.map((proof, idx) => (
 					<Entry
 						key={idx}

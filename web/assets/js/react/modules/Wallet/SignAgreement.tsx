@@ -16,7 +16,21 @@ export const SignAgreement = () => {
 	const { disconnect } = useDisconnect();
 	const { addToast } = useToast();
 
+	const [termsMessage, setTermsMessage] = useState("");
 	const [termsAccepted, setTermsAccepted] = useState(false);
+
+	// Fetch message to sign (with address) on mount
+	useEffect(() => {
+		if (address) {
+			fetch(`/api/wallet/terms-message?address=${address}`)
+				.then((res) => res.json())
+				.then((data) => {
+					if (data.terms_message) {
+						setTermsMessage(data.terms_message);
+					}
+				});
+		}
+	}, [address]);
 
 	useEffect(() => {
 		const csrfToken =
@@ -43,14 +57,10 @@ export const SignAgreement = () => {
 			return;
 		}
 
-		const messageToSign = "Zk Arcade wants you to sign and accept the Terms of Service and Privacy Policy \n\n"
-			+ "Your address: " + address + "\n\n"
-			+ "Click to sign in and accept the Zk Arcade Terms of Service (https://zkarcade.com/tos) and Privacy Policy (https://zkarcade.com/privacy).\n";
-
 		try {
 			setIsSigningAgreement(true);
 			const sig = await signMessageAsync({
-				message: messageToSign,
+				message: termsMessage,
 			});
 			setSignature(sig);
 		} catch (err) {

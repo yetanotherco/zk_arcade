@@ -361,11 +361,11 @@ defmodule ZkArcadeWeb.CoreComponents do
   def home_game_component_hero(assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
-      <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
+      <div class="flex-1 h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
         <.game_content_hero tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
-      <.link href={@link} class="w-[350px] h-full shrink-0">
+      <.link href={@link} class="max-w-[500px] h-full shrink-0">
         <div class="w-full h-full flex flex-col cursor-pointer bg-contrast-300 rounded p-5 group">
           <.game_content_hero tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
         </div>
@@ -377,13 +377,13 @@ defmodule ZkArcadeWeb.CoreComponents do
   defp game_content_hero(assigns) do
     ~H"""
     <div class="flex gap-2">
-      <img class="rounded mb-1 w-full h-[75px] w-[100px]" src={@img}/>
-      <p class="text-xs text-text-200"><%= @desc %></p>
+      <img class="rounded mb-1 h-[150px]" src={@img}/>
     </div>
     <div>
         <h3 class="text-lg font-normal group-hover:underline underline-offset-4">
           <%= @title %>
         </h3>
+      <p class="text-xs text-text-200"><%= @desc %></p>
       <div class="flex gap-2">
         <%= for variant <- @tags do %>
           <.tag variant={variant} />

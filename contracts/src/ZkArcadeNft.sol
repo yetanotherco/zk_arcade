@@ -91,6 +91,12 @@ contract ZkArcadeNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
         return _baseTokenURI;
     }
 
+    // ======== View Functions ========
+
+    function totalSupply() external view returns (uint256) {
+        return _nextTokenId;
+    }
+
     // ======== Whitelist & Merkle Management ========
 
     function isWhitelisted(address user) public view returns (bool) {

@@ -330,20 +330,26 @@ defmodule ZkArcade.Proofs do
       Logger.error("Failed to update proof #{proof_id} does not belong to address #{address}")
       {:error, %{}}
     else
-      changeset = change_proof(proof, %{status: "claimed", claim_tx_hash: claim_tx_hash})
+      # Check if proof is already claimed to prevent duplicate notifications
+      if proof.status == "claimed" do
+        Logger.info("Proof #{proof_id} already marked as claimed, skipping update")
+        {:ok, proof}
+      else
+        changeset = change_proof(proof, %{status: "claimed", claim_tx_hash: claim_tx_hash})
 
-      case Repo.update(changeset) do
-          {:ok, updated_proof} ->
-            Logger.info("Updated proof #{proof_id} status to claimed")
+        case Repo.update(changeset) do
+            {:ok, updated_proof} ->
+              Logger.info("Updated proof #{proof_id} status to claimed")
 
-            broadcast_proof_claimed_notification(updated_proof, address)
+              broadcast_proof_claimed_notification(updated_proof, address)
 
-            {:ok, updated_proof}
+              {:ok, updated_proof}
 
-          {:error, changeset} ->
-            PrometheusMetrics.record_user_error(:proof_claim_status_update_failed)
-            Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
-            {:error, changeset}
+            {:error, changeset} ->
+              PrometheusMetrics.record_user_error(:proof_claim_status_update_failed)
+              Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+              {:error, changeset}
+        end
       end
     end
   end

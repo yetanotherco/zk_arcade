@@ -59,10 +59,12 @@ function showToast(message, type = 'info') {
     toast.className = `max-w-sm toast-enter pointer-events-auto mb-4`
 
     toast.innerHTML = `
-        <div class="w-screen bg-accent-200 border-accent-200 text-black relative flex cursor-pointer items-center gap-4 rounded-md border-2 px-3 py-2 shadow-lg">
-        <div class="flex-1">
-            <p class="text-sm font-medium text-center">${message}</p>
-        </div>
+        <div class="w-screen flex items-center justify-center">
+            <div class="w-full max-w-[800px] bg-accent-200 border-accent-200 text-black relative flex cursor-pointer items-center gap-4 rounded-md border-2 px-3 py-2 shadow-lg">
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-center">${message}</p>
+                </div>
+            </div>
         </div>
     `
 

@@ -1,0 +1,132 @@
+<div class="w-full">
+
+  <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
+
+  <%= if @wallet != nil do %>
+    <x-app-initial-modals
+      network={@network}
+      payment_service_address={@payment_service_address}
+      nft_contract_address={@nft_contract_address}
+      user_address={@wallet} 
+      eligible={@eligible}
+    />
+  <% end %>
+
+  <div class="section-width pb-5" style="min-height: 100vh">
+      <div class="w-full flex flex-col justify-between" style="margin-top: 150px">
+
+        <h1 class="md:text-5xl text-2xl mb-4 font-normal w-full">
+          Play. Prove. <span class="text-accent-100">Verify</span>. Compete
+        </h1>
+
+      <div class="flex flex-row gap-8 w-full items-center mb-4 overflow-scroll">
+         <div class="w-full h-full grid grid-cols-2 sm:grid-cols-3 gap-5">
+            <.home_statistic label="Proofs verified" value={@proofs_verified} desc={@desc} />
+            <.home_statistic label="Total Players" value={@total_players} desc={@desc} />
+            <.home_statistic label="Cost saved (USD)" value={@cost_saved} desc={@desc} />
+            <.home_statistic label="Total claimed points" value={@total_claimed_points} desc={@desc} />
+            <.home_statistic label="Save p/proof (USD)" value={@avg_savings_per_proof} desc={@desc} />
+            <.home_statistic label="Proofs per player" value={@proofs_per_player} desc={@desc} />
+          </div>
+          <div class="hidden [@media(min-width:900px)]:block w-[300px] h-full max-h-[270px] overflow-y-scroll shrink-0 bg-contrast-300 rounded px-8 py-6">
+            <p class="mb-2 text-text-200">Top users</p>
+            <.leaderboard_home 
+              users={@top_users}
+              current_wallet={@wallet}
+              user_data={@user_data}
+              show_view_all_link={true}
+            />
+          </div>
+      </div>
+
+      <div class="mb-5">
+        <p class="text-md mb-5 font-bold">Choose a game</p>
+          <div class="flex w-full h-[200px] gap-5 overflow-scroll">
+            <.home_game_component_hero
+              tags={[:browser, :circom, :easy]} 
+              secondary_tags={[:three_daily_points]}
+              disabled="false" 
+              link="/games/parity" 
+              title="Parity" 
+              desc="Daily parity puzzles in your browser. Simple rules, tricky patterns." 
+              img={~p"/images/parity.png"} 
+            />
+
+            <.home_game_component_hero 
+              tags={[:cli, :sp1, :hard]} 
+              secondary_tags={[:eight_daily_points]}
+              disabled="false" 
+              link="/games/beast" 
+              title="Beast 1984" 
+              desc="Terminal-based survival game. Each wave ramps up the pressure." 
+              img={~p"/images/beast.png"} 
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-5">
+         <p class="text-text-200">
+            The first platform for zero-knowledge games — solve puzzles, prove your skill, and verify on 
+            <.link class="text-accent-100 hover:underline" href="https://alignedlayer.com" target="_blank" rel="noopener noreferrer">ALIGNED</.link>. Climb the leaderboard, earn your rank.
+          </p>
+
+          <a href="#what-is-this" class="w-full">
+            <div class="flex flex-col w-full justify-center cursor-pointer items-center group">
+              <span>Show More</span>
+              <.icon name="hero-chevron-down" class="size-7 transition-transform duration-200 group-hover:translate-y-1" />
+            </div>
+          </a>
+        </div>
+      </div>
+  </div>
+
+  <div class="section-width">
+    <section id="what-is-this" class="section-spacer-lg" style="padding-top: 100px">
+      <.section_header header="What is this?" />
+      <p class="text-text-200 text-md">
+      ZK Arcade is where on-chain gaming meets real fairness. It uses zero-knowledge proofs to let players prove their scores and outcomes without revealing all the details behind them, so you can trust what you're seeing without needing to trust who you're playing against.
+      </p>
+      <p class="mt-4 text-text-200 text-md">
+        Under the hood, it's powered by <span class="text-accent-100">Aligned</span>, which helps keep things fast, low-cost, and scalable, even as the games and proofs get more complex. It's privacy first, cheat-proof, and fully on-chain—the way competitive gaming should be.
+      </p>
+    </section>
+  </div>
+
+   <div class="section-width">
+    <section id="how-to-play" class="section-spacer-lg w-full">
+      <.section_header header="How to play?" subtitle="Complete periodic challenges, submit solution proofs, and claim your rewards." />
+      <div class="flex gap-10 sm:gap-0 justify-between w-full items-center flex-wrap sm:flex-nowrap">
+        <.step_component 
+          show_line="true" 
+          number="1" 
+          title="Claim & Deposit" 
+          desc="Claim your NFT to play. Deposit into ALIGNED to verify proofs" 
+        />
+        <div class="w-full h-[0.2px] bg-accent-100 hidden sm:block"></div>
+        <.step_component 
+          show_line="true" 
+          number="2" 
+          title="Play & Prove" 
+          desc="Pick a game and complete daily challenges." 
+        />
+        <div class="w-full h-[0.2px] bg-accent-100 hidden sm:block"></div>
+        <.step_component 
+          show_line="false" 
+          number="3" 
+          title="Verify & Claim" 
+          desc="Submit your proof to ALIGNED and get points for it once your proof is verified." 
+        />
+      </div>
+    </section>
+  </div>
+
+  <div class="section-width">
+    <section id="faq" class="section-spacer-lg w-full">
+      <.section_header header="Frequently Asked Questions" />
+
+      <div class="">
+        <.faq_list faqs={@faqs} class="" />
+      </div>
+    </section>
+  </div>
+</div>

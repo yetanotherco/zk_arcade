@@ -335,6 +335,9 @@ defmodule ZkArcade.Proofs do
       case Repo.update(changeset) do
           {:ok, updated_proof} ->
             Logger.info("Updated proof #{proof_id} status to claimed")
+
+            broadcast_proof_claimed_notification(updated_proof, address)
+
             {:ok, updated_proof}
 
           {:error, changeset} ->
@@ -415,5 +418,26 @@ defmodule ZkArcade.Proofs do
   defp get_or_create_wallet(_) do
     PrometheusMetrics.record_user_error(:invalid_wallet_address)
     {:error, :invalid_address}
+  end
+
+  defp broadcast_proof_claimed_notification(proof, address) do
+    username = ZkArcade.Accounts.get_wallet_username(address)
+
+    notification_data = %{
+      proof_id: proof.id,
+      username: username,
+      game: proof.game,
+      level_reached: proof.level_reached,
+      wallet_address: address,
+      claim_tx_hash: proof.claim_tx_hash
+    }
+
+    Phoenix.PubSub.broadcast(
+      ZkArcade.PubSub,
+      "proof_claims",
+      {:proof_claimed, notification_data}
+    )
+
+    Logger.info("Broadcasted proof claimed notification for proof #{proof.id} by #{username || address}")
   end
 end

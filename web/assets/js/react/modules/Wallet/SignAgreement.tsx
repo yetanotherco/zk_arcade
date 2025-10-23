@@ -105,16 +105,6 @@ export const SignAgreement = () => {
 					Welcome to Zk Arcade! Please accept our terms to continue and play games.
 				</p>
 
-				{/* Connected Wallet Display */}
-				<div className="bg-text-300 bg-opacity-20 p-6 rounded text-center">
-					<p className="text-sm text-accent-100 mb-2">
-						✓ Wallet Connected
-					</p>
-					<p className="text-sm font-mono text-text-200">
-						{address?.slice(0, 6)}...{address?.slice(-4)}
-					</p>
-				</div>
-
 				{/* Terms Section */}
 				<div className="bg-text-300 bg-opacity-20 p-6 rounded">
 					<label className="flex items-center gap-4">

@@ -109,6 +109,7 @@ defmodule ZkArcade.SubmissionPoller do
 
     if event_proof.status != "claimed" do
       ZkArcade.Proofs.update_proof_status_claimed(user, event_proof.id, transaction_hash)
+      Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} marked as claimed.")
     else
       Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} already set as claimed.")
     end

@@ -83,11 +83,45 @@ export const EligibilityModal = ({
 					</>
 				) : (
 					<>
-						<h3 className="text-xl font-semibold text-center">
-							Not eligible yet
-						</h3>
-						<p className="text-text-100 text-center">
-							This wallet isn’t eligible to participate right now.
+						<div>
+							<h3 className="text-xl mb-1 font-semibold text-center">
+								You are not eligible yet,
+								<br />
+								but don't worry
+							</h3>
+							<p className="text-text-100 text-center">
+								More waves are incoming
+							</p>
+						</div>
+						<p className="text-text-200 text-center text-sm leading-relaxed">
+							Follow{" "}
+							<a
+								href="https://x.com/alignedlayer"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-accent-100 hover:underline"
+							>
+								Aligned on X
+							</a>
+							, subscribe to our{" "}
+							<a
+								href="https://blog.alignedlayer.com/"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-accent-100 hover:underline"
+							>
+								newsletter
+							</a>
+							, and join the{" "}
+							<a
+								href="https://discord.gg/alignedlayer"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-accent-100 hover:underline"
+							>
+								Discord
+							</a>{" "}
+							to hear when the next wave of access opens up.
 						</p>
 						<div className="flex w-full justify-center relative group">
 							<span className="text-white text-sm underline cursor-help">

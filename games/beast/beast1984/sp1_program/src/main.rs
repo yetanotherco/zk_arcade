@@ -152,7 +152,7 @@ fn prove_level_completed(game: GameLevels, input: &LevelLog) -> bool {
 }
 
 fn encode_game_config(game: GameLevels) -> [u8; 32] {
-    let mut levels: [[u8; 4]; 8] = [[0u8; 4]; 8];
+    let mut levels: [[u8; 4]; 3] = [[0u8; 4]; 3];
 
     let mut level = Level::One;
     let mut i = 0;

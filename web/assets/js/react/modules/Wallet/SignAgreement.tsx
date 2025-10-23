@@ -3,7 +3,7 @@ import { Modal } from "../../components/Modal";
 import { useModal } from "../../hooks/useModal";
 import { useToast } from "../../state/toast";
 import { Button } from "../../components/Button";
-import { useAccount, useSignMessage, useDisconnect, useChainId } from "wagmi";
+import { useAccount, useSignMessage, useDisconnect } from "wagmi";
 
 export const SignAgreement = () => {
 	const { open, setOpen } = useModal();

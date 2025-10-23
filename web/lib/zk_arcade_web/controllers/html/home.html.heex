@@ -1,6 +1,7 @@
 <div class="w-full">
 
-  <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 200%;"></div>
+
+  <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 100%;"></div>
 
   <%= if @wallet != nil do %>
     <x-app-initial-modals
@@ -13,7 +14,7 @@
   <% end %>
 
   <div class="section-width pb-5" style="min-height: 100vh">
-      <div class="w-full flex flex-col" style="margin-top: 150px">
+      <div class="w-full flex flex-col" style="margin-top: 130px">
 
       <div class="flex flex-col w-full mb-4">
         <h1 class="md:text-5xl text-2xl mb-8 font-normal w-full">
@@ -72,7 +73,7 @@
 
 
   <div class="section-width">
-    <section id="faq" class="section-spacer-lg w-full">
+    <section id="faq" class="section-spacer-lg w-full mt-20">
       <.section_header header="Frequently Asked Questions" />
 
       <div class="">

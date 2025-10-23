@@ -50,8 +50,8 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
     uint256 constant MAX_PARITY_LEVELS = 3; // Must match circom circuit
     uint256 constant BITS_PER_PARITY_LEVEL = 80; // 10 bytes per level
 
-    event BeastPointsClaimed(address user, uint256 level, uint256 score);
-    event ParityPointsClaimed(address user, uint256 level, uint256 score);
+    event BeastPointsClaimed(address user, uint256 level, uint256 score, uint256 gameConfig);
+    event ParityPointsClaimed(address user, uint256 level, uint256 score, uint256 gameConfig);
     event BeastGamesUpdated(BeastGame[] beastGames);
     event ParityGamesUpdated(ParityGame[] parityGames);
     event WhitelistEnabled();
@@ -180,7 +180,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         verifyAndReplaceInTop10(msg.sender);
 
-        emit BeastPointsClaimed(msg.sender, levelCompleted, usersScore[msg.sender]);
+        emit BeastPointsClaimed(msg.sender, levelCompleted, usersScore[msg.sender], gameConfig);
     }
 
     function claimParityPoints(
@@ -263,7 +263,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
 
         verifyAndReplaceInTop10(msg.sender);
 
-        emit ParityPointsClaimed(msg.sender, levelCompleted, usersScore[msg.sender]);
+        emit ParityPointsClaimed(msg.sender, levelCompleted, usersScore[msg.sender], gameConfig);
     }
 
     // ======== View Functions ========

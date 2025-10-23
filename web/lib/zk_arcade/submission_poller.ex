@@ -4,13 +4,13 @@ defmodule ZkArcade.SubmissionPoller do
 
   @beastTopic "0x" <>
            Base.encode16(
-             ExKeccak.hash_256("BeastPointsClaimed(address,uint256,uint256)"),
+             ExKeccak.hash_256("BeastPointsClaimed(address,uint256,uint256,uint256)"),
              case: :lower
            )
 
   @parityTopic "0x" <>
            Base.encode16(
-             ExKeccak.hash_256("ParityPointsClaimed(address,uint256,uint256)"),
+             ExKeccak.hash_256("ParityPointsClaimed(address,uint256,uint256,uint256)"),
              case: :lower
            )
 
@@ -99,8 +99,19 @@ defmodule ZkArcade.SubmissionPoller do
   end
 
   # This function handles the decoded event by updating the database leaderboard entry.
-  defp handle_event(%{user: user, level: level, score: score, event_type: event_type}) do
-    Logger.info("New #{event_type} event: user #{user}, level #{level}, score #{score}")
+  defp handle_event(%{user: user, level: level, score: score, event_type: event_type, game_config: game_config, transactionHash: transaction_hash}) do
+    game_config_hex = Base.encode16(game_config, case: :lower)
+
+    Logger.info("New #{event_type} event: user #{user}, level #{level}, score #{score}, game config #{game_config_hex}, tx #{transaction_hash}")
+
+    event_proof = ZkArcade.Proofs.get_proofs_by_address(user)
+                  |> Enum.find(fn proof -> proof.level_reached == level and proof.game_config == game_config_hex end)
+
+    if event_proof.status != "claimed" do
+      ZkArcade.Proofs.update_proof_status_claimed(user, event_proof.id, transaction_hash)
+    else
+      Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} already set as claimed.")
+    end
 
     case ZkArcade.Leaderboard.insert_or_update_entry(%{
            "user_address" => user,
@@ -118,7 +129,8 @@ defmodule ZkArcade.SubmissionPoller do
   # If the log format is unexpected, it logs a warning and returns an error.
   defp decode_event_log(%{
          "topics" => [event_sig | _],
-         "data" => data
+         "data" => data,
+         "transactionHash" => tx_hash
        }) do
 
     event_type = case event_sig do
@@ -133,7 +145,7 @@ defmodule ZkArcade.SubmissionPoller do
         {:error, :unknown_event_type}
 
       _ ->
-        <<user::binary-size(32), level::binary-size(32), score::binary-size(32)>> =
+        <<user::binary-size(32), level::binary-size(32), score::binary-size(32), game_config::binary-size(32)>> =
           Base.decode16!(String.trim_leading(data, "0x"), case: :lower)
 
         user_address =
@@ -145,7 +157,7 @@ defmodule ZkArcade.SubmissionPoller do
         level_value = :binary.decode_unsigned(level)
         score_value = :binary.decode_unsigned(score)
 
-        {:ok, %{user: user_address, level: level_value, score: score_value, event_type: event_type}}
+        {:ok, %{user: user_address, level: level_value, score: score_value, game_config: game_config, event_type: event_type, transactionHash: tx_hash}}
     end
   end
 

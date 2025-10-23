@@ -7,7 +7,7 @@ import {
 import { timeAgoInHs } from "../../../utils/date";
 import { BumpChoice, getMinBumpValue } from "./helpers";
 
-const EthPriceWithTooltip = ({
+const EthPriceDisplay = ({
 	wei,
 	ethPrice,
 }: {
@@ -15,19 +15,18 @@ const EthPriceWithTooltip = ({
 	ethPrice: number | null;
 }) => {
 	const ethValue = Number(wei) / 1e18;
-	const usdValue = (ethPrice || 0) * ethValue;
+	const usdValue = ethPrice != null ? ethPrice * ethValue : null;
 
 	return (
-		<div className="relative group">
+		<div className="flex flex-col items-end leading-tight">
 			<span>{ethValue} ETH</span>
-			<div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-				~$
-				{usdValue.toLocaleString(undefined, {
-					maximumFractionDigits: 3,
-				})}{" "}
-				USD
-				<div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black"></div>
-			</div>
+			<span className="text-xs opacity-70">
+				{usdValue != null
+					? `~$${usdValue.toLocaleString(undefined, {
+							maximumFractionDigits: 3,
+					  })} USD`
+					: "USD price unavailable"}
+			</span>
 		</div>
 	);
 };
@@ -114,7 +113,7 @@ export const BumpSelector = ({
 						</div>
 						<span className="text-sm opacity-80">
 							{instantFeeWei ? (
-								<EthPriceWithTooltip
+								<EthPriceDisplay
 									wei={instantFeeWei}
 									ethPrice={price}
 								/>
@@ -158,7 +157,7 @@ export const BumpSelector = ({
 						</div>
 						<span className="text-sm opacity-80">
 							{suggestedFeeWei ? (
-								<EthPriceWithTooltip
+								<EthPriceDisplay
 									wei={suggestedFeeWei}
 									ethPrice={price}
 								/>

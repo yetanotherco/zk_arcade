@@ -35,7 +35,6 @@ const Tile = ({
 		if (prev.current !== value) {
 			if (!muted) {
 				const sound = new Audio("/audio/slide_sound.mp3");
-				sound.volume = 0.25;
 				sound.play();
 			}
 			setChanged(true);

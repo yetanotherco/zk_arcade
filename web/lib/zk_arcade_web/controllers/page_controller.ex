@@ -429,7 +429,7 @@ The goal of the game is to make each number on the board equal.
   end
 
 
-  def mint(conn, params) do
+  def mint(conn, _params) do
     wallet = get_wallet_from_session(conn)
     eligible = get_user_eligibility(wallet)
     proofs = get_proofs(wallet, 1, 10)

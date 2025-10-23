@@ -3,7 +3,8 @@ import { ConnectKitButton } from "connectkit";
 import { useAccount } from "wagmi";
 import { Address } from "viem";
 import Web3EthProvider from "../../providers/web3-eth-provider";
-import { Button } from "../../components";
+import { Button, SocialMediaLinks } from "../../components";
+import { NftSuccessModal } from "../../components/Modal";
 import { ToastContainer } from "../../components/Toast";
 import { ToastsProvider } from "../../state/toast";
 import { useNftContract } from "../../hooks/useNftContract";
@@ -39,7 +40,15 @@ const MintClaimSection = ({
 	nftContractAddress: Address;
 	initialEligibility?: boolean;
 }) => {
-	const { claimNft, receipt, balance } = useNftContract({
+	const {
+		claimNft,
+		receipt,
+		balance,
+		balanceMoreThanZero,
+		showSuccessModal,
+		setShowSuccessModal,
+		claimedNftMetadata,
+	} = useNftContract({
 		contractAddress: nftContractAddress,
 		userAddress: address,
 	});
@@ -54,7 +63,7 @@ const MintClaimSection = ({
 			return "Your wallet is eligible to mint this NFT.";
 		}
 		if (initialEligibility === false) {
-			return "Your wallet isn't eligible to claim this NFT yet.";
+			return "You're not eligible yet, but more waves are on the way.";
 		}
 		return null;
 	});
@@ -63,6 +72,13 @@ const MintClaimSection = ({
 	>(initialEligibility !== undefined ? "eligibility" : null);
 
 	const checkEligibility = useCallback(async () => {
+		if (balanceMoreThanZero) {
+			setLastAction("claim");
+			setStatus("claimed");
+			setMessage("You already claimed this NFT.");
+			return;
+		}
+
 		setLastAction("eligibility");
 		setStatus("checking");
 		setMessage("Checking eligibility…");
@@ -76,7 +92,9 @@ const MintClaimSection = ({
 				setMessage("Your wallet is eligible to mint this NFT.");
 			} else {
 				setStatus("ineligible");
-				setMessage("Your wallet isn't eligible to claim this NFT yet.");
+				setMessage(
+					"You're not eligible yet, but more waves are on the way."
+				);
 			}
 		} catch (err: any) {
 			setStatus("error");
@@ -84,7 +102,7 @@ const MintClaimSection = ({
 				err?.message ?? "Failed to check eligibility. Please retry."
 			);
 		}
-	}, [address]);
+	}, [address, balanceMoreThanZero]);
 
 	useEffect(() => {
 		checkEligibility();
@@ -166,8 +184,7 @@ const MintClaimSection = ({
 	const claimMessage = lastAction === "claim" ? message : null;
 
 	const eligibilityMessageClass =
-		status === "ineligible" ||
-		(status === "error" && lastAction !== "claim")
+		status === "error" && lastAction !== "claim"
 			? "text-red"
 			: "text-text-200";
 	const claimMessageClass =
@@ -176,10 +193,16 @@ const MintClaimSection = ({
 			: "text-text-200";
 
 	const isEligibilityBusy = status === "checking" || status === "claiming";
-	const canClaim = status === "eligible";
+	const canClaim = status === "eligible" && !balanceMoreThanZero;
+	const alreadyMinted = status === "claimed" || balanceMoreThanZero;
 
 	return (
 		<div className="flex flex-col gap-4">
+			{alreadyMinted && (
+				<div className="border border-accent-100/40 rounded p-3 text-sm text-accent-100 bg-accent-100/5">
+					You already claimed this NFT.
+				</div>
+			)}
 			<div className="border border-contrast-100 rounded p-4 flex flex-col gap-3">
 				<div className="flex items-center justify-between text-sm">
 					<span className="font-semibold text-base">
@@ -213,6 +236,9 @@ const MintClaimSection = ({
 					<p className={`text-sm ${eligibilityMessageClass}`}>
 						{eligibilityMessage}
 					</p>
+				)}
+				{status === "ineligible" && (
+					<SocialMediaLinks className="text-center" />
 				)}
 			</div>
 
@@ -250,6 +276,11 @@ const MintClaimSection = ({
 					</p>
 				)}
 			</div>
+			<NftSuccessModal
+				open={showSuccessModal}
+				setOpen={setShowSuccessModal}
+				nftMetadata={claimedNftMetadata}
+			/>
 		</div>
 	);
 };

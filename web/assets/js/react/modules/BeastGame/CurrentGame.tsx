@@ -98,7 +98,7 @@ const CurrentBeastGameComponent = ({
 							>
 								<div className="relative w-full flex gap-2 justify-between">
 									{Array.from(
-										{ length: 8 },
+										{ length: 3 },
 										(_, i) => i + 1
 									).map(i => (
 										<LevelComponent

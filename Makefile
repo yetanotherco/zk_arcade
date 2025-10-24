@@ -52,7 +52,7 @@ submit_beast_solution:
 	@cd games/beast && cargo run --manifest-path ./beast1984/Cargo.toml --release --bin submit_solution
 
 NUM_GAMES ?= 10
-LEVELS_PER_GAME ?= 8
+LEVELS_PER_GAME ?= 3
 CAMPAIGN_DAYS ?= 1
 BEAST_SUBMISSION_OFFSET_MINUTES ?= 720
 beast_gen_levels:

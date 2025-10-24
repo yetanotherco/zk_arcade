@@ -19,6 +19,7 @@ type ClaimComponentProps = {
 	claimTxHash: string;
 	claimExpiryLabel?: string | null;
 	claimExpiryUtc?: string | null;
+	pointsToClaimConstantMultiplication: number;
 };
 
 const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
@@ -33,6 +34,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 			claimTxHash,
 			claimExpiryLabel,
 			claimExpiryUtc,
+			pointsToClaimConstantMultiplication,
 		},
 		formRef
 	) => {
@@ -86,7 +88,11 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 					<p>Game: {proofSubmission.game}</p>
 					<p>Daily Quest: {Number(proofSubmission.game_idx) + 1}</p>
 					<p>Level reached: {proofSubmission.level_reached}</p>
-					<p>Points to claim: {proofSubmission.level_reached}</p>
+					<p>
+						Points to claim:{" "}
+						{proofSubmission.level_reached *
+							pointsToClaimConstantMultiplication}
+					</p>
 					<p>Prover: {proofSubmission.proving_system}</p>
 				</div>
 				<a
@@ -171,10 +177,10 @@ const BeastClaim = ({
 	const handleClaim = async () => {
 		if (proofSubmission.status === "claimed") {
 			const text = encodeURIComponent(
-				"🟩 I just claimed my points on zk-arcade!\n\n"
+				"I just claimed my points on ZK Arcade by @alignedlayer. Think you can beat my score? Prove it :wink:\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,proof,${proofSubmission.proving_system}`;
+			const hashtags = `\naligned,zkarcade,zk`;
 			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 			window.open(twitterShareUrl, "_blank");
@@ -210,6 +216,7 @@ const BeastClaim = ({
 			claimTxHash={claimTxHash}
 			claimExpiryLabel={claimExpiryLabel}
 			claimExpiryUtc={claimExpiryUtc}
+			pointsToClaimConstantMultiplication={60000}
 		/>
 	);
 };
@@ -243,10 +250,10 @@ const ParityClaim = ({
 	const handleClaim = async () => {
 		if (proofSubmission.status === "claimed") {
 			const text = encodeURIComponent(
-				"🟩 I just claimed my points on zk-arcade!\n\n"
+				"I just claimed my points on ZK Arcade by @alignedlayer. Think you can beat my score? Prove it 😉\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,proof,${proofSubmission.proving_system}`;
+			const hashtags = `\naligned,zkarcade,zk`;
 			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 			window.open(twitterShareUrl, "_blank");
@@ -280,6 +287,7 @@ const ParityClaim = ({
 			claimTxHash={submitSolution.tx.hash || ""}
 			claimExpiryLabel={claimExpiryLabel}
 			claimExpiryUtc={claimExpiryUtc}
+			pointsToClaimConstantMultiplication={28000}
 		/>
 	);
 };

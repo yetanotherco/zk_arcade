@@ -427,4 +427,24 @@ The goal of the game is to make each number on the board equal.
     })
     |> render(:leaderboard)
   end
+
+
+  def mint(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    eligible = get_user_eligibility(wallet)
+    proofs = get_proofs(wallet, 1, 10)
+    {username, position} = get_username_and_position(wallet)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+
+    conn
+    |> assign(:network, Application.get_env(:zk_arcade, :network))
+    |> assign(:wallet, wallet)
+    |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+    |> assign(:eligible, eligible)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:username, username)
+    |> assign(:user_position, position)
+    |> assign(:explorer_url, explorer_url)
+    |> render(:mint)
+  end
 end

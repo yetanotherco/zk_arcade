@@ -8,9 +8,9 @@ use serde::{Deserialize, Serialize};
 fn base_template() -> Vec<LevelJson> {
     vec![
         LevelJson {
-            blocks: 250,
+            blocks: 200,
             static_blocks: 10,
-            common_beasts: 3,
+            common_beasts: 10,
             super_beasts: 0,
             eggs: 0,
             egg_hatching_time: 20000,
@@ -19,10 +19,10 @@ fn base_template() -> Vec<LevelJson> {
             completion_score: 5,
         },
         LevelJson {
-            blocks: 250,
-            static_blocks: 12,
-            common_beasts: 5,
-            super_beasts: 0,
+            blocks: 175,
+            static_blocks: 30,
+            common_beasts: 10,
+            super_beasts: 5,
             eggs: 0,
             egg_hatching_time: 20000,
             beast_starting_distance: 42,
@@ -30,10 +30,10 @@ fn base_template() -> Vec<LevelJson> {
             completion_score: 7,
         },
         LevelJson {
-            blocks: 200,
-            static_blocks: 20,
-            common_beasts: 12,
-            super_beasts: 0,
+            blocks: 150,
+            static_blocks: 50,
+            common_beasts: 10,
+            super_beasts: 15,
             eggs: 0,
             egg_hatching_time: 20000,
             beast_starting_distance: 27,

@@ -51,12 +51,11 @@ submit_beast_solution:
 	@cp games/beast/beast1984/cmd/.$(NETWORK).env games/beast/beast1984/cmd/.env
 	@cd games/beast && cargo run --manifest-path ./beast1984/Cargo.toml --release --bin submit_solution
 
-NUM_GAMES ?= 10
-LEVELS_PER_GAME ?= 8
-CAMPAIGN_DAYS ?= 1
+CAMPAIGN_WEEKS_DURATION ?= 5
 BEAST_SUBMISSION_OFFSET_MINUTES ?= 720
+UTC_OFFSET ?= 1761523200 # 26/10/2025 00:00:00 GMT+00:00
 beast_gen_levels:
-	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
+	@cd games/beast && cargo run --bin gen_levels $(CAMPAIGN_WEEKS_DURATION) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK) $(UTC_OFFSET)
 
 beast_build_elf:
 	@cd games/beast/beast1984/sp1_program && cargo prove build --output-directory ./elf --binaries beast_1984_program

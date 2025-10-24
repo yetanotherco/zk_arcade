@@ -174,7 +174,7 @@ const BeastClaim = ({
 				"I just claimed my points on ZK Arcade by @alignedlayer. Think you can beat my score? Prove it :wink:\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,proof,${proofSubmission.proving_system}`;
+			const hashtags = `\naligned,zkarcade,zk`;
 			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 			window.open(twitterShareUrl, "_blank");
@@ -243,10 +243,10 @@ const ParityClaim = ({
 	const handleClaim = async () => {
 		if (proofSubmission.status === "claimed") {
 			const text = encodeURIComponent(
-				"🟩 I just claimed my points on zk-arcade!\n\n"
+				"I just claimed my points on ZK Arcade by @alignedlayer. Think you can beat my score? Prove it 😉\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,proof,${proofSubmission.proving_system}`;
+			const hashtags = `\naligned,zkarcade,zk`;
 			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 			window.open(twitterShareUrl, "_blank");

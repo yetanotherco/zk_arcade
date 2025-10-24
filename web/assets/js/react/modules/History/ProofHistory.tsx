@@ -59,7 +59,7 @@ const Entry = ({
 
 	const [suppressRowHover, setSuppressRowHover] = useState(false);
 
-	const levelsNumber = proof.game === "Beast" ? 8 : 3;
+	const levelsNumber = 3;
 
 	return (
 		<>

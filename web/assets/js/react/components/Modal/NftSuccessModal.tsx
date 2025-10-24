@@ -12,7 +12,7 @@ type Props = {
 const NftSuccessContent = ({ nftMetadata }: { nftMetadata: NftMetadata }) => {
 	const shareOnX = async () => {
 		const text = encodeURIComponent(
-			"I just minted my ZK Arcade Ticket NFT! Sending proofs to @alignedlayer soon :white_check_mark:\n\n"
+			"I just minted my ZK Arcade Ticket NFT! Sending proofs to @alignedlayer soon ✅\n\n"
 		);
 		const url = encodeURIComponent(
 			"Check if you are eligible: https://zkarcade.com/mint\n\n"

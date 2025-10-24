@@ -7,6 +7,10 @@ import {ZkArcadeNft} from "./ZkArcadeNft.sol";
 import {ZkArcadePublicNft} from "./ZkArcadePublicNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
+    // ======== Constants ========
+    uint256 constant BEAST_SCORE_MULTIPLIER = 60000;
+    uint256 constant PARITY_SCORE_MULTIPLIER = 28000;
+
     // ======== Storage ========
 
     address public alignedServiceManager;
@@ -176,7 +180,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
         usersBeastLevelCompleted[key] = levelCompleted;
 
-        usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
+        usersScore[msg.sender] += (levelCompleted - currentLevelCompleted) * BEAST_SCORE_MULTIPLIER;
 
         verifyAndReplaceInTop10(msg.sender);
 
@@ -259,7 +263,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
         usersParityLevelCompleted[key] = levelCompleted;
 
-        usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
+        usersScore[msg.sender] += (levelCompleted - currentLevelCompleted) * PARITY_SCORE_MULTIPLIER;
 
         verifyAndReplaceInTop10(msg.sender);
 

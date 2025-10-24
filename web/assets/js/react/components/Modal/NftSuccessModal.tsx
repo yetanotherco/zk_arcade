@@ -12,10 +12,12 @@ type Props = {
 const NftSuccessContent = ({ nftMetadata }: { nftMetadata: NftMetadata }) => {
 	const shareOnX = async () => {
 		const text = encodeURIComponent(
-			"🟩 I just claimed my points on zk-arcade!\n\n"
+			"I just minted my ZK Arcade Ticket NFT! Sending proofs to @alignedlayer soon :white_check_mark:\n\n"
 		);
-		const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-		const hashtags = `\naligned,zkarcade,nft`;
+		const url = encodeURIComponent(
+			"Check if you are eligible: https://zkarcade.com/mint\n\n"
+		);
+		const hashtags = `\naligned,zkarcade,nft,zk`;
 		const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 		window.open(twitterShareUrl, "_blank");

@@ -174,6 +174,16 @@ defmodule ZkArcade.Accounts do
     end)
   end
 
+  def remove_owned_token(nil, _token_id), do: {:ok, :not_found}
+  def remove_owned_token(address, token_id) do
+    update_token_ids(address, fn tokens ->
+      tokens
+      |> MapSet.new()
+      |> MapSet.delete(to_string(token_id))
+      |> Enum.sort_by(&String.to_integer/1)
+    end)
+  end
+
   defp update_token_ids(address, fun) do
     normalized = String.downcase(address)
 

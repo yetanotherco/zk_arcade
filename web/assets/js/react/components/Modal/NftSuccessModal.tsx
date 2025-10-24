@@ -10,6 +10,21 @@ type Props = {
 };
 
 const NftSuccessContent = ({ nftMetadata }: { nftMetadata: NftMetadata }) => {
+	const shareOnX = async () => {
+		const text = encodeURIComponent(
+			"I just minted my ZK Arcade Ticket NFT! Sending proofs to @alignedlayer soon ✅\n\n"
+		);
+		const url = encodeURIComponent(
+			"Check if you are eligible: https://zkarcade.com/mint\n\n"
+		);
+		const hashtags = `\naligned,zkarcade,nft,zk`;
+		const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
+
+		window.open(twitterShareUrl, "_blank");
+
+		return;
+	};
+
 	return (
 		<div className="flex flex-col items-center gap-6 max-w-md text-center">
 			<div className="relative w-44 overflow-hidden rounded-2xl bg-gradient-to-br from-black via-[#0b0b0d] to-[#040404] p-3 shadow-[0_35px_85px_-35px_rgba(24,255,127,0.9)] ring-1 ring-accent-100/45">
@@ -42,10 +57,27 @@ const NftSuccessContent = ({ nftMetadata }: { nftMetadata: NftMetadata }) => {
 					{nftMetadata.description ||
 						"This NFT does not include a description."}
 				</p>
-				<div className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-accent-100/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.3em] text-accent-100/90 shadow-[0_12px_35px_-22px_rgba(24,255,127,0.9)] ring-1 ring-accent-100/25">
+				<div className="mt-3 inline-flex items-center justify-center gap-2 rounded bg-accent-100/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.3em] text-accent-100/90 shadow-[0_12px_35px_-22px_rgba(24,255,127,0.9)] ring-1 ring-accent-100/25">
 					<span className="inline-block h-2 w-2 animate-ping rounded-full bg-accent-100/70" />
 					Token #{Number(nftMetadata.tokenId || 0n)}
 				</div>
+				<button
+					type="button"
+					onClick={shareOnX}
+					className="mt-5 inline-flex items-center justify-center gap-2 rounded bg-accent-100 px-5 py-2 text-sm font-semibold text-black transition hover:bg-accent-100/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-100/50"
+					aria-label="Share on X"
+				>
+					<svg
+						className="h-4 w-4"
+						viewBox="0 0 1200 1227"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="currentColor"
+						aria-hidden="true"
+					>
+						<path d="M714.163 519.284 1160.89 0H1055.03L667.137 450.887 357.328 0H0L468.492 681.821 0 1226.37H105.866L515.236 747.525 842.672 1226.37H1200L714.137 519.284h.026Zm-182.109 211.7-47.51-67.92L172.352 80.14h162.551l305.806 437.655 47.51 67.92 342.638 490.072H868.306L532.054 730.985Z" />
+					</svg>
+					<span>Share on X</span>
+				</button>
 			</div>
 		</div>
 	);
@@ -88,8 +120,8 @@ export const NftSuccessModal = ({
 						Claim Complete
 					</h2>
 					<p className="text-text-100 text-sm leading-relaxed">
-						Your access pass just hit the chain. Bask in the glow while we tee
-						up what’s next.
+						Your access pass just hit the chain. Bask in the glow
+						while we tee up what’s next.
 					</p>
 				</div>
 

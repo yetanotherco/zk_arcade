@@ -20,6 +20,7 @@ defmodule ZkArcade.Application do
       {Registry, keys: :unique, name: ZkArcade.ProofRegistry},
       {Task.Supervisor, name: ZkArcade.TaskSupervisor},
       ZkArcade.EthPrice,
+      ZkArcade.NftPoller,
       ZkArcade.SubmissionPoller,
       # Start a worker by calling: ZkArcade.Worker.start_link(arg)
       # {ZkArcade.Worker, arg},

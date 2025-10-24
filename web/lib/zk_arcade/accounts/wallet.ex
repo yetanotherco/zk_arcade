@@ -11,6 +11,7 @@ defmodule ZkArcade.Accounts.Wallet do
     field :agreement_signature, :string
     field :username, :string
     field :country, :string
+    field :owned_token_ids, {:array, :string}, default: []
     # TODO: Add the required fields to use in wallets
 
     has_many :proofs, ZkArcade.Proofs.Proof, foreign_key: :wallet_address, references: :address
@@ -21,7 +22,7 @@ defmodule ZkArcade.Accounts.Wallet do
   @doc false
   def changeset(wallet, attrs) do
     wallet
-    |> cast(attrs, [:address, :points, :balance, :agreement_signature, :username, :country])
+    |> cast(attrs, [:address, :points, :balance, :agreement_signature, :username, :country, :owned_token_ids])
     |> validate_address()
     |> validate_required([:address, :agreement_signature])
     |> put_default(:points, 0)
@@ -43,5 +44,10 @@ defmodule ZkArcade.Accounts.Wallet do
     changeset
     |> validate_format(:address, ethereum_address_regex, message: "must be an ethereum valid address")
     |> validate_length(:address, max: max_length)
+  end
+
+  def token_ids_changeset(wallet, attrs) do
+    wallet
+    |> cast(attrs, [:owned_token_ids])
   end
 end

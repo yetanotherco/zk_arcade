@@ -157,7 +157,55 @@ defmodule ZkArcade.Accounts do
     end
   end
 
- def has_country(address) do
+  def get_owned_token_ids(nil), do: {:ok, []}
+  def get_owned_token_ids(address) do
+    with {:ok, wallet} <- fetch_wallet_by_address(String.downcase(address)) do
+      {:ok, wallet.owned_token_ids || []}
+    end
+  end
+
+  def add_owned_token(nil, _token_id), do: {:ok, :not_found}
+  def add_owned_token(address, token_id) do
+    update_token_ids(address, fn tokens ->
+      tokens
+      |> MapSet.new()
+      |> MapSet.put(to_string(token_id))
+      |> Enum.sort_by(&String.to_integer/1)
+    end)
+  end
+
+  def remove_owned_token(nil, _token_id), do: {:ok, :not_found}
+  def remove_owned_token(address, token_id) do
+    update_token_ids(address, fn tokens ->
+      tokens
+      |> MapSet.new()
+      |> MapSet.delete(to_string(token_id))
+      |> Enum.sort_by(&String.to_integer/1)
+    end)
+  end
+
+  defp update_token_ids(address, fun) do
+    normalized = String.downcase(address)
+
+    case fetch_wallet_by_address(normalized) do
+      {:ok, wallet} ->
+        current_tokens = wallet.owned_token_ids || []
+        updated_tokens = fun.(current_tokens)
+
+        if updated_tokens == current_tokens do
+          {:ok, wallet}
+        else
+          wallet
+          |> Wallet.token_ids_changeset(%{owned_token_ids: updated_tokens})
+          |> Repo.update()
+        end
+
+      {:error, :not_found} ->
+        {:ok, :not_found}
+    end
+  end
+
+  def has_country(address) do
     case fetch_wallet_by_address(address) do
       {:ok, wallet} ->
         if wallet.country not in [nil, ""] do

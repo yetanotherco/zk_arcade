@@ -147,13 +147,9 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 			// Fetch the latest NFT metadata and show modal
 			const fetchLatestNftMetadata = async () => {
 				try {
-					if (!publicClient) return;
+					if (!publicClient || !userAddress) return;
 
-					const userTokenIds = await getUserTokenIds(
-						publicClient,
-						userAddress,
-						contractAddress
-					);
+					const userTokenIds = await getUserTokenIds(userAddress);
 
 					if (userTokenIds.length > 0) {
 						// Get the latest event (most recent NFT)
@@ -203,8 +199,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 
 	const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
 
-	// Fetch events Transfer(from, to, tokenId) where to == userAddress
-	// When the user has a balance > 0, we check the blockchain logs to see the NFTs they have received
+	// When the user has a balance > 0, load cached NFT token IDs from the backend
 	useEffect(() => {
 		if (!userAddress || !balanceMoreThanZero) return;
 
@@ -215,11 +210,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 					return;
 				}
 
-				const userTokenIds = await getUserTokenIds(
-					publicClient,
-					userAddress,
-					contractAddress
-				);
+				const userTokenIds = await getUserTokenIds(userAddress);
 
 				const fetchTokenURIs = async () => {
 					try {

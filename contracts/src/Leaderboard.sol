@@ -7,6 +7,10 @@ import {ZkArcadeNft} from "./ZkArcadeNft.sol";
 import {ZkArcadePublicNft} from "./ZkArcadePublicNft.sol";
 
 contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
+    // ======== Constants ========
+    uint256 constant BEAST_SCORE_MULTIPLIER = 60000;
+    uint256 constant PARITY_SCORE_MULTIPLIER = 28000;
+
     // ======== Storage ========
 
     address public alignedServiceManager;
@@ -90,10 +94,14 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         bytes32 _beastVkCommitment,
         bytes32 _parityVkCommitment
     ) public initializer {
-        require(_alignedServiceManager != address(0) &&
-            _alignedServiceManager.code.length > 0, "invalid alignedServiceManager");
-        require(_alignedBatcherPaymentService != address(0) &&
-            _alignedBatcherPaymentService.code.length > 0, "invalid alignedBatcherPaymentService");
+        require(
+            _alignedServiceManager != address(0) && _alignedServiceManager.code.length > 0,
+            "invalid alignedServiceManager"
+        );
+        require(
+            _alignedBatcherPaymentService != address(0) && _alignedBatcherPaymentService.code.length > 0,
+            "invalid alignedBatcherPaymentService"
+        );
         alignedServiceManager = _alignedServiceManager;
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
@@ -176,7 +184,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
         usersBeastLevelCompleted[key] = levelCompleted;
 
-        usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
+        usersScore[msg.sender] += (levelCompleted - currentLevelCompleted) * BEAST_SCORE_MULTIPLIER;
 
         verifyAndReplaceInTop10(msg.sender);
 
@@ -259,7 +267,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         }
         usersParityLevelCompleted[key] = levelCompleted;
 
-        usersScore[msg.sender] += levelCompleted - currentLevelCompleted;
+        usersScore[msg.sender] += (levelCompleted - currentLevelCompleted) * PARITY_SCORE_MULTIPLIER;
 
         verifyAndReplaceInTop10(msg.sender);
 

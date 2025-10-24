@@ -174,35 +174,43 @@ fn gen_levels(
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 10 {
+    if args.len() != 9 {
         eprintln!(
-            "Usage: {} <number_of_games> <levels_per_game> <min_end_of_level> <max_end_of_level> <min_movements> <max_movements> <total_campaign_in_days> <submission_offset_in_minutes> <network>",
+            "Usage: {} <campaign_weeks_amount> <min_end_of_level> <max_end_of_level> <min_movements> <max_movements> <submission_offset_in_minutes> <network> <start_time_utc>",
             args[0]
         );
         std::process::exit(1);
     }
 
-    let num_games: usize = args[1].parse().expect("Invalid number of games");
-    let num_levels = args[2].parse().expect("Invalid levels per game");
-    let min_end_of_level = args[3].parse().expect("Invalid min end of level");
-    let max_end_of_level = args[4].parse().expect("Invalid max end of level");
-    let min_movements = args[5].parse().expect("Invalid min movements");
-    let max_movements = args[6].parse().expect("Invalid max movements");
-    let time_days: u64 = args[7].parse().expect("Invalid total campaign in days");
-    let submission_offset_minutes: u64 = args[8].parse().expect("Invalid submission offset");
-    let network: String = args[9].parse().expect("Invalid network");
+    let weeks_amount: u64 = args[1].parse().expect("Invalid total campaign in weeks");
+    let min_end_of_level = args[2].parse().expect("Invalid min end of level");
+    let max_end_of_level = args[3].parse().expect("Invalid max end of level");
+    let min_movements = args[4].parse().expect("Invalid min movements");
+    let max_movements = args[5].parse().expect("Invalid max movements");
+    let submission_offset_minutes: u64 = args[6].parse().expect("Invalid submission offset");
+    let network: String = args[7].parse().expect("Invalid network");
+    let start_time_utc: u64 = args[8].parse().expect("Invalid start time");
 
-    let current_time = std::time::SystemTime::now();
-    let mut current_timestamp = current_time
-        .duration_since(std::time::UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_secs();
+    // Get the time in seconds from the parameter
+    let mut current_timestamp = std::time::Duration::from_secs(start_time_utc).as_secs();
 
-    let time_in_seconds = time_days * 24 * 3600;
-    let seconds_per_game = time_in_seconds / num_games as u64;
+    let four_days_seconds = 4 * 24 * 3600;
+    let three_days_seconds = 3 * 24 * 3600;
+
+    // Generate a sequence of seconds per game alternating between 4 and 3 days
+    let mut seconds_per_game_sequence = vec![];
+    for i in 0..weeks_amount {
+        if i % 2 == 0 {
+            seconds_per_game_sequence.push(four_days_seconds);
+        } else {
+            seconds_per_game_sequence.push(three_days_seconds);
+        }
+    }
+
+    let num_levels: u8 = 3;
 
     let mut games: Vec<GameEntry> = vec![];
-    for _ in 0..num_games {
+    for seconds_per_game in seconds_per_game_sequence {
         let game_levels = gen_levels(
             num_levels,
             min_end_of_level,

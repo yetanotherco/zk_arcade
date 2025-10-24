@@ -86,15 +86,10 @@ beast_write_program_vk:
 #   level_i    := min(PARITY_MIN_MOVEMENTS + i * step_size, PARITY_MAX_MOVEMENTS)
 # With defaults (levels=3, min=15, max=45): levels → [15, 30, 45]
 # ─────────────────────────────────────────────────────────────────────────────
-# Number of calendar days the campaign spans (scheduling/rotation; not difficulty).
-# Each game takes (campaign days * 24hs / num games) hs
-PARITY_CAMPAIGN_DAYS ?= 1
-# Total number of games in the campaign (pattern repeats per game).
-PARITY_NUM_GAMES ?= 10
+# Number of calendar weeks the campaign spans (scheduling/rotation; not difficulty).
+PARITY_CAMPAIGN_WEEKS ?= 5
 # Adds a time offset to the ends_at to allow a bit more time for claiming
 PARITY_SUBMISSION_OFFSET_MINUTES ?= 720 
-# Levels per game (indexes 0..L-1). Can be up to 3 (fits proof data in 32 bytes).
-PARITY_LEVELS_PER_GAME ?= 3
 # UI-only: lower bound for numbers shown at the end of a level on the board.
 # Does NOT affect difficulty or movement calculations.
 PARITY_MIN_END_OF_LEVEL ?= 12
@@ -105,10 +100,12 @@ PARITY_MAX_END_OF_LEVEL ?= 50
 PARITY_MIN_MOVEMENTS ?= 15
 # Movement budget at the last level. Defines the top of the ramp.
 PARITY_MAX_MOVEMENTS ?= 45
+# The moment (UTC timestamp) when the campaign starts.
+PARITY_CAMPAIGN_START_UTC ?= 1761523200 # 26/10/2025 00:00:00 GMT+00:00
 parity_gen_levels:
 	@cd games/parity/level_generator && \
-	cargo run --release $(PARITY_NUM_GAMES) $(PARITY_LEVELS_PER_GAME) $(PARITY_MIN_END_OF_LEVEL) $(PARITY_MAX_END_OF_LEVEL) \
-	$(PARITY_MIN_MOVEMENTS) $(PARITY_MAX_MOVEMENTS) $(PARITY_CAMPAIGN_DAYS) $(PARITY_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
+	cargo run --release $(PARITY_CAMPAIGN_WEEKS) $(PARITY_MIN_END_OF_LEVEL) $(PARITY_MAX_END_OF_LEVEL) \
+	$(PARITY_MIN_MOVEMENTS) $(PARITY_MAX_MOVEMENTS) $(PARITY_SUBMISSION_OFFSET_MINUTES) $(NETWORK) $(PARITY_CAMPAIGN_START_UTC)
 
 parity_write_program_vk:
 	@cd games/parity/circuits/cmd && cargo run --release

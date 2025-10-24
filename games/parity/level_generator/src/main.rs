@@ -199,7 +199,7 @@ fn main() {
 
     // Generate a sequence of seconds per game alternating between 4 and 3 days
     let mut seconds_per_game_sequence = vec![];
-    for i in 0..weeks_amount {
+    for i in 0..(weeks_amount * 2) {
         if i % 2 == 0 {
             seconds_per_game_sequence.push(four_days_seconds);
         } else {

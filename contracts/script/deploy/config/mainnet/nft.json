@@ -1,8 +1,8 @@
 {
 	"permissions": {
-		"owner": "0x351c5A40c759668E2c2Df18389e6E2A41b32E5B9"
+		"owner": "0xfC135A861efF65b7644Fb03d9f851251546C0835"
 	},
-	"name": "ZK Arcade NFTs",
+	"name": "Aligned ZK Arcade - Premium Ticket",
 	"symbol": "ZKA",
-	"tokenURI": "ipfs://bafybeie4an7i3rey27sbcewdjya74eyag27es5aozekphe2dvzbpmsvwym/"
+	"tokenURI": "ipfs://QmWXibSRVC7T1eq46mkDB25Z1XA6CEJShfgihAQmZAtMye/"
 }

@@ -117,7 +117,7 @@ export const SignAgreement = () => {
 						<p className="mb-1 text-sm">
 							I agree with Zk Arcade{" "}
 							<a
-								href="/tos"
+								href="https://tos.zkarcade.com"
 								className="text-accent-100 hover:underline"
 								target="_blank"
 								rel="noopener noreferrer"
@@ -126,7 +126,7 @@ export const SignAgreement = () => {
 							</a>{" "}
 							and{" "}
 							<a
-								href="/privacy"
+								href="https://privacy.zkarcade.com"
 								className="text-accent-100 hover:underline"
 								target="_blank"
 								rel="noopener noreferrer"

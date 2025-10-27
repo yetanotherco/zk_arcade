@@ -70,13 +70,6 @@ const WalletContent = ({
 		}
 	}, [isConnected, address, user_address]);
 
-	// If the relative route is /tos or /privacy, avoid showing the agreement modal
-	const currentPath = window.location.pathname;
-	const isTosOrPrivacyPath = currentPath === "/tos" || currentPath === "/privacy";
-	if (isTosOrPrivacyPath && isConnected && address) {
-		return <></>;
-	}
-
 	// Case 1: User has completed session (signed agreement)
 	if (user_address) {
 		const decodedProofs: ProofSubmission[] = JSON.parse(proofs);

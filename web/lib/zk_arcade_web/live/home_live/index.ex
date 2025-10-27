@@ -110,43 +110,28 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     faqs = [
       %{
         number: "01",
-        question: "Why do I need a wallet to play?",
-        answer: "Your wallet is your identity in ZK Arcade. It allows you to deposit ETH into Aligned to pay for proof verification, claim your points on the leaderboard, and keep all your progress securely tied to your address."
+        question: "How can I play ZK Arcade?",
+        answer: ""
       },
       %{
         number: "02",
-        question: "Why do I need to mint an NFT?",
-        answer: "The NFT proves you're eligible to participate. It acts as your entry ticket to ZK Arcade and helps us maintain fair play by ensuring each participant is verified."
+        question: "How can I obtain an NFT ticket to play ZK Arcade?",
+        answer: ""
       },
       %{
         number: "03",
-        question: "How much does it cost to play?",
-        answer: "Playing costs only the gas fees for transactions on Aligned Network. Proof verification is extremely affordable - typically just a few cents per proof."
+        question: "How much does NFT minting cost?",
+        answer: ""
       },
       %{
         number: "04",
-        question: "What games can I play?",
-        answer: "Currently, we offer Parity (a number guessing game) and Beast (a simple platformer). More games are coming soon!"
+        question: "How much does it cost to play each game?",
+        answer: ""
       },
       %{
         number: "05",
-        question: "Can I transfer or sell the NFT?",
-        answer: "No. The NFT is non-transferable. It's permanently tied to the wallet that minted it to preserve fair participation and prevent selling or lending access."
-      },
-      %{
-        number: "06",
-        question: "Why do I need to verify my proofs?",
-        answer: "Verification guarantees that your results are valid and are not tampered with. It ensures the leaderboard reflects the player's real skills, and not manipulated outcomes."
-      },
-      %{
-        number: "07",
-        question: "Can I resubmit a proof for a lower level?",
-        answer: "No, you can only submit proofs for higher levels than your current best. This maintains competitive integrity and prevents gaming the system."
-      },
-      %{
-        number: "08",
-        question: "How long does proof verification take?",
-        answer: "Proof verification on Aligned Network typically takes just a few seconds to a few minutes, depending on network congestion."
+        question: "How often are new challenges released?",
+        answer: ""
       }
     ]
 

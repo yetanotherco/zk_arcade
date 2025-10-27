@@ -131,13 +131,17 @@ deploy_nft_contract: submodules
 deploy_leaderboard_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_leaderboard_contract.sh
 
-generate_merkle_tree:
-	@cd merkle_tree && cargo run --release -- $(WHITELIST_PATH) $(OUTPUT_PATH) $(MERKLE_ROOT_INDEX)
+build_merkle_proof_generator:
+	cd merkle_tree && cargo build --release
+
+generate_merkle_tree: build_merkle_proof_generator
+	@./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) $(OUTPUT_FILE) $(MERKLE_ROOT_INDEX) $(INSERTED_DIRECTORY)
 
 add_merkle_root: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
 
-gen_levels_and_deploy_contracts_devnet: beast_gen_levels parity_gen_levels web_db
+gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db
+	@rm -rf data/inserted_devnet/inserted_*.csv
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
@@ -151,7 +155,8 @@ gen_levels_and_deploy_contracts_devnet: beast_gen_levels parity_gen_levels web_d
 	@$(MAKE) deploy_leaderboard_contract NETWORK=devnet
 	@$(MAKE) update_leaderboard_address
 	@$(MAKE) update_nft_address
-	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./whitelist_devnet.json OUTPUT_PATH=./merkle_output_devnet.json MERKLE_ROOT_INDEX=0
+	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/inserted_devnet
+	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./data/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/inserted_devnet
 	@$(MAKE) add_merkle_root NETWORK=devnet
 
 upgrade_contract: submodules
@@ -166,10 +171,14 @@ set_beast_games: submodules
 set_parity_games:
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_parity_games.sh
 
+__WHITELIST__:
+
 # This path is relative to the project root
 WHITELIST_PATH?=merkle_tree/whitelist.json
-nft_whitelist_addresses: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/create_new_campaign.sh "$(MERKLE_ROOT_INDEX)" "$(WHITELIST_PATH)"
+INSERTED_DIRECTORY?=data/inserted
+
+preprocess_whitelist:
+	pip3 install -r data/requirements.txt && python3 data/preprocess_addresses.py $(WHITELIST_PATH) $(INSERTED_DIRECTORY)
 
 __INFRA__: ## ____
 ## Initial Setup

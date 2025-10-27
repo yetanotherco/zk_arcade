@@ -26,7 +26,7 @@ export const useBackgroundMusic = () => {
 			a.src = MUSIC_SRC;
 			a.loop = true;
 			a.preload = "auto";
-			a.volume = 0.05;
+			a.volume = 0.1;
 			document.body.appendChild(a);
 		}
 

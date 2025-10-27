@@ -5,7 +5,7 @@ defmodule ZkArcade.VerifySignature do
   def init(opts), do: opts
 
   def get_terms_message(address) do
-    "Zk Arcade wants you to sign and accept the Terms of Service and Privacy Policy \n\nYour address: " <> address <> "\n\nClick to sign in and accept the Zk Arcade Terms of Service (https://zkarcade.com/tos) and Privacy Policy (https://zkarcade.com/privacy).\n"
+    "Zk Arcade wants you to sign and accept the Terms of Service and Privacy Policy \n\nYour address: " <> address <> "\n\nClick to sign in and accept the Zk Arcade Terms of Service (https://tos.zkarcade.com) and Privacy Policy (https://privacy.zkarcade.com).\n"
   end
 
   def call(conn, address, sig_hex) do

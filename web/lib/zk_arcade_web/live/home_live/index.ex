@@ -110,43 +110,28 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     faqs = [
       %{
         number: "01",
-        question: "Why do I need a wallet to play?",
-        answer: "Your wallet is your identity in ZK Arcade. It allows you to deposit ETH into Aligned to pay for proof verification, claim your points on the leaderboard, and keep all your progress securely tied to your address."
+        question: "How can I play ZK Arcade?",
+        answer: "Access to ZK Arcade is gated by the ZK Arcade Ticket NFT. You must mint the NFT on the Zk Arcade website to play. Connect your wallet to check eligibility, mint the NFT, deposit ETH to pay for proof verification, and start playing!"
       },
       %{
         number: "02",
-        question: "Why do I need to mint an NFT?",
-        answer: "The NFT proves you're eligible to participate. It acts as your entry ticket to ZK Arcade and helps us maintain fair play by ensuring each participant is verified."
+        question: "How can I obtain an NFT ticket to play ZK Arcade?",
+        answer: "If you have been whitelisted, you can mint your NFT on the ZK Arcade website. If you aren't eligible, follow our official channels (<a href=\"https://x.com/alignedlayer\" target=\"_blank\" class=\"underline\">X</a>, <a href=\"https://blog.alignedlayer.com/\" target=\"_blank\" class=\"underline\">blog</a>, <a href=\"https://t.me/alignedlayer\" target=\"_blank\" class=\"underline\">telegram channel</a>), and <a href=\"https://discord.gg/alignedlayer\" target=\"_blank\" class=\"underline\">join our Discord community</a> to stay updated on when the next wave of access becomes available."
       },
       %{
         number: "03",
-        question: "How much does it cost to play?",
-        answer: "Playing costs only the gas fees for transactions on Aligned Network. Proof verification is extremely affordable - typically just a few cents per proof."
+        question: "How much does NFT minting cost?",
+        answer: "The ZK Arcade Ticket NFT is free. You only have to pay gas for the minting transaction."
       },
       %{
         number: "04",
-        question: "What games can I play?",
-        answer: "Currently, we offer Parity (a number guessing game) and Beast (a simple platformer). More games are coming soon!"
+        question: "How much does it cost to play each game?",
+        answer: "Playing games on ZK Arcade is free! However, you have to deposit some ETH into Aligned (recommended 0.001 ETH) to submit proofs for verification. You will also need to pay a small separate gas fee for the transaction to claim points on the leaderboard (around $1, and you can set a lower priority fee in your wallet to save gas)."
       },
       %{
         number: "05",
-        question: "Can I transfer or sell the NFT?",
-        answer: "No. The NFT is non-transferable. It's permanently tied to the wallet that minted it to preserve fair participation and prevent selling or lending access."
-      },
-      %{
-        number: "06",
-        question: "Why do I need to verify my proofs?",
-        answer: "Verification guarantees that your results are valid and are not tampered with. It ensures the leaderboard reflects the player's real skills, and not manipulated outcomes."
-      },
-      %{
-        number: "07",
-        question: "Can I resubmit a proof for a lower level?",
-        answer: "No, you can only submit proofs for higher levels than your current best. This maintains competitive integrity and prevents gaming the system."
-      },
-      %{
-        number: "08",
-        question: "How long does proof verification take?",
-        answer: "Proof verification on Aligned Network typically takes just a few seconds to a few minutes, depending on network congestion."
+        question: "How often are new challenges released?",
+        answer: "New challenges are released every Monday and Friday at 00:00 UTC. You have an additional 48-hour window to claim points after a level expires."
       }
     ]
 

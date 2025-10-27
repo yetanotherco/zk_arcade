@@ -3,6 +3,26 @@ defmodule ZkArcadeWeb.WalletController do
   use ZkArcadeWeb, :controller
   alias ZkArcade.VerifySignature
 
+  defp redirect_path(conn, default \\ "/") do
+    case get_req_header(conn, "referer") do
+      [referer | _] ->
+        uri = URI.parse(referer)
+
+        cond do
+          uri.host && uri.host != conn.host -> default
+          is_nil(uri.path) -> default
+          !String.starts_with?(uri.path, "/") -> default
+          true ->
+            query_part = if uri.query, do: "?" <> uri.query, else: ""
+            fragment_part = if uri.fragment, do: "#" <> uri.fragment, else: ""
+            uri.path <> query_part <> fragment_part
+        end
+
+      _ ->
+        default
+    end
+  end
+
   def connect_wallet(conn, %{"address" => address, "signature" => sig}) do
     conn = VerifySignature.call(conn, address, sig)
 
@@ -13,10 +33,11 @@ defmodule ZkArcadeWeb.WalletController do
       case ZkArcade.Accounts.fetch_wallet_by_address(String.downcase(address)) do
         {:ok, wallet} ->
           Logger.info("There is already a wallet for the received address")
+          destination = redirect_path(conn)
 
           conn
           |> put_session(:wallet_address, wallet.address)
-          |> redirect(to: ~p"/")
+          |> redirect(to: destination)
 
         {:error, :not_found} ->
           Logger.info("Could not find a wallet for the received address, creating wallet...")
@@ -24,10 +45,11 @@ defmodule ZkArcadeWeb.WalletController do
           case ZkArcade.Accounts.create_wallet(%{address: String.downcase(address), agreement_signature: sig}) do
             {:ok, wallet} ->
               Logger.info("Created wallet for address #{wallet.address}")
+              destination = redirect_path(conn)
 
               conn
               |> put_session(:wallet_address, wallet.address)
-              |> redirect(to: ~p"/")
+              |> redirect(to: destination)
             {:error, changeset} ->
               Logger.error("Error creating wallet: #{inspect(changeset.errors)}")
 

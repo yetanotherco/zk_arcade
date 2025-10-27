@@ -2,7 +2,7 @@
     <div class="section-width section-spacer-md">
         <div class="flex flex-col gap-8 w-full">
             <div>
-                <h1 class="text-3xl text-text-100 font-normal mb-4">Hello, {@username} 👋</h1>
+                <h1 class="text-3xl text-text-100 truncate font-normal mb-4">Hello, {@username} 👋</h1>
                 <p class="text-md text-text-200">
                     This is you.
                 </p>
@@ -10,13 +10,15 @@
             <div class="flex flex-col gap-4 w-full">
                 <div class="flex items-end">
                     <p class="text-lg text-text-200 mr-2">Username: </p>
-                    <x-app-history-update-username-btn
-                        network={@network}
-                        username={@username}
-                    />
+                    <div id="update-username-btn-wrap" phx-update="ignore">
+                        <x-app-history-update-username-btn
+                            network={@network}
+                            username={@username}
+                        />
+                    </div>
                 </div>
                 <p class="text-lg text-text-200 ellipsis">Address: <span class="text-text-100"><%= @wallet %></span></p>
-                <div class="flex sm:gap-8 flex-wrap items-center">
+                <div id="aligned-actions" phx-update="ignore" class="flex sm:gap-8 flex-wrap items-center">
                     <p class="text-lg text-text-200">Balance on Aligned: <span class="text-text-100" id="history-balance">...</span></p>
                     <x-app-history-deposit-on-aligned-btn  
                         network={@network} 
@@ -32,14 +34,27 @@
                 <p class="text-lg text-text-200">Score: <span class="text-text-100" id="history-score">...</span></p>
                 <p class="text-lg text-text-200">Proofs sent: <span class="text-text-100"><%= @proofs_sent_total %></span></p>
             </div>
-            <x-app-history-claim-nft 
-                network={@network}
-                user_address={@wallet}
-                nft_contract_address={@nft_contract_address}
-                is_eligible={@eligible}
-            />
+
+            <div id="nft-claim-section" phx-update="ignore">
+                <x-app-history-claim-nft 
+                    network={@network}
+                    user_address={@wallet}
+                    nft_contract_address={@nft_contract_address}
+                    is_eligible={@eligible}
+                />
+            </div>
         </div>
     </div>
+
+    <div id="nfts-list" phx-update="ignore">
+        <x-app-nft-list
+            network={@network}
+            user_address={@wallet}
+            nft_contract_address={@nft_contract_address}
+            is_eligible={@eligible}
+        />
+    </div>
+          
 
     <div class="section-width section-spacer-md">
         <div class="flex flex-col gap-8 w-full">
@@ -50,6 +65,8 @@
                 </p>
             </div>
             <x-app-history
+                id={"history-root-#{@wallet}"}
+                phx-update="ignore"
                 network={@network}
                 proofs={@submitted_proofs}
                 leaderboard_address={@leaderboard_address}

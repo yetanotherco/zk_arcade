@@ -254,11 +254,13 @@ defmodule ZkArcadeWeb.PageController do
           - Windows: Download the portable executable:
           #{Application.get_env(:zk_arcade, :beast_windows_download_url)}
           - Linux/MacOS: Run the following command:
-          <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
+          <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url)} | bash</span>
 
-        2. Start playing: Run the game with the command: <span class="code-block">beast</span>
+        2. Start playing: Run the game with the command: <span class="code-block">#{Application.get_env(:zk_arcade, :beast_bash_command)}</span>. When prompted, enter the same Ethereum address you use on ZK Arcade (the wallet that holds your Ticket NFT).
 
-        3. Find your proof: After completing levels, locate the generated proof file on your system
+        3. Find your proof: After completing levels, locate the generated proof file on your system.
+           - Windows: The proof file is saved alongside <span class="code-block">beast.exe</span> (for example <span class="code-block">C:\\Users\\&lt;you&gt;\\Downloads\\beast\\sp1_solution_YYYY-MM-DD_HH-MM-SS.bin</span>).
+           - macOS/Linux: The proof file is written to the directory where you launched <span class="code-block">beast</span> (for most people that's the home directory, e.g. <span class="code-block">~/sp1_solution_YYYY-MM-DD_HH-MM-SS.bin</span>).
 
         4. Fund verification: Deposit ETH into <span class="text-accent-100">ALIGNED</span> to pay for proof verification
 
@@ -275,7 +277,8 @@ defmodule ZkArcadeWeb.PageController do
         Uninstall: Remove Beast anytime with: <span class="code-block">rm $(which beast)</span>
         """,
         acknowledgments: acknowledgements,
-        tags: [:cli, :sp1, :hard]
+        tags: [:cli, :sp1, :hard],
+        secondary_tags: [:eight_daily_points]
       })
       |> assign(:username, username)
       |> assign(:user_position, position)
@@ -311,7 +314,8 @@ defmodule ZkArcadeWeb.PageController do
 The goal of the game is to make each number on the board equal.
 ",
         acknowledgments: acknowledgements,
-        tags: [:browser, :circom, :easy]
+        tags: [:browser, :circom, :easy],
+        secondary_tags: [:three_daily_points]
       })
       |> assign(:username, username)
       |> assign(:submitted_proofs, Jason.encode!(proofs))
@@ -422,5 +426,25 @@ The goal of the game is to make each number on the board equal.
       items_per_page: entries_per_page
     })
     |> render(:leaderboard)
+  end
+
+
+  def mint(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    eligible = get_user_eligibility(wallet)
+    proofs = get_proofs(wallet, 1, 10)
+    {username, position} = get_username_and_position(wallet)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+
+    conn
+    |> assign(:network, Application.get_env(:zk_arcade, :network))
+    |> assign(:wallet, wallet)
+    |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+    |> assign(:eligible, eligible)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:username, username)
+    |> assign(:user_position, position)
+    |> assign(:explorer_url, explorer_url)
+    |> render(:mint)
   end
 end

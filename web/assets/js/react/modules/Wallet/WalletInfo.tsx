@@ -5,9 +5,10 @@ import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
-import { useNftContract } from "../../hooks/useNftContract";
-import { EligibilityModal } from "../../components/Modal/EligibilityModal";
+import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
+import { useNftContract, NftMetadata } from "../../hooks/useNftContract";
+import { getNftMetadata } from "../../hooks/useNftContract/utils";
 
 type Props = {
 	network: string;
@@ -38,14 +39,30 @@ export const WalletInfo = ({
 	const formRef = useRef<HTMLFormElement>(null);
 	const [claimed, setClaimed] = useState(false);
 	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
-	const { balance, claimNft, receipt } = useNftContract({
+	const {
+		balance,
+		claimNft,
+		receipt,
+		tokenURIs,
+		showSuccessModal,
+		setShowSuccessModal,
+		claimedNftMetadata,
+	} = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
+
 	const { disconnect } = useDisconnect();
+
+	const [nftMetadataList, setNftMetadataList] = useState<NftMetadata[]>([]);
 
 	const handleDisconnect = () => {
 		disconnect();
+		Object.keys(localStorage).forEach(key => {
+			if (key.startsWith("wagmi.") || key.startsWith("wc@")) {
+				localStorage.removeItem(key);
+			}
+		});
 		formRef.current?.submit();
 	};
 
@@ -56,6 +73,35 @@ export const WalletInfo = ({
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
 		: "You are not currently eligible to mint the NFT and participate in the contest.";
+
+	useEffect(() => {
+		const fetchNftMetadata = async () => {
+			if (tokenURIs.length === 0) return;
+
+			const metadataList = await Promise.all(
+				tokenURIs.map(async uri => {
+					try {
+						return await getNftMetadata(uri, nft_contract_address);
+					} catch (error) {
+						console.error(
+							`Error fetching metadata for ${uri}:`,
+							error
+						);
+						return null;
+					}
+				})
+			);
+
+			setNftMetadataList(
+				metadataList.filter(
+					(metadata: any): metadata is NftMetadata =>
+						metadata !== null
+				)
+			);
+		};
+
+		fetchNftMetadata();
+	}, [tokenURIs]);
 
 	return (
 		<div className="sm:relative group">
@@ -76,14 +122,28 @@ export const WalletInfo = ({
 					className="overflow-scroll flex flex-col gap-8 p-8 absolute max-sm:left-0 sm:w-[450px] w-full sm:right-0 shadow-2xl bg-contrast-100 rounded opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-10"
 					style={{ maxHeight: 450 }}
 				>
-					<div className="flex gap-2 items-center">
-						<span className="hero-user" />
-						<a href="/history" className="text-lg hover:underline">
-							{username}{" "}
-							{user_position === null
-								? "(#None)"
-								: `(#${user_position})`}
-						</a>
+					<div className="flex gap-2 items-center justify-between w-full">
+						<div className="flex gap-2 items-center">
+							{balance.data != undefined && balance.data > 0n ? (
+								<img
+									src={nftMetadataList.at(0)?.image}
+									alt={nftMetadataList.at(0)?.name || "NFT"}
+									title={nftMetadataList.at(0)?.name}
+									style={{ maxWidth: "30px" }}
+								/>
+							) : (
+								<span className="hero-user" />
+							)}
+							<a
+								href="/history"
+								className="text-lg hover:underline"
+							>
+								{username}{" "}
+								{user_position === null
+									? "(#None)"
+									: `(#${user_position})`}
+							</a>
+						</div>
 						<div>
 							<form
 								ref={formRef}
@@ -146,6 +206,12 @@ export const WalletInfo = ({
 					/>
 				</div>
 			</div>
+
+			<NftSuccessModal
+				open={showSuccessModal}
+				setOpen={setShowSuccessModal}
+				nftMetadata={claimedNftMetadata}
+			/>
 		</div>
 	);
 };

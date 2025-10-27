@@ -275,7 +275,7 @@ defmodule ZkArcadeWeb.CoreComponents do
       ]} id={"#{@id}-content"}>
         <div class="overflow-hidden lg:pl-[60px] pr-[40px]">
           <div class="pb-5">
-            <p class="text-text-200"><%= @answer %></p>
+            <p class="text-text-200"><%= Phoenix.HTML.raw(@answer) %></p>
           </div>
         </div>
       </div>

@@ -8,10 +8,10 @@
         leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
         nft_contract_address={Application.get_env(:zk_arcade, :nft_contract_address)}
         batcher_url={Application.get_env(:zk_arcade, :batcher_url)}
-        wallet={@conn.assigns.wallet} 
-        submitted_proofs={@conn.assigns.submitted_proofs}
-        username={@conn.assigns.username}
-        user_position={@conn.assigns.user_position}
+        wallet={assigns[:wallet]} 
+        submitted_proofs={assigns[:submitted_proofs]}
+        username={assigns[:username]}
+        user_position={assigns[:user_position]}
         explorer_url={@explorer_url}
         eligible={@eligible}
       />
@@ -38,8 +38,7 @@
          {"Resources",
           [
             {"Aligned", "https://alignedlayer.com/"},
-            {"Blog", "https://blog.alignedlayer.com/"},
-            {"Contact", "https://alignedlayer.com/contact/"}
+            {"Blog", "https://blog.alignedlayer.com/"}
           ]}
        ]}/>
   </footer>

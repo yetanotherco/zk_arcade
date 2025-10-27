@@ -7,6 +7,7 @@ import { useCSRFToken } from "../../../hooks/useCSRFToken";
 import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboardContract";
 import { useChainId, useReadContract } from "wagmi";
 import { leaderboardAbi } from "../../../constants/aligned";
+import { SocialLinks } from "../../SocialLinks";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
@@ -18,6 +19,7 @@ type ClaimComponentProps = {
 	claimTxHash: string;
 	claimExpiryLabel?: string | null;
 	claimExpiryUtc?: string | null;
+	pointsToClaimConstantMultiplication: number;
 };
 
 const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
@@ -32,6 +34,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 			claimTxHash,
 			claimExpiryLabel,
 			claimExpiryUtc,
+			pointsToClaimConstantMultiplication,
 		},
 		formRef
 	) => {
@@ -71,11 +74,25 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 					</div>
 				)}
 
+				{!canClaim && !gameHasExpired && proofStatus !== "claimed" && (
+					<div className="rounded border border-contrast-100/40 bg-black/60 px-4 py-3">
+						<p className="text-sm text-text-200 text-center mb-2">
+							We're still verifying your proof. Stay tuned on our
+							channels for the latest status updates.
+						</p>
+					</div>
+				)}
+				<SocialLinks className="text-xs text-text-300" />
+
 				<div className="flex flex-col gap-2">
 					<p>Game: {proofSubmission.game}</p>
 					<p>Daily Quest: {Number(proofSubmission.game_idx) + 1}</p>
 					<p>Level reached: {proofSubmission.level_reached}</p>
-					<p>Points to claim: {proofSubmission.level_reached}</p>
+					<p>
+						Points to claim:{" "}
+						{proofSubmission.level_reached *
+							pointsToClaimConstantMultiplication}
+					</p>
 					<p>Prover: {proofSubmission.proving_system}</p>
 				</div>
 				<a
@@ -160,10 +177,10 @@ const BeastClaim = ({
 	const handleClaim = async () => {
 		if (proofSubmission.status === "claimed") {
 			const text = encodeURIComponent(
-				"🟩 I just claimed my points on zk-arcade!\n\n"
+				"I just claimed my points on ZK Arcade by @alignedlayer. Think you can beat my score? Prove it :wink:\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,proof,${proofSubmission.proving_system}`;
+			const hashtags = `\naligned,zkarcade,zk`;
 			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 			window.open(twitterShareUrl, "_blank");
@@ -199,6 +216,7 @@ const BeastClaim = ({
 			claimTxHash={claimTxHash}
 			claimExpiryLabel={claimExpiryLabel}
 			claimExpiryUtc={claimExpiryUtc}
+			pointsToClaimConstantMultiplication={60000}
 		/>
 	);
 };
@@ -232,10 +250,10 @@ const ParityClaim = ({
 	const handleClaim = async () => {
 		if (proofSubmission.status === "claimed") {
 			const text = encodeURIComponent(
-				"🟩 I just claimed my points on zk-arcade!\n\n"
+				"I just claimed my points on ZK Arcade by @alignedlayer. Think you can beat my score? Prove it 😉\n\n"
 			);
 			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,proof,${proofSubmission.proving_system}`;
+			const hashtags = `\naligned,zkarcade,zk`;
 			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
 
 			window.open(twitterShareUrl, "_blank");
@@ -269,6 +287,7 @@ const ParityClaim = ({
 			claimTxHash={submitSolution.tx.hash || ""}
 			claimExpiryLabel={claimExpiryLabel}
 			claimExpiryUtc={claimExpiryUtc}
+			pointsToClaimConstantMultiplication={28000}
 		/>
 	);
 };

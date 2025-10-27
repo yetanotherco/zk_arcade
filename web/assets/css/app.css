@@ -318,3 +318,41 @@ thead {
 	background: hsl(0 0% 0% / 0.15);
 	transform: translateY(2px);
 }
+
+/* Toast progress bar animation */
+@keyframes shrink {
+	from { height: 0%; }
+	to { height: 100%; }
+}
+
+/* Toast slide in animation */
+@keyframes slideInFromTop {
+	from {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+/* Toast slide out animation */
+@keyframes slideOutToBottom {
+	from {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+}
+
+.toast-enter {
+	animation: slideInFromTop 0.3s ease-out;
+}
+
+.toast-exit {
+	animation: slideOutToBottom 0.3s ease-in;
+}

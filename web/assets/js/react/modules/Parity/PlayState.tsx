@@ -55,6 +55,7 @@ export const PlayState = ({
 	setCurrentLevel: (level: number) => void;
 	playerLevelReached: number;
 	timeRemaining: {
+		days: number;
 		hours: number;
 		minutes: number;
 	} | null;
@@ -130,8 +131,8 @@ export const PlayState = ({
 					<p>
 						Daily Quests renew in{" "}
 						<span className="text-accent-100">
-							{timeRemaining.hours > 0
-								? `${timeRemaining.hours} hours`
+							{timeRemaining.days > 0 || timeRemaining.hours > 0
+								? `${timeRemaining.days > 0 ? `${timeRemaining.days} days ` : ""}${timeRemaining.hours} hours`
 								: `${timeRemaining.minutes} minutes`}
 						</span>
 					</p>

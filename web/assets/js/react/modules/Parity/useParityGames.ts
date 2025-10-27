@@ -57,6 +57,7 @@ export const useParityGames = ({
 	const currentBlock = useBlock();
 
 	const [timeRemaining, setTimeRemaining] = useState<{
+		days: number;
 		hours: number;
 		minutes: number;
 	} | null>(null);
@@ -68,16 +69,15 @@ export const useParityGames = ({
 			: 0;
 
 		if (startsAtTime > 0 && currentBlockTimestamp) {
-			const timeRemaining =
-				Number(startsAtTime) - Number(currentBlockTimestamp);
+			const totalSeconds = Math.max(
+				0,
+				Number(startsAtTime) - Number(currentBlockTimestamp)
+			);
+			const days = Math.floor(totalSeconds / 86400);
+			const hours = Math.floor((totalSeconds % 86400) / 3600);
+			const minutes = Math.floor((totalSeconds % 3600) / 60);
 
-			const hours = timeRemaining / 3600;
-			const minutes = Math.floor(timeRemaining / 60);
-
-			setTimeRemaining({
-				hours: Math.floor(hours),
-				minutes,
-			});
+			setTimeRemaining({ days, hours, minutes });
 		}
 	}, [nextGame.data, currentGame.data, currentBlock.data]);
 

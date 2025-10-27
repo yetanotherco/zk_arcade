@@ -53,13 +53,13 @@ defmodule ZkArcadeWeb.CoreComponents do
               <%!-- <.link href="/games" class="transition hover:text-accent-100 hover:underline">Games</.link> --%>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
-              <button class="transition hover:text-accent-100 hover:underline" id="how-it-works-nav-btn">
+              <button class="transition hover:text-accent-100 hover:underline" id="how-it-works-nav-btn-desktop">
                 How it Works
               </button>
           </div>
         </div>
 
-        <div class="flex gap-6 items-center">
+        <div id="submit-proof" class="flex gap-6 items-center" phx-update="ignore">
           <x-app-submit-proof
               network={@network}
               payment_service_address={@payment_service_address}
@@ -135,7 +135,7 @@ defmodule ZkArcadeWeb.CoreComponents do
                 <%!-- <.link href="/games" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link> --%>
                 <.link href="/leaderboard" class="text-text-100 transition hover:text-accent-100 hover:underline">Leaderboard</.link>
                 <.link href="/history" class="text-text-100 transition hover:text-accent-100 hover:underline">Profile</.link>
-                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">How it Works</p>
+                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn-mobile">How it Works</p>
                 <.link href="#faq" class="text-text-100 transition hover:text-accent-100 hover:underline">FAQ</.link>
                 <.link href={Application.get_env(:zk_arcade, :feedback_form_url)} target="_blank" rel="noopener noreferrer" class="text-text-100 transition hover:text-accent-100 hover:underline">Give us Feedback</.link>
                 <x-app-background-music-mute-btn />
@@ -275,7 +275,7 @@ defmodule ZkArcadeWeb.CoreComponents do
       ]} id={"#{@id}-content"}>
         <div class="overflow-hidden lg:pl-[60px] pr-[40px]">
           <div class="pb-5">
-            <p class="text-text-200"><%= @answer %></p>
+            <p class="text-text-200"><%= Phoenix.HTML.raw(@answer) %></p>
           </div>
         </div>
       </div>
@@ -361,11 +361,11 @@ defmodule ZkArcadeWeb.CoreComponents do
   def home_game_component_hero(assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
-      <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
+      <div class="flex-1 h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
         <.game_content_hero tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
-      <.link href={@link} class="w-[350px] h-full shrink-0">
+      <.link href={@link} class="max-w-[500px] h-full shrink-0">
         <div class="w-full h-full flex flex-col cursor-pointer bg-contrast-300 rounded p-5 group">
           <.game_content_hero tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
         </div>
@@ -377,13 +377,13 @@ defmodule ZkArcadeWeb.CoreComponents do
   defp game_content_hero(assigns) do
     ~H"""
     <div class="flex gap-2">
-      <img class="rounded mb-1 w-full h-[75px] w-[100px]" src={@img}/>
-      <p class="text-xs text-text-200"><%= @desc %></p>
+      <img class="rounded mb-1 h-[150px]" src={@img}/>
     </div>
     <div>
         <h3 class="text-lg font-normal group-hover:underline underline-offset-4">
           <%= @title %>
         </h3>
+      <p class="text-xs text-text-200"><%= @desc %></p>
       <div class="flex gap-2">
         <%= for variant <- @tags do %>
           <.tag variant={variant} />

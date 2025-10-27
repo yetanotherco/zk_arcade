@@ -6,7 +6,7 @@
 	"parityVKCommitment": "0x38ec54af857e6f2beef357eb00a07aa879a354ea2374f51ce2fb9d58977b2e4c",
 	"alignedServiceManager": "0xeF2A435e5EE44B2041100EF8cbC8ae035166606c",
 	"alignedBatcherPaymentService": "0xb0567184A52cB40956df6333510d6eF35B89C8de",
-	"zkArcadeNftContract": "",
+	"zkArcadeNftContract": "0xd84c0fEfEaEf69A51836DBf607E031a9033a4ed7",
 	"useWhitelist": true,
 	"games": [
 		{

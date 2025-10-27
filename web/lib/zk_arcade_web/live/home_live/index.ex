@@ -131,7 +131,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
       %{
         number: "05",
         question: "How often are new challenges released?",
-        answer: "New challenges are released every Monday and Friday at 00:00 UTC."
+        answer: "New challenges are released every Monday and Friday at 00:00 UTC. You have an additional 48-hour window to claim points after a level expires."
       }
     ]
 

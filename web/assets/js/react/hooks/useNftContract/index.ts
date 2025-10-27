@@ -41,6 +41,8 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 	const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
 	const [tokenURIs, setTokenURIs] = useState<string[]>([]);
 
+	const mintedTokenIdRef = useRef<bigint | null>(null);
+
 	const balance = useReadContract({
 		address: contractAddress,
 		abi: zkArcadeNftAbi,
@@ -84,6 +86,24 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 				type: "error",
 			});
 			return;
+		}
+
+		// Here we simulate the call to capture the tokenId returned by claimNFT
+		try {
+			if (publicClient) {
+				const simulation = await publicClient.simulateContract({
+					address: contractAddress,
+					abi: zkArcadeNftAbi,
+					functionName: "claimNFT",
+					args: [merkleProofArray, BigInt(res.merkle_root_index)],
+					account: userAddress,
+				});
+
+				mintedTokenIdRef.current =
+					simulation.result as unknown as bigint;
+			}
+		} catch (_) {
+			mintedTokenIdRef.current = null;
 		}
 
 		const hash = await writeContractAsync({
@@ -140,38 +160,30 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 			});
 		}
 
-		// Only process success if we haven't already processed this transaction
 		if (receipt.isSuccess && txHash && processedTxHash !== txHash) {
 			setProcessedTxHash(txHash);
 
-			// Fetch the latest NFT metadata and show modal
 			const fetchLatestNftMetadata = async () => {
 				try {
-					if (!publicClient || !userAddress) return;
+					const storageKey = `${userAddress}:hasShownSuccessModal`;
+					let mintedTokenId = mintedTokenIdRef.current;
+					if (mintedTokenId === null) return;
 
-					const userTokenIds = await getUserTokenIds(userAddress);
+					const tokenURI = await getTokenURI(
+						publicClient,
+						contractAddress,
+						mintedTokenId
+					);
 
-					if (userTokenIds.length > 0) {
-						// Get the latest event (most recent NFT)
-						const latestTokenId =
-							userTokenIds[userTokenIds.length - 1];
-
-						if (latestTokenId !== undefined) {
-							const tokenURI = await getTokenURI(
-								publicClient,
-								contractAddress,
-								latestTokenId
-							);
-
-							// Fetch the metadata
-							const metadata = await getNftMetadata(
-								tokenURI,
-								contractAddress
-							);
-							setClaimedNftMetadata(metadata);
-							setShowSuccessModal(true);
-						}
-					}
+					const metadata = await getNftMetadata(
+						tokenURI,
+						contractAddress
+					);
+					setClaimedNftMetadata(metadata);
+					setShowSuccessModal(true);
+					try {
+						localStorage.setItem(storageKey, "true");
+					} catch (_) {}
 				} catch (error) {
 					console.error("Error fetching latest NFT metadata:", error);
 				}
@@ -189,13 +201,6 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		userAddress,
 		addToast,
 	]);
-
-	// Reset processed hash when starting a new transaction
-	useEffect(() => {
-		if (txHash && processedTxHash && processedTxHash !== txHash) {
-			setProcessedTxHash(null);
-		}
-	}, [txHash, processedTxHash]);
 
 	const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
 

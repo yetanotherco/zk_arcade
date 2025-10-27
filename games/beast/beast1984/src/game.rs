@@ -642,15 +642,15 @@ impl Game {
 
         let mut successful_files = Vec::new();
         if let Ok(filename) = &sp1_res {
-            successful_files.push(filename.as_str());
+            let full_path = std::fs::canonicalize(filename)
+                .or_else(|_| std::env::current_dir().map(|dir| dir.join(filename)))
+                .unwrap_or_else(|_| std::path::PathBuf::from(filename));
+            successful_files.push(full_path.to_string_lossy().into_owned());
         }
-        // if let Ok(filename) = &risc0_res {
-        //     successful_files.push(filename.as_str());
-        // }
 
         self.proof_completion_message = if !successful_files.is_empty() {
             format!(
-                "Proof saved to {}. Submit it to https://test.zkarcade.com and earn points!",
+                "Proof saved to {}. Submit it to https://zkarcade.com/games/beast and earn points!",
                 successful_files.join(", ")
             )
         } else {

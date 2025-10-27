@@ -37,10 +37,7 @@ export async function getTokenURI(
 		args: [tokenId],
 	});
 
-	return tokenURI.replace(
-		"ipfs://",
-		"https://gateway.lighthouse.storage/ipfs/"
-	);
+	return tokenURI.replace("ipfs://", "https://ipfs.io/ipfs/");
 }
 
 // Receives an ipfs URL and processes it to return a HTTP URL

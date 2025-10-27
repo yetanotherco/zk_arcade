@@ -111,27 +111,27 @@ defmodule ZkArcadeWeb.HomeLive.Index do
       %{
         number: "01",
         question: "How can I play ZK Arcade?",
-        answer: ""
+        answer: "To play ZK Arcade, you first need to mint your NFT ticket, in case you are whitelisted. Once you have the ticket, connect your wallet and choose an available game to play."
       },
       %{
         number: "02",
         question: "How can I obtain an NFT ticket to play ZK Arcade?",
-        answer: ""
+        answer: "You can obtain your NFT ticket by minting it on the page if you are whitelisted. If you are not whitelisted, follow our official channels (X and our Blog), join the Discord community, and participate in ongoing campaigns to earn a spot on the whitelist for future minting rounds."
       },
       %{
         number: "03",
         question: "How much does NFT minting cost?",
-        answer: ""
+        answer: "The cost of minting an NFT ticket for ZK Arcade varies depending on current gas fees and the specific minting event."
       },
       %{
         number: "04",
         question: "How much does it cost to play each game?",
-        answer: ""
+        answer: "Playing games on ZK Arcade is free. However, to claim points on the leaderboard you will need to pay a small gas fee for the claim transaction."
       },
       %{
         number: "05",
         question: "How often are new challenges released?",
-        answer: ""
+        answer: "Two challenges are released per week — every Monday and Friday at 12:00 PM UTC."
       }
     ]
 

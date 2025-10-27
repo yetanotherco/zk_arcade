@@ -84,12 +84,7 @@ impl GameLevels {
         match level {
             Level::One => self.levels[0].clone(),
             Level::Two => self.levels[1].clone(),
-            Level::Three => self.levels[2].clone(),
-            Level::Four => self.levels[3].clone(),
-            Level::Five => self.levels[4].clone(),
-            Level::Six => self.levels[5].clone(),
-            Level::Seven => self.levels[6].clone(),
-            Level::Eight => self.levels[7].clone(),
+            Level::Three => self.levels[2].clone()
         }
     }
 }

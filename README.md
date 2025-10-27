@@ -126,3 +126,63 @@ As app user, run:
 ```
 systemctl restart zk_arcade --user
 ```
+
+## Address Whitelisting
+
+First, we run a preprocessing step on the address whitelist to ensure it contains no duplicate or invalid addresses. Then, we use the valid addresses to generate the Merkle proof data for the new campaign, which will be stored in the database and added to the NFT contract.
+
+### Prerequisites
+
+The preprocessing script requires Python with pandas. Set up a virtual environment:
+
+```shell
+# Create virtual environment
+python3 -m venv ~/.python_venvs/pandas_venv
+
+# Activate virtual environment
+source ~/.python_venvs/pandas_venv/bin/activate
+
+# Install dependencies
+pip install -r data/requirements.txt
+```
+
+### Preprocessing Workflow
+
+To run the preprocessing:
+
+1. Put your addresses in `whitelist_addresses.csv`, or provide your own CSV file.
+2. Activate the Python virtual environment:
+   ```shell
+   source ~/.python_venvs/pandas_venv/bin/activate
+   ```
+3. Run the preprocessing script:
+   ```shell
+   make preprocess_whitelist WHITELIST_PATH=<whitelist_path> INSERTED_DIRECTORY=<inserted_directory>
+   ```
+   Where:
+   - `WHITELIST_PATH`: Path to the CSV file containing the addresses to whitelist
+   - `INSERTED_DIRECTORY`: Directory containing previously inserted addresses (default: `data/inserted`, for devnet use: `data/inserted_devnet`)
+4. Removed addresses will be written to `removed_addresses.csv`, and the addresses to generate Merkle proof data will be written to `new_addresses.csv` into `data` directory.
+
+### Merkle Proof Data Generation
+
+1. Complete `.env` file into `merkle_tree/.env` with the required environment variables.
+   ```
+   DATABASE_URL=postgresql://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
+   ```
+2. Run:
+   ```shell
+   make generate_merkle_tree WHITELIST_PATH=data/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output.json MERKLE_ROOT_INDEX=<campaign_number> INSERTED_DIRECTORY=<directory>
+   ```  
+   Where:
+   - `WHITELIST_PATH`: Path to the CSV file with addresses (usually `data/new_addresses.csv` from preprocessing)
+   - `OUTPUT_FILE`: Path where the Merkle proof JSON will be written
+   - `MERKLE_ROOT_INDEX`: Campaign number (must match the index the merkle root will take in the contract)
+   - `INSERTED_DIRECTORY`: Directory where filtered addresses CSV will be saved as `inserted_<MERKLE_ROOT_INDEX>.csv`
+   
+   For devnet, use: `INSERTED_DIRECTORY=./data/inserted_devnet`
+3. This command generates the Merkle proof data, stores the Merkle paths in the backend database, writes the campaign Merkle root to the output file, and saves filtered addresses to the specified directory.
+4. Add the new campaign Merkle root to the NFT contract by running:  
+   ```shell
+   make add_merkle_root NETWORK=<network>
+   ```

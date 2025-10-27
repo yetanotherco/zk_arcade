@@ -25,6 +25,7 @@ import { Button } from "../../Button";
 import { BumpFeeModal } from "../../Modal/BumpFee";
 import { ProgressBar } from "../../ProgressBar";
 import { usePendingProofsToBump } from "../../../hooks/usePendingProofsToBump";
+import { SocialLinks } from "../../SocialLinks";
 
 type Game = {
 	id: "beast" | string;
@@ -428,18 +429,20 @@ export const SubmitProofStep = ({
 			<div className="flex flex-col gap-4 justify-between h-full">
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
-						The proof has been submitted to Aligned. Come back in a
-						few hours to claim your points.
+						The proof has been submitted to Aligned. Settling your
+						proofs on Ethereum typically takes 5 -15 minutes, though
+						occasionally it takes more time.
 					</p>
 				) : proofStatus === "underpriced" ? (
 					<p className="bg-orange/20 rounded p-2 text-orange">
-						The proof is underpriced, we suggest you to bump the
-						fee.
+						The proof transaction is currently underpriced. We
+						recommend increasing the fee to ensure it gets processed
+						in the next batches.
 					</p>
 				) : (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
-						The proof has been included in a batch and it will be
-						verified by Aligned
+						The proof has been included and is now awaiting
+						verification by Aligned.
 					</p>
 				)}
 
@@ -495,6 +498,7 @@ export const SubmitProofStep = ({
 						}}
 					/>
 				)}
+				<SocialLinks className="text-xs text-text-200 mt-4" />
 			</div>
 		);
 	}

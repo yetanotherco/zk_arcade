@@ -12,6 +12,8 @@ import InitialModals from "./modules/InitialModals";
 import { ParityGame } from "./modules/Parity";
 import { BackgroundMusicPromptBtn } from "./modules/BackgroundMusic/BackgroundMusicPrompt";
 import { MuteBackgroundBtn } from "./modules/BackgroundMusic/MuteBtn";
+import NFTList from "./modules/History/NFTList";
+import { Mint } from "./modules/Mint";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -152,4 +154,28 @@ define(
 define(
 	{ "x-app-background-music-mute-btn": MuteBackgroundBtn },
 	{ attributes: [] }
+);
+
+define(
+	{ "x-app-nft-list": NFTList },
+	{
+		attributes: [
+			"network",
+			"user_address",
+			"nft_contract_address",
+			"is_eligible",
+		],
+	}
+);
+
+define(
+	{ "x-app-mint": Mint },
+	{
+		attributes: [
+			"network",
+			"user_address",
+			"nft_contract_address",
+			"is_eligible",
+		],
+	}
 );

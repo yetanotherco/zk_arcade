@@ -2,8 +2,8 @@
 	"permissions": {
 		"owner": "0x351c5A40c759668E2c2Df18389e6E2A41b32E5B9"
 	},
-	"beastVKCommitment": "0x17d1f38bfbf17d1c9dd4d9dabe58c6d6a1f1a2b7a7fa8d01a422c7e1af7c7342",
-	"parityVKCommitment": "0x949446f1e2cd049ac9bec14482e4386015db6e2e8bf3b7160b31292434e6edeb",
+	"beastVKCommitment": "0x43a0ab019387486065bbde328ce86d43809cdde808db37e0cdab8e3f520d23ca",
+	"parityVKCommitment": "0x38ec54af857e6f2beef357eb00a07aa879a354ea2374f51ce2fb9d58977b2e4c",
 	"alignedServiceManager": "0xeF2A435e5EE44B2041100EF8cbC8ae035166606c",
 	"alignedBatcherPaymentService": "0xb0567184A52cB40956df6333510d6eF35B89C8de",
 	"zkArcadeNftContract": "0x760Be9CCA9c9dE659DB66b91c9804bb955242Ea6",

@@ -111,27 +111,27 @@ defmodule ZkArcadeWeb.HomeLive.Index do
       %{
         number: "01",
         question: "How can I play ZK Arcade?",
-        answer: "To play ZK Arcade, you first need to mint your NFT ticket, in case you are whitelisted. Once you have the ticket, connect your wallet and choose an available game to play."
+        answer: "Access to ZK Arcade is gated by the ZK Arcade Ticket NFT. You must mint the NFT on the Zk Arcade website to play. Connect your wallet to check eligibility, mint the NFT, deposit ETH to pay for proof verification, and start playing!"
       },
       %{
         number: "02",
         question: "How can I obtain an NFT ticket to play ZK Arcade?",
-        answer: "You can obtain your NFT ticket by minting it on the page if you are whitelisted. If you aren't whitelisted, follow our official channels (X and our Blog), and join the Discord community to stay updated for future minting rounds."
+        answer: "If you have been whitelisted, you can mint your NFT on the ZK Arcade website. If you aren't eligible, follow our official channels (<a href=\"https://x.com/alignedlayer\" target=\"_blank\" class=\"underline\">X</a>, <a href=\"https://blog.alignedlayer.com/\" target=\"_blank\" class=\"underline\">blog</a>, <a href=\"https://t.me/alignedlayer\" target=\"_blank\" class=\"underline\">telegram channel</a>), and <a href=\"https://discord.gg/alignedlayer\" target=\"_blank\" class=\"underline\">join our Discord community</a> to stay updated on when the next wave of access becomes available."
       },
       %{
         number: "03",
         question: "How much does NFT minting cost?",
-        answer: "The cost of minting an NFT ticket for ZK Arcade varies depending on current gas fees and the specific minting event."
+        answer: "The ZK Arcade Ticket NFT is free. You only have to pay gas for the minting transaction."
       },
       %{
         number: "04",
         question: "How much does it cost to play each game?",
-        answer: "Playing games on ZK Arcade is free. However, to claim points on the leaderboard you will need to pay a small gas fee for the claim transaction."
+        answer: "Playing games on ZK Arcade is free! However, you have to deposit some ETH into Aligned (recommended 0.001 ETH) to submit proofs for verification. You will also need to pay a small separate gas fee for the transaction to claim points on the leaderboard (around $1, and you can set a lower priority fee in your wallet to save gas)."
       },
       %{
         number: "05",
         question: "How often are new challenges released?",
-        answer: "Two challenges are released per week,  every Monday and Friday at 12:00 PM UTC."
+        answer: "New challenges are released every Monday and Friday at 00:00 UTC."
       }
     ]
 

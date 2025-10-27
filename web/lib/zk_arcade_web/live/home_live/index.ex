@@ -116,7 +116,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
       %{
         number: "02",
         question: "How can I obtain an NFT ticket to play ZK Arcade?",
-        answer: "You can obtain your NFT ticket by minting it on the page if you are whitelisted. If you are not whitelisted, follow our official channels (X and our Blog), join the Discord community, and participate in ongoing campaigns to earn a spot on the whitelist for future minting rounds."
+        answer: "You can obtain your NFT ticket by minting it on the page if you are whitelisted. If you aren't whitelisted, follow our official channels (X and our Blog), and join the Discord community to stay updated for future minting rounds."
       },
       %{
         number: "03",
@@ -131,7 +131,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
       %{
         number: "05",
         question: "How often are new challenges released?",
-        answer: "Two challenges are released per week — every Monday and Friday at 12:00 PM UTC."
+        answer: "Two challenges are released per week,  every Monday and Friday at 12:00 PM UTC."
       }
     ]
 

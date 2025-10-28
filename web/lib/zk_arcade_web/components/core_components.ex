@@ -429,10 +429,10 @@ defmodule ZkArcadeWeb.CoreComponents do
         <p class="mt-2 text-xs text-text-100 bg-red/20 border border-red rounded w-fit px-3 font-bold">Hard</p>
       <% :easy -> %>
         <p class="mt-2 text-xs text-text-100 bg-emerald-400/20 border border-emerald-400 rounded w-fit px-3 font-bold">Easy</p>
-      <% :three_daily_points -> %>
-        <p class="mt-2 text-xs text-text-100 bg-yellow/20 border border-yellow rounded w-fit px-3 font-bold">3 daily points</p>
-      <% :eight_daily_points -> %>
-        <p class="mt-2 text-xs text-text-100 bg-purple-500/20 border border-purple-500 rounded w-fit px-3 font-bold">8 daily points</p>
+      <% :parity_daily_points -> %>
+        <p class="mt-2 text-xs text-text-100 bg-yellow/20 border border-yellow rounded w-fit px-3 font-bold">84K points</p>
+      <% :beast_daily_points -> %>
+        <p class="mt-2 text-xs text-text-100 bg-purple-500/20 border border-purple-500 rounded w-fit px-3 font-bold">180K points</p>
       <% _ -> %>
     <% end %>
     """

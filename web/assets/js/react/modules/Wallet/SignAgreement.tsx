@@ -16,6 +16,22 @@ export const SignAgreement = () => {
 	const { disconnect } = useDisconnect();
 	const { addToast } = useToast();
 
+	const [termsMessage, setTermsMessage] = useState("");
+	const [termsAccepted, setTermsAccepted] = useState(false);
+
+	// Fetch message to sign (with address) on mount
+	useEffect(() => {
+		if (address) {
+			fetch(`/api/wallet/terms-message?address=${address}`)
+				.then((res) => res.json())
+				.then((data) => {
+					if (data.terms_message) {
+						setTermsMessage(data.terms_message);
+					}
+				});
+		}
+	}, [address]);
+
 	useEffect(() => {
 		const csrfToken =
 			document.head
@@ -44,7 +60,7 @@ export const SignAgreement = () => {
 		try {
 			setIsSigningAgreement(true);
 			const sig = await signMessageAsync({
-				message: "I agree with the service policy",
+				message: termsMessage,
 			});
 			setSignature(sig);
 		} catch (err) {
@@ -71,82 +87,54 @@ export const SignAgreement = () => {
 
 	return (
 		<Modal
-			maxWidth={900}
+			maxWidth={600}
 			open={open}
 			setOpen={() => {}}
 			shouldCloseOnOutsideClick={false}
 			shouldCloseOnEsc={false}
 			showCloseButton={false}
 		>
-			<div className="bg-contrast-100 w-full p-10 rounded flex flex-col gap-8">
+			<div className="bg-contrast-100 w-full p-10 rounded flex flex-col gap-5">
 				<form ref={formRef} action="/wallet/sign" method="post">
 					<input type="hidden" name="_csrf_token" value={csrfToken} />
 					<input type="hidden" name="address" value={address || ""} />
 					<input type="hidden" name="signature" value={signature} />
 				</form>
 
-				<div className="text-center">
-					<h3 className="text-3xl font-bold mb-2">
-						Accept Terms of Service
-					</h3>
-					<p className="text-text-200">
-						Welcome back! Please accept our terms to continue using
-						ZK Arcade
-					</p>
-				</div>
-
-				{/* Connected Wallet Display */}
-				<div className="bg-text-300 bg-opacity-20 p-6 rounded text-center">
-					<p className="text-sm text-accent-100 mb-2">
-						✓ Wallet Connected
-					</p>
-					<p className="text-sm font-mono text-text-200">
-						{address?.slice(0, 6)}...{address?.slice(-4)}
-					</p>
-				</div>
+				<p className="text-center">
+					Welcome to Zk Arcade! Please accept our terms to continue and play games.
+				</p>
 
 				{/* Terms Section */}
 				<div className="bg-text-300 bg-opacity-20 p-6 rounded">
-					<h4 className="text-lg font-semibold mb-3">
-						Terms of Service
-					</h4>
-					<div className="overflow-y-auto max-h-60 text-sm text-text-200 leading-relaxed">
-						<p className="mb-4">
-							Lorem ipsum dolor sit amet, consectetur adipiscing
-							elit. Proin dapibus, felis sit amet convallis
-							iaculis, felis purus commodo nibh, at sodales velit
-							arcu a odio. Pellentesque dapibus volutpat odio, eu
-							rutrum mauris malesuada et. Aliquam ligula velit,
-							ultricies et mattis quis, ultrices in elit. Nam eget
-							erat finibus, scelerisque purus eleifend, pretium
-							lacus. Nam vitae tellus rhoncus, ornare libero eget,
-							aliquam risus. Morbi lacinia lacinia ultricies.
-							Morbi volutpat sollicitudin eros at vehicula.
-							Pellentesque sed neque luctus, laoreet mi id, luctus
-							est. Vivamus dictum ullamcorper lorem, non hendrerit
-							purus condimentum et. Vestibulum viverra ligula vel
-							lacinia porttitor. Donec blandit, ligula sit amet
-							condimentum accumsan, quam elit sagittis nisl, et
-							commodo lorem justo eget erat. Nam maximus arcu vel
-							nibh feugiat accumsan. Ut aliquam massa ut pulvinar
-							sagittis. Sed dictum mauris nec pretium feugiat.
-							Aliquam erat volutpat. Mauris scelerisque sodales ex
-							vel convallis.
+					<label className="flex items-center gap-4">
+						<input
+							type="checkbox"
+							className="mr-2 w-4 h-4 rounded-sm"
+							checked={termsAccepted}
+							onChange={(e) => setTermsAccepted(e.target.checked)}
+						/>
+						<p className="mb-1 text-sm">
+							I agree with Zk Arcade{" "}
+							<a
+								href="https://tos.zkarcade.com"
+								className="text-accent-100 hover:underline"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Terms of Service
+							</a>{" "}
+							and{" "}
+							<a
+								href="https://privacy.zkarcade.com"
+								className="text-accent-100 hover:underline"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Privacy Policy
+							</a>.
 						</p>
-						<p className="mb-4">
-							Sed ut perspiciatis unde omnis iste natus error sit
-							voluptatem accusantium doloremque laudantium, totam
-							rem aperiam, eaque ipsa quae ab illo inventore
-							veritatis et quasi architecto beatae vitae dicta
-							sunt explicabo. Nemo enim ipsam voluptatem quia
-							voluptas sit aspernatur aut odit aut fugit, sed quia
-							consequuntur magni dolores eos qui ratione
-							voluptatem sequi nesciunt.
-						</p>
-						<p>
-							TODO: Replace with actual terms of service content
-						</p>
-					</div>
+					</label>
 				</div>
 
 				{/* Action Buttons */}
@@ -161,7 +149,7 @@ export const SignAgreement = () => {
 					<Button
 						variant="accent-fill"
 						onClick={handleSignAgreement}
-						disabled={!isConnected || isSigningAgreement}
+						disabled={!isConnected || isSigningAgreement || !termsAccepted}
 					>
 						{isSigningAgreement ? "Signing..." : "Accept & Sign"}
 					</Button>

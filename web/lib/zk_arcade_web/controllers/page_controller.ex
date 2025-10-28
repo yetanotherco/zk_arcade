@@ -245,7 +245,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:wallet, wallet)
       |> assign(:eligible, eligible)
       |> assign(:game, %{
-        image: "/images/beast.png",
+        image: "/images/beast.jpg",
         name: "Beast 1984",
         desc: "Survive across waves of enemies",
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
@@ -306,7 +306,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:wallet, wallet)
       |> assign(:eligible, eligible)
       |> assign(:game, %{
-        image: "/images/parity.png",
+        image: "/images/parity.jpg",
         name: "Parity",
         desc: "Daily parity puzzles in your browser. Simple rules, tricky patterns. Test your logic and stay sharp as difficulty builds.",
         full_desc: "The game is played by moving a cursor with WASD around the board to select different squares in a grid. Each time you select a select a cell by moving the cursor with the arrow keys, the number inside that cell increases by one.

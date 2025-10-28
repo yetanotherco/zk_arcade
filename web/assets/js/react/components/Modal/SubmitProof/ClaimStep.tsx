@@ -248,11 +248,9 @@ const ParityClaim = ({
 	const handleClaim = async () => {
 		if (proofSubmission.status === "claimed") {
 			const text = encodeURIComponent(
-				"I just claimed my points on ZK Arcade by @alignedlayer. Think you can beat my score? Prove it 😉\n\n"
+				"I just claimed my points on ZK Arcade. Think you can beat my score? Follow @alignedlayer, play, and prove it"
 			);
-			const url = encodeURIComponent("Try: https://zkarcade.com\n\n");
-			const hashtags = `\naligned,zkarcade,zk`;
-			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`;
+			const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}`;
 
 			window.open(twitterShareUrl, "_blank");
 

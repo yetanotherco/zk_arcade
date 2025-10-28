@@ -3,6 +3,7 @@ import { useModal } from "../../hooks";
 import { useNftContract } from "../../hooks/useNftContract";
 import { Address } from "../../types/blockchain";
 import { EligibilityModal } from "../../components/Modal/EligibilityModal";
+import { NftSuccessModal } from "../../components/Modal";
 
 type Props = {
 	user_address: Address;
@@ -39,7 +40,14 @@ export const ShowEligibilityModal = ({
 	isEligible,
 }: Props) => {
 	const { open, setOpen } = useModal();
-	const { balance, claimNft, receipt } = useNftContract({
+	const {
+		balance,
+		claimNft,
+		receipt,
+		claimedNftMetadata,
+		showSuccessModal,
+		setShowSuccessModal,
+	} = useNftContract({
 		userAddress: user_address,
 		contractAddress: nft_contract_address,
 	});
@@ -86,14 +94,21 @@ export const ShowEligibilityModal = ({
 	};
 
 	return (
-		<EligibilityModal
-			isEligible={isEligible}
-			open={open}
-			setOpen={setOpen}
-			onClose={dismiss}
-			claimNft={claimNft}
-			balance={balance.data || 0n}
-			isLoading={receipt.isLoading}
-		/>
+		<>
+			<EligibilityModal
+				isEligible={isEligible}
+				open={open}
+				setOpen={setOpen}
+				onClose={dismiss}
+				claimNft={claimNft}
+				balance={balance.data || 0n}
+				isLoading={receipt.isLoading}
+			/>
+			<NftSuccessModal
+				nftMetadata={claimedNftMetadata}
+				open={showSuccessModal}
+				setOpen={setShowSuccessModal}
+			/>
+		</>
 	);
 };

@@ -67,7 +67,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     wallet = socket.assigns.wallet
     proofs = get_proofs(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.list_proofs()
-    total_players = ZkArcade.Accounts.list_wallets()
+    total_players = ZkArcade.Proofs.get_addresses_that_claimed_count()
 
     eth_price = case ZkArcade.EthPrice.get_eth_price_usd() do
       {:ok, price} -> price

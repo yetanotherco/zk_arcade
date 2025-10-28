@@ -142,7 +142,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     |> assign(:total_players, total_players)
     |> assign(:cost_saved, ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)))
     |> assign(:desc, desc)
-    |> assign(:total_claimed_points, total_claimed_points)
+    |> assign(:total_claimed_points, ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(total_claimed_points)))
     |> assign(:proofs_per_player, proofs_per_player)
     |> assign(:avg_savings_per_proof, avg_savings_per_proof)
     |> assign(:top_users, top_users)

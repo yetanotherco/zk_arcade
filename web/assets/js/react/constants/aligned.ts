@@ -254,7 +254,9 @@ export const zkArcadeNftAbi = [
 			{ name: "merkleProof", type: "bytes32[]" },
 			{ name: "rootIndex", type: "uint256" },
 		],
-		outputs: [],
+		outputs: [
+			{ name: "", type: "uint256", internalType: "uint256" },
+		],
 	},
 	{
 		type:"function",

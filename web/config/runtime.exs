@@ -92,7 +92,7 @@ if config_env() == :prod do
 
   config :ethereumex, url: System.get_env("RPC_URL")
 
-  config :zk_arcade, :campaign_started_at, 1753031818
+  config :zk_arcade, :campaign_started_at, System.get_env("CAMPAIGN_STARTED_AT")
 
   config :zk_arcade, :batcher_host, System.get_env("BATCHER_HOST")
   config :zk_arcade, :batcher_port, String.to_integer(System.get_env("BATCHER_PORT"))

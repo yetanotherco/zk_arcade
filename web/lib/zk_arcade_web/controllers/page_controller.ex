@@ -278,7 +278,7 @@ defmodule ZkArcadeWeb.PageController do
         """,
         acknowledgments: acknowledgements,
         tags: [:cli, :sp1, :hard],
-        secondary_tags: [:eight_daily_points]
+        secondary_tags: [:beast_daily_points]
       })
       |> assign(:username, username)
       |> assign(:user_position, position)
@@ -315,7 +315,7 @@ The goal of the game is to make each number on the board equal.
 ",
         acknowledgments: acknowledgements,
         tags: [:browser, :circom, :easy],
-        secondary_tags: [:three_daily_points]
+        secondary_tags: [:parity_daily_points]
       })
       |> assign(:username, username)
       |> assign(:submitted_proofs, Jason.encode!(proofs))

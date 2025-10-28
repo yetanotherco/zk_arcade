@@ -15,7 +15,7 @@ const LevelComponent = ({
 	points,
 }: {
 	level_number: number;
-	points: number;
+	points: string;
 	claimed: boolean;
 }) => {
 	return (
@@ -111,7 +111,7 @@ const CurrentBeastGameComponent = ({
 														0
 												)
 											}
-											points={1}
+											points={"60K"}
 										/>
 									))}
 								</div>
@@ -122,8 +122,13 @@ const CurrentBeastGameComponent = ({
 							Daily Quests renew in{" "}
 							{timeRemaining ? (
 								<span className="text-accent-100">
-									{timeRemaining.days > 0 || timeRemaining.hours > 0
-										? `${timeRemaining.days > 0 ? `${timeRemaining.days} days ` : ""}${timeRemaining.hours} hours`
+									{timeRemaining.days > 0 ||
+									timeRemaining.hours > 0
+										? `${
+												timeRemaining.days > 0
+													? `${timeRemaining.days} days `
+													: ""
+										  }${timeRemaining.hours} hours`
 										: `${timeRemaining.minutes} minutes`}
 								</span>
 							) : (

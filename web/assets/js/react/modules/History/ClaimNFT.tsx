@@ -44,7 +44,13 @@ const ClaimNFT = ({
 		: "You are not currently eligible to mint the NFT and participate in the contest.";
 
 	if (claimed || balance.data !== 0n) {
-		return null;
+		return (
+			<NftSuccessModal
+				open={showSuccessModal}
+				setOpen={setShowSuccessModal}
+				nftMetadata={claimedNftMetadata}
+			/>
+		);
 	}
 	return (
 		<>
@@ -71,12 +77,6 @@ const ClaimNFT = ({
 					isLoading={receipt.isLoading}
 				/>
 			</div>
-
-			<NftSuccessModal
-				open={showSuccessModal}
-				setOpen={setShowSuccessModal}
-				nftMetadata={claimedNftMetadata}
-			/>
 		</>
 	);
 };

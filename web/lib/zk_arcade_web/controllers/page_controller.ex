@@ -428,7 +428,6 @@ The goal of the game is to make each number on the board equal.
     |> render(:leaderboard)
   end
 
-
   def mint(conn, _params) do
     wallet = get_wallet_from_session(conn)
     eligible = get_user_eligibility(wallet)

@@ -34,6 +34,7 @@ defmodule ZkArcadeWeb.Router do
 
     # API endpoint for wallet agreement status check
     get "/api/wallet/:address/agreement-status", ApiController, :check_agreement_status
+    get "/api/wallet/terms-message", ApiController, :get_terms_message
     get "/api/wallet/:address/nfts", ApiController, :get_wallet_nfts
     get "/api/ethprice", ApiController, :get_eth_price
     get "/api/nft/proof", ApiController, :get_nft_claim_merkle_proof

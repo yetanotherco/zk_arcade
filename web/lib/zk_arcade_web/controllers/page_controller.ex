@@ -72,7 +72,7 @@ defmodule ZkArcadeWeb.PageController do
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.list_proofs()
-    total_players = ZkArcade.Accounts.list_wallets()
+    total_players = ZkArcade.Proofs.get_addresses_that_claimed_count()
 
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
     # In the future, we'd have to sum the savings of all the proofs for each proving system

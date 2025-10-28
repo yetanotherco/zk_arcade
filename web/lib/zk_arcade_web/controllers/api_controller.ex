@@ -103,4 +103,9 @@ defmodule ZkArcadeWeb.ApiController do
           |> json(%{error: "Failed to fetch merkle proof"})
     end
   end
+
+  def get_terms_message(conn, %{"address" => address}) do
+    message = ZkArcade.VerifySignature.get_terms_message(address)
+    conn |> json(%{terms_message: message})
+  end
 end

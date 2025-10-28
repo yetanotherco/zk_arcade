@@ -84,7 +84,7 @@ defmodule ZkArcadeWeb.PageController do
     end
     cost_saved = ZkArcade.Utils.calc_aligned_savings(proofs_verified, "risc0", eth_price, 20)
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
-    days = ZkArcade.Utils.date_diff_days(campaign_started_at_unix_timestamp)
+    days = ZkArcade.Utils.date_diff_days(String.to_integer(campaign_started_at_unix_timestamp))
     desc = "Last #{days} days"
     total_claimed_points = ZkArcade.Leaderboard.count_total_claimed_points()
     proofs_per_player = if total_players > 0 do

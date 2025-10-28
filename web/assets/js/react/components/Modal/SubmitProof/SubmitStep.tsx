@@ -37,12 +37,12 @@ const GAMES: Game[] = [
 	{
 		id: "beast",
 		name: "Beast",
-		cover: "/images/beast.png",
+		cover: "/images/beast.jpg",
 	},
 	{
 		id: "parity",
 		name: "Parity",
-		cover: "/images/parity.png",
+		cover: "/images/parity.jpg",
 	},
 ];
 

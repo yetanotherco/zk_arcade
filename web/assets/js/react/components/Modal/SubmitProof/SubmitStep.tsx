@@ -430,7 +430,7 @@ export const SubmitProofStep = ({
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
 						The proof has been submitted to Aligned. Settling your
-						proofs on Ethereum typically takes 5 -15 minutes, though
+						proofs on Ethereum typically takes 5-15 minutes, though
 						occasionally it takes more time.
 					</p>
 				) : proofStatus === "underpriced" ? (

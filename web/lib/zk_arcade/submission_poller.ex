@@ -108,8 +108,8 @@ defmodule ZkArcade.SubmissionPoller do
     event_proof = ZkArcade.Proofs.get_proofs_by_address(user)
                   |> Enum.find(fn proof -> proof.level_reached == level and proof.game_config == game_config_hex end)
 
+    ZkArcade.PrometheusMetrics.increment_claims()
     if event_proof.status != "claimed" do
-      ZkArcade.PrometheusMetrics.increment_claims()
       ZkArcade.Proofs.update_proof_status_claimed(user, event_proof.id, transaction_hash)
       Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} marked as claimed.")
     else

@@ -447,12 +447,12 @@ defmodule ZkArcade.Proofs do
     Logger.info("Broadcasted proof claimed notification for proof #{proof.id} by #{username || address}")
   end
 
+  ## select count(distinct(wallet_address)) from proofs where status = 'claimed';
   def get_addresses_that_claimed_count() do
     Proof
     |> where([p], p.status == "claimed")
     |> select([p], p.wallet_address)
     |> distinct(true)
-    |> Repo.all()
-    |> length()
+    |> Repo.aggregate(:count)
   end
 end

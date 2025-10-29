@@ -120,7 +120,6 @@ export const SubmitProofStep = ({
 	);
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
-	const [isCurrentLevelReached, setIsCurrentLevelReached] = useState(false);
 	const [gameIdx, setGameIdx] = useState(initialGameIdx);
 	const { price: ethPrice } = useEthPrice();
 	const {
@@ -415,10 +414,6 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		if (!proofToSubmitData) return;
-		if ((highestLevelReached ?? 0) == (currentLevelReached ?? 0)) {
-			setIsCurrentLevelReached(true);
-			return;
-		}
 		if ((highestLevelReached ?? 0) > (currentLevelReached ?? 0)) {
 			setLevelAlreadyReached(true);
 			return;
@@ -615,13 +610,6 @@ export const SubmitProofStep = ({
 							you'll have to wait 6 hours to submit it again.
 						</p>
 					)}
-					{isCurrentLevelReached && (
-						<p className="text-red">
-							You have already reached this level for this game. If
-							you don't find it, go to the profile page to claim
-							your rewards.
-						</p>
-					)}
 					{(balance.data || 0) < maxFee && (
 						<p className="text-red">
 							You don't have enough balance to pay for the proof
@@ -683,8 +671,7 @@ export const SubmitProofStep = ({
 							nonceLoading ||
 							previousMaxFeeLoading ||
 							nonce == null ||
-							levelAlreadyReached ||
-							isCurrentLevelReached
+							levelAlreadyReached
 						}
 						isLoading={submissionIsLoading}
 						onClick={handleSubmission}
@@ -699,8 +686,7 @@ export const SubmitProofStep = ({
 							nonceLoading ||
 							previousMaxFeeLoading ||
 							nonce == null ||
-							levelAlreadyReached ||
-							isCurrentLevelReached
+							levelAlreadyReached
 						}
 						isLoading={submissionIsLoading}
 						onClick={() => handleSend(proofToSubmitData)}

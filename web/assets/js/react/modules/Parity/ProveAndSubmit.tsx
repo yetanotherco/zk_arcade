@@ -105,6 +105,7 @@ export const ProveAndSubmit = ({
 							"An error occurred while generating parity proof",
 						details: {
 							error: e,
+							gameConfig: currentGameConfig,
 							gameTrace: gameData[key],
 						},
 					}),

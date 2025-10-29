@@ -37,24 +37,6 @@ defmodule ZkArcadeWeb.PageController do
     proofs
   end
 
-  defp build_redirect_url(conn, message) do
-    referer = get_req_header(conn, "referer") |> List.first() || "/"
-    uri = URI.parse(referer)
-
-    query_params =
-      case uri.query do
-        nil -> %{}
-        q -> URI.decode_query(q)
-      end
-
-    new_query =
-      query_params
-      |> Map.put("message", message)
-      |> URI.encode_query()
-
-    uri.path <> "?" <> new_query
-  end
-
   defp get_user_eligibility(nil) do
     "false"
   end

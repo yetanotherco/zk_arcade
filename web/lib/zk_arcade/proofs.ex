@@ -455,4 +455,11 @@ defmodule ZkArcade.Proofs do
     |> distinct(true)
     |> Repo.aggregate(:count)
   end
+
+  def get_verified_proofs_count() do
+    Proof
+      |> where([p], p.status == "claimed" or p.status == "verified")
+      |> select([p], p.id)
+      |> Repo.aggregate(:count)
+  end
 end

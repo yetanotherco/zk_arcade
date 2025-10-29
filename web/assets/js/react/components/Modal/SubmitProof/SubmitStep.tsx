@@ -448,7 +448,7 @@ export const SubmitProofStep = ({
 
 				<div className="flex flex-col gap-2">
 					<p>Game: {gameName}</p>
-					<p>Daily Quest: {Number(gameIdx) + 1}</p>
+					<p>Daily number: {Number(gameIdx) + 1}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
 					<p>Prover: {provingSystem}</p>
 				</div>

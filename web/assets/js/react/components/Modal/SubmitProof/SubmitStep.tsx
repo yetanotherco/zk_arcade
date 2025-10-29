@@ -118,6 +118,7 @@ export const SubmitProofStep = ({
 	);
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
+	const [isCurrentLevelReached, setIsCurrentLevelReached] = useState(false);
 	const [gameIdx, setGameIdx] = useState(initialGameIdx);
 	const { price: ethPrice } = useEthPrice();
 	const {
@@ -412,7 +413,11 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		if (!proofToSubmitData) return;
-		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
+		if ((highestLevelReached ?? 0) == (currentLevelReached ?? 0)) {
+			setIsCurrentLevelReached(true);
+			return;
+		}
+		if ((highestLevelReached ?? 0) > (currentLevelReached ?? 0)) {
 			setLevelAlreadyReached(true);
 			return;
 		}
@@ -603,10 +608,16 @@ export const SubmitProofStep = ({
 
 					{levelAlreadyReached && (
 						<p className="text-red">
-							You have already submitted a proof with a higher or
-							equal level for this game. If you uploaded the proof
-							recently, you'll have to wait 6 hours to submit it
-							again.
+							You have already submitted a proof with a higher level
+							for this game. If you uploaded the proof recently,
+							you'll have to wait 6 hours to submit it again.
+						</p>
+					)}
+					{isCurrentLevelReached && (
+						<p className="text-red">
+							You have already reached this level for this game. If
+							you don't find it, go to the profile page to claim
+							your rewards.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (
@@ -670,7 +681,8 @@ export const SubmitProofStep = ({
 							nonceLoading ||
 							previousMaxFeeLoading ||
 							nonce == null ||
-							levelAlreadyReached
+							levelAlreadyReached ||
+							isCurrentLevelReached
 						}
 						isLoading={submissionIsLoading}
 						onClick={handleSubmission}
@@ -685,7 +697,8 @@ export const SubmitProofStep = ({
 							nonceLoading ||
 							previousMaxFeeLoading ||
 							nonce == null ||
-							levelAlreadyReached
+							levelAlreadyReached ||
+							isCurrentLevelReached
 						}
 						isLoading={submissionIsLoading}
 						onClick={() => handleSend(proofToSubmitData)}

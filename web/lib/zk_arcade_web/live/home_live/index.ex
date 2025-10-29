@@ -21,7 +21,10 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     # Handle the PubSub event - refresh stats and show toast via push_event
 
     # Note: Change here in case the points per level logic changes
-    points_claimed = proof_data.level_reached
+    points_claimed = case proof_data.game do
+      "Beast" -> proof_data.level_reached * 60000
+      "Parity" -> proof_data.level_reached * 28000
+    end
 
     socket =
       socket

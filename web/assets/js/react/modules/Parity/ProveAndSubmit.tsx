@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "../../components";
 import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
-import { Address } from "viem";
+import { Address, toHex } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 import { gameDataKey, ParityGameState } from "./types";
 import { useCSRFToken } from "../../hooks/useCSRFToken";
@@ -105,7 +105,9 @@ export const ProveAndSubmit = ({
 							"An error occurred while generating parity proof",
 						details: {
 							error: e,
-							gameConfig: currentGameConfig,
+							gameConfig: toHex(BigInt(currentGameConfig), {
+								size: 32,
+							}),
 							gameTrace: gameData[key],
 						},
 					}),

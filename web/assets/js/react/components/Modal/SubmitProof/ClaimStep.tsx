@@ -86,7 +86,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 
 				<div className="flex flex-col gap-2">
 					<p>Game: {proofSubmission.game}</p>
-					<p>Daily Quest: {Number(proofSubmission.game_idx) + 1}</p>
+					<p>Quest number: {Number(proofSubmission.game_idx) + 1}</p>
 					<p>Level reached: {proofSubmission.level_reached}</p>
 					<p>
 						Points to claim:{" "}

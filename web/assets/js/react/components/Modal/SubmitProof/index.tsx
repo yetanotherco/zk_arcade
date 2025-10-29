@@ -29,6 +29,12 @@ type Props = {
 
 export type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
 
+export function openProofById(proofId: string) {
+	const url = `${window.location.pathname}?submitProofId=${proofId}`;
+	window.history.pushState({}, "", url);
+	window.location.reload();
+}
+
 const BreadCrumb = ({
 	active,
 	step,
@@ -94,6 +100,20 @@ export const SubmitProofModal = ({
 		useState<BreadCrumbStatus>("neutral");
 	const [submissionStatus, setSubmissionStatus] =
 		useState<BreadCrumbStatus>("neutral");
+	
+	useEffect(() => {
+		if (proofToSubmitData && highestLevelReached && Number(highestLevelReached) === (currentLevelReached ?? 0)) {
+			const proofIdCandidate = highestLevelReachedProofId ?? proof?.id;
+			if (proofIdCandidate) {
+				try {
+					openProofById(String(proofIdCandidate));
+				} catch (e) {
+					console.warn("Failed to open proof by id:", e);
+				}
+			}
+		}
+	}, [highestLevelReachedProofId, proof, proofToSubmitData, currentLevelReached, highestLevelReached]);
+
 
 	const { balance: nftBalance } = useNftContract({
 		contractAddress: nft_contract_address,

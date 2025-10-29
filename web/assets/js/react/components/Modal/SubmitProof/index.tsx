@@ -23,6 +23,7 @@ type Props = {
 	gameName?: string;
 	gameIdx?: number;
 	highestLevelReached?: number;
+	highestLevelReachedProofId?: string | number;
 	currentLevelReached?: number;
 };
 
@@ -75,9 +76,11 @@ export const SubmitProofModal = ({
 	gameName,
 	gameIdx,
 	highestLevelReached,
+	highestLevelReachedProofId,
 	currentLevelReached,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
+	const [currentProof, setCurrentProof] = useState<ProofSubmission | undefined>(proof);
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
@@ -105,7 +108,7 @@ export const SubmitProofModal = ({
 		userAddress: user_address,
 	});
 
-	const activeGameName = (gameName || proof?.game || "").toLowerCase();
+	const activeGameName = (gameName || currentProof?.game || "").toLowerCase();
 	const beastEndsAt = beastCurrentGame.game?.endsAtTime;
 	const parityEndsAt = parityCurrentGame.game?.endsAtTime;
 
@@ -169,7 +172,7 @@ export const SubmitProofModal = ({
 	}, [claimExpiryDate]);
 
 	const updateState = useCallback(() => {
-		if (proof) {
+		if (currentProof) {
 			if (
 				proofStatus === "pending" ||
 				proofStatus === "underpriced" ||
@@ -277,21 +280,22 @@ export const SubmitProofModal = ({
 				setOpen={modal.setOpen}
 				setStep={setStep}
 				user_address={user_address}
-				proofSubmission={proof}
+				proofSubmission={currentProof}
 				proofStatus={proofStatus}
 				setProofStatus={setProofStatus}
 				proofToSubmitData={proofToSubmitData}
-				gameName={gameName ? gameName : proof?.game || "beast"}
+				gameName={gameName ? gameName : currentProof?.game || "beast"}
 				initialGameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
 				currentLevelReached={currentLevelReached}
+				highestLevelReachedProofId={highestLevelReachedProofId}
 			/>
 		),
 		claim: () =>
-			proof && (
+				currentProof && (
 				<ClaimStep
 					setOpen={modal.setOpen}
-					proofSubmission={proof}
+					proofSubmission={currentProof}
 					user_address={user_address}
 					leaderboard_address={leaderboard_address}
 					proofStatus={proofStatus}

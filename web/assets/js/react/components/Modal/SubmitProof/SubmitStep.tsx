@@ -77,6 +77,7 @@ export const SubmitProofStep = ({
 	initialGameIdx,
 	highestLevelReached,
 	currentLevelReached,
+	highestLevelReachedProofId,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -92,6 +93,7 @@ export const SubmitProofStep = ({
 	initialGameIdx?: number;
 	highestLevelReached?: number;
 	currentLevelReached?: number;
+	highestLevelReachedProofId?: string | number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();

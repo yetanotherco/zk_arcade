@@ -195,6 +195,13 @@ The following is a step by step on how to mark all `pending` proofs as `failed` 
 See which proofs are currently `pending` or `failed`.
 
 ```sql
+SELECT COUNT(*) FROM proofs WHERE status = 'pending';
+SELECT COUNT(*) FROM proofs WHERE status = 'failed';
+```
+
+if you want to see their ids you can do:
+
+```sql
 SELECT id FROM proofs WHERE status = 'pending';
 SELECT id FROM proofs WHERE status = 'failed';
 ```
@@ -210,13 +217,13 @@ UPDATE proofs SET status = 'failed' WHERE status = 'pending';
 
 Confirm that the number of failed proofs now equals the old failed count plus the old pending count, that is:
 
-$$$
-failedProofs_t = failedproofs_(t-1) + pendingProofs_(t-1)
-$$$
+$$
+failedProofs_t = failedProofs_{t-1} + pendingProofs_{t-1}
+$$
 
 ```sql
-SELECT id FROM proofs WHERE status = 'pending';
-SELECT id FROM proofs WHERE status = 'failed';
+SELECT COUNT(*) FROM proofs WHERE status = 'pending';
+SELECT COUNT(*) FROM proofs WHERE status = 'failed';
 ```
 
 ## Step 4: Commit the changes

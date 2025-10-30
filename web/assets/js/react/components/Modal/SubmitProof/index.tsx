@@ -23,10 +23,17 @@ type Props = {
 	gameName?: string;
 	gameIdx?: number;
 	highestLevelReached?: number;
+	highestLevelReachedProofId?: string | number;
 	currentLevelReached?: number;
 };
 
 export type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
+
+export function openProofById(proofId: string) {
+	const url = `${window.location.pathname}?submitProofId=${proofId}`;
+	window.history.pushState({}, "", url);
+	window.location.reload();
+}
 
 const BreadCrumb = ({
 	active,
@@ -75,6 +82,7 @@ export const SubmitProofModal = ({
 	gameName,
 	gameIdx,
 	highestLevelReached,
+	highestLevelReachedProofId,
 	currentLevelReached,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
@@ -91,6 +99,20 @@ export const SubmitProofModal = ({
 		useState<BreadCrumbStatus>("neutral");
 	const [submissionStatus, setSubmissionStatus] =
 		useState<BreadCrumbStatus>("neutral");
+	
+	useEffect(() => {
+		if (proofToSubmitData && highestLevelReached && Number(highestLevelReached) === (currentLevelReached ?? 0)) {
+			const proofIdCandidate = highestLevelReachedProofId ?? proof?.id;
+			if (proofIdCandidate) {
+				try {
+					openProofById(String(proofIdCandidate));
+				} catch (e) {
+					console.warn("Failed to open proof by id:", e);
+				}
+			}
+		}
+	}, [highestLevelReachedProofId, proof, proofToSubmitData, currentLevelReached, highestLevelReached]);
+
 
 	const { balance: nftBalance } = useNftContract({
 		contractAddress: nft_contract_address,
@@ -285,10 +307,11 @@ export const SubmitProofModal = ({
 				initialGameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
 				currentLevelReached={currentLevelReached}
+				highestLevelReachedProofId={highestLevelReachedProofId}
 			/>
 		),
 		claim: () =>
-			proof && (
+				proof && (
 				<ClaimStep
 					setOpen={modal.setOpen}
 					proofSubmission={proof}

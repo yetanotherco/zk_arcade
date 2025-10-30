@@ -103,6 +103,7 @@ define(
 			"leaderboard_address",
 			"nft_contract_address",
 			"highest_level_reached",
+			"highest_level_reached_proof_id",
 		],
 	}
 );
@@ -140,6 +141,7 @@ define(
 			"leaderboard_address",
 			"nft_contract_address",
 			"highest_level_reached",
+			"highest_level_reached_proof_id",
 		],
 	}
 );

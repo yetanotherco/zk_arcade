@@ -26,6 +26,7 @@ import { BumpFeeModal } from "../../Modal/BumpFee";
 import { ProgressBar } from "../../ProgressBar";
 import { usePendingProofsToBump } from "../../../hooks/usePendingProofsToBump";
 import { SocialLinks } from "../../SocialLinks";
+import { useProofStopFlag } from "../../../hooks/useProofStopFlag";
 
 type Game = {
 	id: "beast" | string;
@@ -96,6 +97,7 @@ export const SubmitProofStep = ({
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
+	const { stop } = useProofStopFlag();
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
@@ -112,10 +114,8 @@ export const SubmitProofStep = ({
 		batcher_url,
 		user_address
 	);
-	const { maxFee: latestMaxFee, isLoading: previousMaxFeeLoading } = useBatcherMaxFee(
-		batcher_url,
-		user_address
-	);
+	const { maxFee: latestMaxFee, isLoading: previousMaxFeeLoading } =
+		useBatcherMaxFee(batcher_url, user_address);
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
 	const [gameIdx, setGameIdx] = useState(initialGameIdx);
@@ -160,9 +160,10 @@ export const SubmitProofStep = ({
 			const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
 			if (!estimatedMaxFee) return;
 
-			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
-				? latestMaxFee
-				: estimatedMaxFee;
+			const maxFee =
+				latestMaxFee && latestMaxFee < estimatedMaxFee
+					? latestMaxFee
+					: estimatedMaxFee;
 
 			setMaxFee(maxFee);
 		};
@@ -261,9 +262,10 @@ export const SubmitProofStep = ({
 			return;
 		}
 
-		const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
-			? latestMaxFee
-			: estimatedMaxFee;
+		const maxFee =
+			latestMaxFee && latestMaxFee < estimatedMaxFee
+				? latestMaxFee
+				: estimatedMaxFee;
 
 		if (nonce == null) {
 			alert("Nonce is still loading or failed");
@@ -328,9 +330,10 @@ export const SubmitProofStep = ({
 				alert("Could not estimate max fee");
 				return;
 			}
-			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
-				? latestMaxFee
-				: estimatedMaxFee;
+			const maxFee =
+				latestMaxFee && latestMaxFee < estimatedMaxFee
+					? latestMaxFee
+					: estimatedMaxFee;
 
 			if (nonce == null) {
 				alert("Nonce is still loading or failed");
@@ -601,6 +604,13 @@ export const SubmitProofStep = ({
 						</p>
 					)}
 
+					{stop && (
+						<p className="text-yellow">
+							Submissions are temporarily stopped for maintenance
+							come back in a few minutes.
+						</p>
+					)}
+
 					{levelAlreadyReached && (
 						<p className="text-red">
 							You have already submitted a proof with a higher or
@@ -670,7 +680,8 @@ export const SubmitProofStep = ({
 							nonceLoading ||
 							previousMaxFeeLoading ||
 							nonce == null ||
-							levelAlreadyReached
+							levelAlreadyReached ||
+							stop
 						}
 						isLoading={submissionIsLoading}
 						onClick={handleSubmission}
@@ -685,7 +696,8 @@ export const SubmitProofStep = ({
 							nonceLoading ||
 							previousMaxFeeLoading ||
 							nonce == null ||
-							levelAlreadyReached
+							levelAlreadyReached ||
+							stop
 						}
 						isLoading={submissionIsLoading}
 						onClick={() => handleSend(proofToSubmitData)}

@@ -66,7 +66,7 @@ const Component = ({ leaderboardAddress }: { leaderboardAddress: Address }) => {
 	);
 };
 
-export const HomeNextGamesTimer = ({ leaderboard_address, network }: Props) => {
+export default ({ leaderboard_address, network }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
 			<Component leaderboardAddress={leaderboard_address} />

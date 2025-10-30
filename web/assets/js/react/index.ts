@@ -14,7 +14,7 @@ import { BackgroundMusicPromptBtn } from "./modules/BackgroundMusic/BackgroundMu
 import { MuteBackgroundBtn } from "./modules/BackgroundMusic/MuteBtn";
 import NFTList from "./modules/History/NFTList";
 import { Mint } from "./modules/Mint";
-import { HomeNextGamesTimer } from "./modules/HomeNextGameTimer";
+import HomeNextGamesTimer from "./modules/HomeNextGameTimer";
 
 define(
 	{ "x-app-user-wallet": Wallet },

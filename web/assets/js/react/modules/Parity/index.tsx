@@ -13,7 +13,8 @@ type Props = {
 	leaderboard_address: Address;
 	nft_contract_address: Address;
 	batcher_url: string;
-	highest_level_reached: any;
+	highest_level_reached: number;
+	highest_level_reached_proof_id?: string | number;
 };
 
 export const ParityGame = ({
@@ -23,12 +24,9 @@ export const ParityGame = ({
 	leaderboard_address,
 	nft_contract_address,
 	batcher_url,
-	highest_level_reached
+	highest_level_reached,
+	highest_level_reached_proof_id
 }: Props) => {
-	const parsedHighest =
-		typeof highest_level_reached === "string"
-			? JSON.parse(highest_level_reached)
-			: highest_level_reached;
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
@@ -41,7 +39,8 @@ export const ParityGame = ({
 						leaderboard_address={leaderboard_address}
 						batcher_url={batcher_url}
 						nft_contract_address={nft_contract_address}
-						highest_level_reached={parsedHighest}
+						highest_level_reached={highest_level_reached}
+						highest_level_reached_proof_id={highest_level_reached_proof_id}
 					/>
 				</AudioProvider>
 			</ToastsProvider>

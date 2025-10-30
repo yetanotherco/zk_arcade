@@ -283,7 +283,8 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:username, username)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
-      |> assign(:highest_level_reached, if highest_level_reached_proof do %{level: highest_level_reached_proof.level_reached, proof_id: to_string(highest_level_reached_proof.id)} else %{level: 0, proof_id: nil} end)
+      |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
+      |> assign(:highest_level_reached_proof_id, if highest_level_reached_proof do to_string(highest_level_reached_proof.id) else nil end)
       |> render(:beast_game)
   end
 
@@ -321,7 +322,8 @@ The goal of the game is to make each number on the board equal.
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
-      |> assign(:highest_level_reached, if highest_level_reached_proof do %{level: highest_level_reached_proof.level_reached, proof_id: to_string(highest_level_reached_proof.id)} else %{level: 0, proof_id: nil} end)
+      |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
+      |> assign(:highest_level_reached_proof_id, if highest_level_reached_proof do to_string(highest_level_reached_proof.id) else nil end)
       |> render(:parity_game)
   end
 

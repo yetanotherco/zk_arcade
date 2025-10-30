@@ -77,6 +77,7 @@ export const SubmitProofStep = ({
 	initialGameIdx,
 	highestLevelReached,
 	currentLevelReached,
+	highestLevelReachedProofId,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -90,8 +91,9 @@ export const SubmitProofStep = ({
 	proofToSubmitData: VerificationData | null;
 	gameName: string;
 	initialGameIdx?: number;
-	highestLevelReached?: any;
+	highestLevelReached?: number;
 	currentLevelReached?: number;
+	highestLevelReachedProofId?: string | number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
@@ -221,11 +223,7 @@ export const SubmitProofStep = ({
 			setInvalidGameConfig(false);
 		}
 
-		const highestNum = typeof highestLevelReached === "object" && highestLevelReached !== null
-			? (highestLevelReached.level ?? 0)
-			: Number(highestLevelReached ?? 0);
-
-		const alreadySubmitted = highestNum >= parsed.level;
+		const alreadySubmitted = (highestLevelReached ?? 0) >= parsed.level;
 
 		if (alreadySubmitted) {
 			setLevelAlreadyReached(true);
@@ -416,14 +414,11 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		if (!proofToSubmitData) return;
-		const highestNum = typeof highestLevelReached === "object" && highestLevelReached !== null
-			? (highestLevelReached.level ?? 0)
-			: Number(highestLevelReached ?? 0);
-		if (highestNum > (currentLevelReached ?? 0)) {
+		if ((highestLevelReached ?? 0) > (currentLevelReached ?? 0)) {
 			setLevelAlreadyReached(true);
 			return;
 		}
-	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached, highestLevelReached]);
+	}, [setLevelAlreadyReached, proofToSubmitData, currentLevelReached]);
 
 	const [bumpFeeOpen, setBumpFeeOpen] = useState(false);
 

@@ -252,9 +252,9 @@ defmodule ZkArcadeWeb.PageController do
         how_to_play: """
         1. Install Beast:
           - Windows: Download the portable executable:
-          #{Application.get_env(:zk_arcade, :beast_windows_download_url)}
+          #{Application.get_env(:zk_arcade, :beast_windows_download_url)} or #{Application.get_env(:zk_arcade, :beast_windows_download_url_fallback)}
           - Linux/MacOS: Run the following command:
-          <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url)} | bash</span>
+          <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url)} | bash</span> or <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url_fallback)} | bash</span>
 
         2. Start playing: Run the game with the command: <span class="code-block">#{Application.get_env(:zk_arcade, :beast_bash_command)}</span>. When prompted, enter the same Ethereum address you use on ZK Arcade (the wallet that holds your Ticket NFT).
 

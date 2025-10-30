@@ -72,6 +72,14 @@ export const useProofSentMessageReader = () => {
 			});
 		}
 
+		if (message == "submissions-paused") {
+			addToast({
+				title: "Submissions paused",
+				desc: "The server is under maintenance and the proof was not submitted. Please try again later in a few minutes.",
+				type: "warning",
+			});
+		}
+
 		// Remove the message param from the URL without reloading the page
 		// this prevents showing the message again when the user refreshes the page
 		if (message) {

@@ -72,7 +72,6 @@ defmodule ZkArcadeWeb.PageController do
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.get_verified_proofs_count()
-    total_players = ZkArcade.Proofs.get_addresses_that_claimed_count()
 
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
     # In the future, we'd have to sum the savings of all the proofs for each proving system
@@ -82,25 +81,13 @@ defmodule ZkArcadeWeb.PageController do
       {:error, reason} ->
         Logger.error("Failed to get ETH price: #{reason}")
     end
-    cost_saved = ZkArcade.Utils.calc_aligned_savings(proofs_verified, "risc0", eth_price, 20)
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
     days = ZkArcade.Utils.date_diff_days(String.to_integer(campaign_started_at_unix_timestamp))
     desc = "Last #{days} days"
     total_claimed_points = ZkArcade.Leaderboard.count_total_claimed_points()
-    proofs_per_player = if total_players > 0 do
-        div(proofs_verified, total_players)
-      else
-        0
-      end
-
-    avg_savings_per_proof =
-      if proofs_verified > 0 do
-        div(trunc(cost_saved.savings), proofs_verified)
-      else
-        0
-      end
-
+    nfts_minted = 100
     top_users = ZkArcade.Leaderboard.get_top_users(10)
+
     user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
 
     {username, position} = get_username_and_position(wallet)
@@ -192,11 +179,8 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:user_data, user_data)
       |> assign(:statistics, %{
           proofs_verified: proofs_verified,
-          total_player: total_players,
-          cost_saved: ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)),
           total_claimed_points: total_claimed_points,
-          proofs_per_player: proofs_per_player,
-          avg_savings_per_proof: avg_savings_per_proof,
+          nfts_minted: nfts_minted,
           desc: desc
         })
       |> assign(:username, username)

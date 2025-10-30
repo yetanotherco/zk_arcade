@@ -70,7 +70,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     wallet = socket.assigns.wallet
     proofs = get_proofs(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.get_verified_proofs_count()
-    total_players = ZkArcade.Proofs.get_addresses_that_claimed_count()
+    nfts_minted = ZkArcade.Accounts.get_total_nfts_minted()
 
     eth_price = case ZkArcade.EthPrice.get_eth_price_usd() do
       {:ok, price} -> price
@@ -79,23 +79,10 @@ defmodule ZkArcadeWeb.HomeLive.Index do
         0
     end
 
-    cost_saved = ZkArcade.Utils.calc_aligned_savings(proofs_verified, "risc0", eth_price, 20)
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
     days = ZkArcade.Utils.date_diff_days(String.to_integer(campaign_started_at_unix_timestamp))
     desc = "Last #{days} days"
     total_claimed_points = ZkArcade.Leaderboard.count_total_claimed_points()
-
-    proofs_per_player = if total_players > 0 do
-      div(proofs_verified, total_players)
-    else
-      0
-    end
-
-    avg_savings_per_proof = if proofs_verified > 0 do
-      div(trunc(cost_saved.savings), proofs_verified)
-    else
-      0
-    end
 
     top_users = ZkArcade.Leaderboard.get_top_users(10)
     user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
@@ -141,14 +128,11 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     socket
     |> assign(:leaderboard, leaderboard)
     |> assign(:submitted_proofs, Jason.encode!(proofs))
-    |> assign(:proofs_verified, proofs_verified)
-    |> assign(:total_players, total_players)
-    |> assign(:cost_saved, ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(cost_saved.savings)))
     |> assign(:desc, desc)
-    |> assign(:total_claimed_points, ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(total_claimed_points)))
-    |> assign(:proofs_per_player, proofs_per_player)
-    |> assign(:avg_savings_per_proof, avg_savings_per_proof)
     |> assign(:top_users, top_users)
+    |> assign(:total_claimed_points, ZkArcade.NumberDisplay.convert_number_to_shorthand(trunc(total_claimed_points)))
+    |> assign(:proofs_verified, proofs_verified)
+    |> assign(:nfts_minted, nfts_minted)
     |> assign(:user_data, user_data)
     |> assign(:faqs, faqs)
   end

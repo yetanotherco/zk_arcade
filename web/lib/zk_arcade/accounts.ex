@@ -218,4 +218,13 @@ defmodule ZkArcade.Accounts do
         {:error, :not_found}
     end
   end
+
+  def get_total_nfts_minted() do
+    import Ecto.Query
+
+    query = from w in Wallet,
+      select: coalesce(sum(fragment("COALESCE(array_length(?, 1), 0)", w.owned_token_ids)), 0)
+
+    Repo.one(query)
+  end
 end

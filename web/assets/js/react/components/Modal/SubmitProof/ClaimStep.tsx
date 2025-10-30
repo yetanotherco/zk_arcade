@@ -20,6 +20,7 @@ type ClaimComponentProps = {
 	claimExpiryLabel?: string | null;
 	claimExpiryUtc?: string | null;
 	pointsToClaimConstantMultiplication: number;
+	contractCallIsLoading: boolean;
 };
 
 const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
@@ -35,6 +36,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 			claimExpiryLabel,
 			claimExpiryUtc,
 			pointsToClaimConstantMultiplication,
+			contractCallIsLoading,
 		},
 		formRef
 	) => {
@@ -56,10 +58,15 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						transaction from your wallet.
 					</p>
 				)}
-				{gameHasExpired && (
+				{(gameHasExpired && !contractCallIsLoading) && (
 					<p className="bg-red/20 rounded p-2 text-red">
 						Claim window expired. You can't claim these points
 						anymore.
+					</p>
+				)}
+				{(contractCallIsLoading) && (
+					<p className="bg-contrast-200 rounded p-2 text-text-200">
+						Loading claim information. Please wait...
 					</p>
 				)}
 				{showExpiryInfo && (
@@ -215,6 +222,7 @@ const BeastClaim = ({
 			claimExpiryLabel={claimExpiryLabel}
 			claimExpiryUtc={claimExpiryUtc}
 			pointsToClaimConstantMultiplication={60000}
+			contractCallIsLoading={claimGame.isLoading}
 		/>
 	);
 };
@@ -284,6 +292,7 @@ const ParityClaim = ({
 			claimExpiryLabel={claimExpiryLabel}
 			claimExpiryUtc={claimExpiryUtc}
 			pointsToClaimConstantMultiplication={28000}
+			contractCallIsLoading={claimGame.isLoading}
 		/>
 	);
 };

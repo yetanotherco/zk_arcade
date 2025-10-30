@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Address, zeroAddress } from "viem";
 import Web3EthProvider from "../providers/web3-eth-provider";
 import { useBeastLeaderboardContract } from "../hooks";
-import { useBlock } from "wagmi";
 
 type Props = {
 	leaderboard_address: Address;
@@ -10,8 +9,7 @@ type Props = {
 };
 
 const Component = ({ leaderboardAddress }: { leaderboardAddress: Address }) => {
-	const currentBlock = useBlock();
-	const { nextGame, currentGame } = useBeastLeaderboardContract({
+	const { nextGame } = useBeastLeaderboardContract({
 		contractAddress: leaderboardAddress,
 		userAddress: zeroAddress,
 	});
@@ -20,30 +18,35 @@ const Component = ({ leaderboardAddress }: { leaderboardAddress: Address }) => {
 		days: number;
 		hours: number;
 		minutes: number;
+		seconds: number;
 	} | null>(null);
 
 	useEffect(() => {
 		const startsAtTime = nextGame.data?.startsAtTime || 0n;
-		const currentBlockTimestamp = currentBlock.data
-			? currentBlock.data.timestamp
-			: 0;
+		if (startsAtTime === 0n) {
+			setTimeRemaining(null);
+			return;
+		}
 
-		if (startsAtTime > 0 && currentBlockTimestamp) {
-			const totalSeconds = Math.max(
-				0,
-				Number(startsAtTime) - Number(currentBlockTimestamp)
-			);
+		const startsAtSeconds = Number(startsAtTime);
+
+		const tick = () => {
+			const nowSeconds = Math.floor(Date.now() / 1000);
+			const totalSeconds = Math.max(0, startsAtSeconds - nowSeconds);
 			const days = Math.floor(totalSeconds / 86400);
 			const hours = Math.floor((totalSeconds % 86400) / 3600);
 			const minutes = Math.floor((totalSeconds % 3600) / 60);
+			const seconds = totalSeconds % 60;
+			setTimeRemaining({ days, hours, minutes, seconds });
+		};
 
-			setTimeRemaining({ days, hours, minutes });
-		}
-	}, [nextGame.data, currentGame.data, currentBlock.data]);
+		tick();
+		const id = setInterval(tick, 1000);
+		return () => clearInterval(id);
+	}, [nextGame.data?.startsAtTime]);
 
 	return (
 		<div className="relative overflow-hidden rounded-xl h-full w-full p-4 bg-contrast-300/60 border border-white/10 shadow-2xl">
-			{/* ambient gradient glow */}
 			<div
 				aria-hidden
 				className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-accent-100/15 via-transparent to-contrast-100/5"
@@ -57,7 +60,7 @@ const Component = ({ leaderboardAddress }: { leaderboardAddress: Address }) => {
 					{timeRemaining ? (
 						<h1 className="font-semibold text-4xl sm:text-5xl mb-1 bg-gradient-to-r from-accent-100 to-white/90 bg-clip-text text-transparent drop-shadow-lg">
 							{timeRemaining.days}d {timeRemaining.hours}h{" "}
-							{timeRemaining.minutes}m
+							{timeRemaining.minutes}m {timeRemaining.seconds}s
 						</h1>
 					) : (
 						<p className="text-text-200">Calculating…</p>

@@ -39,6 +39,7 @@ defmodule ZkArcadeWeb.Router do
     get "/api/ethprice", ApiController, :get_eth_price
     get "/api/nft/proof", ApiController, :get_nft_claim_merkle_proof
     get "/api/nft/eligibility", ApiController, :get_nft_eligibility
+    post "/api/telemetry/error", TelemetryApiController, :log_error
   end
 
   # Enable LiveDashboard in development

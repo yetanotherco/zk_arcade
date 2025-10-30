@@ -23,7 +23,7 @@
 
         <div class="flex flex-row gap-8 w-full items-center mb-4 overflow-scroll">
           <div class="w-full h-full grid grid-cols-2 sm:grid-cols-3 gap-5">
-              <div id="home-timer" phx-update="ignore" class="col-span-3">
+              <div id="home-timer" phx-update="ignore" class="sm:col-span-3 col-span-2">
                 <x-app-home-next-games-timer 
                   network={Application.get_env(:zk_arcade, :network)}
                   leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}

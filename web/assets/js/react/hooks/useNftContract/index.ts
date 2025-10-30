@@ -149,7 +149,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 			desc: message,
 			type: "error",
 		});
-	}, [txRest.isError, txRest.error, addToast]);
+	}, [txRest.isError, txRest.error]);
 
 	useEffect(() => {
 		if (receipt.isError) {
@@ -199,7 +199,6 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		publicClient,
 		contractAddress,
 		userAddress,
-		addToast,
 	]);
 
 	const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;

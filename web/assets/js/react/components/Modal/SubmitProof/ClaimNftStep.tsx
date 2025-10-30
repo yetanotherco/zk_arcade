@@ -32,7 +32,7 @@ export const ClaimNft: React.FC<Props> = ({
 	setOpen,
 	updateState,
 }) => {
-	const { claimNft, receipt } = useNftContract({
+	const { claimNft, receipt, balance } = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
@@ -63,6 +63,14 @@ export const ClaimNft: React.FC<Props> = ({
 			setMessage(err?.message ?? "Failed to check eligibility.");
 		}
 	}, [user_address]);
+
+	useEffect(() => {
+		if (balance.data && balance.data > 0n) {
+			setStatus("claimed");
+			updateState();
+			return;
+		}
+	}, [balance.data, updateState]);
 
 	useEffect(() => {
 		if (didMountRef.current) return;

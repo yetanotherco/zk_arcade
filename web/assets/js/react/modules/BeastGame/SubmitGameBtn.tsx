@@ -14,8 +14,7 @@ type Props = {
 	batcher_url: string;
 	leaderboard_address: Address;
 	nft_contract_address: Address;
-	highest_level_reached: number;
-	highest_level_reached_proof_id?: string | number;
+	highest_level_reached: any;
 };
 
 const SubmitModal = ({
@@ -25,7 +24,6 @@ const SubmitModal = ({
 	batcher_url,
 	nft_contract_address,
 	highest_level_reached,
-	highest_level_reached_proof_id,
 }: Omit<Props, "network">) => {
 	const { open, setOpen, toggleOpen } = useModal();
 
@@ -45,7 +43,6 @@ const SubmitModal = ({
 				gameName="beast"
 				nft_contract_address={nft_contract_address}
 				highestLevelReached={highest_level_reached}
-				highestLevelReachedProofId={highest_level_reached_proof_id}
 			/>
 		</>
 	);
@@ -59,8 +56,11 @@ export const SubmitBeastGameBtn = ({
 	leaderboard_address,
 	nft_contract_address,
 	highest_level_reached,
-	highest_level_reached_proof_id,
 }: Props) => {
+	const parsedHighest =
+ 		typeof highest_level_reached === "string"
+ 			? JSON.parse(highest_level_reached)
+ 			: highest_level_reached;
 	return (
 		<Web3EthProvider network={network}>
 			<ToastsProvider>
@@ -71,8 +71,7 @@ export const SubmitBeastGameBtn = ({
 					batcher_url={batcher_url}
 					leaderboard_address={leaderboard_address}
 					nft_contract_address={nft_contract_address}
-					highest_level_reached={highest_level_reached}
-					highest_level_reached_proof_id={highest_level_reached_proof_id}
+					highest_level_reached={parsedHighest}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

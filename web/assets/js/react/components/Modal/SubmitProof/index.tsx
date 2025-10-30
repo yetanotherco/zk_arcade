@@ -22,8 +22,7 @@ type Props = {
 	proofToSubmitData: VerificationData | null;
 	gameName?: string;
 	gameIdx?: number;
-	highestLevelReached?: number;
-	highestLevelReachedProofId?: string | number;
+	highestLevelReached?: any;
 	currentLevelReached?: number;
 };
 
@@ -82,7 +81,6 @@ export const SubmitProofModal = ({
 	gameName,
 	gameIdx,
 	highestLevelReached,
-	highestLevelReachedProofId,
 	currentLevelReached,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
@@ -101,8 +99,16 @@ export const SubmitProofModal = ({
 		useState<BreadCrumbStatus>("neutral");
 	
 	useEffect(() => {
-		if (proofToSubmitData && highestLevelReached && Number(highestLevelReached) === (currentLevelReached ?? 0)) {
-			const proofIdCandidate = highestLevelReachedProofId ?? proof?.id;
+		if (!proofToSubmitData || !highestLevelReached) return;
+
+		const highestLevelNumber = typeof highestLevelReached === "object" && highestLevelReached !== null
+			? (highestLevelReached.level ?? 0)
+			: Number(highestLevelReached || 0);
+
+		if (highestLevelNumber === (currentLevelReached ?? 0)) {
+			const proofIdCandidate = (typeof highestLevelReached === "object" && highestLevelReached !== null
+				? highestLevelReached.proof_id
+				: undefined) ?? proof?.id;
 			if (proofIdCandidate) {
 				try {
 					openProofById(String(proofIdCandidate));
@@ -111,7 +117,7 @@ export const SubmitProofModal = ({
 				}
 			}
 		}
-	}, [highestLevelReachedProofId, proof, proofToSubmitData, currentLevelReached, highestLevelReached]);
+	}, [proof, proofToSubmitData, currentLevelReached, highestLevelReached]);
 
 
 	const { balance: nftBalance } = useNftContract({
@@ -307,7 +313,6 @@ export const SubmitProofModal = ({
 				initialGameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
 				currentLevelReached={currentLevelReached}
-				highestLevelReachedProofId={highestLevelReachedProofId}
 			/>
 		),
 		claim: () =>

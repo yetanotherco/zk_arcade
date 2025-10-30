@@ -17,7 +17,7 @@ type ProofProps = {
 	user_address: Address;
 	explorer_url: string;
 	nft_contract_address: Address;
-	highest_level_reached: number;
+	highest_level_reached: any;
 };
 
 const Proof = ({

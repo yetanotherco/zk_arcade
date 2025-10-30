@@ -28,7 +28,6 @@ export const ProveAndSubmit = ({
 	nft_contract_address,
 	gameIdx,
 	highestLevelReached,
-	highestLevelReachedProofId,
 	setPlayerLevelReached,
 }: {
 	user_address: Address;
@@ -41,8 +40,7 @@ export const ProveAndSubmit = ({
 	timeRemaining?: TimeRemaining | null;
 	nft_contract_address: Address;
 	gameIdx: number;
-	highestLevelReached: number;
-	highestLevelReachedProofId?: string | number;
+	highestLevelReached?: any;
 	setPlayerLevelReached: (level: number) => void;
 }) => {
 	const [open, setOpen] = useState(false);
@@ -282,7 +280,6 @@ export const ProveAndSubmit = ({
 				nft_contract_address={nft_contract_address}
 				gameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
-				highestLevelReachedProofId={highestLevelReachedProofId}
 				currentLevelReached={currentLevel}
 			/>
 		</div>

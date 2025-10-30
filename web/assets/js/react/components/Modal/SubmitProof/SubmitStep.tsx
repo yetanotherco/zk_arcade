@@ -606,7 +606,7 @@ export const SubmitProofStep = ({
 
 					{stop && (
 						<p className="text-yellow">
-							Submissions are temporarily stopped for maintenance
+							Submissions are temporarily stopped for maintenance.
 							come back in a few minutes.
 						</p>
 					)}

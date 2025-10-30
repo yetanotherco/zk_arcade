@@ -92,7 +92,7 @@ if config_env() == :prod do
 
   config :ethereumex, url: System.get_env("RPC_URL")
 
-  config :zk_arcade, :campaign_started_at, 1753031818
+  config :zk_arcade, :campaign_started_at, System.get_env("CAMPAIGN_STARTED_AT")
 
   config :zk_arcade, :batcher_host, System.get_env("BATCHER_HOST")
   config :zk_arcade, :batcher_port, String.to_integer(System.get_env("BATCHER_PORT"))
@@ -102,6 +102,10 @@ if config_env() == :prod do
   config :zk_arcade, :feedback_form_url, System.get_env("FEEDBACK_FORM_URL")
 
   config :zk_arcade, :beast_windows_download_url, System.get_env("BEAST_WINDOWS_DOWNLOAD_URL")
+  config :zk_arcade, :beast_bash_download_url, System.get_env("BEAST_BASH_DOWNLOAD_URL")
+  config :zk_arcade, :beast_windows_download_url_fallback, System.get_env("BEAST_WINDOWS_DOWNLOAD_URL_FALLBACK")
+  config :zk_arcade, :beast_bash_download_url_fallback, System.get_env("BEAST_BASH_DOWNLOAD_URL_FALLBACK")
+  config :zk_arcade, :beast_bash_command, System.get_env("BEAST_BASH_COMMAND")
 
   config :zk_arcade, :ip_info_api_key, System.get_env("IP_INFO_API_KEY")
   config :zk_arcade, :ipgeolocation_api_key, System.get_env("IPGEOLOCATION_API_KEY")

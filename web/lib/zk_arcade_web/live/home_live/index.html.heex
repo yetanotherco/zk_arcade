@@ -1,0 +1,84 @@
+<div class="w-full">
+
+
+  <div id="gradient-bg" class="w-full absolute left-0 top-0" style="z-index: -1; height: 100%;"></div>
+
+  <%= if @wallet != nil do %>
+    <x-app-initial-modals
+      network={Application.get_env(:zk_arcade, :network)}
+      payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
+      nft_contract_address={Application.get_env(:zk_arcade, :nft_contract_address)}
+      user_address={@wallet} 
+      eligible={@eligible}
+    />
+  <% end %>
+
+  <div class="section-width pb-5" style="min-height: 100vh">
+      <div class="w-full flex flex-col" style="margin-top: 130px">
+
+      <div class="flex flex-col w-full mb-4">
+        <h1 class="md:text-5xl text-2xl mb-8 font-normal w-full">
+          Play. Prove. <span class="text-accent-100">Verify</span>. Compete
+        </h1>
+
+        <div class="flex flex-row gap-8 w-full items-center mb-4 overflow-scroll">
+          <div class="w-full h-full grid grid-cols-2 sm:grid-cols-3 gap-5">
+              <.home_statistic label="Proofs verified" value={@proofs_verified} desc={@desc} />
+              <.home_statistic label="Total Players" value={@total_players} desc={@desc} />
+              <.home_statistic label="Cost saved (USD)" value={@cost_saved} desc={@desc} />
+              <.home_statistic label="Total claimed points" value={@total_claimed_points} desc={@desc} />
+              <.home_statistic label="Save p/proof (USD)" value={@avg_savings_per_proof} desc={@desc} />
+              <.home_statistic label="Proofs per player" value={@proofs_per_player} desc={@desc} />
+            </div>
+            <div class="hidden [@media(min-width:900px)]:block w-[300px] h-full max-h-[270px] overflow-y-scroll shrink-0 bg-contrast-300 rounded px-8 py-6">
+              <p class="mb-2 text-text-200">Top users</p>
+              <.leaderboard_home 
+                users={@top_users}
+                current_wallet={@wallet}
+                user_data={@user_data}
+                show_view_all_link={true}
+              />
+            </div>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <p class="text-3xl mb-5">Games</p>
+          <div class="flex w-full gap-5 overflow-scroll">
+            <.home_game_component_hero
+              tags={[:browser, :circom, :easy]} 
+              secondary_tags={[:parity_daily_points]}
+              disabled="false" 
+              link="/games/parity" 
+              title="Parity" 
+              desc="Browser daily puzzles." 
+              img={~p"/images/parity.jpg"} 
+            />
+
+            <.home_game_component_hero 
+              tags={[:cli, :sp1, :hard]} 
+              secondary_tags={[:beast_daily_points]}
+              disabled="false" 
+              link="/games/beast" 
+              title="Beast 1984" 
+              desc="Terminal-based survival game." 
+              img={~p"/images/beast.jpg"} 
+            />
+          </div>
+        </div>
+
+      </div>
+  </div>
+
+
+
+  <div class="section-width">
+    <section id="faq" class="section-spacer-lg w-full mt-20">
+      <.section_header header="Frequently Asked Questions" />
+
+      <div class="">
+        <.faq_list faqs={@faqs} class="" />
+      </div>
+    </section>
+  </div>
+</div>

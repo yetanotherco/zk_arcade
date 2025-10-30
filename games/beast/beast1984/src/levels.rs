@@ -38,13 +38,13 @@ const fn game_file() -> GameFile {
     #[cfg(feature = "mainnet")]
     return GameFile {
         hosting: FileHosting::WEB,
-        location: "https://raw.githubusercontent.com/yetanotherco/zk_arcade/refs/heads/main/games/beast/levels/mainnet.json",
+        location: "https://beast.zkarcade.com/mainnet.json",
     };
 
     #[cfg(feature = "sepolia")]
     return GameFile {
         hosting: FileHosting::WEB,
-        location: "https://raw.githubusercontent.com/yetanotherco/zk_arcade/refs/heads/main/games/beast/levels/sepolia.json",
+        location: "https://beast.zkarcade.com/sepolia.json",
     };
 
     GameFile {

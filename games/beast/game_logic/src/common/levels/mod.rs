@@ -9,17 +9,7 @@ pub enum Level {
     /// level 2
     Two,
     /// level 3
-    Three,
-    /// level 4
-    Four,
-    /// level 5
-    Five,
-    /// level 6
-    Six,
-    /// level 7
-    Seven,
-    /// level 8
-    Eight,
+    Three
 }
 
 impl Level {
@@ -28,12 +18,7 @@ impl Level {
         match self {
             Self::One => Some(Self::Two),
             Self::Two => Some(Self::Three),
-            Self::Three => Some(Self::Four),
-            Self::Four => Some(Self::Five),
-            Self::Five => Some(Self::Six),
-            Self::Six => Some(Self::Seven),
-            Self::Seven => Some(Self::Eight),
-            Self::Eight => None,
+            Self::Three => None,
         }
     }
 
@@ -42,11 +27,6 @@ impl Level {
             Self::One => 1,
             Self::Two => 2,
             Self::Three => 3,
-            Self::Four => 4,
-            Self::Five => 5,
-            Self::Six => 6,
-            Self::Seven => 7,
-            Self::Eight => 8,
         }
     }
 }
@@ -57,11 +37,6 @@ impl fmt::Display for Level {
             Level::One => write!(f, "1"),
             Level::Two => write!(f, "2"),
             Level::Three => write!(f, "3"),
-            Level::Four => write!(f, "4"),
-            Level::Five => write!(f, "5"),
-            Level::Six => write!(f, "6"),
-            Level::Seven => write!(f, "7"),
-            Level::Eight => write!(f, "8"),
         }
     }
 }

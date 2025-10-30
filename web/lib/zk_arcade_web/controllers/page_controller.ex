@@ -71,8 +71,8 @@ defmodule ZkArcadeWeb.PageController do
     leaderboard = ZkArcade.LeaderboardContract.top10()
     wallet = get_wallet_from_session(conn)
     proofs = get_proofs(wallet, 1, 5)
-    proofs_verified = ZkArcade.Proofs.list_proofs()
-    total_players = ZkArcade.Accounts.list_wallets()
+    proofs_verified = ZkArcade.Proofs.get_verified_proofs_count()
+    total_players = ZkArcade.Proofs.get_addresses_that_claimed_count()
 
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
     # In the future, we'd have to sum the savings of all the proofs for each proving system
@@ -84,7 +84,7 @@ defmodule ZkArcadeWeb.PageController do
     end
     cost_saved = ZkArcade.Utils.calc_aligned_savings(proofs_verified, "risc0", eth_price, 20)
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
-    days = ZkArcade.Utils.date_diff_days(campaign_started_at_unix_timestamp)
+    days = ZkArcade.Utils.date_diff_days(String.to_integer(campaign_started_at_unix_timestamp))
     desc = "Last #{days} days"
     total_claimed_points = ZkArcade.Leaderboard.count_total_claimed_points()
     proofs_per_player = if total_players > 0 do
@@ -245,20 +245,22 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:wallet, wallet)
       |> assign(:eligible, eligible)
       |> assign(:game, %{
-        image: "/images/beast.png",
+        image: "/images/beast.jpg",
         name: "Beast 1984",
         desc: "Survive across waves of enemies",
         full_desc: "The object of this arcade-like game is to survive through a number of levels while crushing the beasts (├┤) with movable blocks (░░). The beasts are attracted to the player's (◄►) position every move. The beginning levels have only the common beasts, however in later levels the more challenging super-beasts appear (╟╢). These super-beasts are harder to kill as they must be crushed against a static block (▓▓).",
         how_to_play: """
         1. Install Beast:
           - Windows: Download the portable executable:
-          #{Application.get_env(:zk_arcade, :beast_windows_download_url)}
+          #{Application.get_env(:zk_arcade, :beast_windows_download_url)} or #{Application.get_env(:zk_arcade, :beast_windows_download_url_fallback)}
           - Linux/MacOS: Run the following command:
-          <span class="code-block">curl -L https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh | bash</span>
+          <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url)} | bash</span> or <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url_fallback)} | bash</span>
 
-        2. Start playing: Run the game with the command: <span class="code-block">beast</span>
+        2. Start playing: Run the game with the command: <span class="code-block">#{Application.get_env(:zk_arcade, :beast_bash_command)}</span>. When prompted, enter the same Ethereum address you use on ZK Arcade (the wallet that holds your Ticket NFT).
 
-        3. Find your proof: After completing levels, locate the generated proof file on your system
+        3. Find your proof: After completing levels, locate the generated proof file on your system.
+           - Windows: The proof file is saved alongside <span class="code-block">beast.exe</span> (for example <span class="code-block">C:\\Users\\&lt;you&gt;\\Downloads\\beast\\sp1_solution_YYYY-MM-DD_HH-MM-SS.bin</span>).
+           - macOS/Linux: The proof file is written to the directory where you launched <span class="code-block">beast</span> (for most people that's the home directory, e.g. <span class="code-block">~/sp1_solution_YYYY-MM-DD_HH-MM-SS.bin</span>).
 
         4. Fund verification: Deposit ETH into <span class="text-accent-100">ALIGNED</span> to pay for proof verification
 
@@ -275,12 +277,14 @@ defmodule ZkArcadeWeb.PageController do
         Uninstall: Remove Beast anytime with: <span class="code-block">rm $(which beast)</span>
         """,
         acknowledgments: acknowledgements,
-        tags: [:cli, :sp1, :hard]
+        tags: [:cli, :sp1, :hard],
+        secondary_tags: [:beast_daily_points]
       })
       |> assign(:username, username)
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
+      |> assign(:highest_level_reached_proof_id, if highest_level_reached_proof do to_string(highest_level_reached_proof.id) else nil end)
       |> render(:beast_game)
   end
 
@@ -303,7 +307,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:wallet, wallet)
       |> assign(:eligible, eligible)
       |> assign(:game, %{
-        image: "/images/parity.png",
+        image: "/images/parity.jpg",
         name: "Parity",
         desc: "Daily parity puzzles in your browser. Simple rules, tricky patterns. Test your logic and stay sharp as difficulty builds.",
         full_desc: "The game is played by moving a cursor with WASD around the board to select different squares in a grid. Each time you select a select a cell by moving the cursor with the arrow keys, the number inside that cell increases by one.
@@ -311,13 +315,15 @@ defmodule ZkArcadeWeb.PageController do
 The goal of the game is to make each number on the board equal.
 ",
         acknowledgments: acknowledgements,
-        tags: [:browser, :circom, :easy]
+        tags: [:browser, :circom, :easy],
+        secondary_tags: [:parity_daily_points]
       })
       |> assign(:username, username)
       |> assign(:submitted_proofs, Jason.encode!(proofs))
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
+      |> assign(:highest_level_reached_proof_id, if highest_level_reached_proof do to_string(highest_level_reached_proof.id) else nil end)
       |> render(:parity_game)
   end
 
@@ -422,5 +428,24 @@ The goal of the game is to make each number on the board equal.
       items_per_page: entries_per_page
     })
     |> render(:leaderboard)
+  end
+
+  def mint(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    eligible = get_user_eligibility(wallet)
+    proofs = get_proofs(wallet, 1, 10)
+    {username, position} = get_username_and_position(wallet)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+
+    conn
+    |> assign(:network, Application.get_env(:zk_arcade, :network))
+    |> assign(:wallet, wallet)
+    |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+    |> assign(:eligible, eligible)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:username, username)
+    |> assign(:user_position, position)
+    |> assign(:explorer_url, explorer_url)
+    |> render(:mint)
   end
 end

@@ -50,16 +50,16 @@ defmodule ZkArcadeWeb.CoreComponents do
             </p>
           </.link>
           <div class="lg:flex hidden w-full gap-10">
-              <.link href="/games" class="transition hover:text-accent-100 hover:underline">Games</.link>
+              <%!-- <.link href="/games" class="transition hover:text-accent-100 hover:underline">Games</.link> --%>
               <.link href="/leaderboard" class="transition hover:text-accent-100 hover:underline">Leaderboard</.link>
               <.link href="/history" class="transition hover:text-accent-100 hover:underline">Profile</.link>
-              <button class="transition hover:text-accent-100 hover:underline" id="how-it-works-nav-btn">
-                Tutorial
+              <button class="transition hover:text-accent-100 hover:underline" id="how-it-works-nav-btn-desktop">
+                How it Works
               </button>
           </div>
         </div>
 
-        <div class="flex gap-6 items-center">
+        <div id="submit-proof" class="flex gap-6 items-center" phx-update="ignore">
           <x-app-submit-proof
               network={@network}
               payment_service_address={@payment_service_address}
@@ -132,10 +132,10 @@ defmodule ZkArcadeWeb.CoreComponents do
           >
             <div class="h-dvh flex flex-col gap-y-10 text-2xl justify-end items-center p-12">
                 <.link href="/" class="text-text-100 transition hover:text-accent-100 hover:underline">Home</.link>
-                <.link href="/games" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link>
+                <%!-- <.link href="/games" class="text-text-100 transition hover:text-accent-100 hover:underline">Games</.link> --%>
                 <.link href="/leaderboard" class="text-text-100 transition hover:text-accent-100 hover:underline">Leaderboard</.link>
                 <.link href="/history" class="text-text-100 transition hover:text-accent-100 hover:underline">Profile</.link>
-                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn">Tutorial</p>
+                <p class="transition hover:text-accent-100 hover:underline cursor-pointer" id="how-it-works-nav-btn-mobile">How it Works</p>
                 <.link href="#faq" class="text-text-100 transition hover:text-accent-100 hover:underline">FAQ</.link>
                 <.link href={Application.get_env(:zk_arcade, :feedback_form_url)} target="_blank" rel="noopener noreferrer" class="text-text-100 transition hover:text-accent-100 hover:underline">Give us Feedback</.link>
                 <x-app-background-music-mute-btn />
@@ -191,12 +191,12 @@ defmodule ZkArcadeWeb.CoreComponents do
     ~H"""
     <%= if @disabled == "true" do %>
       <div class="w-full opacity-75 sm:max-w-280">
-        <.games_game_content tags={@tags} title={@title} desc={@desc} img={@img} />
+        <.games_game_content tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
       <.link href={@link}>
         <div class="cursor-pointer group w-full sm:max-w-280">
-          <.games_game_content tags={@tags} title={@title} desc={@desc} img={@img} />
+          <.games_game_content tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
         </div>
       </.link>
     <% end %>
@@ -208,8 +208,13 @@ defmodule ZkArcadeWeb.CoreComponents do
     <div class="w-full flex justify-between flex-wrap">
       <div class="max-w-[500px]">
         <img class="rounded mb-2 w-full sm:h-[170px]" src={@img} width={280} height={180}/>
-        <div class="mb-2 flex gap-2">
+        <div class="flex gap-2">
           <%= for variant <- @tags do %>
+            <.tag variant={variant} />
+          <% end %>
+        </div>
+        <div class="mb-2 flex gap-2">
+          <%= for variant <- @secondary_tags do %>
             <.tag variant={variant} />
           <% end %>
         </div>
@@ -270,7 +275,7 @@ defmodule ZkArcadeWeb.CoreComponents do
       ]} id={"#{@id}-content"}>
         <div class="overflow-hidden lg:pl-[60px] pr-[40px]">
           <div class="pb-5">
-            <p class="text-text-200"><%= @answer %></p>
+            <p class="text-text-200"><%= Phoenix.HTML.raw(@answer) %></p>
           </div>
         </div>
       </div>
@@ -356,13 +361,13 @@ defmodule ZkArcadeWeb.CoreComponents do
   def home_game_component_hero(assigns) do
     ~H"""
     <%= if @disabled == "true" do %>
-      <div class="w-[350px] h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
-        <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
+      <div class="flex-1 h-full flex flex-col shrink-0 p-5 bg-contrast-300 rounded">
+        <.game_content_hero tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
       </div>
     <% else %>
-      <.link href={@link} class="w-[350px] h-full shrink-0">
+      <.link href={@link} class="max-w-[500px] h-full shrink-0">
         <div class="w-full h-full flex flex-col cursor-pointer bg-contrast-300 rounded p-5 group">
-          <.game_content_hero tags={@tags} title={@title} desc={@desc} img={@img} />
+          <.game_content_hero tags={@tags} secondary_tags={@secondary_tags} title={@title} desc={@desc} img={@img} />
         </div>
       </.link>
     <% end %>
@@ -372,15 +377,20 @@ defmodule ZkArcadeWeb.CoreComponents do
   defp game_content_hero(assigns) do
     ~H"""
     <div class="flex gap-2">
-      <img class="rounded mb-1 w-full h-[75px] w-[100px]" src={@img}/>
-      <p class="text-xs text-text-200"><%= @desc %></p>
+      <img class="rounded mb-1 h-[150px]" src={@img}/>
     </div>
     <div>
         <h3 class="text-lg font-normal group-hover:underline underline-offset-4">
           <%= @title %>
         </h3>
+      <p class="text-xs text-text-200"><%= @desc %></p>
       <div class="flex gap-2">
         <%= for variant <- @tags do %>
+          <.tag variant={variant} />
+        <% end %>
+      </div>
+      <div class="flex gap-2">
+        <%= for variant <- @secondary_tags do %>
           <.tag variant={variant} />
         <% end %>
       </div>
@@ -419,6 +429,10 @@ defmodule ZkArcadeWeb.CoreComponents do
         <p class="mt-2 text-xs text-text-100 bg-red/20 border border-red rounded w-fit px-3 font-bold">Hard</p>
       <% :easy -> %>
         <p class="mt-2 text-xs text-text-100 bg-emerald-400/20 border border-emerald-400 rounded w-fit px-3 font-bold">Easy</p>
+      <% :parity_daily_points -> %>
+        <p class="mt-2 text-xs text-text-100 bg-yellow/20 border border-yellow rounded w-fit px-3 font-bold">84K points</p>
+      <% :beast_daily_points -> %>
+        <p class="mt-2 text-xs text-text-100 bg-purple-500/20 border border-purple-500 rounded w-fit px-3 font-bold">180K points</p>
       <% _ -> %>
     <% end %>
     """

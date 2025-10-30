@@ -1,9 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Modal, ModalProps } from "../Modal";
 import { Address, formatEther } from "viem";
 import { ProofSubmission, VerificationData } from "../../../types/aligned";
 import { useBatcherPaymentService } from "../../../hooks/useBatcherPaymentService";
 import { useNftContract } from "../../../hooks/useNftContract";
+import { useBeastLeaderboardContract } from "../../../hooks/useBeastLeaderboardContract";
+import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboardContract";
 import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
@@ -21,10 +23,17 @@ type Props = {
 	gameName?: string;
 	gameIdx?: number;
 	highestLevelReached?: number;
+	highestLevelReachedProofId?: string | number;
 	currentLevelReached?: number;
 };
 
 export type BreadCrumbStatus = "success" | "warn" | "failed" | "neutral";
+
+export function openProofById(proofId: string) {
+	const url = `${window.location.pathname}?submitProofId=${proofId}`;
+	window.history.pushState({}, "", url);
+	window.location.reload();
+}
 
 const BreadCrumb = ({
 	active,
@@ -73,6 +82,7 @@ export const SubmitProofModal = ({
 	gameName,
 	gameIdx,
 	highestLevelReached,
+	highestLevelReachedProofId,
 	currentLevelReached,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
@@ -89,11 +99,96 @@ export const SubmitProofModal = ({
 		useState<BreadCrumbStatus>("neutral");
 	const [submissionStatus, setSubmissionStatus] =
 		useState<BreadCrumbStatus>("neutral");
+	
+	useEffect(() => {
+		if (proofToSubmitData && highestLevelReached && Number(highestLevelReached) === (currentLevelReached ?? 0)) {
+			const proofIdCandidate = highestLevelReachedProofId ?? proof?.id;
+			if (proofIdCandidate) {
+				try {
+					openProofById(String(proofIdCandidate));
+				} catch (e) {
+					console.warn("Failed to open proof by id:", e);
+				}
+			}
+		}
+	}, [highestLevelReachedProofId, proof, proofToSubmitData, currentLevelReached, highestLevelReached]);
+
 
 	const { balance: nftBalance } = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
+	const { currentGame: beastCurrentGame } = useBeastLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address,
+	});
+	const { currentGame: parityCurrentGame } = useParityLeaderboardContract({
+		contractAddress: leaderboard_address,
+		userAddress: user_address,
+	});
+
+	const activeGameName = (gameName || proof?.game || "").toLowerCase();
+	const beastEndsAt = beastCurrentGame.game?.endsAtTime;
+	const parityEndsAt = parityCurrentGame.game?.endsAtTime;
+
+	const claimExpiryTimestampSeconds = useMemo(() => {
+		if (activeGameName === "beast") {
+			const endsAt = beastEndsAt;
+			return endsAt && endsAt > 0n ? Number(endsAt) : null;
+		}
+
+		if (activeGameName === "parity") {
+			const endsAt = parityEndsAt;
+			return endsAt && endsAt > 0n ? Number(endsAt) : null;
+		}
+
+		return null;
+	}, [activeGameName, beastEndsAt, parityEndsAt]);
+
+	const [expiresInLabel, setExpiresInLabel] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (!claimExpiryTimestampSeconds) {
+			setExpiresInLabel(null);
+			return;
+		}
+
+		const updateLabel = () => {
+			const diffMs = claimExpiryTimestampSeconds * 1000 - Date.now();
+
+			if (diffMs <= 0) {
+				setExpiresInLabel("Expired");
+				return;
+			}
+
+			const totalSeconds = Math.floor(diffMs / 1000);
+			const days = Math.floor(totalSeconds / 86400);
+			const hours = Math.floor((totalSeconds % 86400) / 3600);
+			const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+			const parts: string[] = [];
+			if (days > 0) parts.push(`${days}d`);
+			if (hours > 0 || days > 0) parts.push(`${hours}h`);
+			parts.push(`${minutes}m`);
+
+			setExpiresInLabel(parts.join(" "));
+		};
+
+		updateLabel();
+
+		const timer = setInterval(updateLabel, 60_000);
+		return () => clearInterval(timer);
+	}, [claimExpiryTimestampSeconds]);
+
+	const claimExpiryDate = useMemo(() => {
+		if (!claimExpiryTimestampSeconds) return null;
+		return new Date(claimExpiryTimestampSeconds * 1000);
+	}, [claimExpiryTimestampSeconds]);
+
+	const claimExpiryDateUtc = useMemo(() => {
+		if (!claimExpiryDate) return null;
+		return claimExpiryDate.toUTCString();
+	}, [claimExpiryDate]);
 
 	const updateState = useCallback(() => {
 		if (proof) {
@@ -212,16 +307,19 @@ export const SubmitProofModal = ({
 				initialGameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
 				currentLevelReached={currentLevelReached}
+				highestLevelReachedProofId={highestLevelReachedProofId}
 			/>
 		),
 		claim: () =>
-			proof && (
+				proof && (
 				<ClaimStep
 					setOpen={modal.setOpen}
 					proofSubmission={proof}
 					user_address={user_address}
 					leaderboard_address={leaderboard_address}
 					proofStatus={proofStatus}
+					claimExpiryLabel={expiresInLabel}
+					claimExpiryUtc={claimExpiryDateUtc}
 				/>
 			),
 	};

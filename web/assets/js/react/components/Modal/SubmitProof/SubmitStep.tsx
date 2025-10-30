@@ -12,6 +12,7 @@ import {
 import {
 	useAligned,
 	useBatcherNonce,
+	useBatcherMaxFee,
 	useBatcherPaymentService,
 	useEthPrice,
 	useBeastLeaderboardContract,
@@ -24,6 +25,7 @@ import { Button } from "../../Button";
 import { BumpFeeModal } from "../../Modal/BumpFee";
 import { ProgressBar } from "../../ProgressBar";
 import { usePendingProofsToBump } from "../../../hooks/usePendingProofsToBump";
+import { SocialLinks } from "../../SocialLinks";
 
 type Game = {
 	id: "beast" | string;
@@ -35,12 +37,12 @@ const GAMES: Game[] = [
 	{
 		id: "beast",
 		name: "Beast",
-		cover: "/images/beast.png",
+		cover: "/images/beast.jpg",
 	},
 	{
 		id: "parity",
 		name: "Parity",
-		cover: "/images/parity.png",
+		cover: "/images/parity.jpg",
 	},
 ];
 
@@ -75,6 +77,7 @@ export const SubmitProofStep = ({
 	initialGameIdx,
 	highestLevelReached,
 	currentLevelReached,
+	highestLevelReachedProofId,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -90,6 +93,7 @@ export const SubmitProofStep = ({
 	initialGameIdx?: number;
 	highestLevelReached?: number;
 	currentLevelReached?: number;
+	highestLevelReachedProofId?: string | number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
@@ -107,6 +111,10 @@ export const SubmitProofStep = ({
 	const [maxFee, setMaxFee] = useState(BigInt(0));
 	const [submissionIsLoading, setSubmissionIsLoading] = useState(false);
 	const { nonce, isLoading: nonceLoading } = useBatcherNonce(
+		batcher_url,
+		user_address
+	);
+	const { maxFee: latestMaxFee, isLoading: previousMaxFeeLoading } = useBatcherMaxFee(
 		batcher_url,
 		user_address
 	);
@@ -151,12 +159,17 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		const fn = async () => {
-			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-			if (!maxFee) return;
+			const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
+			if (!estimatedMaxFee) return;
+
+			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
+				? latestMaxFee
+				: estimatedMaxFee;
+
 			setMaxFee(maxFee);
 		};
 		fn();
-	}, [estimateMaxFeeForBatchOfProofs]);
+	}, [estimateMaxFeeForBatchOfProofs, latestMaxFee, maxFee]);
 
 	const handleCombinedProofFile = async (
 		e: React.ChangeEvent<HTMLInputElement>
@@ -243,11 +256,16 @@ export const SubmitProofStep = ({
 			return;
 		}
 
-		const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-		if (!maxFee) {
+		// This value should be capped by the previous proof max fee
+		const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
+		if (!estimatedMaxFee) {
 			alert("Could not estimate max fee");
 			return;
 		}
+
+		const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
+			? latestMaxFee
+			: estimatedMaxFee;
 
 		if (nonce == null) {
 			alert("Nonce is still loading or failed");
@@ -301,15 +319,20 @@ export const SubmitProofStep = ({
 		payment_service_addr,
 		chainId,
 		nonce,
+		latestMaxFee,
+		maxFee,
 	]);
 
 	const handleSend = useCallback(
 		async (proofToSubmitData: VerificationData) => {
-			const maxFee = await estimateMaxFeeForBatchOfProofs(16);
-			if (!maxFee) {
+			const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
+			if (!estimatedMaxFee) {
 				alert("Could not estimate max fee");
 				return;
 			}
+			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
+				? latestMaxFee
+				: estimatedMaxFee;
 
 			if (nonce == null) {
 				alert("Nonce is still loading or failed");
@@ -351,6 +374,8 @@ export const SubmitProofStep = ({
 			payment_service_addr,
 			chainId,
 			nonce,
+			latestMaxFee,
+			maxFee,
 		]
 	);
 
@@ -389,7 +414,7 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		if (!proofToSubmitData) return;
-		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
+		if ((highestLevelReached ?? 0) > (currentLevelReached ?? 0)) {
 			setLevelAlreadyReached(true);
 			return;
 		}
@@ -406,24 +431,26 @@ export const SubmitProofStep = ({
 			<div className="flex flex-col gap-4 justify-between h-full">
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
-						The proof has been submitted to Aligned. Come back in a
-						few hours to claim your points.
+						The proof has been submitted to Aligned. Settling your
+						proofs on Ethereum typically takes 5-15 minutes, though
+						occasionally it takes more time.
 					</p>
 				) : proofStatus === "underpriced" ? (
 					<p className="bg-orange/20 rounded p-2 text-orange">
-						The proof is underpriced, we suggest you to bump the
-						fee.
+						The proof transaction is currently underpriced. We
+						recommend increasing the fee to ensure it gets processed
+						in the next batches.
 					</p>
 				) : (
 					<p className="bg-accent-100/20 rounded p-2 text-accent-100">
-						The proof has been included in a batch and it will be
-						verified by Aligned
+						The proof has been included and is now awaiting
+						verification by Aligned.
 					</p>
 				)}
 
 				<div className="flex flex-col gap-2">
 					<p>Game: {gameName}</p>
-					<p>Daily Quest: {Number(gameIdx) + 1}</p>
+					<p>Quest number: {Number(gameIdx) + 1}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
 					<p>Prover: {provingSystem}</p>
 				</div>
@@ -473,6 +500,7 @@ export const SubmitProofStep = ({
 						}}
 					/>
 				)}
+				<SocialLinks className="text-xs text-text-200 mt-4" />
 			</div>
 		);
 	}
@@ -577,10 +605,9 @@ export const SubmitProofStep = ({
 
 					{levelAlreadyReached && (
 						<p className="text-red">
-							You have already submitted a proof with a higher or
-							equal level for this game. If you uploaded the proof
-							recently, you'll have to wait 6 hours to submit it
-							again.
+							You have already submitted a proof with a higher level
+							for this game. If you uploaded the proof recently,
+							you'll have to wait 6 hours to submit it again.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (
@@ -642,6 +669,7 @@ export const SubmitProofStep = ({
 							!publicInputs ||
 							(balance.data || 0) < maxFee ||
 							nonceLoading ||
+							previousMaxFeeLoading ||
 							nonce == null ||
 							levelAlreadyReached
 						}
@@ -656,6 +684,7 @@ export const SubmitProofStep = ({
 						disabled={
 							(balance.data || 0) < maxFee ||
 							nonceLoading ||
+							previousMaxFeeLoading ||
 							nonce == null ||
 							levelAlreadyReached
 						}

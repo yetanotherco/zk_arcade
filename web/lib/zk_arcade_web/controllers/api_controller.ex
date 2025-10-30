@@ -35,6 +35,26 @@ defmodule ZkArcadeWeb.ApiController do
       |> json(%{error: "Invalid wallet address"})
   end
 
+  def get_wallet_nfts(conn, %{"address" => address}) do
+    case ZkArcade.Accounts.get_owned_token_ids(address) do
+      {:ok, token_ids} ->
+        json(conn, %{token_ids: token_ids})
+
+      {:error, :not_found} ->
+        json(conn, %{token_ids: []})
+
+      {:error, _reason} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: "Failed to fetch wallet NFTs"})
+    end
+  rescue
+    _ ->
+      conn
+      |> put_status(:bad_request)
+      |> json(%{error: "Invalid wallet address"})
+  end
+
   def get_eth_price(conn, _) do
     eth_price = ZkArcade.EthPrice.get_eth_price_usd()
 
@@ -82,5 +102,10 @@ defmodule ZkArcadeWeb.ApiController do
           |> put_status(:internal_server_error)
           |> json(%{error: "Failed to fetch merkle proof"})
     end
+  end
+
+  def get_terms_message(conn, %{"address" => address}) do
+    message = ZkArcade.VerifySignature.get_terms_message(address)
+    conn |> json(%{terms_message: message})
   end
 end

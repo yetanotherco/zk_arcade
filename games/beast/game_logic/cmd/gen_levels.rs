@@ -8,92 +8,37 @@ use serde::{Deserialize, Serialize};
 fn base_template() -> Vec<LevelJson> {
     vec![
         LevelJson {
-            blocks: 250,
+            blocks: 200,
             static_blocks: 10,
-            common_beasts: 3,
-            super_beasts: 0,
-            eggs: 0,
-            egg_hatching_time: 20000,
-            beast_starting_distance: 16,
-            time: 120,
-            completion_score: 5,
-        },
-        LevelJson {
-            blocks: 250,
-            static_blocks: 12,
             common_beasts: 5,
             super_beasts: 0,
             eggs: 0,
             egg_hatching_time: 20000,
+            beast_starting_distance: 16,
+            time: 150,
+            completion_score: 5,
+        },
+        LevelJson {
+            blocks: 175,
+            static_blocks: 30,
+            common_beasts: 8,
+            super_beasts: 2,
+            eggs: 0,
+            egg_hatching_time: 20000,
             beast_starting_distance: 42,
-            time: 120,
+            time: 150,
             completion_score: 7,
         },
         LevelJson {
-            blocks: 200,
-            static_blocks: 20,
-            common_beasts: 12,
-            super_beasts: 0,
-            eggs: 0,
-            egg_hatching_time: 20000,
-            beast_starting_distance: 27,
-            time: 240,
-            completion_score: 7,
-        },
-        LevelJson {
-            blocks: 180,
-            static_blocks: 30,
-            common_beasts: 12,
-            super_beasts: 1,
-            eggs: 0,
-            egg_hatching_time: 20000,
-            beast_starting_distance: 27,
-            time: 240,
-            completion_score: 10,
-        },
-        LevelJson {
-            blocks: 170,
-            static_blocks: 30,
-            common_beasts: 15,
-            super_beasts: 3,
-            eggs: 0,
-            egg_hatching_time: 20000,
-            beast_starting_distance: 27,
-            time: 240,
-            completion_score: 12,
-        },
-        LevelJson {
-            blocks: 160,
-            static_blocks: 30,
-            common_beasts: 10,
-            super_beasts: 7,
-            eggs: 0,
-            egg_hatching_time: 20000,
-            beast_starting_distance: 27,
-            time: 300,
-            completion_score: 15,
-        },
-        LevelJson {
-            blocks: 160,
+            blocks: 150,
             static_blocks: 50,
-            common_beasts: 15,
-            super_beasts: 7,
+            common_beasts: 8,
+            super_beasts: 5,
             eggs: 0,
             egg_hatching_time: 20000,
             beast_starting_distance: 27,
             time: 300,
-            completion_score: 20,
-        },
-        LevelJson {
-            blocks: 160,
-            static_blocks: 100,
-            common_beasts: 10,
-            super_beasts: 10,
-            eggs: 0,
-            egg_hatching_time: 20000,
-            beast_starting_distance: 27,
-            time: 330,
-            completion_score: 25,
+            completion_score: 7,
         },
     ]
 }
@@ -120,7 +65,7 @@ fn extrapolate_level(prev: &LevelJson, level_index: usize, rng: &mut impl Rng) -
 }
 
 fn encode_game_config(game_levels: &[LevelJson]) -> [u8; 32] {
-    let mut levels: [[u8; 4]; 8] = [[0u8; 4]; 8];
+    let mut levels: [[u8; 4]; 3] = [[0u8; 4]; 3];
 
     for i in 0..game_levels.len() {
         let level = &game_levels[i];
@@ -183,37 +128,45 @@ struct LeaderboardConfig {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 6 {
+    if args.len() != 5 {
         eprintln!(
-            "Usage: {} <number_of_games> <levels_per_game> <total_campaign_in_days> <submission_offset_in_minutes> <network>",
+            "Usage: {} <campaign_weeks_amount> <submission_offset_in_minutes> <network> <start_time_utc>",
             args[0]
         );
         std::process::exit(1);
     }
 
-    let num_games: usize = args[1].parse().expect("Invalid number of games");
-    let levels_per_game: usize = args[2].parse().expect("Invalid number of levels");
-    let time_days: u64 = args[3].parse().expect("Invalid total campaign in days");
-    let submission_offset_minutes: u64 = args[4].parse().expect("Invalid submission offset minutes");
-    let network: String = args[5].parse().expect("Invalid network");
+    let weeks_amount: u64 = args[1].parse().expect("Invalid total campaign in weeks");
+    let submission_offset_minutes: u64 =
+        args[2].parse().expect("Invalid submission offset minutes");
+    let network: String = args[3].parse().expect("Invalid network");
+    let start_time_utc: u64 = args[4].parse().expect("Invalid start time");
 
-    // Get the current time in seconds from the OS
-    let current_time = std::time::SystemTime::now();
-    let mut current_timestamp = current_time
-        .duration_since(std::time::UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_secs();
+    // Get the time in seconds from the parameter
+    let mut start_timestamp = std::time::Duration::from_secs(start_time_utc).as_secs();
 
-    let time_in_seconds = time_days * 24 * 3600;
-    let seconds_per_game = time_in_seconds / num_games as u64;
+    let four_days_seconds = 4 * 24 * 3600;
+    let three_days_seconds = 3 * 24 * 3600;
+
+    // Generate a sequence of seconds per game alternating between 4 and 3 days
+    let mut seconds_per_game_sequence = vec![];
+    for i in 0..(weeks_amount * 2) {
+        if i % 2 == 0 {
+            seconds_per_game_sequence.push(four_days_seconds);
+        } else {
+            seconds_per_game_sequence.push(three_days_seconds);
+        }
+    }
+
+    let levels_per_game: usize = 3;
 
     let mut rng = rand::rng();
-    let games: Vec<GameJson> = (0..num_games)
-        .map(|_| {
+    let games: Vec<GameJson> = (0..seconds_per_game_sequence.len())
+        .map(|i| {
             let levels = generate_game_levels(levels_per_game, &mut rng);
-            let from_time = current_timestamp;
-            let to_time = current_timestamp + seconds_per_game;
-            current_timestamp = to_time;
+            let from_time = start_timestamp;
+            let to_time = start_timestamp + seconds_per_game_sequence[i];
+            start_timestamp = to_time;
 
             GameJson {
                 from_time: from_time,

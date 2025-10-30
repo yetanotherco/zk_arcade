@@ -30,3 +30,5 @@ node_modules
 *.bin
 
 **/CLAUDE.md
+
+data/inserted_devnet/inserted_*.csv

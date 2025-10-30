@@ -330,17 +330,26 @@ defmodule ZkArcade.Proofs do
       Logger.error("Failed to update proof #{proof_id} does not belong to address #{address}")
       {:error, %{}}
     else
-      changeset = change_proof(proof, %{status: "claimed", claim_tx_hash: claim_tx_hash})
+      # Check if proof is already claimed to prevent duplicate notifications
+      if proof.status == "claimed" do
+        Logger.info("Proof #{proof_id} already marked as claimed, skipping update")
+        {:ok, proof}
+      else
+        changeset = change_proof(proof, %{status: "claimed", claim_tx_hash: claim_tx_hash})
 
-      case Repo.update(changeset) do
-          {:ok, updated_proof} ->
-            Logger.info("Updated proof #{proof_id} status to claimed")
-            {:ok, updated_proof}
+        case Repo.update(changeset) do
+            {:ok, updated_proof} ->
+              Logger.info("Updated proof #{proof_id} status to claimed")
 
-          {:error, changeset} ->
-            PrometheusMetrics.record_user_error(:proof_claim_status_update_failed)
-            Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
-            {:error, changeset}
+              broadcast_proof_claimed_notification(updated_proof, address)
+
+              {:ok, updated_proof}
+
+            {:error, changeset} ->
+              PrometheusMetrics.record_user_error(:proof_claim_status_update_failed)
+              Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+              {:error, changeset}
+        end
       end
     end
   end
@@ -415,5 +424,42 @@ defmodule ZkArcade.Proofs do
   defp get_or_create_wallet(_) do
     PrometheusMetrics.record_user_error(:invalid_wallet_address)
     {:error, :invalid_address}
+  end
+
+  defp broadcast_proof_claimed_notification(proof, address) do
+    username = ZkArcade.Accounts.get_wallet_username(address)
+
+    notification_data = %{
+      proof_id: proof.id,
+      username: username,
+      game: proof.game,
+      level_reached: proof.level_reached,
+      wallet_address: address,
+      claim_tx_hash: proof.claim_tx_hash
+    }
+
+    Phoenix.PubSub.broadcast(
+      ZkArcade.PubSub,
+      "proof_claims",
+      {:proof_claimed, notification_data}
+    )
+
+    Logger.info("Broadcasted proof claimed notification for proof #{proof.id} by #{username || address}")
+  end
+
+  ## select count(distinct(wallet_address)) from proofs where status = 'claimed';
+  def get_addresses_that_claimed_count() do
+    Proof
+    |> where([p], p.status == "claimed")
+    |> select([p], p.wallet_address)
+    |> distinct(true)
+    |> Repo.aggregate(:count)
+  end
+
+  def get_verified_proofs_count() do
+    Proof
+      |> where([p], p.status == "claimed" or p.status == "verified")
+      |> select([p], p.id)
+      |> Repo.aggregate(:count)
   end
 end

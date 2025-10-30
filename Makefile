@@ -51,15 +51,29 @@ submit_beast_solution:
 	@cp games/beast/beast1984/cmd/.$(NETWORK).env games/beast/beast1984/cmd/.env
 	@cd games/beast && cargo run --manifest-path ./beast1984/Cargo.toml --release --bin submit_solution
 
-NUM_GAMES ?= 10
-LEVELS_PER_GAME ?= 8
-CAMPAIGN_DAYS ?= 1
+CAMPAIGN_WEEKS_DURATION ?= 5
 BEAST_SUBMISSION_OFFSET_MINUTES ?= 720
+UTC_OFFSET ?= 1761523200 # 26/10/2025 00:00:00 GMT+00:00
 beast_gen_levels:
-	@cd games/beast && cargo run --bin gen_levels $(NUM_GAMES) $(LEVELS_PER_GAME) $(CAMPAIGN_DAYS) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
-	
+	@cd games/beast && cargo run --bin gen_levels $(CAMPAIGN_WEEKS_DURATION) $(BEAST_SUBMISSION_OFFSET_MINUTES) $(NETWORK) $(UTC_OFFSET)
+
+beast_build_elf:
+	@cd games/beast/beast1984/sp1_program && cargo prove build --output-directory ./elf --binaries beast_1984_program
+
 beast_build:
 	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
+
+beast_build_sepolia:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia
+
+beast_build_mainnet:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features mainnet
+
+beast_build_sepolia_windows:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features sepolia --target x86_64-pc-windows-gnu
+
+beast_build_mainnet_windows:
+	@cd games/beast/beast1984 && cargo build --release --bin beast --features mainnet --target x86_64-pc-windows-gnu
 
 beast_write_program_vk:
 	@cd games/beast/beast1984/ && cargo run --release --bin write_program_vk
@@ -72,15 +86,10 @@ beast_write_program_vk:
 #   level_i    := min(PARITY_MIN_MOVEMENTS + i * step_size, PARITY_MAX_MOVEMENTS)
 # With defaults (levels=3, min=15, max=45): levels → [15, 30, 45]
 # ─────────────────────────────────────────────────────────────────────────────
-# Number of calendar days the campaign spans (scheduling/rotation; not difficulty).
-# Each game takes (campaign days * 24hs / num games) hs
-PARITY_CAMPAIGN_DAYS ?= 1
-# Total number of games in the campaign (pattern repeats per game).
-PARITY_NUM_GAMES ?= 10
+# Number of calendar weeks the campaign spans (scheduling/rotation; not difficulty).
+PARITY_CAMPAIGN_WEEKS ?= 5
 # Adds a time offset to the ends_at to allow a bit more time for claiming
 PARITY_SUBMISSION_OFFSET_MINUTES ?= 720 
-# Levels per game (indexes 0..L-1). Can be up to 3 (fits proof data in 32 bytes).
-PARITY_LEVELS_PER_GAME ?= 3
 # UI-only: lower bound for numbers shown at the end of a level on the board.
 # Does NOT affect difficulty or movement calculations.
 PARITY_MIN_END_OF_LEVEL ?= 12
@@ -91,10 +100,12 @@ PARITY_MAX_END_OF_LEVEL ?= 50
 PARITY_MIN_MOVEMENTS ?= 15
 # Movement budget at the last level. Defines the top of the ramp.
 PARITY_MAX_MOVEMENTS ?= 45
+# The moment (UTC timestamp) when the campaign starts.
+PARITY_CAMPAIGN_START_UTC ?= 1761523200 # 26/10/2025 00:00:00 GMT+00:00
 parity_gen_levels:
 	@cd games/parity/level_generator && \
-	cargo run --release $(PARITY_NUM_GAMES) $(PARITY_LEVELS_PER_GAME) $(PARITY_MIN_END_OF_LEVEL) $(PARITY_MAX_END_OF_LEVEL) \
-	$(PARITY_MIN_MOVEMENTS) $(PARITY_MAX_MOVEMENTS) $(PARITY_CAMPAIGN_DAYS) $(PARITY_SUBMISSION_OFFSET_MINUTES) $(NETWORK)
+	cargo run --release $(PARITY_CAMPAIGN_WEEKS) $(PARITY_MIN_END_OF_LEVEL) $(PARITY_MAX_END_OF_LEVEL) \
+	$(PARITY_MIN_MOVEMENTS) $(PARITY_MAX_MOVEMENTS) $(PARITY_SUBMISSION_OFFSET_MINUTES) $(NETWORK) $(PARITY_CAMPAIGN_START_UTC)
 
 parity_write_program_vk:
 	@cd games/parity/circuits/cmd && cargo run --release
@@ -120,13 +131,17 @@ deploy_nft_contract: submodules
 deploy_leaderboard_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_leaderboard_contract.sh
 
-generate_merkle_tree:
-	@cd merkle_tree && cargo run --release -- $(WHITELIST_PATH) $(OUTPUT_PATH) $(MERKLE_ROOT_INDEX)
+build_merkle_proof_generator:
+	cd merkle_tree && cargo build --release
+
+generate_merkle_tree: build_merkle_proof_generator
+	@./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) $(OUTPUT_FILE) $(MERKLE_ROOT_INDEX) $(INSERTED_DIRECTORY)
 
 add_merkle_root: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
 
-gen_levels_and_deploy_contracts_devnet: beast_gen_levels parity_gen_levels web_db
+gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db
+	@rm -rf data/inserted_devnet/inserted_*.csv
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
@@ -140,7 +155,8 @@ gen_levels_and_deploy_contracts_devnet: beast_gen_levels parity_gen_levels web_d
 	@$(MAKE) deploy_leaderboard_contract NETWORK=devnet
 	@$(MAKE) update_leaderboard_address
 	@$(MAKE) update_nft_address
-	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./whitelist_devnet.json OUTPUT_PATH=./merkle_output_devnet.json MERKLE_ROOT_INDEX=0
+	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/inserted_devnet
+	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./data/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/inserted_devnet
 	@$(MAKE) add_merkle_root NETWORK=devnet
 
 upgrade_contract: submodules
@@ -155,10 +171,14 @@ set_beast_games: submodules
 set_parity_games:
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_parity_games.sh
 
+__WHITELIST__:
+
 # This path is relative to the project root
 WHITELIST_PATH?=merkle_tree/whitelist.json
-nft_whitelist_addresses: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/create_new_campaign.sh "$(MERKLE_ROOT_INDEX)" "$(WHITELIST_PATH)"
+INSERTED_DIRECTORY?=data/inserted
+
+preprocess_whitelist:
+	pip3 install -r data/requirements.txt && python3 data/preprocess_addresses.py $(WHITELIST_PATH) $(INSERTED_DIRECTORY)
 
 __INFRA__: ## ____
 ## Initial Setup
@@ -213,10 +233,19 @@ debian_setup_postgres: ## Requires DB_PASSWORD
 	sudo -u postgres psql -U postgres -c "CREATE USER "zk_arcade_user" WITH PASSWORD '$(DB_PASSWORD)';"
 	sudo -u postgres psql -U postgres -c "CREATE DATABASE "zk_arcade_db" OWNER 'zk_arcade_user';"
 
+debian_setup_read_only_user: ## Requires DB_READ_ONLY_PASSWORD
+	sudo -u postgres psql -U postgres -c "CREATE USER "grafana" WITH PASSWORD '$(DB_READ_ONLY_PASSWORD)';"
+	sudo -u postgres psql -U postgres -c "GRANT pg_read_all_data TO "grafana";"
+
+debian_setup_vpn_connections_to_db:
+	sudo bash -c 'echo "listen_addresses = '*'" >> /etc/postgresql/16/main/postgresql.conf'
+	sudo bash -c 'echo "host all all 100.64.0.0/10" >> /etc/postgresql/16/main/pg_hba.conf'
+
 debian_deps: debian_create_dirs debian_install_deps debian_apply_firewall debian_install_erlang debian_install_elixir debian_install_nodejs user_install_rust debian_install_postgres debian_setup_postgres
 
 create_env_mainnet:
 	@truncate -s0 /home/app/config/.env.zk_arcade
+	@echo "MIX_ENV=prod" >> /home/app/config/.env.zk_arcade
 	@echo "PHX_SERVER=true" >> /home/app/config/.env.zk_arcade
 	@echo "DATABASE_URL=ecto://zk_arcade_user:${DB_PASSWORD}@127.0.0.1/zk_arcade_db" >> /home/app/config/.env.zk_arcade
 	@echo "POOL_SIZE=64" >> /home/app/config/.env.zk_arcade
@@ -224,12 +253,24 @@ create_env_mainnet:
 	@echo "PHX_HOST=${PHX_HOST}" >> /home/app/config/.env.zk_arcade
 	@echo "KEYFILE_PATH=/home/app/.ssl/key.pem" >> /home/app/config/.env.zk_arcade
 	@echo "CERTFILE_PATH=/home/app/.ssl/cert.pem" >> /home/app/config/.env.zk_arcade
+	@echo "RPC_URL=${RPC_URL}" >> /home/app/config/.env.zk_arcade
 	@echo "ZK_ARCADE_NETWORK=mainnet" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_PAYMENT_SERVICE_ADDRESS=0xb0567184A52cB40956df6333510d6eF35B89C8de" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_SERVICE_MANAGER_ADDRESS=0xeF2A435e5EE44B2041100EF8cbC8ae035166606c" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_NFT_CONTRACT_ADDRESS=" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_HOST=mainnet.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_PORT=443" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_URL=wss://mainnet.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 	@echo "EXPLORER_URL=https://explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "FEEDBACK_FORM_URL=" >> /home/app/config/.env.zk_arcade
+	@echo "BEAST_WINDOWS_DOWNLOAD_URL=https://github.com/yetanotherco/zk_arcade/releases/download/v0.6.0/beast.exe" >> /home/app/config/.env.zk_arcade
+	@echo "IP_INFO_API_KEY=${IP_INFO_API_KEY}" >> /home/app/config/.env.zk_arcade
+	@echo "IPGEOLOCATION_API_KEY=${IPGEOLOCATION_API_KEY}" >> /home/app/config/.env.zk_arcade
 
-create_env_stage:
+create_env_holesky:
 	@truncate -s0 /home/app/config/.env.zk_arcade
-	@truncate -s0 /home/app/config/.env.zk_arcade
+	@echo "MIX_ENV=prod" >> /home/app/config/.env.zk_arcade
 	@echo "PHX_SERVER=true" >> /home/app/config/.env.zk_arcade
 	@echo "DATABASE_URL=ecto://zk_arcade_user:${DB_PASSWORD}@127.0.0.1/zk_arcade_db" >> /home/app/config/.env.zk_arcade
 	@echo "POOL_SIZE=64" >> /home/app/config/.env.zk_arcade
@@ -239,14 +280,16 @@ create_env_stage:
 	@echo "CERTFILE_PATH=/home/app/.ssl/cert.pem" >> /home/app/config/.env.zk_arcade
 	@echo "RPC_URL=${RPC_URL}" >> /home/app/config/.env.zk_arcade
 	@echo "ZK_ARCADE_NETWORK=holesky" >> /home/app/config/.env.zk_arcade
-	@echo "ALIGNED_PAYMENT_SERVICE_ADDRESS=0x7577Ec4ccC1E6C529162ec8019A49C13F6DAd98b" >> /home/app/config/.env.zk_arcade
-	@echo "ALIGNED_SERVICE_MANAGER_ADDRESS=0x9C5231FC88059C086Ea95712d105A2026048c39B" >> /home/app/config/.env.zk_arcade
-	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=0x02792Dab0272BB69fEa61a69b934b44c69fD7b33" >> /home/app/config/.env.zk_arcade
-	@echo "BATCHER_HOST=stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_PAYMENT_SERVICE_ADDRESS=0x815aeCA64a974297942D2Bbf034ABEe22a38A003" >> /home/app/config/.env.zk_arcade
+	@echo "ALIGNED_SERVICE_MANAGER_ADDRESS=0x58F280BeBE9B34c9939C3C39e0890C81f163B623" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_LEADERBOARD_ADDRESS=0xA8FED3cEEd5E5f5c8B862730E668f4585aD72fE0" >> /home/app/config/.env.zk_arcade
+	@echo "ZK_ARCADE_NFT_CONTRACT_ADDRESS=0xF0c8CD5Aaf19bdD63eC353AA342a6518D4458B8F" >> /home/app/config/.env.zk_arcade
+	@echo "BATCHER_HOST=batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
 	@echo "BATCHER_PORT=443" >> /home/app/config/.env.zk_arcade
-	@echo "BATCHER_URL=wss://stage.batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
-	@echo "EXPLORER_URL=https://stage.explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
-
+	@echo "BATCHER_URL=wss://batcher.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "EXPLORER_URL=https://holesky.explorer.alignedlayer.com" >> /home/app/config/.env.zk_arcade
+	@echo "FEEDBACK_FORM_URL=" >> /home/app/config/.env.zk_arcade
+	@echo "BEAST_WINDOWS_DOWNLOAD_URL=https://github.com/yetanotherco/zk_arcade/releases/download/v0.6.0/beast.exe" >> /home/app/config/.env.zk_arcade
 
 ## Deploy
 release: export MIX_ENV=prod

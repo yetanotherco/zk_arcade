@@ -86,7 +86,6 @@ export const SubmitProofModal = ({
 	currentLevelReached,
 }: Props) => {
 	const [step, setStep] = useState<SubmitProofModalSteps | undefined>();
-	const [currentProof, setCurrentProof] = useState<ProofSubmission | undefined>(proof);
 	const { balance } = useBatcherPaymentService({
 		contractAddress: payment_service_address,
 		userAddress: user_address,
@@ -128,7 +127,7 @@ export const SubmitProofModal = ({
 		userAddress: user_address,
 	});
 
-	const activeGameName = (gameName || currentProof?.game || "").toLowerCase();
+	const activeGameName = (gameName || proof?.game || "").toLowerCase();
 	const beastEndsAt = beastCurrentGame.game?.endsAtTime;
 	const parityEndsAt = parityCurrentGame.game?.endsAtTime;
 
@@ -192,7 +191,7 @@ export const SubmitProofModal = ({
 	}, [claimExpiryDate]);
 
 	const updateState = useCallback(() => {
-		if (currentProof) {
+		if (proof) {
 			if (
 				proofStatus === "pending" ||
 				proofStatus === "underpriced" ||
@@ -300,11 +299,11 @@ export const SubmitProofModal = ({
 				setOpen={modal.setOpen}
 				setStep={setStep}
 				user_address={user_address}
-				proofSubmission={currentProof}
+				proofSubmission={proof}
 				proofStatus={proofStatus}
 				setProofStatus={setProofStatus}
 				proofToSubmitData={proofToSubmitData}
-				gameName={gameName ? gameName : currentProof?.game || "beast"}
+				gameName={gameName ? gameName : proof?.game || "beast"}
 				initialGameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
 				currentLevelReached={currentLevelReached}
@@ -312,10 +311,10 @@ export const SubmitProofModal = ({
 			/>
 		),
 		claim: () =>
-				currentProof && (
+				proof && (
 				<ClaimStep
 					setOpen={modal.setOpen}
-					proofSubmission={currentProof}
+					proofSubmission={proof}
 					user_address={user_address}
 					leaderboard_address={leaderboard_address}
 					proofStatus={proofStatus}

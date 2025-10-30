@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Button } from "../../components";
 import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
-import { Address } from "viem";
+import { Address, toHex } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 import { gameDataKey, ParityGameState } from "./types";
+import { useCSRFToken } from "../../hooks/useCSRFToken";
 
 type GameStatus = {
 	levelsBoards: number[][][];
@@ -52,6 +53,8 @@ export const ProveAndSubmit = ({
 	const [proofGenerationFailed, setProofGenerationFailed] = useState(false);
 	const [isGeneratingProof, setIsGeneratingProof] = useState(false);
 
+	const { csrfToken } = useCSRFToken();
+
 	const [userGameData, _setUserGameData] = useState<GameStatus>(() => {
 		const stored = localStorage.getItem("parity-game-data");
 		const gameData: { [key: string]: GameStatus } = stored
@@ -98,6 +101,37 @@ export const ProveAndSubmit = ({
 			setOpen(true);
 		} catch (e) {
 			console.error("Error generating proof:", e);
+
+			// send the error to telemetry so we can reproduce it
+			try {
+				const stored = localStorage.getItem("parity-game-data");
+				const key = gameDataKey(currentGameConfig, user_address);
+				const gameData: { [key: string]: GameStatus } = stored
+					? JSON.parse(stored)
+					: {};
+
+				await fetch("/api/telemetry/error", {
+					method: "POST",
+					credentials: "include",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						_csrf_token: csrfToken,
+						name: "Parity proof generation",
+						message:
+							"An error occurred while generating parity proof",
+						details: {
+							error: e,
+							gameConfig: toHex(BigInt(currentGameConfig), {
+								size: 32,
+							}),
+							gameTrace: gameData[key],
+						},
+					}),
+				});
+			} catch (err) {}
+
 			setIsGeneratingProof(false);
 			setProofGenerationFailed(true);
 

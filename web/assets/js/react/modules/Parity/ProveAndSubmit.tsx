@@ -82,21 +82,11 @@ export const ProveAndSubmit = ({
 			// If the user already has a submitted proof for this level, open
 			// the existing proof instead of showing the modal for the newly
 			// generated proof (avoids flashing the generated-proof modal).
-			const highestLevelNumber =
-				typeof highestLevelReached === "object" && highestLevelReached !== null
-					? (highestLevelReached.level ?? 0)
-					: Number(highestLevelReached || 0);
-
-			const proofIdCandidate =
-				typeof highestLevelReached === "object" && highestLevelReached !== null
-					? highestLevelReached.proof_id
-					: undefined;
-
 			setIsGeneratingProof(false);
 
-			if (highestLevelNumber === currentLevel && proofIdCandidate) {
+			if (highestLevelReached === currentLevel && highestLevelReachedProofId) {
 				try {
-					const url = `${window.location.pathname}?submitProofId=${proofIdCandidate}`;
+					const url = `${window.location.pathname}?submitProofId=${highestLevelReachedProofId}`;
 					window.history.pushState({}, "", url);
 					window.location.reload();
 					return;

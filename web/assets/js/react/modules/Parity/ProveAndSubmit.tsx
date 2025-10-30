@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Button } from "../../components";
 import { generateCircomParityProof } from "./GenerateProof";
 import { VerificationData } from "../../types/aligned";
-import { Address } from "viem";
+import { Address, toHex } from "viem";
 import { SubmitProofModal } from "../../components/Modal/SubmitProof";
 import { gameDataKey, ParityGameState } from "./types";
+import { useCSRFToken } from "../../hooks/useCSRFToken";
 
 type GameStatus = {
 	levelsBoards: number[][][];
@@ -28,6 +29,7 @@ export const ProveAndSubmit = ({
 	nft_contract_address,
 	gameIdx,
 	highestLevelReached,
+	highestLevelReachedProofId,
 	setPlayerLevelReached,
 }: {
 	user_address: Address;
@@ -41,6 +43,7 @@ export const ProveAndSubmit = ({
 	nft_contract_address: Address;
 	gameIdx: number;
 	highestLevelReached: number;
+	highestLevelReachedProofId?: string | number;
 	setPlayerLevelReached: (level: number) => void;
 }) => {
 	const [open, setOpen] = useState(false);
@@ -49,6 +52,8 @@ export const ProveAndSubmit = ({
 
 	const [proofGenerationFailed, setProofGenerationFailed] = useState(false);
 	const [isGeneratingProof, setIsGeneratingProof] = useState(false);
+
+	const { csrfToken } = useCSRFToken();
 
 	const [userGameData, _setUserGameData] = useState<GameStatus>(() => {
 		const stored = localStorage.getItem("parity-game-data");
@@ -76,10 +81,57 @@ export const ProveAndSubmit = ({
 			);
 
 			setProofVerificationData(submitproofVerificationData);
+
+			// If the user already has a submitted proof for this level, open
+			// the existing proof instead of showing the modal for the newly
+			// generated proof (avoids flashing the generated-proof modal).
 			setIsGeneratingProof(false);
+
+			if (highestLevelReached === currentLevel && highestLevelReachedProofId) {
+				try {
+					const url = `${window.location.pathname}?submitProofId=${highestLevelReachedProofId}`;
+					window.history.pushState({}, "", url);
+					window.location.reload();
+					return;
+				} catch (e) {
+					console.warn("Failed to open existing proof by id:", e);
+				}
+			}
+
 			setOpen(true);
 		} catch (e) {
 			console.error("Error generating proof:", e);
+
+			// send the error to telemetry so we can reproduce it
+			try {
+				const stored = localStorage.getItem("parity-game-data");
+				const key = gameDataKey(currentGameConfig, user_address);
+				const gameData: { [key: string]: GameStatus } = stored
+					? JSON.parse(stored)
+					: {};
+
+				await fetch("/api/telemetry/error", {
+					method: "POST",
+					credentials: "include",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						_csrf_token: csrfToken,
+						name: "Parity proof generation",
+						message:
+							"An error occurred while generating parity proof",
+						details: {
+							error: e,
+							gameConfig: toHex(BigInt(currentGameConfig), {
+								size: 32,
+							}),
+							gameTrace: gameData[key],
+						},
+					}),
+				});
+			} catch (err) {}
+
 			setIsGeneratingProof(false);
 			setProofGenerationFailed(true);
 
@@ -280,6 +332,7 @@ export const ProveAndSubmit = ({
 				nft_contract_address={nft_contract_address}
 				gameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
+				highestLevelReachedProofId={highestLevelReachedProofId}
 				currentLevelReached={currentLevel}
 			/>
 		</div>

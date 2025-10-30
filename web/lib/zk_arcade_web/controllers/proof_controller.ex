@@ -7,6 +7,21 @@ defmodule ZkArcadeWeb.ProofController do
   alias ZkArcade.EIP712Verifier
   alias ZkArcade.PrometheusMetrics
 
+  @stop_key {__MODULE__, :stop}
+
+  # Public runtime helpers to manage/read the stop flag.
+  # Usage from an attached IEx session:
+  #   ZkArcadeWeb.ProofController.set_stop(true)
+  #   ZkArcadeWeb.ProofController.get_stop()
+  def set_stop(flag \\ true) when is_boolean(flag) do
+    :persistent_term.put(@stop_key, flag)
+    :ok
+  end
+
+  def get_stop do
+    :persistent_term.get(@stop_key, false)
+  end
+
   def get_pending_proofs_to_bump(conn, %{"address" => address}) do
     case ZkArcade.Proofs.get_pending_proofs_to_bump(address) do
       nil ->
@@ -210,6 +225,10 @@ defmodule ZkArcadeWeb.ProofController do
         "game" => game,
         "game_idx" => game_idx
       }) do
+    if get_stop() do
+      # Short-circuit when submissions are paused
+      redirect(conn, to: build_redirect_url(conn, "submissions-paused"))
+    else
     if address = get_session(conn, :wallet_address) do
       result =
         submit_proof_message_json
@@ -281,6 +300,7 @@ defmodule ZkArcadeWeb.ProofController do
       end
     else
       redirect(conn, to: "/")
+    end
     end
   end
 
@@ -405,6 +425,10 @@ defmodule ZkArcadeWeb.ProofController do
         "proof_id" => proof_id,
         "submit_proof_message" => submit_proof_message_json
       }) do
+    if get_stop() do
+      # Short-circuit when submissions are paused
+      redirect(conn, to: build_redirect_url(conn, "submissions-paused"))
+    else
     if address = get_session(conn, :wallet_address) do
       result =
         submit_proof_message_json
@@ -489,6 +513,12 @@ defmodule ZkArcadeWeb.ProofController do
       conn
       |> redirect(to: "/")
     end
+    end
+  end
+
+  # Endpoint to retrieve the current stop flag status
+  def get_stop_flag(conn, _params) do
+    json(conn, %{stop: get_stop()})
   end
 
   defp save_user_country(conn, address) do

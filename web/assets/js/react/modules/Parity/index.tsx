@@ -14,6 +14,7 @@ type Props = {
 	nft_contract_address: Address;
 	batcher_url: string;
 	highest_level_reached: number;
+	highest_level_reached_proof_id?: string | number;
 };
 
 export const ParityGame = ({
@@ -24,6 +25,7 @@ export const ParityGame = ({
 	nft_contract_address,
 	batcher_url,
 	highest_level_reached,
+	highest_level_reached_proof_id
 }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -38,6 +40,7 @@ export const ParityGame = ({
 						batcher_url={batcher_url}
 						nft_contract_address={nft_contract_address}
 						highest_level_reached={highest_level_reached}
+						highest_level_reached_proof_id={highest_level_reached_proof_id}
 					/>
 				</AudioProvider>
 			</ToastsProvider>

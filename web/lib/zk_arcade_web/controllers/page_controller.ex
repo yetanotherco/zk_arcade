@@ -37,24 +37,6 @@ defmodule ZkArcadeWeb.PageController do
     proofs
   end
 
-  defp build_redirect_url(conn, message) do
-    referer = get_req_header(conn, "referer") |> List.first() || "/"
-    uri = URI.parse(referer)
-
-    query_params =
-      case uri.query do
-        nil -> %{}
-        q -> URI.decode_query(q)
-      end
-
-    new_query =
-      query_params
-      |> Map.put("message", message)
-      |> URI.encode_query()
-
-    uri.path <> "?" <> new_query
-  end
-
   defp get_user_eligibility(nil) do
     "false"
   end
@@ -65,124 +47,6 @@ defmodule ZkArcadeWeb.PageController do
         {:error, :proof_not_found} -> "false"
         _ -> "false"
     end
-  end
-
-  def home(conn, _params) do
-    leaderboard = ZkArcade.LeaderboardContract.top10()
-    wallet = get_wallet_from_session(conn)
-    proofs = get_proofs(wallet, 1, 5)
-    proofs_verified = ZkArcade.Proofs.get_verified_proofs_count()
-
-    # TODO: since all our proofs are from risc0, we can just fetch all the proofs
-    # In the future, we'd have to sum the savings of all the proofs for each proving system
-    campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
-    days = ZkArcade.Utils.date_diff_days(String.to_integer(campaign_started_at_unix_timestamp))
-    desc = "Last #{days} days"
-    total_claimed_points = ZkArcade.Leaderboard.count_total_claimed_points()
-    nfts_minted = 100
-    top_users = ZkArcade.Leaderboard.get_top_users(10)
-
-    user_in_top? = Enum.any?(top_users, fn u -> u.address == wallet end)
-
-    {username, position} = get_username_and_position(wallet)
-
-    user_data =
-      if !user_in_top? && wallet do
-        case ZkArcade.Leaderboard.get_user_and_position(wallet) do
-          %{user: user, position: position} ->
-            %{address: wallet, position: position, score: user.score, username: username}
-          _ ->
-            nil
-        end
-      else
-        nil
-      end
-
-    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
-
-    faqs = [
-      %{
-        number: "01",
-        question: "Why do I need a wallet to play?",
-        answer: "Your wallet is your identity in ZK Arcade. It allows you to deposit ETH into Aligned to pay for proof verification, claim your points on the leaderboard, and keep all your progress securely tied to your address."
-      },
-      %{
-        number: "01",
-        question: "Why do I need to mint an NFT?",
-        answer: "Minting the NFT proves your eligibility and grants access to participate in ZK Arcade. Without it, you cannot submit proofs or earn points on the leaderboard."
-      },
-      %{
-        number: "02",
-        question: "Do I need to be eligible to mint?",
-        answer: "Yes. Only addresses that meet the eligibility requirements can mint the NFT. Make sure your address qualifies before trying to mint."
-      },
-      %{
-        number: "03",
-        question: "What does the NFT do after I mint it?",
-        answer: "The NFT acts as your participation ticket. It ties your identity to the game, allowing you to claim points in the global leaderboard."
-      },
-      %{
-        number: "04",
-        question: "Do I need to mint a new NFT for each challenge?",
-        answer: "No. You only need to mint the NFT once. After that, it continues to serve as your participation ticket for new challenges."
-      },
-      %{
-        number: "05",
-        question: "Can I transfer or sell the NFT?",
-        answer: "No. The NFT is non-transferable. It’s permanently tied to the wallet that minted it to preserve fair participation and prevent selling or lending access."
-      },
-      %{
-        number: "06",
-        question: "Why do I need to verify my proofs?",
-        answer: "Verification guarantees that your results are valid and are not tampered with. It ensures the leaderboard reflects the player's real skills, and not manipulated outcomes."
-      },
-      %{
-        number: "07",
-        question: "Can I resubmit a proof for a lower level?",
-        answer: "No. You can only submit one proof per level, and each new proof must be for a higher level than the last one submitted for the daily game."
-      },
-      %{
-        number: "08",
-        question: "What happens if my proof submission fails?",
-        answer: "If a proof fails verification, it won’t count toward your score. You can generate a new valid proof and resubmit."
-      },
-      %{
-        number: "09",
-        question: "How do I earn points on the leaderboard?",
-        answer: "Points are awarded per verified level on each day. The higher the level you submit a valid proof for, the more points you receive for it."
-      },
-      %{
-        number: "10",
-        question: "Is my gameplay data public?",
-        answer: "No. Only your proof and score are submitted. Zero-knowledge proofs allow verification without exposing your full gameplay data."
-      },
-      %{
-        number: "11",
-        question: "How often are new challenges released?",
-        answer: "A new challenge is available every day for each game!"
-      },
-    ]
-
-    eligible = get_user_eligibility(wallet)
-
-    conn
-      |> assign(:submitted_proofs, Jason.encode!(proofs))
-      |> assign(:wallet, wallet)
-      |> assign(:leaderboard, leaderboard)
-      |> assign(:top_users, top_users)
-      |> assign(:user_data, user_data)
-      |> assign(:statistics, %{
-          proofs_verified: proofs_verified,
-          total_claimed_points: total_claimed_points,
-          nfts_minted: nfts_minted,
-          desc: desc
-        })
-      |> assign(:username, username)
-      |> assign(:user_position, position)
-      |> assign(:explorer_url, explorer_url)
-      |> assign(:faqs, faqs)
-      |> assign(:eligible, eligible)
-      |> render(:home)
   end
 
   def games(conn, _params) do
@@ -262,6 +126,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
+      |> assign(:highest_level_reached_proof_id, if highest_level_reached_proof do to_string(highest_level_reached_proof.id) else nil end)
       |> render(:beast_game)
   end
 
@@ -300,54 +165,8 @@ The goal of the game is to make each number on the board equal.
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
+      |> assign(:highest_level_reached_proof_id, if highest_level_reached_proof do to_string(highest_level_reached_proof.id) else nil end)
       |> render(:parity_game)
-  end
-
-  def history(conn, params) do
-    case get_wallet_from_session(conn) do
-      nil -> conn |> redirect(to: build_redirect_url(conn, "user-not-connected"))
-      wallet ->
-        entries_per_page = 5
-
-        page = String.to_integer(params["page"] || "1")
-
-        total_proofs = ZkArcade.Proofs.get_total_proofs_by_address(wallet)
-
-        total_pages = ceil(total_proofs / entries_per_page)
-        has_prev = page > 1
-        has_next = page < total_pages
-
-        proofs = get_proofs(wallet, page, entries_per_page)
-
-        {username, position} = get_username_and_position(wallet)
-
-        explorer_url = Application.get_env(:zk_arcade, :explorer_url)
-        batcher_url = Application.get_env(:zk_arcade, :batcher_url)
-        eligible = get_user_eligibility(wallet)
-
-        conn
-        |> assign(:wallet, wallet)
-        |> assign(:eligible, eligible)
-        |> assign(:network, Application.get_env(:zk_arcade, :network))
-        |> assign(:proofs_sent_total, total_proofs)
-        |> assign(:submitted_proofs, Jason.encode!(proofs))
-        |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
-        |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
-        |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
-        |> assign(:username, username)
-        |> assign(:user_position, position)
-        |> assign(:explorer_url, explorer_url)
-        |> assign(:batcher_url, batcher_url)
-        |> assign(:pagination, %{
-          current_page: page,
-          total_pages: total_pages,
-          has_prev: has_prev,
-          has_next: has_next,
-          total_users: total_proofs,
-          items_per_page: entries_per_page
-        })
-        |> render(:history)
-    end
   end
 
   def leaderboard(conn, params) do

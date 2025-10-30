@@ -252,9 +252,9 @@ defmodule ZkArcadeWeb.PageController do
         how_to_play: """
         1. Install Beast:
           - Windows: Download the portable executable:
-          #{Application.get_env(:zk_arcade, :beast_windows_download_url)}
+          #{Application.get_env(:zk_arcade, :beast_windows_download_url)} or #{Application.get_env(:zk_arcade, :beast_windows_download_url_fallback)}
           - Linux/MacOS: Run the following command:
-          <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url)} | bash</span>
+          <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url)} | bash</span> or <span class="code-block">curl -L #{Application.get_env(:zk_arcade, :beast_bash_download_url_fallback)} | bash</span>
 
         2. Start playing: Run the game with the command: <span class="code-block">#{Application.get_env(:zk_arcade, :beast_bash_command)}</span>. When prompted, enter the same Ethereum address you use on ZK Arcade (the wallet that holds your Ticket NFT).
 
@@ -284,6 +284,7 @@ defmodule ZkArcadeWeb.PageController do
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
+      |> assign(:highest_level_reached_proof_id, if highest_level_reached_proof do to_string(highest_level_reached_proof.id) else nil end)
       |> render(:beast_game)
   end
 
@@ -322,6 +323,7 @@ The goal of the game is to make each number on the board equal.
       |> assign(:user_position, position)
       |> assign(:explorer_url, explorer_url)
       |> assign(:highest_level_reached, if highest_level_reached_proof do highest_level_reached_proof.level_reached else 0 end)
+      |> assign(:highest_level_reached_proof_id, if highest_level_reached_proof do to_string(highest_level_reached_proof.id) else nil end)
       |> render(:parity_game)
   end
 

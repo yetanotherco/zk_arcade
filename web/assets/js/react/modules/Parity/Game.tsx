@@ -18,6 +18,7 @@ type GameProps = {
 	nft_contract_address: Address;
 	batcher_url: string;
 	highest_level_reached: number;
+	highest_level_reached_proof_id?: string | number;
 };
 
 export const Game = ({
@@ -27,6 +28,7 @@ export const Game = ({
 	nft_contract_address,
 	batcher_url,
 	highest_level_reached,
+	highest_level_reached_proof_id,
 }: GameProps) => {
 	const [gameState, setGameState] = useState<ParityGameState>("home");
 	const {
@@ -226,6 +228,7 @@ export const Game = ({
 				nft_contract_address={nft_contract_address}
 				gameIdx={currentGameIdx}
 				highestLevelReached={highest_level_reached}
+				highestLevelReachedProofId={highest_level_reached_proof_id}
 				setPlayerLevelReached={setPlayerLevelReached}
 			/>
 		),

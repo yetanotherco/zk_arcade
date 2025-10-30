@@ -29,6 +29,7 @@ export const ProveAndSubmit = ({
 	nft_contract_address,
 	gameIdx,
 	highestLevelReached,
+	highestLevelReachedProofId,
 	setPlayerLevelReached,
 }: {
 	user_address: Address;
@@ -42,6 +43,7 @@ export const ProveAndSubmit = ({
 	nft_contract_address: Address;
 	gameIdx: number;
 	highestLevelReached: number;
+	highestLevelReachedProofId?: string | number;
 	setPlayerLevelReached: (level: number) => void;
 }) => {
 	const [open, setOpen] = useState(false);
@@ -79,7 +81,23 @@ export const ProveAndSubmit = ({
 			);
 
 			setProofVerificationData(submitproofVerificationData);
+
+			// If the user already has a submitted proof for this level, open
+			// the existing proof instead of showing the modal for the newly
+			// generated proof (avoids flashing the generated-proof modal).
 			setIsGeneratingProof(false);
+
+			if (highestLevelReached === currentLevel && highestLevelReachedProofId) {
+				try {
+					const url = `${window.location.pathname}?submitProofId=${highestLevelReachedProofId}`;
+					window.history.pushState({}, "", url);
+					window.location.reload();
+					return;
+				} catch (e) {
+					console.warn("Failed to open existing proof by id:", e);
+				}
+			}
+
 			setOpen(true);
 		} catch (e) {
 			console.error("Error generating proof:", e);
@@ -314,6 +332,7 @@ export const ProveAndSubmit = ({
 				nft_contract_address={nft_contract_address}
 				gameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
+				highestLevelReachedProofId={highestLevelReachedProofId}
 				currentLevelReached={currentLevel}
 			/>
 		</div>

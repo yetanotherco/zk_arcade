@@ -85,7 +85,7 @@ config :phoenix_live_view,
 config :zk_arcade, :payment_service_address, "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
 config :zk_arcade, :service_manager_address, "0x851356ae760d987E095750cCeb3bC6014560891C"
 # Deploy the contract with `make deploy_contract NETWORK=devnet` and put the address here
-config :zk_arcade, :leaderboard_address, "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2"
+config :zk_arcade, :leaderboard_address, "0x4C4a2f8c81640e47606d3fd77B353E87Ba015584"
 config :ethereumex,
   url: "http://localhost:8545"
 
@@ -99,11 +99,13 @@ config :zk_arcade, :batcher_url, "ws://localhost:8080"
 
 config :zk_arcade, :feedback_form_url, "http://localhost:4000/batches"
 
-config :zk_arcade, :beast_windows_download_url, "https://github.com/yetanotherco/zk_arcade/releases/download/v0.3.0/beast.exe"
+config :zk_arcade, :beast_windows_download_url, "https://github.com/yetanotherco/zk_arcade/releases/download/v1.0.1/beast.exe"
 config :zk_arcade, :beast_bash_download_url, "https://raw.githubusercontent.com/yetanotherco/zk_arcade/main/install_beast.sh"
+config :zk_arcade, :beast_windows_download_url_fallback, "https://downloads.zkarcade.com/v1_0_1/beast.exe"
+config :zk_arcade, :beast_bash_download_url_fallback, "https://downloads.zkarcade.com/install_beast_cloudflare.sh"
 config :zk_arcade, :beast_bash_command, "beast"
 
-config :zk_arcade, :nft_contract_address, "0x4C4a2f8c81640e47606d3fd77B353E87Ba015584"
+config :zk_arcade, :nft_contract_address, "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6"
 
 
 config :zk_arcade, :ip_info_api_key, "<IP_INFO_API_KEY>"

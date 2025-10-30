@@ -72,13 +72,6 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     proofs_verified = ZkArcade.Proofs.get_verified_proofs_count()
     nfts_minted = ZkArcade.Accounts.get_total_nfts_minted()
 
-    eth_price = case ZkArcade.EthPrice.get_eth_price_usd() do
-      {:ok, price} -> price
-      {:error, reason} ->
-        Logger.error("Failed to get ETH price: #{reason}")
-        0
-    end
-
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
     days = ZkArcade.Utils.date_diff_days(String.to_integer(campaign_started_at_unix_timestamp))
     desc = "Last #{days} days"

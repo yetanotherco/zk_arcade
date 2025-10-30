@@ -75,12 +75,6 @@ defmodule ZkArcadeWeb.PageController do
 
     # TODO: since all our proofs are from risc0, we can just fetch all the proofs
     # In the future, we'd have to sum the savings of all the proofs for each proving system
-    eth_price = case ZkArcade.EthPrice.get_eth_price_usd() do
-      {:ok, price} ->
-        price
-      {:error, reason} ->
-        Logger.error("Failed to get ETH price: #{reason}")
-    end
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
     days = ZkArcade.Utils.date_diff_days(String.to_integer(campaign_started_at_unix_timestamp))
     desc = "Last #{days} days"

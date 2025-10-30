@@ -26,6 +26,7 @@ defmodule ZkArcadeWeb.Router do
 
     get "/proof/verification-data", ProofController, :get_proof_verification_data
     get "/proof/pending", ProofController, :get_pending_proofs_to_bump
+    get "/proof/stop-flag", ProofController, :get_stop_flag
     get "/proof/status/:proof_id", ProofController, :get_proof_status
     get "/proof/:proof_id", ProofController, :get_proof_submission
     post "/proof/", ProofController, :submit

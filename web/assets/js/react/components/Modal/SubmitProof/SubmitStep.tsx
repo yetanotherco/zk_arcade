@@ -77,6 +77,7 @@ export const SubmitProofStep = ({
 	initialGameIdx,
 	highestLevelReached,
 	currentLevelReached,
+	highestLevelReachedProofId,
 }: {
 	batcher_url: string;
 	user_address: Address;
@@ -92,6 +93,7 @@ export const SubmitProofStep = ({
 	initialGameIdx?: number;
 	highestLevelReached?: number;
 	currentLevelReached?: number;
+	highestLevelReachedProofId?: string | number;
 }) => {
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
@@ -412,7 +414,7 @@ export const SubmitProofStep = ({
 
 	useEffect(() => {
 		if (!proofToSubmitData) return;
-		if ((highestLevelReached ?? 0) >= (currentLevelReached ?? 0)) {
+		if ((highestLevelReached ?? 0) > (currentLevelReached ?? 0)) {
 			setLevelAlreadyReached(true);
 			return;
 		}
@@ -603,10 +605,9 @@ export const SubmitProofStep = ({
 
 					{levelAlreadyReached && (
 						<p className="text-red">
-							You have already submitted a proof with a higher or
-							equal level for this game. If you uploaded the proof
-							recently, you'll have to wait 6 hours to submit it
-							again.
+							You have already submitted a proof with a higher level
+							for this game. If you uploaded the proof recently,
+							you'll have to wait 6 hours to submit it again.
 						</p>
 					)}
 					{(balance.data || 0) < maxFee && (

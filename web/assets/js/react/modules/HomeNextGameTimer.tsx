@@ -42,25 +42,33 @@ const Component = ({ leaderboardAddress }: { leaderboardAddress: Address }) => {
 	}, [nextGame.data, currentGame.data, currentBlock.data]);
 
 	return (
-		<div className="row-span-2 bg-contrast-300 p-2 flex flex-col justify-between rounded h-full w-full">
-			<div>
-				<p className="text-text-100 text-sm mb-2">Next game in</p>
-				{timeRemaining ? (
-					<h1 className="font-normal text-accent-100 text-4xl mb-1">
-						{timeRemaining.days}d {timeRemaining.hours}h{" "}
-						{timeRemaining.minutes}m
-					</h1>
-				) : (
-					<p className="text-text-200">Calculating…</p>
-				)}
-			</div>
-			<div className="flex w-full justify-end">
-				<p
-					className="text-text-100 bg-contrast-100 text-sm rounded"
-					style={{ padding: "0 5px" }}
-				>
-					Live updates
-				</p>
+		<div className="relative overflow-hidden rounded-xl h-full w-full p-4 bg-contrast-300/60 border border-white/10 shadow-2xl">
+			{/* ambient gradient glow */}
+			<div
+				aria-hidden
+				className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-accent-100/15 via-transparent to-contrast-100/5"
+			/>
+
+			<div className="relative flex flex-col justify-between h-full">
+				<div>
+					<p className="text-text-100/80 text-xs tracking-widest uppercase mb-2">
+						Next games in
+					</p>
+					{timeRemaining ? (
+						<h1 className="font-semibold text-4xl sm:text-5xl mb-1 bg-gradient-to-r from-accent-100 to-white/90 bg-clip-text text-transparent drop-shadow-lg">
+							{timeRemaining.days}d {timeRemaining.hours}h{" "}
+							{timeRemaining.minutes}m
+						</h1>
+					) : (
+						<p className="text-text-200">Calculating…</p>
+					)}
+				</div>
+				<div className="flex w-full justify-end">
+					<p className="inline-flex items-center gap-2 text-text-100 text-xs bg-contrast-100/70 px-2 py-1 rounded border border-white/10 shadow-md">
+						<span className="inline-block w-2 h-2 rounded-full bg-accent-100 ring-2 ring-accent-100/40 animate-pulse" />
+						Live updates
+					</p>
+				</div>
 			</div>
 		</div>
 	);

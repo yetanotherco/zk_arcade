@@ -27,6 +27,7 @@
                 <x-app-home-next-games-timer 
                   network={Application.get_env(:zk_arcade, :network)}
                   leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
+                  next_game_starts_at={if @next_game_starts_at, do: Integer.to_string(@next_game_starts_at), else: nil}
                 />
               </div>
               <.home_statistic label="Proofs verified" value={@proofs_verified} desc={@desc} />

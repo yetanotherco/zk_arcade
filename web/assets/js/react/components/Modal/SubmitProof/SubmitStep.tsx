@@ -215,8 +215,8 @@ export const SubmitProofStep = ({
 
 		if (parsed.submittedAddress !== user_address.slice(2).padStart(64, "0")) {
 			addToast({
-				title: "Invalid address",
-				desc: "The submitted address does not match your address",
+				title: "Wrong address",
+				desc: "The proof address does not match your connected address",
 				type: "error",
 			});
 			return;
@@ -271,8 +271,8 @@ export const SubmitProofStep = ({
 
 		if (parsed.submittedAddress !== user_address.slice(2).padStart(64, "0")) {
 			addToast({
-				title: "Invalid address",
-				desc: "The submitted address does not match your address",
+				title: "Wrong address",
+				desc: "The proof address does not match your connected address",
 				type: "error",
 			});
 			return;

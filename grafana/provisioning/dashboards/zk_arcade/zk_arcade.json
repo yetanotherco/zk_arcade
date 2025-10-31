@@ -1716,7 +1716,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM telemetry_logs;",
+          "rawSql": "-- Count of users with errors generating proofs that were not able to generate valid proofs for a game config\nSELECT COUNT(DISTINCT(address))\nFROM telemetry_logs\nWHERE address NOT IN (\n    SELECT address\n    FROM telemetry_logs LEFT JOIN proofs ON wallet_address = address\n    WHERE game = 'Parity'\n      AND REPLACE(telemetry_logs.details->>'gameConfig', '\"', '') = CONCAT('0x', proofs.game_config)\n);",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1798,7 +1798,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM telemetry_logs WHERE inserted_at >= NOW() - INTERVAL '24 hours';",
+          "rawSql": "-- Count of users with errors generating proofs that were not able to generate valid proofs for a game config in the last 24hs\nSELECT COUNT(DISTINCT(address))\nFROM telemetry_logs\nWHERE address NOT IN (\n    SELECT address\n    FROM telemetry_logs LEFT JOIN proofs ON wallet_address = address\n    WHERE game = 'Parity'\n      AND REPLACE(telemetry_logs.details->>'gameConfig', '\"', '') = CONCAT('0x', proofs.game_config)\n) AND inserted_at >= NOW() - INTERVAL '24 hours';",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1885,7 +1885,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT * FROM telemetry_logs ORDER BY inserted_at DESC LIMIT 500;",
+          "rawSql": "-- Users with errors generating proofs that were not able to generate valid proofs for a game config\nSELECT address, REPLACE(telemetry_logs.details->>'gameConfig', '\"', '') as game_cfg, details, inserted_at\nFROM telemetry_logs\nWHERE address NOT IN (\n    SELECT address\n    FROM telemetry_logs LEFT JOIN proofs ON wallet_address = address\n    WHERE game = 'Parity'\n      AND REPLACE(telemetry_logs.details->>'gameConfig', '\"', '') = CONCAT('0x', proofs.game_config)\n    )\nORDER BY address, inserted_at DESC;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2028,6 +2028,6 @@
   "timezone": "",
   "title": "ZK Arcade",
   "uid": "ec4ebfb9-8757-4fde-9b2b-99917dc9b706",
-  "version": 22,
+  "version": 26,
   "weekStart": ""
 }

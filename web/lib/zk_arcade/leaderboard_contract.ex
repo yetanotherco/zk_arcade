@@ -43,4 +43,24 @@ defmodule ZkArcade.LeaderboardContract do
       _ -> {:error, :unknown_game}
     end
   end
+
+  @doc """
+  Returns the startsAtTime (unix seconds) for the next Beast game, or nil if there is no next game.
+
+  Mirrors the client logic: when the current index is 0, it uses index 0; otherwise uses current_index + 1.
+  """
+  def get_next_beast_game_starts_at do
+    contract_address = Application.get_env(:zk_arcade, :leaderboard_address)
+
+    with {:ok, [_game, current_idx]} <- get_current_beast_game() |> Ethers.call(to: contract_address) do
+      target_idx = if current_idx == 0, do: 0, else: current_idx + 1
+
+      case beast_games(target_idx) |> Ethers.call(to: contract_address) do
+        {:ok, [_, _game_config, starts_at_time]} -> starts_at_time
+        {:error, _reason} -> nil
+      end
+    else
+      _ -> nil
+    end
+  end
 end

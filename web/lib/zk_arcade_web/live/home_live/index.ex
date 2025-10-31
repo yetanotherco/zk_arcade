@@ -71,6 +71,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     proofs = get_proofs(wallet, 1, 5)
     proofs_verified = ZkArcade.Proofs.get_verified_proofs_count()
     nfts_minted = ZkArcade.Accounts.get_total_nfts_minted()
+    next_game_starts_at = ZkArcade.LeaderboardContract.get_next_beast_game_starts_at()
 
     campaign_started_at_unix_timestamp = Application.get_env(:zk_arcade, :campaign_started_at)
     days = ZkArcade.Utils.date_diff_days(String.to_integer(campaign_started_at_unix_timestamp))
@@ -128,6 +129,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     |> assign(:nfts_minted, nfts_minted)
     |> assign(:user_data, user_data)
     |> assign(:faqs, faqs)
+    |> assign(:next_game_starts_at, next_game_starts_at)
   end
 
   defp get_wallet_from_session(session) do

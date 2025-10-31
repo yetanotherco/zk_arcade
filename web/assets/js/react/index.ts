@@ -186,6 +186,10 @@ define(
 define(
 	{ "x-app-home-next-games-timer": HomeNextGamesTimer },
 	{
-		attributes: ["network", "leaderboard_address"],
+		attributes: [
+			"network",
+			"leaderboard_address",
+			"next_game_starts_at",
+		],
 	}
 );

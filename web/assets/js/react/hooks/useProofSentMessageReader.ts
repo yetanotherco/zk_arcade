@@ -83,7 +83,7 @@ export const useProofSentMessageReader = () => {
 		if (message == "proof-invalidated") {
 			addToast({
 				title: "Proof invalidated",
-				desc: "The has been invalidated successfully, you can play again and submit a new proof",
+				desc: "The proof has been invalidated, you can play again and generate a new proof",
 				type: "success",
 			});
 		}
@@ -91,7 +91,7 @@ export const useProofSentMessageReader = () => {
 		if (message == "invalidate-failed") {
 			addToast({
 				title: "Proof invalidation failed",
-				desc: "The has been an error while invalidating the proof, are you sure it exists and you haven't claimed it already?",
+				desc: "There has been an error while invalidating the proof, are you sure it exists and you haven't claimed it already?",
 				type: "error",
 			});
 		}

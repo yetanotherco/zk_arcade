@@ -109,5 +109,7 @@ export const useParityGames = ({
 		timeRemaining,
 		currentGameConfig: gameConfig,
 		currentGameIdx: currentGame.gameIdx,
+		gamesHaveFinished: currentGame.gamesHaveFinished,
+		isLoading: currentGame.isLoading,
 	};
 };

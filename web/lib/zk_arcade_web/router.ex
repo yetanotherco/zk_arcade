@@ -29,6 +29,7 @@ defmodule ZkArcadeWeb.Router do
     get "/proof/stop-flag", ProofController, :get_stop_flag
     get "/proof/status/:proof_id", ProofController, :get_proof_status
     get "/proof/:proof_id", ProofController, :get_proof_submission
+    post "/proof/invalidate/:proof_id", ProofController, :invalidate_proof_submission
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
     post "/proof/status/retry", ProofController, :retry_submit_proof

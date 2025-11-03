@@ -15,6 +15,7 @@ const colorBasedOnStatus: {
 	claimed: "bg-blue/20 text-blue",
 	failed: "bg-red/20 text-red",
 	underpriced: "bg-orange/20 text-orange",
+	invalidated: "bg-red/20 text-red",
 };
 
 const statusText: { [key in KeysForStatus]: string } = {
@@ -24,6 +25,7 @@ const statusText: { [key in KeysForStatus]: string } = {
 	pending: "Pending",
 	failed: "Failed",
 	underpriced: "Pending",
+	invalidated: "Invalidated",
 };
 
 type Props = {
@@ -32,7 +34,8 @@ type Props = {
 };
 
 export const ProofStatusWithTooltipDesc = ({ proof }: Props) => {
-	const isUnderpriced = proof.status === "pending" && timeAgoInHs(proof.inserted_at) > 6;
+	const isUnderpriced =
+		proof.status === "pending" && timeAgoInHs(proof.inserted_at) > 6;
 	if (isUnderpriced) proof.status = "underpriced";
 	return (
 		<td>

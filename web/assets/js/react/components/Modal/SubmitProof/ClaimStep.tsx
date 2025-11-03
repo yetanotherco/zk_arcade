@@ -145,8 +145,8 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 							<div className="pointer-events-none group-hover:pointer-events-auto absolute bottom-full left-0 group-focus-within:pointer-events-auto">
 								<div className="px-3 pb-2 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 shadow-lg ring-1 ring-white/10 min-w-[280px] max-w-[360px]">
 									<p>
-										If your claim is stuck or failing,
-										invalidate to regenerate a new proof.{" "}
+										If your claim is stuck or failing, reset
+										to play again and generate a new proof.{" "}
 										<span
 											className="text-accent-100 cursor-pointer hover:underline"
 											onClick={() =>
@@ -222,13 +222,13 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 							Are you sure?
 						</h3>
 						<p className="text-text-200 mb-6">
-							Invalidating will discard the current proof and
-							clear local game data for this game so you can
-							regenerate a fresh proof.
+							Resetting will discard the proof so you can play
+							again and generate a new proof.
 						</p>
-						<div className="flex justify-end gap-3">
+						<div className="flex justify-end">
 							<Button
 								variant="text"
+								className="mr-10"
 								onClick={() => setShowInvalidateConfirm(false)}
 							>
 								Cancel

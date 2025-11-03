@@ -119,7 +119,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
       %{
         number: "06",
         question: "What can I do if my claim fails?",
-        answer: "If your claim gets stuck or fails, use the <span class=\"underline\">Invalidate</span> action in the claim modal. This discards the previously generated proof and clears your local game state for that game so you can regenerate a fresh proof and try again. No points are lost, but you will need to pay gas again for the new transaction. Be sure to re‑prove and re‑claim before the claim window expires."
+        answer: "If your claim fails, or you see an unusually high estimated fee on your wallet, use the <span class=\"underline\">Reset</span> action in the claim modal. This will discard the previously generated proof so you can play again and start over."
       },
       %{
         number: "07",

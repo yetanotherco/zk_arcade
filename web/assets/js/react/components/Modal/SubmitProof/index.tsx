@@ -99,9 +99,13 @@ export const SubmitProofModal = ({
 		useState<BreadCrumbStatus>("neutral");
 	const [submissionStatus, setSubmissionStatus] =
 		useState<BreadCrumbStatus>("neutral");
-	
+
 	useEffect(() => {
-		if (proofToSubmitData && highestLevelReached && Number(highestLevelReached) === (currentLevelReached ?? 0)) {
+		if (
+			proofToSubmitData &&
+			highestLevelReached &&
+			Number(highestLevelReached) === (currentLevelReached ?? 0)
+		) {
 			const proofIdCandidate = highestLevelReachedProofId ?? proof?.id;
 			if (proofIdCandidate) {
 				try {
@@ -111,8 +115,13 @@ export const SubmitProofModal = ({
 				}
 			}
 		}
-	}, [highestLevelReachedProofId, proof, proofToSubmitData, currentLevelReached, highestLevelReached]);
-
+	}, [
+		highestLevelReachedProofId,
+		proof,
+		proofToSubmitData,
+		currentLevelReached,
+		highestLevelReached,
+	]);
 
 	const { balance: nftBalance } = useNftContract({
 		contractAddress: nft_contract_address,
@@ -200,7 +209,11 @@ export const SubmitProofModal = ({
 			) {
 				setStep("submit");
 			}
-			if (proofStatus === "claimed" || proofStatus === "verified") {
+			if (
+				proofStatus === "claimed" ||
+				proofStatus === "verified" ||
+				proofStatus == "invalidated"
+			) {
 				setStep("claim");
 			}
 		} else {
@@ -311,7 +324,7 @@ export const SubmitProofModal = ({
 			/>
 		),
 		claim: () =>
-				proof && (
+			proof && (
 				<ClaimStep
 					setOpen={modal.setOpen}
 					proofSubmission={proof}

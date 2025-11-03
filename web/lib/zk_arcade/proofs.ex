@@ -216,7 +216,7 @@ defmodule ZkArcade.Proofs do
         [p],
         p.wallet_address == ^downcased_addr and p.game_idx == ^game_idx and p.game == ^game and
           (
-            (p.status not in ["failed", "pending"]) or
+            (p.status not in ["failed", "pending", "invalidated"]) or
             # This means we only consider those pending proofs that were submitted in the last 6 hours
             (p.status == "pending" and p.inserted_at > ^six_hours_ago)
           )
@@ -369,6 +369,37 @@ defmodule ZkArcade.Proofs do
         PrometheusMetrics.record_user_error(:proof_failed_status_update_failed)
         Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
         {:error, changeset}
+    end
+  end
+
+  def update_proof_status_invalidated(address, proof_id) do
+    case get_proof_by_id(proof_id) do
+      nil ->
+        {:error, :not_found}
+
+      %Proof{} = proof ->
+        downcased_addr = String.downcase(address)
+
+        if proof.wallet_address != downcased_addr do
+          Logger.error(
+            "Failed to invalidate proof #{proof_id}: does not belong to address #{address}"
+          )
+
+          {:error, :not_owner}
+        else
+          changeset = change_proof(proof, %{status: "invalidated"})
+
+          case Repo.update(changeset) do
+            {:ok, updated_proof} ->
+              Logger.info("Updated proof #{proof_id} status to invalidated")
+              {:ok, updated_proof}
+
+            {:error, changeset} ->
+              PrometheusMetrics.record_user_error(:proof_invalidated_status_update_failed)
+              Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+              {:error, changeset}
+          end
+        end
     end
   end
 

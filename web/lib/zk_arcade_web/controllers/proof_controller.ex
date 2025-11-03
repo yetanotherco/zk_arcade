@@ -83,6 +83,23 @@ defmodule ZkArcadeWeb.ProofController do
     end
   end
 
+  def invalidate_proof_submission(conn, %{"proof_id" => proof_id}) do
+    if get_session(conn, :wallet_address) do
+      address = get_session(conn, :wallet_address)
+
+      case Proofs.update_proof_status_invalidated(address, proof_id) do
+        {:ok, _updated_proof} ->
+          redirect(conn, to: build_redirect_url(conn, "proof-invalidated", proof_id))
+
+        {:error, _reason} ->
+          redirect(conn, to: build_redirect_url(conn, "invalidate-failed", proof_id))
+      end
+    else
+      conn
+      |> redirect(to: "/")
+    end
+  end
+
   def parse_public_input_risc0_sp1(public_input)
       when is_list(public_input) and length(public_input) >= 96 do
     <<level_bytes::binary-size(32), game_bytes::binary-size(32), address_bytes::binary-size(32)>> =

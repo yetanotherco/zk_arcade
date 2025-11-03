@@ -115,6 +115,16 @@ defmodule ZkArcadeWeb.HomeLive.Index do
         number: "05",
         question: "How often are new challenges released?",
         answer: "New challenges are released every Monday and Friday at 00:00 UTC. You have an additional 48-hour window to claim points after a level expires."
+      },
+      %{
+        number: "06",
+        question: "What can I do if my claim fails?",
+        answer: "If your claim gets stuck or fails, use the <span class=\"underline\">Invalidate</span> action in the claim modal. This discards the previously generated proof and clears your local game state for that game so you can regenerate a fresh proof and try again. No points are lost, but you will need to pay gas again for the new transaction. Be sure to re‑prove and re‑claim before the claim window expires."
+      },
+      %{
+        number: "07",
+        question: "Where can I contact you?",
+        answer: "You can reach us on our official channels: <a href=\"https://x.com/alignedlayer\" target=\"_blank\" class=\"underline\">X</a>, <a href=\"https://discord.gg/alignedlayer\" target=\"_blank\" class=\"underline\">Discord</a>, <a href=\"https://t.me/alignedlayer\" target=\"_blank\" class=\"underline\">Telegram</a>, and our <a href=\"https://blog.alignedlayer.com/\" target=\"_blank\" class=\"underline\">blog</a>."
       }
     ]
 

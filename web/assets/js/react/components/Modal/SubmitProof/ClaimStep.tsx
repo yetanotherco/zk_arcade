@@ -72,6 +72,12 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						anymore.
 					</p>
 				)}
+				{proofStatus === "invalidated" && (
+					<p className="bg-red/20 rounded p-2 text-red">
+						This proof was invalidated. Generate a new proof to
+						claim.
+					</p>
+				)}
 				{contractCallIsLoading && (
 					<p className="bg-contrast-200 rounded p-2 text-text-200">
 						Loading claim information. Please wait...
@@ -89,14 +95,17 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 					</div>
 				)}
 
-				{!canClaim && !gameHasExpired && proofStatus !== "claimed" && (
-					<div className="rounded border border-contrast-100/40 bg-black/60 px-4 py-3">
-						<p className="text-sm text-text-200 text-center mb-2">
-							We're still verifying your proof. Stay tuned on our
-							channels for the latest status updates.
-						</p>
-					</div>
-				)}
+				{!canClaim &&
+					!gameHasExpired &&
+					proofStatus !== "claimed" &&
+					proofStatus !== "invalidated" && (
+						<div className="rounded border border-contrast-100/40 bg-black/60 px-4 py-3">
+							<p className="text-sm text-text-200 text-center mb-2">
+								We're still verifying your proof. Stay tuned on
+								our channels for the latest status updates.
+							</p>
+						</div>
+					)}
 				<SocialLinks className="text-xs text-text-300" />
 
 				<div className="flex flex-col gap-2">
@@ -153,7 +162,10 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						variant="accent-fill"
 						onClick={handleClaim}
 						isLoading={isLoading}
-						disabled={gameHasExpired && proofStatus !== "claimed"}
+						disabled={
+							(gameHasExpired && proofStatus !== "claimed") ||
+							proofStatus === "invalidated"
+						}
 					>
 						{proofStatus === "claimed"
 							? "Share on twitter"

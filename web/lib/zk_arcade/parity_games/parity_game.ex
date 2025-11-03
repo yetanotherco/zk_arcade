@@ -1,7 +1,6 @@
 defmodule ZkArcade.ParityGames.ParityGame do
   use Ecto.Schema
   import Ecto.Changeset
-  alias ZkArcade.Repo
 
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "parity_games" do

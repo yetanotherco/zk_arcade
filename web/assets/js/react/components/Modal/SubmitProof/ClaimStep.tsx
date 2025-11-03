@@ -8,12 +8,15 @@ import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboar
 import { useChainId, useReadContract } from "wagmi";
 import { leaderboardAbi } from "../../../constants/aligned";
 import { SocialLinks } from "../../SocialLinks";
+import { gameDataKey, GameStatus } from "../../../modules/Parity/types";
+import { toHex } from "viem";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
 	proofSubmission: ProofSubmission;
 	proofStatus: ProofSubmission["status"];
 	handleClaim: () => void;
+	beforeInvalidating?: () => void;
 	onCancel: () => void;
 	isLoading: boolean;
 	claimTxHash: string;
@@ -30,6 +33,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 			proofStatus,
 			proofSubmission,
 			handleClaim,
+			beforeInvalidating,
 			onCancel,
 			isLoading,
 			claimTxHash,
@@ -46,7 +50,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 		const handleInvalidate = () => {
 			if (isInvalidating) return;
 			setIsInvalidating(true);
-			// Submit a form so Phoenix can issue a redirect
+			beforeInvalidating && beforeInvalidating();
 			invalidateFormRef.current?.submit();
 		};
 		const showExpiryInfo =
@@ -327,6 +331,11 @@ const ParityClaim = ({
 		await submitSolution.claimParityPoints(proofSubmission);
 	};
 
+	// clean parity
+	const beforeInvalidating = () => {
+		localStorage.setItem("parity-game-data", "{}");
+	};
+
 	useEffect(() => {
 		if (submitSolution.receipt.isSuccess) {
 			window.setTimeout(() => {
@@ -352,6 +361,7 @@ const ParityClaim = ({
 			claimExpiryUtc={claimExpiryUtc}
 			pointsToClaimConstantMultiplication={28000}
 			contractCallIsLoading={claimGame.isLoading}
+			beforeInvalidating={beforeInvalidating}
 		/>
 	);
 };

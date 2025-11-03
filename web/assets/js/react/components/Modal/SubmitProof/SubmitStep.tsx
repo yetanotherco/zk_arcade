@@ -56,11 +56,13 @@ function parsePublicInputs(inputs: Uint8Array) {
 
 	const levelBytes = inputs.slice(0, 32);
 	const gameBytes = inputs.slice(32, 64);
+	const submittedAddressBytes = inputs.slice(64, 96);
 
 	const level = (levelBytes[30] << 8) + levelBytes[31];
 	const game_config = Buffer.from(gameBytes).toString("hex");
+	const submittedAddress = Buffer.from(submittedAddressBytes).toString("hex");
 
-	return { level, game_config };
+	return { level, game_config, submittedAddress };
 }
 
 export const SubmitProofStep = ({
@@ -210,6 +212,16 @@ export const SubmitProofStep = ({
 			});
 			return;
 		}
+
+		if (parsed.submittedAddress !== user_address.slice(2).padStart(64, "0")) {
+			addToast({
+				title: "Wrong address",
+				desc: "The proof address does not match your connected address",
+				type: "error",
+			});
+			return;
+		}
+
 		setParsedPublicInputs(parsed);
 
 		const parsedGameConfigBigInt = BigInt("0x" + parsed.game_config);
@@ -252,6 +264,15 @@ export const SubmitProofStep = ({
 			addToast({
 				title: "Invalid inputs",
 				desc: "The provided public inputs are invalid",
+				type: "error",
+			});
+			return;
+		}
+
+		if (parsed.submittedAddress !== user_address.slice(2).padStart(64, "0")) {
+			addToast({
+				title: "Wrong address",
+				desc: "The proof address does not match your connected address",
 				type: "error",
 			});
 			return;

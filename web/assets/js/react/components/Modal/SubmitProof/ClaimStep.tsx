@@ -132,7 +132,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 				</a>
 				<div className="flex w-full align-center">
 					{proofStatus === "verified" && (
-						<div className="relative inline-flex items-center mr-10 group">
+						<div className="relative inline-flex items-center pr-10 group">
 							<Button
 								variant="text"
 								className="text-red hover:underline transition-colors text-sm flex items-center gap-1"

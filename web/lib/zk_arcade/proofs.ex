@@ -372,6 +372,37 @@ defmodule ZkArcade.Proofs do
     end
   end
 
+  def update_proof_status_invalidated(address, proof_id) do
+    case get_proof_by_id(proof_id) do
+      nil ->
+        {:error, :not_found}
+
+      %Proof{} = proof ->
+        downcased_addr = String.downcase(address)
+
+        if proof.wallet_address != downcased_addr do
+          Logger.error(
+            "Failed to invalidate proof #{proof_id}: does not belong to address #{address}"
+          )
+
+          {:error, :not_owner}
+        else
+          changeset = change_proof(proof, %{status: "invalidated"})
+
+          case Repo.update(changeset) do
+            {:ok, updated_proof} ->
+              Logger.info("Updated proof #{proof_id} status to invalidated")
+              {:ok, updated_proof}
+
+            {:error, changeset} ->
+              PrometheusMetrics.record_user_error(:proof_invalidated_status_update_failed)
+              Logger.error("Failed to update proof #{proof_id}: #{inspect(changeset)}")
+              {:error, changeset}
+          end
+        end
+    end
+  end
+
   def update_proof_retry(proof_id, max_fee) do
     PrometheusMetrics.bumped_proof()
 

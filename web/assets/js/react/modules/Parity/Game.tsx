@@ -41,6 +41,8 @@ export const Game = ({
 		currentGameIdx,
 		timeRemaining,
 		currentGameLevelCompleted,
+		gamesHaveFinished,
+		isLoading,
 	} = useParityGames({
 		leaderBoardContractAddress: leaderboard_address,
 		userAddress: user_address,
@@ -149,38 +151,46 @@ export const Game = ({
 		home: (
 			<div className="flex flex-col gap-6 h-full w-full justify-center items-center">
 				<h1 className="text-2xl font-normal">Parity</h1>
-				<Button
-					variant="arcade"
-					className="max-w-[300px] w-full"
-					disabled={!user_address}
-					disabledTextOnHover="You need to connect your wallet first"
-					onClick={() => {
-						setCurrentLevel(null);
-						if (!hasPlayedTutorial) {
-							setGameState("tutorial");
-						} else {
-							setGameState("running");
-						}
-					}}
-				>
-					Play
-				</Button>
-				<Button
-					variant="arcade"
-					className="max-w-[300px] w-full"
-					disabled={!user_address}
-					disabledTextOnHover="You need to connect your wallet first"
-					onClick={() => setGameState("proving")}
-				>
-					Submit Proof
-				</Button>
-				<Button
-					variant="arcade"
-					className="max-w-[300px] w-full"
-					onClick={() => setGameState("tutorial")}
-				>
-					Tutorial
-				</Button>
+				{isLoading ? (
+					<p className="text-lg text-text-100">Loading...</p>
+				) : gamesHaveFinished ? (
+					<p className="text-lg text-text-100">There are no more games available to play...</p>
+				) : (
+					<>
+						<Button
+							variant="arcade"
+							className="max-w-[300px] w-full"
+							disabled={!user_address}
+							disabledTextOnHover="You need to connect your wallet first"
+							onClick={() => {
+								setCurrentLevel(null);
+								if (!hasPlayedTutorial) {
+									setGameState("tutorial");
+								} else {
+									setGameState("running");
+								}
+							}}
+						>
+							Play
+						</Button>
+						<Button
+							variant="arcade"
+							className="max-w-[300px] w-full"
+							disabled={!user_address}
+							disabledTextOnHover="You need to connect your wallet first"
+							onClick={() => setGameState("proving")}
+						>
+							Submit Proof
+						</Button>
+						<Button
+							variant="arcade"
+							className="max-w-[300px] w-full"
+							onClick={() => setGameState("tutorial")}
+						>
+							Tutorial
+						</Button>
+					</>
+				)}
 			</div>
 		),
 		tutorial: (

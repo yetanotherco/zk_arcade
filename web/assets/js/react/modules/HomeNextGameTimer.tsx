@@ -57,7 +57,7 @@ const Component = ({ leaderboardAddress }: { leaderboardAddress: Address }) => {
 					<p className="text-text-100/80 text-xs tracking-widest uppercase mb-2">
 						Next games in
 					</p>
-					{nextGame.isFetched && nextGame.data == null ? (
+					{!nextGame.isLoading && nextGame.data == null ? (
 						<h1 className="font-semibold text-3xl sm:text-4xl mb-1 bg-gradient-to-r from-accent-100 to-white/90 bg-clip-text text-transparent drop-shadow-lg">
 							No more games, campaign has ended
 						</h1>

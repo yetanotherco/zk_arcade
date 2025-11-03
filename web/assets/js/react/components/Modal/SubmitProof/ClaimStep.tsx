@@ -8,8 +8,7 @@ import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboar
 import { useChainId, useReadContract } from "wagmi";
 import { leaderboardAbi } from "../../../constants/aligned";
 import { SocialLinks } from "../../SocialLinks";
-import { gameDataKey, GameStatus } from "../../../modules/Parity/types";
-import { toHex } from "viem";
+import { Modal } from "..";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
@@ -46,6 +45,8 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 	) => {
 		const { csrfToken } = useCSRFToken();
 		const [isInvalidating, setIsInvalidating] = useState(false);
+		const [showInvalidateConfirm, setShowInvalidateConfirm] =
+			useState(false);
 		const invalidateFormRef = useRef<HTMLFormElement>(null);
 		const handleInvalidate = () => {
 			if (isInvalidating) return;
@@ -140,7 +141,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 								className="text-red hover:underline transition-colors flex items-center gap-1"
 								isLoading={isInvalidating}
 								disabled={isInvalidating}
-								onClick={handleInvalidate}
+								onClick={() => setShowInvalidateConfirm(true)}
 							>
 								Invalidate
 							</Button>
@@ -204,6 +205,42 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 				>
 					<input type="hidden" name="_csrf_token" value={csrfToken} />
 				</form>
+
+				<Modal
+					open={showInvalidateConfirm}
+					setOpen={setShowInvalidateConfirm}
+					maxWidth={520}
+				>
+					<div className="bg-contrast-100 w-full p-6 rounded">
+						<h3 className="text-xl mb-4 text-center">
+							Are you sure?
+						</h3>
+						<p className="text-text-200 mb-6">
+							Invalidating will discard the current proof and
+							clear local game data for this game so you can
+							regenerate a fresh proof.
+						</p>
+						<div className="flex justify-end gap-3">
+							<Button
+								variant="text"
+								onClick={() => setShowInvalidateConfirm(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant="accent-fill"
+								isLoading={isInvalidating}
+								disabled={isInvalidating}
+								onClick={() => {
+									setShowInvalidateConfirm(false);
+									handleInvalidate();
+								}}
+							>
+								Yes
+							</Button>
+						</div>
+					</div>
+				</Modal>
 			</div>
 		);
 	}

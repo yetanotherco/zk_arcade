@@ -130,23 +130,20 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 				>
 					Go to leaderboard
 				</a>
-				<div className="self-end">
-					<Button variant="text" className="mr-10" onClick={onCancel}>
-						Cancel
-					</Button>
+				<div className="flex w-full align-center">
 					{proofStatus === "verified" && (
 						<div className="relative inline-flex items-center mr-10 group">
 							<Button
 								variant="text"
-								className="text-red hover:underline transition-colors flex items-center gap-1"
+								className="text-red hover:underline transition-colors text-sm flex items-center gap-1"
 								isLoading={isInvalidating}
 								disabled={isInvalidating}
 								onClick={() => setShowInvalidateConfirm(true)}
 							>
-								Invalidate
+								Reset
 							</Button>
-							<div className="pointer-events-none group-hover:pointer-events-auto absolute bottom-full right-0 group-focus-within:pointer-events-auto pb-2">
-								<div className="px-3 py-2 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 shadow-lg ring-1 ring-white/10 min-w-[280px] max-w-[360px]">
+							<div className="pointer-events-none group-hover:pointer-events-auto absolute bottom-full left-0 group-focus-within:pointer-events-auto">
+								<div className="px-3 pb-2 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 shadow-lg ring-1 ring-white/10 min-w-[280px] max-w-[360px]">
 									<p>
 										If your claim is stuck or failing,
 										invalidate to regenerate a new proof.{" "}
@@ -163,19 +160,28 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 							</div>
 						</div>
 					)}
-					<Button
-						variant="accent-fill"
-						onClick={handleClaim}
-						isLoading={isLoading}
-						disabled={
-							(gameHasExpired && proofStatus !== "claimed") ||
-							proofStatus === "invalidated"
-						}
-					>
-						{proofStatus === "claimed"
-							? "Share on twitter"
-							: "Claim"}
-					</Button>
+					<div className="w-full flex justify-end align-center">
+						<Button
+							variant="text"
+							className="mr-10"
+							onClick={onCancel}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="accent-fill"
+							onClick={handleClaim}
+							isLoading={isLoading}
+							disabled={
+								(gameHasExpired && proofStatus !== "claimed") ||
+								proofStatus === "invalidated"
+							}
+						>
+							{proofStatus === "claimed"
+								? "Share on twitter"
+								: "Claim"}
+						</Button>
+					</div>
 				</div>
 				<form
 					className="hidden"

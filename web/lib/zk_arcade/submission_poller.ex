@@ -36,7 +36,7 @@ defmodule ZkArcade.SubmissionPoller do
 
     with {:ok, latest_block} <- Ethereumex.HttpClient.eth_block_number(url: rpc_url),
          to_block <- String.to_integer(String.trim_leading(latest_block, "0x"), 16) do
-
+      from_block = max(from_block - 10, 0) # Add a buffer of 10 block to avoid possible missing events
       Logger.info("Polling Claim Events from block #{from_block} to #{to_block}")
 
       with {:ok, logs} <- fetch_logs(from_block, to_block, contract_address) do
@@ -66,7 +66,7 @@ defmodule ZkArcade.SubmissionPoller do
   # This function fetches logs from the blockchain based on the specified block range and contract address.
   # Constructs a filter for the logs and uses the Ethereumex HTTP client to retrieve them. If successful,
   # returns the logs; otherwise, it returns an error.
-  defp fetch_logs(from_block, to_block, contract_address) do
+  def fetch_logs(from_block, to_block, contract_address) do
     filter = %{
       address: contract_address,
       fromBlock: "0x" <> Integer.to_string(from_block, 16),
@@ -108,23 +108,23 @@ defmodule ZkArcade.SubmissionPoller do
     event_proof = ZkArcade.Proofs.get_proofs_by_address(user)
                   |> Enum.find(fn proof -> proof.level_reached == level and proof.game_config == game_config_hex end)
 
-    ZkArcade.PrometheusMetrics.increment_claims()
     if event_proof.status != "claimed" do
+      ZkArcade.PrometheusMetrics.increment_claims()
       ZkArcade.Proofs.update_proof_status_claimed(user, event_proof.id, transaction_hash)
       Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} marked as claimed.")
+
+      case ZkArcade.Leaderboard.insert_or_update_entry(%{
+             "user_address" => user,
+             "score" => score
+           }) do
+        {:ok, _entry} ->
+          Logger.info("Leaderboard entry created/updated successfully for #{event_type}.")
+
+        {:error, changeset} ->
+          Logger.error("Failed to create/update leaderboard entry: #{inspect(changeset)}")
+      end
     else
       Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} already set as claimed.")
-    end
-
-    case ZkArcade.Leaderboard.insert_or_update_entry(%{
-           "user_address" => user,
-           "score" => score
-         }) do
-      {:ok, _entry} ->
-        Logger.info("Leaderboard entry created/updated successfully for #{event_type}.")
-
-      {:error, changeset} ->
-        Logger.error("Failed to create/update leaderboard entry: #{inspect(changeset)}")
     end
   end
 

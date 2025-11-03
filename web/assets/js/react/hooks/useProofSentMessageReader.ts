@@ -72,6 +72,30 @@ export const useProofSentMessageReader = () => {
 			});
 		}
 
+		if (message == "submissions-paused") {
+			addToast({
+				title: "Submissions paused",
+				desc: "The server is under maintenance and the proof was not submitted. Please try again later in a few minutes.",
+				type: "warning",
+			});
+		}
+
+		if (message == "proof-invalidated") {
+			addToast({
+				title: "Proof invalidated",
+				desc: "The proof has been invalidated, you can play again and generate a new proof",
+				type: "success",
+			});
+		}
+
+		if (message == "invalidate-failed") {
+			addToast({
+				title: "Proof invalidation failed",
+				desc: "There has been an error while invalidating the proof, are you sure it exists and you haven't claimed it already?",
+				type: "error",
+			});
+		}
+
 		// Remove the message param from the URL without reloading the page
 		// this prevents showing the message again when the user refreshes the page
 		if (message) {

@@ -14,7 +14,8 @@ export type ProofSubmission = {
 		| "failed"
 		| "claimed"
 		| "underpriced"
-		| "verified";
+		| "verified"
+		| "invalidated";
 	inserted_at: string;
 	batch_hash: string | null;
 	verification_data_commitment: `0x${string}`;

@@ -23,12 +23,15 @@
 
         <div class="flex flex-row gap-8 w-full items-center mb-4 overflow-scroll">
           <div class="w-full h-full grid grid-cols-2 sm:grid-cols-3 gap-5">
+              <div id="home-timer" phx-update="ignore" class="sm:col-span-3 col-span-2">
+                <x-app-home-next-games-timer 
+                  network={Application.get_env(:zk_arcade, :network)}
+                  leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
+                />
+              </div>
               <.home_statistic label="Proofs verified" value={@proofs_verified} desc={@desc} />
-              <.home_statistic label="Total Players" value={@total_players} desc={@desc} />
-              <.home_statistic label="Cost saved (USD)" value={@cost_saved} desc={@desc} />
+              <.home_statistic label="Total nfts minted" value={@nfts_minted} desc={@desc} />
               <.home_statistic label="Total claimed points" value={@total_claimed_points} desc={@desc} />
-              <.home_statistic label="Save p/proof (USD)" value={@avg_savings_per_proof} desc={@desc} />
-              <.home_statistic label="Proofs per player" value={@proofs_per_player} desc={@desc} />
             </div>
             <div class="hidden [@media(min-width:900px)]:block w-[300px] h-full max-h-[270px] overflow-y-scroll shrink-0 bg-contrast-300 rounded px-8 py-6">
               <p class="mb-2 text-text-200">Top users</p>

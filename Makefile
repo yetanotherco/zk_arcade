@@ -42,6 +42,17 @@ web_remove_db_container:
 web_clean_db: web_remove_db_container
 	@docker volume rm zkarcade-postgres-data || true
 
+web_seed_games_devnet:
+	@cd web && \
+		mix seed_games ../games/beast/levels/leaderboard_devnet.json ../games/parity/level_generator/levels/parity_devnet.json
+
+web_seed_games_sepolia:
+	@cd web && \
+		mix seed_games ../games/beast/levels/leaderboard_sepolia.json ../games/parity/level_generator/levels/parity_sepolia.json
+
+web_seed_games_mainnet:
+	@cd web && \
+		mix seed_games ../games/beast/levels/leaderboard_mainnet.json ../games/parity/level_generator/levels/parity_mainnet.json
 
 __GAME__:
 play_beast:
@@ -140,7 +151,7 @@ generate_merkle_tree: build_merkle_proof_generator
 add_merkle_root: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
 
-gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db
+gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db web_seed_games_devnet
 	@rm -rf data/inserted_devnet/inserted_*.csv
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \

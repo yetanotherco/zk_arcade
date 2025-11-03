@@ -26,8 +26,10 @@ defmodule ZkArcadeWeb.Router do
 
     get "/proof/verification-data", ProofController, :get_proof_verification_data
     get "/proof/pending", ProofController, :get_pending_proofs_to_bump
+    get "/proof/stop-flag", ProofController, :get_stop_flag
     get "/proof/status/:proof_id", ProofController, :get_proof_status
     get "/proof/:proof_id", ProofController, :get_proof_submission
+    post "/proof/invalidate/:proof_id", ProofController, :invalidate_proof_submission
     post "/proof/", ProofController, :submit
     post "/proof/status/submitted", ProofController, :mark_proof_as_submitted_to_leaderboard
     post "/proof/status/retry", ProofController, :retry_submit_proof
@@ -39,6 +41,10 @@ defmodule ZkArcadeWeb.Router do
     get "/api/ethprice", ApiController, :get_eth_price
     get "/api/nft/proof", ApiController, :get_nft_claim_merkle_proof
     get "/api/nft/eligibility", ApiController, :get_nft_eligibility
+    get "/api/games/beast/current", BeastGamesController, :current
+    get "/api/games/beast/:index", BeastGamesController, :by_index
+    get "/api/games/parity/current", ParityGamesController, :current
+    get "/api/games/parity/:index", ParityGamesController, :by_index
     post "/api/telemetry/error", TelemetryApiController, :log_error
   end
 

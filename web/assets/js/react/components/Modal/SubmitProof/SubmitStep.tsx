@@ -26,6 +26,7 @@ import { BumpFeeModal } from "../../Modal/BumpFee";
 import { ProgressBar } from "../../ProgressBar";
 import { usePendingProofsToBump } from "../../../hooks/usePendingProofsToBump";
 import { SocialLinks } from "../../SocialLinks";
+import { useProofStopFlag } from "../../../hooks/useProofStopFlag";
 
 type Game = {
 	id: "beast" | string;
@@ -55,11 +56,13 @@ function parsePublicInputs(inputs: Uint8Array) {
 
 	const levelBytes = inputs.slice(0, 32);
 	const gameBytes = inputs.slice(32, 64);
+	const submittedAddressBytes = inputs.slice(64, 96);
 
 	const level = (levelBytes[30] << 8) + levelBytes[31];
 	const game_config = Buffer.from(gameBytes).toString("hex");
+	const submittedAddress = Buffer.from(submittedAddressBytes).toString("hex");
 
-	return { level, game_config };
+	return { level, game_config, submittedAddress };
 }
 
 export const SubmitProofStep = ({
@@ -98,6 +101,7 @@ export const SubmitProofStep = ({
 	const chainId = useChainId();
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
+	const { stop } = useProofStopFlag();
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
@@ -114,10 +118,8 @@ export const SubmitProofStep = ({
 		batcher_url,
 		user_address
 	);
-	const { maxFee: latestMaxFee, isLoading: previousMaxFeeLoading } = useBatcherMaxFee(
-		batcher_url,
-		user_address
-	);
+	const { maxFee: latestMaxFee, isLoading: previousMaxFeeLoading } =
+		useBatcherMaxFee(batcher_url, user_address);
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
 	const [gameIdx, setGameIdx] = useState(initialGameIdx);
@@ -162,9 +164,10 @@ export const SubmitProofStep = ({
 			const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
 			if (!estimatedMaxFee) return;
 
-			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
-				? latestMaxFee
-				: estimatedMaxFee;
+			const maxFee =
+				latestMaxFee && latestMaxFee < estimatedMaxFee
+					? latestMaxFee
+					: estimatedMaxFee;
 
 			setMaxFee(maxFee);
 		};
@@ -209,6 +212,16 @@ export const SubmitProofStep = ({
 			});
 			return;
 		}
+
+		if (parsed.submittedAddress !== user_address.slice(2).padStart(64, "0")) {
+			addToast({
+				title: "Wrong address",
+				desc: "The proof address does not match your connected address",
+				type: "error",
+			});
+			return;
+		}
+
 		setParsedPublicInputs(parsed);
 
 		const parsedGameConfigBigInt = BigInt("0x" + parsed.game_config);
@@ -256,6 +269,15 @@ export const SubmitProofStep = ({
 			return;
 		}
 
+		if (parsed.submittedAddress !== user_address.slice(2).padStart(64, "0")) {
+			addToast({
+				title: "Wrong address",
+				desc: "The proof address does not match your connected address",
+				type: "error",
+			});
+			return;
+		}
+
 		// This value should be capped by the previous proof max fee
 		const estimatedMaxFee = await estimateMaxFeeForBatchOfProofs(16);
 		if (!estimatedMaxFee) {
@@ -263,9 +285,10 @@ export const SubmitProofStep = ({
 			return;
 		}
 
-		const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
-			? latestMaxFee
-			: estimatedMaxFee;
+		const maxFee =
+			latestMaxFee && latestMaxFee < estimatedMaxFee
+				? latestMaxFee
+				: estimatedMaxFee;
 
 		if (nonce == null) {
 			alert("Nonce is still loading or failed");
@@ -330,9 +353,10 @@ export const SubmitProofStep = ({
 				alert("Could not estimate max fee");
 				return;
 			}
-			const maxFee = latestMaxFee && latestMaxFee < estimatedMaxFee
-				? latestMaxFee
-				: estimatedMaxFee;
+			const maxFee =
+				latestMaxFee && latestMaxFee < estimatedMaxFee
+					? latestMaxFee
+					: estimatedMaxFee;
 
 			if (nonce == null) {
 				alert("Nonce is still loading or failed");
@@ -603,6 +627,13 @@ export const SubmitProofStep = ({
 						</p>
 					)}
 
+					{stop && (
+						<p className="text-yellow">
+							Submissions are temporarily stopped for maintenance.
+							Come back in a few minutes.
+						</p>
+					)}
+
 					{levelAlreadyReached && (
 						<p className="text-red">
 							You have already submitted a proof with a higher level
@@ -671,7 +702,8 @@ export const SubmitProofStep = ({
 							nonceLoading ||
 							previousMaxFeeLoading ||
 							nonce == null ||
-							levelAlreadyReached
+							levelAlreadyReached ||
+							stop
 						}
 						isLoading={submissionIsLoading}
 						onClick={handleSubmission}
@@ -686,7 +718,8 @@ export const SubmitProofStep = ({
 							nonceLoading ||
 							previousMaxFeeLoading ||
 							nonce == null ||
-							levelAlreadyReached
+							levelAlreadyReached ||
+							stop
 						}
 						isLoading={submissionIsLoading}
 						onClick={() => handleSend(proofToSubmitData)}

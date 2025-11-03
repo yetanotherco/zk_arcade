@@ -4,10 +4,11 @@ import {
 	useWaitForTransactionReceipt,
 	useWriteContract,
 } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
 import { Address } from "../types/blockchain";
 import { leaderboardAbi } from "../constants/aligned";
 import { bytesToHex, encodeAbiParameters, keccak256 } from "viem";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { ProofSubmission } from "../types/aligned";
 import {
 	computeVerificationDataCommitment,
@@ -43,28 +44,62 @@ export const useParityLeaderboardContract = ({
 		setSubmitSolutionFetchingVDataIsLoading,
 	] = useState(false);
 
-	const currentGame = useReadContract({
-		address: contractAddress,
-		abi: leaderboardAbi,
-		functionName: "getCurrentParityGame",
-		args: [],
-		chainId,
+	const currentGameApi = useQuery({
+		queryKey: ["parity-game", "current"],
+		queryFn: async () => {
+			const response = await fetch("/api/games/parity/current");
+			if (response.status === 404) {
+				return null;
+			}
+			if (!response.ok) {
+				throw new Error("Failed to fetch current Parity game");
+			}
+			return response.json();
+		},
+		refetchInterval: 30000,
 	});
 
+	const currentGame = useMemo(() => ({
+		data: currentGameApi.data ? [
+			{
+				gameConfig: currentGameApi.data.game_config,
+				startsAtTime: BigInt(new Date(currentGameApi.data.starts_at).getTime() / 1000),
+				endsAtTime: BigInt(new Date(currentGameApi.data.ends_at).getTime() / 1000),
+			},
+			BigInt(currentGameApi.data.game_index)
+		] : null,
+		isLoading: currentGameApi.isLoading,
+		error: currentGameApi.error,
+	}), [currentGameApi.data, currentGameApi.isLoading, currentGameApi.error]);
+
 	// Used to calculate the time remaining for the current game
-	const nextGame = useReadContract({
-		address: contractAddress,
-		abi: leaderboardAbi,
-		functionName: "parityGames",
-		args: [
-			currentGame.data
-				? currentGame.data[1] === 0
-					? 0
-					: currentGame.data[1] + 1n
-				: -1,
-		],
-		chainId,
+	const nextGameApi = useQuery({
+		queryKey: ["parity-game", "next", currentGameApi.data?.game_index],
+		queryFn: async () => {
+			if (!currentGameApi.data) return null;
+			const nextIndex = currentGameApi.data.game_index + 1;
+			const response = await fetch(`/api/games/parity/${nextIndex}`);
+			if (response.status === 404) {
+				return null;
+			}
+			if (!response.ok) {
+				throw new Error("Failed to fetch next Parity game");
+			}
+			return response.json();
+		},
+		enabled: !!currentGameApi.data,
+		refetchInterval: 30000,
 	});
+
+	const nextGame = useMemo(() => ({
+		data: nextGameApi.data ? {
+			gameConfig: nextGameApi.data.game_config,
+			startsAtTime: BigInt(new Date(nextGameApi.data.starts_at).getTime() / 1000),
+			endsAtTime: BigInt(new Date(nextGameApi.data.ends_at).getTime() / 1000),
+		} : null,
+		isLoading: nextGameApi.isLoading,
+		error: nextGameApi.error,
+	}), [nextGameApi.data, nextGameApi.isLoading, nextGameApi.error]);
 
 	const currentGameLevelCompleted = useReadContract({
 		address: contractAddress,
@@ -180,8 +215,7 @@ export const useParityLeaderboardContract = ({
 			...currentGame,
 			game: currentGame.data ? currentGame.data[0] : null,
 			gameIdx: currentGame.data ? currentGame.data[1] : null,
-			gamesHaveFinished:
-				currentGame.error?.message?.includes("NoActiveParityGame"),
+			gamesHaveFinished: currentGameApi.data === null && !currentGameApi.isLoading,
 		},
 		submitSolution: {
 			claimParityPoints,

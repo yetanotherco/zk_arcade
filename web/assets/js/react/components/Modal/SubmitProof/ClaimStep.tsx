@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../../Button";
 import { ProofSubmission } from "../../../types/aligned";
 import { useBeastLeaderboardContract } from "../../../hooks";
@@ -8,12 +8,14 @@ import { useParityLeaderboardContract } from "../../../hooks/useParityLeaderboar
 import { useChainId, useReadContract } from "wagmi";
 import { leaderboardAbi } from "../../../constants/aligned";
 import { SocialLinks } from "../../SocialLinks";
+import { Modal } from "..";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
 	proofSubmission: ProofSubmission;
 	proofStatus: ProofSubmission["status"];
 	handleClaim: () => void;
+	beforeInvalidating?: () => void;
 	onCancel: () => void;
 	isLoading: boolean;
 	claimTxHash: string;
@@ -30,6 +32,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 			proofStatus,
 			proofSubmission,
 			handleClaim,
+			beforeInvalidating,
 			onCancel,
 			isLoading,
 			claimTxHash,
@@ -41,6 +44,16 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 		formRef
 	) => {
 		const { csrfToken } = useCSRFToken();
+		const [isInvalidating, setIsInvalidating] = useState(false);
+		const [showInvalidateConfirm, setShowInvalidateConfirm] =
+			useState(false);
+		const invalidateFormRef = useRef<HTMLFormElement>(null);
+		const handleInvalidate = () => {
+			if (isInvalidating) return;
+			setIsInvalidating(true);
+			beforeInvalidating && beforeInvalidating();
+			invalidateFormRef.current?.submit();
+		};
 		const showExpiryInfo =
 			!gameHasExpired &&
 			proofStatus === "verified" &&
@@ -58,13 +71,19 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						transaction from your wallet.
 					</p>
 				)}
-				{(gameHasExpired && !contractCallIsLoading) && (
+				{gameHasExpired && !contractCallIsLoading && (
 					<p className="bg-red/20 rounded p-2 text-red">
 						Claim window expired. You can't claim these points
 						anymore.
 					</p>
 				)}
-				{(contractCallIsLoading) && (
+				{proofStatus === "invalidated" && (
+					<p className="bg-red/20 rounded p-2 text-red">
+						This proof was invalidated. Generate a new proof to
+						claim.
+					</p>
+				)}
+				{contractCallIsLoading && (
 					<p className="bg-contrast-200 rounded p-2 text-text-200">
 						Loading claim information. Please wait...
 					</p>
@@ -81,14 +100,17 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 					</div>
 				)}
 
-				{!canClaim && !gameHasExpired && proofStatus !== "claimed" && (
-					<div className="rounded border border-contrast-100/40 bg-black/60 px-4 py-3">
-						<p className="text-sm text-text-200 text-center mb-2">
-							We're still verifying your proof. Stay tuned on our
-							channels for the latest status updates.
-						</p>
-					</div>
-				)}
+				{!canClaim &&
+					!gameHasExpired &&
+					proofStatus !== "claimed" &&
+					proofStatus !== "invalidated" && (
+						<div className="rounded border border-contrast-100/40 bg-black/60 px-4 py-3">
+							<p className="text-sm text-text-200 text-center mb-2">
+								We're still verifying your proof. Stay tuned on
+								our channels for the latest status updates.
+							</p>
+						</div>
+					)}
 				<SocialLinks className="text-xs text-text-300" />
 
 				<div className="flex flex-col gap-2">
@@ -108,20 +130,58 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 				>
 					Go to leaderboard
 				</a>
-				<div className="self-end">
-					<Button variant="text" className="mr-10" onClick={onCancel}>
-						Cancel
-					</Button>
-					<Button
-						variant="accent-fill"
-						onClick={handleClaim}
-						isLoading={isLoading}
-						disabled={gameHasExpired && proofStatus !== "claimed"}
-					>
-						{proofStatus === "claimed"
-							? "Share on twitter"
-							: "Claim"}
-					</Button>
+				<div className="flex w-full align-center">
+					{proofStatus === "verified" && (
+						<div className="relative inline-flex items-center pr-10 group">
+							<Button
+								variant="text"
+								className="text-red hover:underline transition-colors text-sm flex items-center gap-1"
+								isLoading={isInvalidating}
+								disabled={isInvalidating}
+								onClick={() => setShowInvalidateConfirm(true)}
+							>
+								Reset
+							</Button>
+							<div className="pointer-events-none group-hover:pointer-events-auto absolute bottom-full left-0 group-focus-within:pointer-events-auto">
+								<div className="px-3 pb-2 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 shadow-lg ring-1 ring-white/10 min-w-[280px] max-w-[360px]">
+									<p>
+										If your claim is stuck or failing, reset
+										to play again and generate a new proof.{" "}
+										<span
+											className="text-accent-100 cursor-pointer hover:underline"
+											onClick={() =>
+												(window.location.href = "/#faq")
+											}
+										>
+											Help
+										</span>
+									</p>
+								</div>
+							</div>
+						</div>
+					)}
+					<div className="w-full flex justify-end align-center">
+						<Button
+							variant="text"
+							className="mr-10"
+							onClick={onCancel}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="accent-fill"
+							onClick={handleClaim}
+							isLoading={isLoading}
+							disabled={
+								(gameHasExpired && proofStatus !== "claimed") ||
+								proofStatus === "invalidated"
+							}
+						>
+							{proofStatus === "claimed"
+								? "Share on twitter"
+								: "Claim"}
+						</Button>
+					</div>
 				</div>
 				<form
 					className="hidden"
@@ -141,6 +201,52 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 						value={claimTxHash}
 					/>
 				</form>
+				<form
+					className="hidden"
+					ref={invalidateFormRef}
+					action={`/proof/invalidate/${encodeURIComponent(
+						String(proofSubmission.id)
+					)}`}
+					method="POST"
+				>
+					<input type="hidden" name="_csrf_token" value={csrfToken} />
+				</form>
+
+				<Modal
+					open={showInvalidateConfirm}
+					setOpen={setShowInvalidateConfirm}
+					maxWidth={520}
+				>
+					<div className="bg-contrast-100 w-full p-6 rounded">
+						<h3 className="text-xl mb-4 text-center">
+							Are you sure?
+						</h3>
+						<p className="text-text-200 mb-6">
+							Resetting will discard the proof so you can play
+							again and generate a new proof.
+						</p>
+						<div className="flex justify-end">
+							<Button
+								variant="text"
+								className="mr-10"
+								onClick={() => setShowInvalidateConfirm(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant="accent-fill"
+								isLoading={isInvalidating}
+								disabled={isInvalidating}
+								onClick={() => {
+									setShowInvalidateConfirm(false);
+									handleInvalidate();
+								}}
+							>
+								Yes
+							</Button>
+						</div>
+					</div>
+				</Modal>
 			</div>
 		);
 	}
@@ -268,6 +374,11 @@ const ParityClaim = ({
 		await submitSolution.claimParityPoints(proofSubmission);
 	};
 
+	// clean parity
+	const beforeInvalidating = () => {
+		localStorage.setItem("parity-game-data", "{}");
+	};
+
 	useEffect(() => {
 		if (submitSolution.receipt.isSuccess) {
 			window.setTimeout(() => {
@@ -293,6 +404,7 @@ const ParityClaim = ({
 			claimExpiryUtc={claimExpiryUtc}
 			pointsToClaimConstantMultiplication={28000}
 			contractCallIsLoading={claimGame.isLoading}
+			beforeInvalidating={beforeInvalidating}
 		/>
 	);
 };

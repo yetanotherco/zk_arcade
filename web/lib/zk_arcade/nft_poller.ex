@@ -83,7 +83,7 @@ defmodule ZkArcade.NftPoller do
     end
   end
 
-  defp fetch_logs(contract_address, from_block, to_block) do
+  def fetch_logs(contract_address, from_block, to_block) do
     filter = %{
       address: contract_address,
       fromBlock: integer_to_hex(from_block),

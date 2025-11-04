@@ -4,7 +4,6 @@ use crate::levels::get_game_levels;
 use crate::{
     ethereum,
     help::Help,
-    // risc0_prover::{prove as risc0_prove, save_proof as risc0_save_proof},
     sp1_prover::{prove as sp1_prove, save_proof as sp1_save_proof},
     stty::{install_raw_mode_signal_handler, RawMode},
 };
@@ -39,7 +38,6 @@ pub const ANSI_FOOTER_HEIGHT: usize = 2;
 const TICK_DURATION: Duration = Duration::from_millis(200);
 
 const SP1: &str = "SP1";
-// const RISC0: &str = "Risc0"; // Risc0 is disabled
 
 /// we need the [Beat] to count down when we call the beast advance methods and for animations
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -128,7 +126,6 @@ impl Game {
     pub fn new() -> Self {
         let address = ethereum::read_address();
 
-        // let items = vec![SP1, RISC0];
 
         // let proving_systems = loop {
         //     let selection = MultiSelect::new()
@@ -148,7 +145,7 @@ impl Game {
         //
         //     eprintln!("You must select at least one proving system. Please try again.");
         // };
-        let proving_systems = vec![SP1.to_string()]; // RISC0 is disabled for now
+        let proving_systems = vec![SP1.to_string()];
 
         let block_timestamp = ethereum::get_current_block_timestamp()
             .expect("Could not get block timestamp from rpc");
@@ -585,7 +582,6 @@ impl Game {
         );
 
         let mut sp1_res: Result<String, _> = Err("SP1 not used".to_string());
-        // let mut risc0_res: Result<String, _> = Err("RISC0 not used".to_string());
 
         if self.proving_systems.contains(&SP1.to_string()) {
             // If it hasn't won, then don't include the last level as it wasn't completed
@@ -610,27 +606,6 @@ impl Game {
             sp1_res = sp1_handle.join().map_err(|_| "SP1 proving failed".to_string());
         }
 
-        // if self.proving_systems.contains(&RISC0.to_string()) {
-        //     let risc0_levels_completion_log = if self.has_won {
-        //         self.levels_completion_log.clone()
-        //     } else {
-        //         let mut levels_log = self.levels_completion_log.clone();
-        //         levels_log.pop();
-        //         levels_log
-        //     };
-        //     let risc0_address = self.address.clone();
-        //     let levels = self.game_match.get_levels_in_json();
-        //
-        //     let risc0_handle = thread::spawn(move || {
-        //         let res = risc0_prove(risc0_levels_completion_log, levels, risc0_address);
-        //         if let Ok(receipt) = res {
-        //             risc0_save_proof(receipt).expect("To be able to write proof")
-        //         } else {
-        //             panic!("Could prove program")
-        //         }
-        //     });
-        //     risc0_res = risc0_handle.join().map_err(|_| "RISC0 proving failed".to_string());
-        // }
 
         let _ = proving_alert_handle.join();
 

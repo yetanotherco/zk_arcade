@@ -49,6 +49,7 @@ defmodule ZkArcade.NftPoller do
       true ->
         with {:ok, latest_hex} <- Ethereumex.HttpClient.eth_block_number(url: rpc_url),
              latest_block <- hex_to_integer(latest_hex) do
+          from_block = max(from_block - 10, 0)
           process_range(contract_address, from_block, latest_block, state)
         else
           error ->

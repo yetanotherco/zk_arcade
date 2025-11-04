@@ -10,14 +10,17 @@ BEAST_BIN_DIR="$BEAST_DIR/bin"
 BEAST_BIN_PATH="$BEAST_BIN_DIR/beast"
 CURRENT_VERSION="v1_0_1"
 RELEASE_URL="https://downloads.zkarcade.com/$CURRENT_VERSION/"
+OS=$(uname -s)
 ARCH=$(uname -m)
 
-if [ "$ARCH" == "x86_64" ]; then
+if [ "$OS" == "Linux" ] && [ "$ARCH" == "x86_64" ]; then
     FILE="beast_x86"
-elif [ "$ARCH" == "arm64" ]; then
+elif [ "$OS" == "Darwin" ] && [ "$ARCH" == "arm64" ]; then
     FILE="beast_arm64"
+elif [ "$OS" == "Darwin" ] && [ "$ARCH" == "x86_64" ]; then
+    FILE="beast_macos_x86"
 else
-    echo "Unsupported architecture: $ARCH"
+    echo "Unsupported OS/architecture combination: $OS/$ARCH"
     exit 1
 fi
 

@@ -14,14 +14,17 @@ CURRENT_TAG=$(curl -s -L \
   https://api.github.com/repos/yetanotherco/zk_arcade/releases/latest \
   | grep '"tag_name":' | awk -F'"' '{print $4}')
 RELEASE_URL="https://github.com/yetanotherco/zk_arcade/releases/download/$CURRENT_TAG/"
+OS=$(uname -s)
 ARCH=$(uname -m)
 
-if [ "$ARCH" == "x86_64" ]; then
-    FILE="beast_sepolia_x86"
-elif [ "$ARCH" == "arm64" ]; then
-    FILE="beast_sepolia_arm64"
+if [ "$OS" == "Linux" ] && [ "$ARCH" == "x86_64" ]; then
+    FILE="beast_x86"
+elif [ "$OS" == "Darwin" ] && [ "$ARCH" == "arm64" ]; then
+    FILE="beast_arm64"
+elif [ "$OS" == "Darwin" ] && [ "$ARCH" == "x86_64" ]; then
+    FILE="beast_macos_x86"
 else
-    echo "Unsupported architecture: $ARCH"
+    echo "Unsupported OS/architecture combination: $OS/$ARCH"
     exit 1
 fi
 

@@ -126,25 +126,6 @@ impl Game {
     pub fn new() -> Self {
         let address = ethereum::read_address();
 
-
-        // let proving_systems = loop {
-        //     let selection = MultiSelect::new()
-        //         .with_prompt(
-        //             "Choose proving systems to use\n(Press [SPACE] to select, [ENTER] to confirm)",
-        //         )
-        //         .items(&items)
-        //         .interact()
-        //         .unwrap();
-        //
-        //     if !selection.is_empty() {
-        //         break selection
-        //             .into_iter()
-        //             .map(|i| items[i].to_string())
-        //             .collect::<Vec<String>>();
-        //     }
-        //
-        //     eprintln!("You must select at least one proving system. Please try again.");
-        // };
         let proving_systems = vec![SP1.to_string()];
 
         let block_timestamp = ethereum::get_current_block_timestamp()

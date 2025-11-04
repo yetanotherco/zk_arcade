@@ -11,7 +11,6 @@ pub mod aligned_client;
 pub mod game;
 pub mod help;
 pub mod sp1_prover;
-pub mod risc0_prover;
 pub mod start;
 pub mod stty;
 mod ethereum;

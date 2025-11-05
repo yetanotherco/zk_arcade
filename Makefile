@@ -199,6 +199,9 @@ upgrade_contract: submodules
 upgrade_nft_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_nft_contract.sh
 
+upgrade_public_nft_contract: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_public_nft_contract.sh
+
 set_beast_games: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/set_beast_games.sh
 

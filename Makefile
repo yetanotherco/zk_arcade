@@ -142,8 +142,11 @@ update_public_nft_address: ## Set the Public NFT contract address in web config 
 
 __CONTRACTS__:
 
-deploy_nft_contracts: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_nft_contracts.sh
+deploy_nft_contract: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_nft_contract.sh
+
+deploy_public_nft_contract: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_public_nft_contract.sh
 
 deploy_leaderboard_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_leaderboard_contract.sh
@@ -160,6 +163,10 @@ add_merkle_root: submodules
 add_merkle_root_public: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root_public.sh "$(MERKLE_ROOT_INDEX)" "$(PUBLIC_NFT_OUTPUT_PATH)"
 
+enable_minting_public_nft_devnet: submodules
+	@. contracts/scripts/.devnet.env && \
+	cast send $$(jq -r '.addresses.proxy' contracts/script/output/devnet/public_nft.json) "enableMinting()" --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
 gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db web_seed_games_devnet
 	@rm -rf data/inserted_devnet/inserted_*.csv
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
@@ -168,7 +175,9 @@ gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen
 	@jq ".parityGames = $$(jq '.games' games/parity/level_generator/levels/parity_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
-	@$(MAKE) deploy_nft_contracts NETWORK=devnet
+	@$(MAKE) deploy_nft_contract NETWORK=devnet
+	@$(MAKE) deploy_public_nft_contract NETWORK=devnet
+	@$(MAKE) enable_minting_public_nft_devnet
 	@jq ".zkArcadeNftContract = \"$$(jq -r '.addresses.proxy' contracts/script/output/devnet/nft.json)\"" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json

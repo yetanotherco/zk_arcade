@@ -15,6 +15,7 @@ import { MuteBackgroundBtn } from "./modules/BackgroundMusic/MuteBtn";
 import NFTList from "./modules/History/NFTList";
 import { Mint } from "./modules/Mint";
 import HomeNextGamesTimer from "./modules/HomeNextGameTimer";
+import { BuyNft } from "./modules/BuyNft";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -187,5 +188,17 @@ define(
 	{ "x-app-home-next-games-timer": HomeNextGamesTimer },
 	{
 		attributes: ["network", "leaderboard_address"],
+	}
+);
+
+define(
+	{ "x-app-buy-nft": BuyNft },
+	{
+		attributes: [
+			"network",
+			"nft_contract_address",
+			"second_nft_contract_address",
+			"is_eligible_for_discount",
+		],
 	}
 );

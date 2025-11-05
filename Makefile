@@ -151,24 +151,13 @@ deploy_public_nft_contract: submodules
 deploy_leaderboard_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_leaderboard_contract.sh
 
-build_merkle_proof_generator:
-	cd merkle_tree && cargo build --release
-
-generate_merkle_tree: build_merkle_proof_generator
-	@./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) $(OUTPUT_FILE) $(MERKLE_ROOT_INDEX) $(INSERTED_DIRECTORY)
-
-add_merkle_root: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
-
-add_merkle_root_public: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root_public.sh "$(MERKLE_ROOT_INDEX)" "$(PUBLIC_NFT_OUTPUT_PATH)"
-
 enable_minting_public_nft_devnet: submodules
 	@. contracts/scripts/.devnet.env && \
 	cast send $$(jq -r '.addresses.proxy' contracts/script/output/devnet/public_nft.json) "enableMinting()" --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
 gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db web_seed_games_devnet
-	@rm -rf data/inserted_devnet/inserted_*.csv
+	@rm -rf data/exclusive/inserted_devnet/inserted_*.csv
+	@rm -rf data/discount/inserted_devnet/inserted_*.csv
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
@@ -188,8 +177,10 @@ gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen
 	@$(MAKE) update_leaderboard_address
 	@$(MAKE) update_nft_address
 	@$(MAKE) update_public_nft_address
-	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/inserted_devnet
-	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./data/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/inserted_devnet
+	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/exclusive/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/exclusive/inserted_devnet
+	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/discount/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/discount/inserted_devnet
+	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./data/exclusive/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/exclusive/inserted_devnet
+	@$(MAKE) generate_merkle_tree_public WHITELIST_PATH=./data/discount/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_public_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/discount/inserted_devnet
 	@$(MAKE) add_merkle_root NETWORK=devnet
 	@$(MAKE) add_merkle_root_public NETWORK=devnet
 
@@ -211,11 +202,27 @@ set_parity_games:
 __WHITELIST__:
 
 # This path is relative to the project root
-WHITELIST_PATH?=merkle_tree/whitelist.json
-INSERTED_DIRECTORY?=data/inserted
+WHITELIST_PATH?=data/exclusive/new_addresses.csv
+INSERTED_DIRECTORY?=data/exclusive/inserted
 
 preprocess_whitelist:
 	pip3 install -r data/requirements.txt && python3 data/preprocess_addresses.py $(WHITELIST_PATH) $(INSERTED_DIRECTORY)
+
+build_merkle_proof_generator:
+	cd merkle_tree && cargo build --release
+
+generate_merkle_tree: build_merkle_proof_generator
+	@./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) $(OUTPUT_FILE) $(MERKLE_ROOT_INDEX) $(INSERTED_DIRECTORY)
+
+generate_merkle_tree_public: build_merkle_proof_generator
+	@./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) $(OUTPUT_FILE) $(MERKLE_ROOT_INDEX) $(INSERTED_DIRECTORY)
+
+add_merkle_root: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
+
+add_merkle_root_public: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root_public.sh "$(MERKLE_ROOT_INDEX)" "$(PUBLIC_NFT_OUTPUT_PATH)"
+
 
 __INFRA__: ## ____
 ## Initial Setup

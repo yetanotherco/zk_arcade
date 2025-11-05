@@ -67,10 +67,6 @@ defmodule ZkArcade.PrometheusMetrics do
     Counter.inc([name: counter_name, labels: [normalize_label(label)]])
   end
 
-  defp increment_gauge_with_label(counter_name, label) do
-    Gauge.inc([name: counter_name, labels: [normalize_label(label)]])
-  end
-
   defp normalize_label(label) when is_atom(label), do: Atom.to_string(label)
   defp normalize_label(label) when is_binary(label), do: label
   defp normalize_label(label), do: inspect(label)

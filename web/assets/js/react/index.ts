@@ -89,6 +89,7 @@ define(
 			"payment_service_address",
 			"user_address",
 			"nft_contract_address",
+			"second_nft_contract_address",
 			"is_eligible",
 		],
 	}

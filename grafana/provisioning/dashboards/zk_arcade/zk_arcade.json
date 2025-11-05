@@ -973,12 +973,124 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "id": 27,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "floor(sum(increase(game_claims_by_index{job=\"zk_arcade\", game_type=\"Parity\"}[10y])))",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Parity",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "floor(sum(increase(game_claims_by_index{job=\"zk_arcade\", game_type=\"Beast\"}[10y])))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Beast",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Claims by Game",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "",
       "gridPos": {
         "h": 2,
         "w": 22,
         "x": 0,
-        "y": 22
+        "y": 30
       },
       "id": 11,
       "options": {
@@ -1024,7 +1136,7 @@
         "h": 6,
         "w": 3,
         "x": 0,
-        "y": 24
+        "y": 32
       },
       "id": 15,
       "options": {
@@ -1114,7 +1226,7 @@
         "h": 6,
         "w": 3,
         "x": 3,
-        "y": 24
+        "y": 32
       },
       "id": 16,
       "options": {
@@ -1204,7 +1316,7 @@
         "h": 6,
         "w": 3,
         "x": 6,
-        "y": 24
+        "y": 32
       },
       "id": 17,
       "options": {
@@ -1294,7 +1406,7 @@
         "h": 6,
         "w": 3,
         "x": 9,
-        "y": 24
+        "y": 32
       },
       "id": 18,
       "options": {
@@ -1362,7 +1474,7 @@
         "h": 2,
         "w": 22,
         "x": 0,
-        "y": 30
+        "y": 38
       },
       "id": 14,
       "options": {
@@ -1399,8 +1511,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           }
@@ -1411,7 +1522,7 @@
         "h": 13,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 40
       },
       "id": 9,
       "options": {
@@ -1558,8 +1669,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           }
@@ -1583,7 +1693,7 @@
         "h": 13,
         "w": 7,
         "x": 12,
-        "y": 32
+        "y": 40
       },
       "id": 10,
       "options": {
@@ -1643,7 +1753,7 @@
         "h": 2,
         "w": 22,
         "x": 0,
-        "y": 45
+        "y": 53
       },
       "id": 7,
       "options": {
@@ -1673,8 +1783,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1689,7 +1798,7 @@
         "h": 7,
         "w": 3,
         "x": 0,
-        "y": 47
+        "y": 55
       },
       "id": 24,
       "options": {
@@ -1755,8 +1864,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1771,7 +1879,7 @@
         "h": 7,
         "w": 3,
         "x": 3,
-        "y": 47
+        "y": 55
       },
       "id": 25,
       "options": {
@@ -1844,8 +1952,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1860,7 +1967,7 @@
         "h": 7,
         "w": 13,
         "x": 6,
-        "y": 47
+        "y": 55
       },
       "id": 26,
       "options": {
@@ -1956,8 +2063,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1972,7 +2078,7 @@
         "h": 13,
         "w": 19,
         "x": 0,
-        "y": 54
+        "y": 62
       },
       "id": 5,
       "options": {
@@ -2021,13 +2127,13 @@
     "list": []
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "ZK Arcade",
   "uid": "ec4ebfb9-8757-4fde-9b2b-99917dc9b706",
-  "version": 26,
+  "version": 32,
   "weekStart": ""
 }

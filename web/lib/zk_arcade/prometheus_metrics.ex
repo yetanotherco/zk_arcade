@@ -17,7 +17,7 @@ defmodule ZkArcade.PrometheusMetrics do
     Gauge.declare(
       name: :game_claims_by_index,
       help: "Game claims by game type and index",
-      labels: [:game_type_index]
+      labels: [:game_type, :game_index]
     )
 
     # Summary.declare(
@@ -60,8 +60,7 @@ defmodule ZkArcade.PrometheusMetrics do
   end
 
   def record_game_claim(game_type, game_index) do
-    game_type_index = "#{game_type}_#{game_index}"
-    increment_gauge_with_label(:game_claims_by_index, game_type_index)
+    Gauge.inc([name: :game_claims_by_index, labels: [normalize_label(game_type), normalize_label(game_index)]])
   end
 
   defp increment_with_label(counter_name, label) do
@@ -85,14 +84,12 @@ defmodule ZkArcade.PrometheusMetrics do
 
     # Initialize Beast game counters
     for index <- 0..(beast_count - 1) do
-      game_type_index = "Beast_#{index}"
-      Gauge.set([name: :game_claims_by_index, labels: [game_type_index]], 0)
+      Gauge.set([name: :game_claims_by_index, labels: ["Beast", "#{index}"]], 0)
     end
 
     # Initialize Parity game counters
     for index <- 0..(parity_count - 1) do
-      game_type_index = "Parity_#{index}"
-      Gauge.set([name: :game_claims_by_index, labels: [game_type_index]], 0)
+      Gauge.set([name: :game_claims_by_index, labels: ["Parity", "#{index}"]], 0)
     end
   end
 end

@@ -53,3 +53,6 @@ nft_contract_proxy=$(jq -r '.addresses.proxy' $PUBLIC_NFT_OUTPUT_PATH)
 echo "NFT Contract Proxy Address: $nft_contract_proxy"
 nft_contract_implementation=$(jq -r '.addresses.implementation' $PUBLIC_NFT_OUTPUT_PATH)
 echo "NFT Contract Implementation Address: $nft_contract_implementation"
+
+# Call enableMinting on Public NFT Contract to enable public minting
+cast send $nft_contract_proxy "enableMinting()" --rpc-url $RPC_URL --private-key $DEPLOYER_PRIVATE_KEY

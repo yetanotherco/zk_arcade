@@ -51,7 +51,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         __Ownable_init(owner);
         _baseTokenURI = baseURI;
         maxSupply = _maxSupply;
-        mintingEnabled = true;
+        mintingEnabled = false;
         transfersEnabled = false;
     }
 

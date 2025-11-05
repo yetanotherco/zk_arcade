@@ -199,6 +199,7 @@ define(
 			"nft_contract_address",
 			"second_nft_contract_address",
 			"is_eligible_for_discount",
+			"user_address",
 		],
 	}
 );

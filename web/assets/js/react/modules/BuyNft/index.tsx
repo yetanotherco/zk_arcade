@@ -8,6 +8,7 @@ import { Button } from "../../components";
 import { useNftContract } from "../../hooks/useNftContract";
 import { useToast } from "../../state/toast";
 import { useSecondNftContract } from "../../hooks/useSecondNftContract";
+import { NftSuccessModal } from "../../components/Modal";
 
 type Props = {
 	nft_contract_address: Address;
@@ -53,6 +54,17 @@ const BuyNftFlow = ({
 	});
 	const alreadyMinted =
 		(primaryHasMinted || secondaryHasMinted) && !!user_address;
+
+	const effectiveDiscount =
+		discount?.data && discountEligibility ? discount.data : 0;
+	const priceIsLoading = nftPrice.isLoading;
+	const stockIsLoading = stockLeft.isLoading || totalSupply.isLoading;
+	const discountedPrice = useMemo(() => {
+		if (nftPrice.data == null) return null;
+		const base = Number(nftPrice.data);
+		const pct = Number(effectiveDiscount || 0);
+		return Math.max(base * (1 - pct / 100), 0);
+	}, [nftPrice.data, effectiveDiscount]);
 
 	// If it elligible for the premium nft, redirect to that page
 	useEffect(() => {
@@ -157,13 +169,28 @@ const BuyNftFlow = ({
 								: "text-text-200"
 						}
 					>
-						{discountEligibility ? "Elligible" : "Not elligible"}
+						{discountEligibility ? "Eligible" : "Not eligible"}
 					</span>
 				</div>
 				<p className="text-sm text-text-200">
-					{discountEligibility
-						? `You are elligible for a ${discount} discount!`
-						: "You aren't elligible for discount but you can still buy it!"}
+					{discountEligibility ? (
+						discount.isLoading ? (
+							<span className="animate-pulse">
+								Checking discount…
+							</span>
+						) : (
+							<>
+								You are eligible for a
+								<span className="text-accent-100 font-semibold">
+									{" "}
+									{discount.data}%{" "}
+								</span>
+								discount!
+							</>
+						)
+					) : (
+						"You aren't eligible for a discount but you can still buy it!"
+					)}
 				</p>
 			</div>
 
@@ -190,15 +217,35 @@ const BuyNftFlow = ({
 					<div className="flex flex-col gap-1">
 						<p className="text-sm text-text-200">
 							Price:{" "}
-							<span className="text-white">
-								{nftPrice.data} ETH
-							</span>
+							{priceIsLoading ? (
+								<span className="animate-pulse">Loading…</span>
+							) : discountEligibility && effectiveDiscount ? (
+								<span className="text-white">
+									<span className="line-through opacity-70 mr-2">
+										{nftPrice.data} ETH
+									</span>
+									<span className="text-accent-100 font-semibold mr-2">
+										-{effectiveDiscount}%
+									</span>
+									<span>
+										{discountedPrice?.toFixed(4)} ETH
+									</span>
+								</span>
+							) : (
+								<span className="text-white">
+									{nftPrice.data} ETH
+								</span>
+							)}
 						</p>
 						<p className="text-sm text-text-200">
 							Stock:{" "}
-							<span className="text-white">
-								{stockLeft.data}/{totalSupply.data}
-							</span>
+							{stockIsLoading ? (
+								<span className="animate-pulse">Loading…</span>
+							) : (
+								<span className="text-white">
+									{stockLeft.data}/{totalSupply.data}
+								</span>
+							)}
 						</p>
 					</div>
 				</div>
@@ -211,6 +258,13 @@ const BuyNftFlow = ({
 					Buy Now
 				</Button>
 			</div>
+
+			<NftSuccessModal
+				open={false}
+				// TODO: set as seen in local storage
+				setOpen={() => {}}
+				nftMetadata={null}
+			/>
 		</div>
 	);
 };

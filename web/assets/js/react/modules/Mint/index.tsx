@@ -52,8 +52,8 @@ const MintClaimSection = ({
 		showSuccessModal,
 		setShowSuccessModal,
 		claimedNftMetadata,
-	 } = usePublicNftContract({
-		contractAddress: publicNftContractAddress,
+	 } = useNftContract({
+		contractAddress: nftContractAddress,
 		userAddress: address,
 	});
 

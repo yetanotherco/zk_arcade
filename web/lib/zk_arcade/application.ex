@@ -31,7 +31,15 @@ defmodule ZkArcade.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: ZkArcade.Supervisor]
-    Supervisor.start_link(children, opts)
+    
+    case Supervisor.start_link(children, opts) do
+      {:ok, pid} ->
+        # Initialize game counters after database is ready
+        Task.start(fn -> ZkArcade.PrometheusMetrics.initialize_game_counters() end)
+        {:ok, pid}
+      error ->
+        error
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration

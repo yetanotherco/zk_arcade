@@ -19,4 +19,10 @@ defmodule ZkArcade.ParityGames do
     |> where([pg], pg.game_index == ^game_index)
     |> Repo.one()
   end
+
+  def get_game_indices_count do
+    ParityGame
+    |> select([pg], count(pg.game_index, :distinct))
+    |> Repo.one()
+  end
 end

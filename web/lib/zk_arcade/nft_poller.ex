@@ -134,9 +134,7 @@ defmodule ZkArcade.NftPoller do
 
   defp maybe_add_token(address, token_id) do
     case Accounts.add_owned_token(address, token_id) do
-      {:ok, _} ->
-        ZkArcade.PrometheusMetrics.increment_nft_mints()
-        :ok
+      {:ok, _} -> :ok
       {:error, reason} -> Logger.warning("Failed to add token #{token_id} for #{address}: #{inspect(reason)}")
     end
   end

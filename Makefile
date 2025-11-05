@@ -134,10 +134,16 @@ update_nft_address: ## Set the NFT contract address in web config for DEV enviro
 		| grep -Eo "0x[0-9a-fA-F]{40}" | head -n1); \
 	sed -E -i '' "s|(^[[:space:]]*config :zk_arcade, :nft_contract_address, \")[^\"]+(\".*)|\1$$addr\2|" "web/config/dev.exs";
 
+update_public_nft_address: ## Set the Public NFT contract address in web config for DEV environment
+	@set -e; \
+	addr=$$(jq -r '(.. | objects | to_entries[]? | select(.key|test("proxy";"i")) | .value) // empty' "contracts/script/output/devnet/public_nft.json" \
+		| grep -Eo "0x[0-9a-fA-F]{40}" | head -n1); \
+	sed -E -i '' "s|(^[[:space:]]*config :zk_arcade, :public_nft_contract_address, \")[^\"]+(\".*)|\1$$addr\2|" "web/config/dev.exs";
+
 __CONTRACTS__:
 
 deploy_nft_contract: submodules
-	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_nft_contract.sh
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_nft_contracts.sh
 
 deploy_leaderboard_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/deploy_leaderboard_contract.sh
@@ -151,6 +157,9 @@ generate_merkle_tree: build_merkle_proof_generator
 add_merkle_root: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root.sh "$(MERKLE_ROOT_INDEX)" "$(OUTPUT_PATH)"
 
+add_merkle_root_public: submodules
+	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/add_merkle_root_public.sh "$(MERKLE_ROOT_INDEX)" "$(PUBLIC_NFT_OUTPUT_PATH)"
+
 gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db web_seed_games_devnet
 	@rm -rf data/inserted_devnet/inserted_*.csv
 	@jq ".games = $$(jq '.games' games/beast/levels/leaderboard_devnet.json)" \
@@ -163,12 +172,17 @@ gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen
 	@jq ".zkArcadeNftContract = \"$$(jq -r '.addresses.proxy' contracts/script/output/devnet/nft.json)\"" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
+	@jq ".publicZkArcadeNftContract = \"$$(jq -r '.addresses.proxy' contracts/script/output/devnet/public_nft.json)\"" \
+		contracts/script/deploy/config/devnet/leaderboard.json \
+		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
 	@$(MAKE) deploy_leaderboard_contract NETWORK=devnet
 	@$(MAKE) update_leaderboard_address
 	@$(MAKE) update_nft_address
+	@$(MAKE) update_public_nft_address
 	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/inserted_devnet
 	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./data/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/inserted_devnet
 	@$(MAKE) add_merkle_root NETWORK=devnet
+	@$(MAKE) add_merkle_root_public NETWORK=devnet
 
 upgrade_contract: submodules
 	@. contracts/scripts/.$(NETWORK).env && . contracts/scripts/upgrade_contract.sh

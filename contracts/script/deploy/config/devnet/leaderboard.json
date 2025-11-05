@@ -111,5 +111,6 @@
       "startsAtTime": "0x0000000000000000000000000000000000000000000000000000000068fccfd3"
     }
   ],
-  "useWhitelist": false
+  "useWhitelist": false,
+  "publicZkArcadeNftContract": "0xCace1b78160AE76398F486c8a18044da0d66d86D"
 }

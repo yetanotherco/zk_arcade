@@ -180,7 +180,7 @@ gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen
 	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/exclusive/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/exclusive/inserted_devnet
 	@$(MAKE) preprocess_whitelist WHITELIST_PATH=data/discount/whitelist_addresses_devnet.csv INSERTED_DIRECTORY=data/discount/inserted_devnet
 	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./data/exclusive/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/exclusive/inserted_devnet
-	@$(MAKE) generate_merkle_tree_public WHITELIST_PATH=./data/discount/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_public_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/discount/inserted_devnet
+	@$(MAKE) generate_merkle_tree WHITELIST_PATH=./data/discount/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output_public_devnet.json MERKLE_ROOT_INDEX=0 INSERTED_DIRECTORY=./data/discount/inserted_devnet
 	@$(MAKE) add_merkle_root NETWORK=devnet
 	@$(MAKE) add_merkle_root_public NETWORK=devnet
 
@@ -212,9 +212,6 @@ build_merkle_proof_generator:
 	cd merkle_tree && cargo build --release
 
 generate_merkle_tree: build_merkle_proof_generator
-	@./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) $(OUTPUT_FILE) $(MERKLE_ROOT_INDEX) $(INSERTED_DIRECTORY)
-
-generate_merkle_tree_public: build_merkle_proof_generator
 	@./merkle_tree/target/release/merkle_tree $(WHITELIST_PATH) $(OUTPUT_FILE) $(MERKLE_ROOT_INDEX) $(INSERTED_DIRECTORY)
 
 add_merkle_root: submodules

@@ -1,0 +1,9 @@
+{
+	"permissions": {
+		"owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	},
+	"name": "ZK Arcade public NFTs",
+	"symbol": "ZKAP",
+    "tokenURI": "ipfs://bafybeihs6wi6iaqtcjnolku63w7w6hxaixftftgdd57jf5gjd2pjn57ht4/",
+    "totalSupply": 10000
+}

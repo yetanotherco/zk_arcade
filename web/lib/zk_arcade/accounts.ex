@@ -195,9 +195,12 @@ defmodule ZkArcade.Accounts do
         if updated_tokens == current_tokens do
           {:ok, wallet}
         else
-          wallet
-          |> Wallet.token_ids_changeset(%{owned_token_ids: updated_tokens})
-          |> Repo.update()
+          case wallet |> Wallet.token_ids_changeset(%{owned_token_ids: updated_tokens}) |> Repo.update() do
+            {:ok, updated_wallet} ->
+              ZkArcade.PrometheusMetrics.increment_nft_mints()
+              {:ok, updated_wallet}
+            {:error, changeset} -> {:error, changeset}
+          end
         end
 
       {:error, :not_found} ->

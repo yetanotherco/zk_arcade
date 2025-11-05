@@ -236,6 +236,7 @@ The goal of the game is to make each number on the board equal.
     |> assign(:network, Application.get_env(:zk_arcade, :network))
     |> assign(:wallet, wallet)
     |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+    |> assign(:public_nft_contract_address, Application.get_env(:zk_arcade, :public_nft_contract_address))
     |> assign(:eligible, eligible)
     |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:username, username)

@@ -27,6 +27,7 @@ import { ProgressBar } from "../../ProgressBar";
 import { usePendingProofsToBump } from "../../../hooks/usePendingProofsToBump";
 import { SocialLinks } from "../../SocialLinks";
 import { useProofStopFlag } from "../../../hooks/useProofStopFlag";
+import { useGasBasedTimeEstimate } from "../../../hooks/useGasBasedTimeEstimate";
 
 type Game = {
 	id: "beast" | string;
@@ -102,6 +103,7 @@ export const SubmitProofStep = ({
 	const { csrfToken } = useCSRFToken();
 	const formRef = useRef<HTMLFormElement>(null);
 	const { stop } = useProofStopFlag();
+	const { getDetailedTimeEstimateText } = useGasBasedTimeEstimate();
 	const [submitProofMessage, setSubmitProofMessage] = useState("");
 	const { estimateMaxFeeForBatchOfProofs, signVerificationData } =
 		useAligned();
@@ -456,7 +458,7 @@ export const SubmitProofStep = ({
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
 						The proof has been submitted to Aligned. Settling your
-						proofs on Ethereum typically takes 5-15 minutes, though
+						proofs on Ethereum typically takes {getDetailedTimeEstimateText()}, though
 						occasionally it takes more time.
 					</p>
 				) : proofStatus === "underpriced" ? (

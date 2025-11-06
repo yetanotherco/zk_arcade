@@ -42,6 +42,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     error AlreadyOwnsNFT();
     error TransfersPaused();
     error ClaimsPaused();
+    error NotEnoughFundsForMinting();
 
     // ======== Initialization & Upgrades ========
 
@@ -100,7 +101,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
         // Check if the user has payed the amount required ($50 or 0.015 ETH) for the NFT
          if (msg.value < discountedPrice) {
-            revert("Not enough money to pay for the NFT");
+            revert NotEnoughFundsForMinting();
         }
 
         // Mark as claimed
@@ -144,7 +145,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
         // Check if the user has payed the amount required ($100 or 0.030 ETH) for the NFT
          if (msg.value < fullPrice) {
-            revert("Not enough money to pay for the NFT");
+            revert NotEnoughFundsForMinting();
         }
 
         // Mark as claimed

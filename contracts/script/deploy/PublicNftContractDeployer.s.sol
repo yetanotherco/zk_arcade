@@ -21,12 +21,14 @@ contract PublicNftContractDeployer is Script {
             configData,
             ".permissions.mintingFundsRecipient"
         );
+        uint256 fullPrice = vm.parseJsonUint(configData, ".prices.full");
+        uint256 discountedPrice = vm.parseJsonUint(configData, ".prices.discounted");
 
         vm.startBroadcast();
         ZkArcadePublicNft implementation = new ZkArcadePublicNft();
         bytes memory data = abi.encodeCall(
             ZkArcadePublicNft.initialize,
-            (owner, name, symbol, tokenURI, totalSupply, mintingFundsRecipient)
+            (owner, name, symbol, tokenURI, totalSupply, mintingFundsRecipient, fullPrice, discountedPrice)
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), data);
         vm.stopBroadcast();

@@ -56,15 +56,17 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         string memory symbol,
         string memory baseURI,
         uint256 _maxSupply,
-        address _mintingFundsRecipientAddress
+        address _mintingFundsRecipientAddress,
+        uint256 _fullPrice,
+        uint256 _discountedPrice
     ) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
         __ReentrancyGuard_init();
         _baseTokenURI = baseURI;
         maxSupply = _maxSupply;
-        fullPrice = 0.03 ether;
-        discountedPrice = 0.015 ether;
+        fullPrice = _fullPrice;
+        discountedPrice = _discountedPrice;
         mintingEnabled = false;
         transfersEnabled = false;
         _mintingFundsRecipient = _mintingFundsRecipientAddress;

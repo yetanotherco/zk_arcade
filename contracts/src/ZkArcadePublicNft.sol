@@ -15,6 +15,9 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     bool internal transfersEnabled;
     string private _baseTokenURI;
 
+    uint256 public fullPrice;
+    uint256 public discountedPrice;
+
     /**
      * Events
      */
@@ -51,6 +54,8 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         __Ownable_init(owner);
         _baseTokenURI = baseURI;
         maxSupply = _maxSupply;
+        fullPrice = 0.03 ether;
+        discountedPrice = 0.015 ether;
         mintingEnabled = false;
         transfersEnabled = false;
     }
@@ -82,7 +87,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         require(MerkleProof.verify(merkleProof, merkleRoots[rootIndex], leaf), "Invalid merkle proof");
 
         // Check if the user has payed the amount required ($50 or 0.015 ETH) for the NFT
-         if (msg.value < 15000000000000000) {
+         if (msg.value < discountedPrice) {
             revert("Not enough money to pay for the NFT");
         }
 
@@ -112,7 +117,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         }
 
         // Check if the user has payed the amount required ($100 or 0.030 ETH) for the NFT
-         if (msg.value < 30000000000000000) {
+         if (msg.value < fullPrice) {
             revert("Not enough money to pay for the NFT");
         }
 
@@ -179,5 +184,13 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
     function setBaseURI(string memory newBaseURI) external onlyOwner {
         _baseTokenURI = newBaseURI;
+    }
+
+    function setFullPrice(uint256 newPrice) external onlyOwner {
+        fullPrice = newPrice;
+    }
+
+    function setDiscountedPrice(uint256 newPrice) external onlyOwner {
+        discountedPrice = newPrice;
     }
 }

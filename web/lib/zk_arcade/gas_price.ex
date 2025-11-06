@@ -12,7 +12,7 @@ defmodule ZkArcade.GasPrice do
   Gets the current gas price from the Ethereum network in gwei.
   """
   def get_gas_price_gwei do
-    case Cachex.get(:gas_price_cache, :gas_price) do
+    case Cachex.get(:eth_cache, :gas_price) do
       {:ok, nil} ->
         fetch_and_cache_gas_price()
 
@@ -31,7 +31,7 @@ defmodule ZkArcade.GasPrice do
         gas_price_gwei = wei_to_gwei(gas_price_wei)
         
         # Cache the result
-        Cachex.put(:gas_price_cache, :gas_price, gas_price_gwei, ttl: @cache_ttl)
+        Cachex.put(:eth_cache, :gas_price, gas_price_gwei, ttl: @cache_ttl)
         
         Logger.info("Current gas price: #{Float.round(gas_price_gwei, 1)} gwei")
         {:ok, gas_price_gwei}

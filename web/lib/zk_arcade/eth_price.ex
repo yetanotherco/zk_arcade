@@ -23,7 +23,7 @@ defmodule ZkArcade.EthPrice do
     case fetch_initial_price() do
       {:ok, price} ->
         # Set the cache with initial price
-        Cachex.put(:eth_price_cache, :eth_price, price, ttl: @cache_ttl)
+        Cachex.put(:eth_cache, :eth_price, price, ttl: @cache_ttl)
         Logger.info("Successfully initialized ETH price fallback: #{price}")
         {:ok, price}
 
@@ -52,13 +52,13 @@ defmodule ZkArcade.EthPrice do
   end
 
   def get_eth_price_usd do
-    case Cachex.get(:eth_price_cache, :eth_price) do
+    case Cachex.get(:eth_cache, :eth_price) do
       {:ok, nil} ->
         # No cached price, try fetching from APIs
         case fetch_from_coingecko() do
           {:ok, price} ->
             # Successfully fetched from CoinGecko, cache it
-            Cachex.put(:eth_price_cache, :eth_price, price, ttl: @cache_ttl)
+            Cachex.put(:eth_cache, :eth_price, price, ttl: @cache_ttl)
             {:ok, price}
 
           {:error, _reason} ->
@@ -66,7 +66,7 @@ defmodule ZkArcade.EthPrice do
             case fetch_from_cryptoprices() do
               {:ok, price} ->
                 # Successfully fetched from cryptoprices, cache it
-                Cachex.put(:eth_price_cache, :eth_price, price, ttl: @cache_ttl)
+                Cachex.put(:eth_cache, :eth_price, price, ttl: @cache_ttl)
                 {:ok, price}
 
               {:error, reason} ->

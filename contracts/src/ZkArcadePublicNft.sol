@@ -71,6 +71,9 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
             revert MintingPaused();
         }
 
+        require(!hasClaimed[msg.sender], "NFT already claimed for this address");
+
+
         if (balanceOf(msg.sender) > 0) {
             revert AlreadyOwnsNFT();
         }
@@ -107,7 +110,9 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         if (!mintingEnabled) {
             revert MintingPaused();
         }
-        
+
+        require(!hasClaimed[msg.sender], "NFT already claimed for this address");
+
         if (balanceOf(msg.sender) > 0) {
             revert AlreadyOwnsNFT();
         }
@@ -120,6 +125,9 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
          if (msg.value < fullPrice) {
             revert("Not enough money to pay for the NFT");
         }
+
+        // Mark as claimed
+        hasClaimed[msg.sender] = true;
 
         uint256 tokenId = _nextTokenId++;
         _mint(msg.sender, tokenId);

@@ -9,7 +9,7 @@ import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 import { useNftContract, NftMetadata } from "../../hooks/useNftContract";
 import { getNftMetadata } from "../../hooks/useNftContract/utils";
-import { useSecondNftContract } from "../../hooks/useSecondNftContract";
+import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 
 type Props = {
 	network: string;
@@ -54,7 +54,7 @@ export const WalletInfo = ({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
-	const { balanceMoreThanZero: hasClaimedSecondNft } = useSecondNftContract({
+	const { balanceMoreThanZero: hasClaimedPublicNft } = usePublicNftContract({
 		contractAddress: public_nft_contract_address,
 		userAddress: user_address,
 	});
@@ -170,7 +170,7 @@ export const WalletInfo = ({
 
 					{!claimed &&
 						balance.data === 0n &&
-						!hasClaimedSecondNft && (
+						!hasClaimedPublicNft && (
 							<div
 								className={`flex flex-col items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
 							>

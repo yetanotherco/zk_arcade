@@ -7,7 +7,7 @@ import { EligibilityModal } from "../../components/Modal/EligibilityModal";
 import { NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 import { useNftContract } from "../../hooks/useNftContract";
-import { useSecondNftContract } from "../../hooks/useSecondNftContract";
+import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 
 type Props = {
 	network: string;
@@ -37,8 +37,8 @@ const ClaimNFT = ({
 		userAddress: user_address,
 	});
 
-	const { balanceMoreThanZero: secondNftBalanceMoreThanZero } =
-		useSecondNftContract({
+	const { balanceMoreThanZero: publicNftBalanceMoreThanZero } =
+		usePublicNftContract({
 			contractAddress: public_nft_contract_address,
 			userAddress: user_address,
 		});
@@ -52,7 +52,7 @@ const ClaimNFT = ({
 		? "You are eligible to mint the NFT and participate in the contest."
 		: "Buy an NFT to participate in ZKArcade and claim the leaderboard.";
 
-	if (claimed || balance.data !== 0n || secondNftBalanceMoreThanZero) {
+	if (claimed || balance.data !== 0n || publicNftBalanceMoreThanZero) {
 		return (
 			<NftSuccessModal
 				open={showSuccessModal}

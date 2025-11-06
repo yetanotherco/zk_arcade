@@ -342,6 +342,7 @@ defmodule ZkArcade.Proofs do
               Logger.info("Updated proof #{proof_id} status to claimed")
 
               ZkArcade.PrometheusMetrics.increment_claims()
+              ZkArcade.PrometheusMetrics.record_game_claim(updated_proof.game, updated_proof.game_idx)
 
               broadcast_proof_claimed_notification(updated_proof, address)
 

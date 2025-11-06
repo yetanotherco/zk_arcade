@@ -265,7 +265,7 @@ const BuyNftFlow = ({
 					isLoading={claimIsLoading}
 					disabled={alreadyMinted}
 				>
-					Buy Now
+					{alreadyMinted ? "Already Bought" : "Buy Now"}
 				</Button>
 			</div>
 

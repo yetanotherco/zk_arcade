@@ -8,10 +8,10 @@ cd "$parent_path"
 # cd to contracts/
 cd ..
 
-# Deploy NFT Contract
-CMD="forge script script/deploy/NftContractDeployer.s.sol:NftContractDeployer \
-    $NFT_CONFIG_PATH \
-    $NFT_OUTPUT_PATH \
+# Deploy Public NFT Contract
+CMD="forge script script/deploy/PublicNftContractDeployer.s.sol:PublicNftContractDeployer \
+    $PUBLIC_NFT_CONFIG_PATH \
+    $PUBLIC_NFT_OUTPUT_PATH \
     --rpc-url $RPC_URL \
     --private-key $DEPLOYER_PRIVATE_KEY \
     --broadcast --slow \
@@ -24,3 +24,9 @@ else
 fi
 
 eval $CMD
+
+# Print the deployed contract address
+nft_contract_proxy=$(jq -r '.addresses.proxy' $PUBLIC_NFT_OUTPUT_PATH)
+echo "NFT Contract Proxy Address: $nft_contract_proxy"
+nft_contract_implementation=$(jq -r '.addresses.implementation' $PUBLIC_NFT_OUTPUT_PATH)
+echo "NFT Contract Implementation Address: $nft_contract_implementation"

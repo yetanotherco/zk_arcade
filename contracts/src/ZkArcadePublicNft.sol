@@ -4,17 +4,21 @@ pragma solidity ^0.8.28;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 private _nextTokenId;
     uint256 public maxSupply;
     bool public mintingEnabled;
-    bool public transfersEnabled;
+    bytes32[] public merkleRoots;
+    mapping(address => bool) public hasClaimed;
+    bool internal transfersEnabled;
     string private _baseTokenURI;
 
     /**
      * Events
      */
+    event MerkleRootUpdated(bytes32 indexed newRoot, uint256 indexed rootIndex);
     event MintingEnabled();
     event MintingDisabled();
     event TransfersEnabled();
@@ -28,6 +32,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     error MaxSupplyExceeded();
     error AlreadyOwnsNFT();
     error TransfersPaused();
+    error ClaimsPaused();
 
     // ======== Initialization & Upgrades ========
 
@@ -54,7 +59,46 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
     // ======== Core NFT Functions ========
 
-    function mint() public returns (uint256) {
+    // This mint function allows whitelisted users to mint an NFT for a discounted price. The not whitelisted
+    // users can use the mint() function.
+    function whitelistedMint(bytes32[] calldata merkleProof, uint256 rootIndex) public payable returns (uint256) {
+        if (!mintingEnabled) {
+            revert MintingPaused();
+        }
+
+        if (balanceOf(msg.sender) > 0) {
+            revert AlreadyOwnsNFT();
+        }
+        
+        if (_nextTokenId >= maxSupply) {
+            revert MaxSupplyExceeded();
+        }
+
+        require(rootIndex < merkleRoots.length, "Invalid root index");
+
+        // Verify that the address is whitelisted using Merkle Proof
+        bytes32 inner = keccak256(abi.encode(msg.sender));
+        bytes32 leaf = keccak256(abi.encode(inner));
+        require(MerkleProof.verify(merkleProof, merkleRoots[rootIndex], leaf), "Invalid merkle proof");
+
+        // Check if the user has payed the amount required ($50 or 0.015 ETH) for the NFT
+         if (msg.value < 15000000000000000) {
+            revert("Not enough money to pay for the NFT");
+        }
+
+        // Mark as claimed
+        hasClaimed[msg.sender] = true;
+
+        // Mint the NFT
+        uint256 tokenId = _nextTokenId++;
+        _mint(msg.sender, tokenId);
+        
+        emit NFTMinted(msg.sender, tokenId);
+        return tokenId;
+    }
+
+    // This mint function allows non-whitelisted users to mint an NFT at the regular price.
+    function mint() public payable returns (uint256) {
         if (!mintingEnabled) {
             revert MintingPaused();
         }
@@ -65,6 +109,11 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         
         if (_nextTokenId >= maxSupply) {
             revert MaxSupplyExceeded();
+        }
+
+        // Check if the user has payed the amount required ($100 or 0.030 ETH) for the NFT
+         if (msg.value < 30000000000000000) {
+            revert("Not enough money to pay for the NFT");
         }
 
         uint256 tokenId = _nextTokenId++;
@@ -93,7 +142,20 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         return _baseTokenURI;
     }
 
-    // ======== Admin Functions ========
+    // ======== Admin Controls ========
+
+    function addMerkleRoot(bytes32 _merkleRoot) external onlyOwner returns (uint256 index) {
+        merkleRoots.push(_merkleRoot);
+        index = merkleRoots.length - 1;
+        emit MerkleRootUpdated(_merkleRoot, index);
+    }
+
+    function setMerkleRoot(bytes32 _merkleRoot, uint256 rootIndex) external onlyOwner {
+        require(rootIndex < merkleRoots.length, "Invalid root index");
+        merkleRoots[rootIndex] = _merkleRoot;
+
+        emit MerkleRootUpdated(_merkleRoot, rootIndex);
+    }
 
     function enableMinting() external onlyOwner {
         mintingEnabled = true;

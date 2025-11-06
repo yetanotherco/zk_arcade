@@ -13,7 +13,7 @@ export const useGasBasedTimeEstimate = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const calculateTimeEstimate = (gasPriceGwei: number): string => {
+  const deriveTimeEstimateString = (gasPriceGwei: number): string => {
     if (gasPriceGwei <= 0.5) {
       return "5 min";
     } else if (gasPriceGwei <= 1.5) {
@@ -40,7 +40,7 @@ export const useGasBasedTimeEstimate = () => {
       }
       const data = await response.json();
       if (data?.gas_price_gwei) {
-        const estimatedTime = calculateTimeEstimate(data.gas_price_gwei);
+        const estimatedTime = deriveTimeEstimateString(data.gas_price_gwei);
         setTimeEstimate({
           estimatedTime,
           gasPriceGwei: data.gas_price_gwei
@@ -70,12 +70,8 @@ export const useGasBasedTimeEstimate = () => {
   };
 
   const getDetailedTimeEstimateText = (): string => {
-    const { estimatedTime, gasPriceGwei } = timeEstimate;
-    
-    if (gasPriceGwei !== null) {
-      return `${estimatedTime} (${gasPriceGwei.toFixed(1)} gwei)`;
-    }
-    return estimatedTime;
+    const { estimatedTime } = timeEstimate;
+    return `${estimatedTime}`;
   };
 
   return {

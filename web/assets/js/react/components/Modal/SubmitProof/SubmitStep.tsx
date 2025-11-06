@@ -457,8 +457,7 @@ export const SubmitProofStep = ({
 			<div className="flex flex-col gap-4 justify-between h-full">
 				{proofStatus === "pending" ? (
 					<p className="bg-yellow/20 rounded p-2 text-yellow">
-						The proof has been submitted to Aligned. Settling your
-						proofs on Ethereum typically takes {getDetailedTimeEstimateText()}, though
+						The proof has been submitted to Aligned. Your proof should be verified in less than {getDetailedTimeEstimateText()}, though
 						occasionally it takes more time.
 					</p>
 				) : proofStatus === "underpriced" ? (

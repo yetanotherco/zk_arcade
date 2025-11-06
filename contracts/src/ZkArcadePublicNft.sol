@@ -14,6 +14,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     mapping(address => bool) public hasClaimed;
     bool internal transfersEnabled;
     string private _baseTokenURI;
+    address public _mintingFundsRecipient;
 
     uint256 public fullPrice;
     uint256 public discountedPrice;
@@ -30,6 +31,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     event BaseURIUpdated(string newBaseURI);
     event FullPriceUpdated(uint256 newPrice);
     event DiscountedPriceUpdated(uint256 newPrice);
+    event MintingFundsRecipientUpdated(address newRecipient);
 
     /**
      * Errors
@@ -51,7 +53,8 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         string memory name,
         string memory symbol,
         string memory baseURI,
-        uint256 _maxSupply
+        uint256 _maxSupply,
+        address _mintingFundsRecipient
     ) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
@@ -61,6 +64,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         discountedPrice = 0.015 ether;
         mintingEnabled = false;
         transfersEnabled = false;
+        _mintingFundsRecipient = _mintingFundsRecipient;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -103,7 +107,19 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         // Mint the NFT
         uint256 tokenId = _nextTokenId++;
         _mint(msg.sender, tokenId);
-        
+
+        // If the payment is above the required amount, return the extra funds to the sender
+        if (msg.value > discountedPrice) {
+            uint256 refundAmount = msg.value - discountedPrice;
+            (bool refundSuccess, ) = msg.sender.call{value: refundAmount}("");
+            require(refundSuccess, "Failed to refund excess payment");
+        }
+
+        // Forward funds to the minting funds recipient
+        uint256 toForward = msg.value <= discountedPrice ? msg.value : discountedPrice;
+        (bool success, ) = _mintingFundsRecipient.call{value: toForward}("");
+        require(success, "Failed to forward funds");
+
         emit NFTMinted(msg.sender, tokenId);
         return tokenId;
     }
@@ -134,7 +150,19 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
         uint256 tokenId = _nextTokenId++;
         _mint(msg.sender, tokenId);
-        
+
+        // If the payment is above the required amount, return the extra funds to the sender
+        if (msg.value > discountedPrice) {
+            uint256 refundAmount = msg.value - discountedPrice;
+            (bool refundSuccess, ) = msg.sender.call{value: refundAmount}("");
+            require(refundSuccess, "Failed to refund excess payment");
+        }
+ 
+        // Forward funds to the minting funds recipient
+        uint256 toForward = msg.value <= discountedPrice ? msg.value : discountedPrice;
+        (bool success, ) = _mintingFundsRecipient.call{value: toForward}("");
+        require(success, "Failed to forward funds");
+
         emit NFTMinted(msg.sender, tokenId);
         return tokenId;
     }
@@ -206,5 +234,10 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     function setDiscountedPrice(uint256 newPrice) external onlyOwner {
         discountedPrice = newPrice;
         emit DiscountedPriceUpdated(newPrice);
+    }
+
+    function setMintingFundsRecipient(address newRecipient) external onlyOwner {
+        _mintingFundsRecipient = newRecipient;
+        emit MintingFundsRecipientUpdated(newRecipient);
     }
 }

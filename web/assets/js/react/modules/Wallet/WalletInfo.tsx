@@ -9,12 +9,14 @@ import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 import { useNftContract, NftMetadata } from "../../hooks/useNftContract";
 import { getNftMetadata } from "../../hooks/useNftContract/utils";
+import { useSecondNftContract } from "../../hooks/useSecondNftContract";
 
 type Props = {
 	network: string;
 	payment_service_address: Address;
 	leaderboard_address: Address;
 	nft_contract_address: Address;
+	second_nft_contract_address: Address;
 	user_address: Address;
 	proofs: ProofSubmission[];
 	username: string;
@@ -35,6 +37,7 @@ export const WalletInfo = ({
 	explorer_url,
 	batcher_url,
 	is_eligible,
+	second_nft_contract_address,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const [claimed, setClaimed] = useState(false);
@@ -49,6 +52,10 @@ export const WalletInfo = ({
 		claimedNftMetadata,
 	} = useNftContract({
 		contractAddress: nft_contract_address,
+		userAddress: user_address,
+	});
+	const { balanceMoreThanZero: hasClaimedSecondNft } = useSecondNftContract({
+		contractAddress: second_nft_contract_address,
 		userAddress: user_address,
 	});
 
@@ -68,11 +75,11 @@ export const WalletInfo = ({
 
 	const eligibilityClasses = is_eligible
 		? "bg-accent-100/20 border-accent-100 text-accent-100"
-		: "bg-yellow/20 border-yellow text-yellow";
+		: "bg-blue/20 border-blue text-blue";
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: "You are not currently eligible to mint the NFT and participate in the contest.";
+		: "Buy an NFT to participate in ZKArcade and claim the leaderboard.";
 
 	useEffect(() => {
 		const fetchNftMetadata = async () => {
@@ -161,32 +168,45 @@ export const WalletInfo = ({
 						</div>
 					</div>
 
-					{!claimed && balance.data === 0n && (
-						<div
-							className={`flex flex-col items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
-						>
-							<p className="text-sm leading-5">
-								{eligibilityText}{" "}
-							</p>
-							{is_eligible && (
-								<p
-									className="text-accent-100 cursor-pointer hover:underline font-medium"
-									onClick={() => setMintModalOpen(true)}
-								>
-									Claim!
+					{!claimed &&
+						balance.data === 0n &&
+						!hasClaimedSecondNft && (
+							<div
+								className={`flex flex-col items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
+							>
+								<p className="text-sm leading-5">
+									{eligibilityText}{" "}
 								</p>
-							)}
-							<EligibilityModal
-								isEligible={is_eligible}
-								open={mintModalOpen}
-								setOpen={setMintModalOpen}
-								onClose={() => setClaimed(true)}
-								claimNft={claimNft}
-								balance={balance.data || 0n}
-								isLoading={receipt.isLoading}
-							/>
-						</div>
-					)}
+								{is_eligible ? (
+									<p
+										className="text-accent-100 cursor-pointer hover:underline font-medium"
+										onClick={() =>
+											window.location.assign("/mint")
+										}
+									>
+										Claim!
+									</p>
+								) : (
+									<p
+										className="text-blue cursor-pointer hover:underline font-medium"
+										onClick={() =>
+											window.location.assign("/nft/buy")
+										}
+									>
+										Buy!
+									</p>
+								)}
+								<EligibilityModal
+									isEligible={is_eligible}
+									open={mintModalOpen}
+									setOpen={setMintModalOpen}
+									onClose={() => setClaimed(true)}
+									claimNft={claimNft}
+									balance={balance.data || 0n}
+									isLoading={receipt.isLoading}
+								/>
+							</div>
+						)}
 
 					<BalanceScoreInAligned
 						payment_service_address={payment_service_address}

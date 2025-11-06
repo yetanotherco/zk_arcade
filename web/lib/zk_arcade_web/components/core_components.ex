@@ -80,6 +80,7 @@ defmodule ZkArcadeWeb.CoreComponents do
               batcher_url={@batcher_url}
               is_eligible={@eligible}
               nft_contract_address={@nft_contract_address}
+              second_nft_contract_address={@second_nft_contract_address}
           />
 
           <div class="relative hidden lg:block">

@@ -6,7 +6,6 @@ import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { EncourageDepositingModal } from "./EncourageDepositingModal";
 import { ShowEligibilityModal } from "./EligibilityModal";
-import { NftSuccessClaim } from "./NFTSuccessClaim";
 
 type Props = {
 	network: string;
@@ -66,10 +65,6 @@ const InitialModals = ({
 					payment_service_address={payment_service_address}
 					user_address={user_address}
 					blocked={eligibilityPending}
-				/>
-				<NftSuccessClaim
-					userAddress={user_address}
-					contractAddress={nft_contract_address}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

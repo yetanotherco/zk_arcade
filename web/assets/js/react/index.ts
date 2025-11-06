@@ -32,6 +32,7 @@ define(
 			"batcher_url",
 			"is_eligible",
 			"nft_contract_address",
+			"second_nft_contract_address",
 		],
 	}
 );

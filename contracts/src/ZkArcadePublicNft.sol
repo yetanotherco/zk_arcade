@@ -27,6 +27,9 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     event TransfersEnabled();
     event TransfersDisabled();
     event NFTMinted(address indexed account, uint256 tokenId);
+    event BaseURIUpdated(string newBaseURI);
+    event FullPriceUpdated(uint256 newPrice);
+    event DiscountedPriceUpdated(uint256 newPrice);
 
     /**
      * Errors
@@ -192,13 +195,16 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
     function setBaseURI(string memory newBaseURI) external onlyOwner {
         _baseTokenURI = newBaseURI;
+        emit BaseURIUpdated(newBaseURI);
     }
 
     function setFullPrice(uint256 newPrice) external onlyOwner {
         fullPrice = newPrice;
+        emit FullPriceUpdated(newPrice);
     }
 
     function setDiscountedPrice(uint256 newPrice) external onlyOwner {
         discountedPrice = newPrice;
+        emit DiscountedPriceUpdated(newPrice);
     }
 }

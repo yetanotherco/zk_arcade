@@ -5,8 +5,9 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
+contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     uint256 private _nextTokenId;
     uint256 public maxSupply;
     bool public mintingEnabled;
@@ -54,17 +55,18 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         string memory symbol,
         string memory baseURI,
         uint256 _maxSupply,
-        address _mintingFundsRecipient
+        address _mintingFundsRecipientAddress
     ) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
+        __ReentrancyGuard_init();
         _baseTokenURI = baseURI;
         maxSupply = _maxSupply;
         fullPrice = 0.03 ether;
         discountedPrice = 0.015 ether;
         mintingEnabled = false;
         transfersEnabled = false;
-        _mintingFundsRecipient = _mintingFundsRecipient;
+        _mintingFundsRecipient = _mintingFundsRecipientAddress;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -73,7 +75,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
     // This mint function allows whitelisted users to mint an NFT for a discounted price. The not whitelisted
     // users can use the mint() function.
-    function whitelistedMint(bytes32[] calldata merkleProof, uint256 rootIndex) public payable returns (uint256) {
+    function whitelistedMint(bytes32[] calldata merkleProof, uint256 rootIndex) public payable nonReentrant returns (uint256) {
         if (!mintingEnabled) {
             revert MintingPaused();
         }
@@ -125,7 +127,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     }
 
     // This mint function allows non-whitelisted users to mint an NFT at the regular price.
-    function mint() public payable returns (uint256) {
+    function mint() public payable nonReentrant returns (uint256) {
         if (!mintingEnabled) {
             revert MintingPaused();
         }

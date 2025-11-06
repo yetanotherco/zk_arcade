@@ -41,6 +41,8 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
     const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
     const [tokenURIs, setTokenURIs] = useState<string[]>([]);
 
+    const [claimIsLoading, setClaimIsLoading] = useState(false);
+
     const mintedTokenIdRef = useRef<bigint | null>(null);
 
     const balance = useReadContract({
@@ -48,6 +50,34 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
         abi: publicZkArcadeNftAbi,
         functionName: "balanceOf",
         args: userAddress ? [userAddress] : undefined,
+        chainId,
+    });
+
+    const discount_percentage = useReadContract({
+        address: contractAddress,
+        abi: publicZkArcadeNftAbi,
+        functionName: "DISCOUNT_PERCENTAGE",
+        chainId,
+    });
+
+    const nft_base_price = useReadContract({
+        address: contractAddress,
+        abi: publicZkArcadeNftAbi,
+        functionName: "BASE_PRICE",
+        chainId,
+    });
+
+    const totalSupply = useReadContract({
+        address: contractAddress,
+        abi: publicZkArcadeNftAbi,
+        functionName: "totalSupply",
+        chainId,
+    });
+
+    const maxSupply = useReadContract({
+        address: contractAddress,
+        abi: publicZkArcadeNftAbi,
+        functionName: "maxSupply",
         chainId,
     });
 
@@ -107,6 +137,8 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
             mintedTokenIdRef.current = null;
         }
 
+        setClaimIsLoading(true);
+
         const hash = await writeContractAsync({
             address: contractAddress,
             abi: publicZkArcadeNftAbi,
@@ -116,6 +148,8 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
             chainId,
             value: parseEther("0.015"),
         });
+
+        setClaimIsLoading(false);
 
         addToast({
             title: "Transaction sent",
@@ -260,6 +294,8 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
         contractAddress,
     ]);
 
+    const supplyLeft = (maxSupply.data ?? 0n) - (totalSupply.data ?? 0n);
+
     return {
         balance,
         claimNft,
@@ -271,5 +307,11 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
         setShowSuccessModal,
         claimedNftMetadata,
         setClaimedNftMetadata,
+        discount_percentage,
+        nft_base_price,
+        totalSupply,
+        maxSupply,
+        supplyLeft,
+        claimIsLoading,
     };
 }

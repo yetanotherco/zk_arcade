@@ -310,6 +310,58 @@ export const publicZkArcadeNftAbi = [
 		outputs:[
 			{ name:"", type:"string", internalType:"string" }
 		],
+	},
+	{
+		type: "function",
+		stateMutability: "view",
+		name: "BASE_PRICE",
+		inputs: [],
+		outputs: [
+			{
+			"internalType": "uint256",
+			"name": "",
+			"type": "uint256"
+			}
+		],
+	},
+	{
+		type: "function",
+		stateMutability: "view",
+		name: "DISCOUNT_PERCENTAGE",
+		inputs: [],
+		outputs: [
+			{
+			"internalType": "uint256",
+			"name": "",
+			"type": "uint256"
+			}
+		],
+	},
+	{
+		type: "function",
+		stateMutability: "view",
+		name: "maxSupply",
+		inputs: [],
+		outputs: [
+			{
+			"internalType": "uint256",
+			"name": "",
+			"type": "uint256"
+			}
+		],
+	},
+	{
+		type: "function",
+		stateMutability: "view",
+		name: "totalSupply",
+		inputs: [],
+		outputs: [
+			{
+			"internalType": "uint256",
+			"name": "",
+			"type": "uint256"
+			}
+		],
 	}
 ] as const;
 

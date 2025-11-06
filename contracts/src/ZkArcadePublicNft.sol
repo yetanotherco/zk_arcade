@@ -15,6 +15,9 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     bool internal transfersEnabled;
     string private _baseTokenURI;
 
+    uint256 public constant BASE_PRICE = 30000000000000000; // 0.03 ETH
+    uint256 public constant DISCOUNT_PERCENTAGE = 50; // 50% discount for whitelisted users
+
     /**
      * Events
      */
@@ -82,7 +85,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         require(MerkleProof.verify(merkleProof, merkleRoots[rootIndex], leaf), "Invalid merkle proof");
 
         // Check if the user has payed the amount required ($50 or 0.015 ETH) for the NFT
-         if (msg.value < 15000000000000000) {
+        if (msg.value < BASE_PRICE * (100 - DISCOUNT_PERCENTAGE) / 100) {
             revert("Not enough money to pay for the NFT");
         }
 
@@ -112,7 +115,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         }
 
         // Check if the user has payed the amount required ($100 or 0.030 ETH) for the NFT
-         if (msg.value < 30000000000000000) {
+         if (msg.value < BASE_PRICE) {
             revert("Not enough money to pay for the NFT");
         }
 

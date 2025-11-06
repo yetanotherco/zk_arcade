@@ -2,14 +2,14 @@
   <x-app-background-music-prompt />
   <div class="nav-container fixed pt-10 w-full flex justify-center z-[20] transition-all duration-300">
     <div class="w-full" style="max-width: 1000px">
-      <.nav 
+      <.nav
         network={Application.get_env(:zk_arcade, :network)}
         payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
         leaderboard_address={Application.get_env(:zk_arcade, :leaderboard_address)}
         nft_contract_address={Application.get_env(:zk_arcade, :nft_contract_address)}
-        second_nft_contract_address={Application.get_env(:zk_arcade, :second_nft_contract_address)}
+        public_nft_contract_address={Application.get_env(:zk_arcade, :public_nft_contract_address)}
         batcher_url={Application.get_env(:zk_arcade, :batcher_url)}
-        wallet={assigns[:wallet]} 
+        wallet={assigns[:wallet]}
         submitted_proofs={assigns[:submitted_proofs]}
         username={assigns[:username]}
         user_position={assigns[:user_position]}

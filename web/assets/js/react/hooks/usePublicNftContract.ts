@@ -84,7 +84,7 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
     const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
     const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
-    const claimNft = useCallback(async () => {
+    const claimNft = useCallback(async (discountEligibility: boolean) => {
         if (!userAddress) {
             addToast({
                 title: "Wallet not connected",
@@ -104,63 +104,117 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
             return;
         }
 
-        let merkleProofArray: `0x${string}`[];
-        try {
-            merkleProofArray = processRawMerkleProof(res.merkle_proof);
-        } catch (e: any) {
-            addToast({
-                title: "Error in eligibility proof",
-                desc: `Could not validate your eligibility to claim your NFT: ${String(
-                    e?.message || e
-                )}`,
-                type: "error",
-            });
-            return;
-        }
-
-        // Here we simulate the call to capture the tokenId returned by claimNFT
-        try {
-            if (publicClient) {
-                const simulation = await publicClient.simulateContract({
-                    address: contractAddress,
-                    abi: publicZkArcadeNftAbi,
-                    functionName: "whitelistedMint",
-                    args: [merkleProofArray, BigInt(res.merkle_root_index)],
-                    account: userAddress,
-                    value: parseEther("0.015")
+        let merkleProofArray: `0x${string}`[] = [];
+        if (typeof res !== "string") {
+            try {
+                merkleProofArray = processRawMerkleProof(res.merkle_proof);
+            } catch (e: any) {
+                addToast({
+                    title: "Error in eligibility proof",
+                    desc: `Could not validate your eligibility to claim your NFT: ${String(
+                        e?.message || e
+                    )}`,
+                    type: "error",
                 });
-
-                mintedTokenIdRef.current =
-                    simulation.result as unknown as bigint;
+                return;
             }
-        } catch (_) {
-            mintedTokenIdRef.current = null;
+        } else {
+            console.warn("Error fetching merkle proof:", res);
         }
 
-        setClaimIsLoading(true);
+        if (discountEligibility && typeof res !== "string") {
+            // If eligible for discount, call to whitelistedMint
 
-        const hash = await writeContractAsync({
-            address: contractAddress,
-            abi: publicZkArcadeNftAbi,
-            functionName: "whitelistedMint",
-            args: [merkleProofArray, BigInt(res.merkle_root_index)],
-            account: userAddress,
-            chainId,
-            value: parseEther("0.015"),
-        });
+            // Here we simulate the call to capture the tokenId returned by claimNFT
+            try {
+                if (publicClient) {
+                    const simulation = await publicClient.simulateContract({
+                        address: contractAddress,
+                        abi: publicZkArcadeNftAbi,
+                        functionName: "whitelistedMint",
+                        args: [merkleProofArray, BigInt(res.merkle_root_index)],
+                        account: userAddress,
+                        value: parseEther("0.015")
+                    });
 
-        setClaimIsLoading(false);
+                    mintedTokenIdRef.current =
+                        simulation.result as unknown as bigint;
+                }
+            } catch (_) {
+                mintedTokenIdRef.current = null;
+            }
 
-        addToast({
-            title: "Transaction sent",
-            desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
-                0,
-                8
-            )}...${hash.slice(-6)}`,
-            type: "success",
-        });
+            setClaimIsLoading(true);
 
-        return hash;
+            const hash = await writeContractAsync({
+                address: contractAddress,
+                abi: publicZkArcadeNftAbi,
+                functionName: "whitelistedMint",
+                args: [merkleProofArray, BigInt(res.merkle_root_index)],
+                account: userAddress,
+                chainId,
+                value: parseEther("0.015"),
+            });
+
+            setClaimIsLoading(false);
+
+            addToast({
+                title: "Transaction sent",
+                desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
+                    0,
+                    8
+                )}...${hash.slice(-6)}`,
+                type: "success",
+            });
+
+            return hash;
+        } else {
+            // If not eligible for discount, call to mint
+
+            // Here we simulate the call to capture the tokenId returned by claimNFT
+            try {
+                if (publicClient) {
+                    const simulation = await publicClient.simulateContract({
+                        address: contractAddress,
+                        abi: publicZkArcadeNftAbi,
+                        functionName: "mint",
+                        args: [],
+                        account: userAddress,
+                        value: parseEther("0.03")
+                    });
+
+                    mintedTokenIdRef.current =
+                        simulation.result as unknown as bigint;
+                }
+            } catch (_) {
+                mintedTokenIdRef.current = null;
+            }
+
+            setClaimIsLoading(true);
+
+            const hash = await writeContractAsync({
+                address: contractAddress,
+                abi: publicZkArcadeNftAbi,
+                functionName: "mint",
+                args: [],
+                account: userAddress,
+                chainId,
+                value: parseEther("0.03"),
+            });
+
+            setClaimIsLoading(false);
+
+            addToast({
+                title: "Transaction sent",
+                desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
+                    0,
+                    8
+                )}...${hash.slice(-6)}`,
+                type: "success",
+            });
+
+            return hash;
+        }
     }, [userAddress, contractAddress, writeContractAsync, chainId, addToast]);
 
     const lastErrorMessage = useRef<string | null>(null);

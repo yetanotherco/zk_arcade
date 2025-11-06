@@ -76,7 +76,7 @@ defmodule ZkArcadeWeb.HistoryLive.Index do
     |> assign(:network, Application.get_env(:zk_arcade, :network))
     |> assign(:leaderboard_address, Application.get_env(:zk_arcade, :leaderboard_address))
     |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
-    |> assign(:second_nft_contract_address, Application.get_env(:zk_arcade, :second_nft_contract_address))
+    |> assign(:public_nft_contract_address, Application.get_env(:zk_arcade, :public_nft_contract_address))
     |> assign(:payment_service_address, Application.get_env(:zk_arcade, :payment_service_address))
     |> assign(:username, username)
     |> assign(:user_position, position)

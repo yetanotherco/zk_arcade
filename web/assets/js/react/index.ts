@@ -32,7 +32,7 @@ define(
 			"batcher_url",
 			"is_eligible",
 			"nft_contract_address",
-			"second_nft_contract_address",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -90,7 +90,7 @@ define(
 			"payment_service_address",
 			"user_address",
 			"nft_contract_address",
-			"second_nft_contract_address",
+			"public_nft_contract_address",
 			"is_eligible",
 		],
 	}
@@ -200,7 +200,7 @@ define(
 		attributes: [
 			"network",
 			"nft_contract_address",
-			"second_nft_contract_address",
+			"public_nft_contract_address",
 			"is_eligible_for_discount",
 			"user_address",
 		],

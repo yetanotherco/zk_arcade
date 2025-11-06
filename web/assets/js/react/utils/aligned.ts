@@ -131,7 +131,7 @@ export const fetchMerkleProofForAddress = async (
 ): Promise<{
 	merkle_proof: NFTClaimMerkleProof;
 	merkle_root_index: number;
-} | null> => {
+} | string | null> => {
 	try {
 		const response = await fetch(`/api/nft/proof?address=${address}`, {
 			method: "GET",
@@ -142,7 +142,8 @@ export const fetchMerkleProofForAddress = async (
 		});
 
 		if (!response.ok) {
-			return null;
+			// Note: this is done to avoid returning null in case of an ineligible address
+			return response.statusText;
 		}
 
 		const data = await response.json();

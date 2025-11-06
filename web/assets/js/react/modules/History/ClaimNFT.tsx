@@ -13,14 +13,14 @@ type Props = {
 	network: string;
 	user_address: Address;
 	nft_contract_address: Address;
-	second_nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	is_eligible: string;
 };
 
 const ClaimNFT = ({
 	is_eligible,
 	nft_contract_address,
-	second_nft_contract_address,
+	public_nft_contract_address,
 	user_address,
 }: Omit<Props, "network">) => {
 	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
@@ -39,7 +39,7 @@ const ClaimNFT = ({
 
 	const { balanceMoreThanZero: secondNftBalanceMoreThanZero } =
 		useSecondNftContract({
-			contractAddress: second_nft_contract_address,
+			contractAddress: public_nft_contract_address,
 			userAddress: user_address,
 		});
 
@@ -101,7 +101,7 @@ export default ({
 	network,
 	user_address,
 	nft_contract_address,
-	second_nft_contract_address,
+	public_nft_contract_address,
 	is_eligible,
 }: Props) => {
 	return (
@@ -112,7 +112,7 @@ export default ({
 					user_address={user_address}
 					nft_contract_address={nft_contract_address}
 					is_eligible={is_eligible}
-					second_nft_contract_address={second_nft_contract_address}
+					public_nft_contract_address={public_nft_contract_address}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

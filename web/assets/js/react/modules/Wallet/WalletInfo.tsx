@@ -16,7 +16,7 @@ type Props = {
 	payment_service_address: Address;
 	leaderboard_address: Address;
 	nft_contract_address: Address;
-	second_nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	user_address: Address;
 	proofs: ProofSubmission[];
 	username: string;
@@ -37,7 +37,7 @@ export const WalletInfo = ({
 	explorer_url,
 	batcher_url,
 	is_eligible,
-	second_nft_contract_address,
+	public_nft_contract_address,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const [claimed, setClaimed] = useState(false);
@@ -55,7 +55,7 @@ export const WalletInfo = ({
 		userAddress: user_address,
 	});
 	const { balanceMoreThanZero: hasClaimedSecondNft } = useSecondNftContract({
-		contractAddress: second_nft_contract_address,
+		contractAddress: public_nft_contract_address,
 		userAddress: user_address,
 	});
 

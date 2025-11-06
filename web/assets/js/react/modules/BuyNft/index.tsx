@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Address } from "../../types/blockchain";
 import Web3EthProvider from "../../providers/web3-eth-provider";
 import { ToastContainer } from "../../components/Toast";
@@ -7,23 +7,27 @@ import { ConnectKitButton } from "connectkit";
 import { Button } from "../../components";
 import { useNftContract } from "../../hooks/useNftContract";
 import { useToast } from "../../state/toast";
-import { useSecondNftContract } from "../../hooks/useSecondNftContract";
+import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 import { NftSuccessModal } from "../../components/Modal";
 
 type Props = {
 	nft_contract_address: Address;
 	user_address?: Address;
-	second_nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	network: string;
-	// whether it has a discount in the second nft
+	// whether it has a discount in the public nft
 	is_eligible_for_discount: string;
 	// whether in can mint the original premium nft
 	is_eligible: string;
 };
 
+const weiToEth = (wei: Number) => {
+	return Number(wei) / 1e18;
+}
+
 const BuyNftFlow = ({
 	nft_contract_address,
-	second_nft_contract_address,
+	public_nft_contract_address,
 	user_address,
 	is_eligible,
 	is_eligible_for_discount,
@@ -41,30 +45,36 @@ const BuyNftFlow = ({
 		userAddress: user_address || "0x0",
 	});
 	const {
-		balanceMoreThanZero: secondaryHasMinted,
-		buyNft,
-		discount,
-		nftPrice,
-		stockLeft,
-		nftImage,
+		balanceMoreThanZero: publicHasMinted,
+		discount_percentage,
+		nft_base_price,
+		supplyLeft,
 		totalSupply,
-	} = useSecondNftContract({
-		contractAddress: second_nft_contract_address,
+		claimNft,
+		claimIsLoading,
+		showSuccessModal,
+		setShowSuccessModal,
+		claimedNftMetadata,
+	} = usePublicNftContract({
+		contractAddress: public_nft_contract_address,
 		userAddress: user_address || "0x0",
 	});
 	const alreadyMinted =
-		(primaryHasMinted || secondaryHasMinted) && !!user_address;
+		(primaryHasMinted || publicHasMinted) && !!user_address;
 
 	const effectiveDiscount =
-		discount?.data && discountEligibility ? discount.data : 0;
-	const priceIsLoading = nftPrice.isLoading;
-	const stockIsLoading = stockLeft.isLoading || totalSupply.isLoading;
+		discount_percentage?.data && discountEligibility ? discount_percentage.data : 0;
+	const priceIsLoading = nft_base_price.isLoading;
+	const stockIsLoading = totalSupply.isLoading;
 	const discountedPrice = useMemo(() => {
-		if (nftPrice.data == null) return null;
-		const base = Number(nftPrice.data);
+		if (nft_base_price.data == null) return null;
+		const base = Number(nft_base_price.data);
 		const pct = Number(effectiveDiscount || 0);
-		return Math.max(base * (1 - pct / 100), 0);
-	}, [nftPrice.data, effectiveDiscount]);
+		return weiToEth(Math.max(base * (1 - pct / 100), 0));
+	}, [nft_base_price.data, effectiveDiscount]);
+
+	// TODO: Move the contract side
+	const nftImage = "https://ipfs.io/ipfs/QmU1TBMfSqRoxt2PfYbYZu9wNZ2emGRNhU5nw7uPkuUi5C";
 
 	// If it elligible for the premium nft, redirect to that page
 	useEffect(() => {
@@ -174,7 +184,7 @@ const BuyNftFlow = ({
 				</div>
 				<p className="text-sm text-text-200">
 					{discountEligibility ? (
-						discount.isLoading ? (
+						discount_percentage.isLoading ? (
 							<span className="animate-pulse">
 								Checking discount…
 							</span>
@@ -183,7 +193,7 @@ const BuyNftFlow = ({
 								You are eligible for a
 								<span className="text-accent-100 font-semibold">
 									{" "}
-									{discount.data}%{" "}
+									{Number(discount_percentage.data)}%{" "}
 								</span>
 								discount!
 							</>
@@ -222,18 +232,18 @@ const BuyNftFlow = ({
 							) : discountEligibility && effectiveDiscount ? (
 								<span className="text-white">
 									<span className="line-through opacity-70 mr-2">
-										{nftPrice.data} ETH
+										{weiToEth(Number(nft_base_price.data))} ETH
 									</span>
 									<span className="text-accent-100 font-semibold mr-2">
-										-{effectiveDiscount}%
+										-{Number(effectiveDiscount)}%
 									</span>
 									<span>
-										{discountedPrice?.toFixed(4)} ETH
+										{discountedPrice?.toString()} ETH
 									</span>
 								</span>
 							) : (
 								<span className="text-white">
-									{nftPrice.data} ETH
+									{Number(nft_base_price.data)} ETH
 								</span>
 							)}
 						</p>
@@ -243,7 +253,7 @@ const BuyNftFlow = ({
 								<span className="animate-pulse">Loading…</span>
 							) : (
 								<span className="text-white">
-									{stockLeft.data}/{totalSupply.data}
+									{Number(supplyLeft)}/{Number(totalSupply.data)}
 								</span>
 							)}
 						</p>
@@ -251,8 +261,8 @@ const BuyNftFlow = ({
 				</div>
 				<Button
 					variant="accent-fill"
-					onClick={buyNft.call}
-					isLoading={buyNft.isLoading}
+					onClick={() => claimNft(discountEligibility)}
+					isLoading={claimIsLoading}
 					disabled={alreadyMinted}
 				>
 					Buy Now
@@ -260,10 +270,9 @@ const BuyNftFlow = ({
 			</div>
 
 			<NftSuccessModal
-				open={false}
-				// TODO: set as seen in local storage
-				setOpen={() => {}}
-				nftMetadata={null}
+				open={showSuccessModal}
+				setOpen={setShowSuccessModal}
+				nftMetadata={claimedNftMetadata}
 			/>
 		</div>
 	);

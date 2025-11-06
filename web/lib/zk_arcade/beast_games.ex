@@ -19,4 +19,10 @@ defmodule ZkArcade.BeastGames do
     |> where([bg], bg.game_index == ^game_index)
     |> Repo.one()
   end
+
+  def get_game_indices_count do
+    BeastGame
+    |> select([bg], count(bg.game_index, :distinct))
+    |> Repo.one()
+  end
 end

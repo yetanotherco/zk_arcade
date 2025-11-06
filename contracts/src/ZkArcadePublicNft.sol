@@ -155,14 +155,14 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         _mint(msg.sender, tokenId);
 
         // If the payment is above the required amount, return the extra funds to the sender
-        if (msg.value > discountedPrice) {
-            uint256 refundAmount = msg.value - discountedPrice;
+        if (msg.value > fullPrice) {
+            uint256 refundAmount = msg.value - fullPrice;
             (bool refundSuccess, ) = msg.sender.call{value: refundAmount}("");
             require(refundSuccess, "Failed to refund excess payment");
         }
  
         // Forward funds to the minting funds recipient
-        uint256 toForward = msg.value <= discountedPrice ? msg.value : discountedPrice;
+        uint256 toForward = msg.value <= fullPrice ? msg.value : fullPrice;
         (bool success, ) = _mintingFundsRecipient.call{value: toForward}("");
         require(success, "Failed to forward funds");
 

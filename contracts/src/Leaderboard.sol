@@ -88,7 +88,6 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         address _alignedServiceManager,
         address _alignedBatcherPaymentService,
         address _zkArcadeNft,
-        address _zkArcadePublicNft,
         BeastGame[] calldata _beastGames,
         ParityGame[] calldata _parityGames,
         bool _useWhitelist,
@@ -103,7 +102,7 @@ contract Leaderboard is UUPSUpgradeable, OwnableUpgradeable {
         alignedBatcherPaymentService = _alignedBatcherPaymentService;
         beastGames = _beastGames;
         zkArcadeNft = _zkArcadeNft;
-        zkArcadePublicNft = _zkArcadePublicNft;
+        zkArcadePublicNft = address(0);
         useWhitelist = _useWhitelist;
         parityGames = _parityGames;
         beastVkCommitment = _beastVkCommitment;

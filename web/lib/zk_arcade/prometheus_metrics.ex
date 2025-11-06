@@ -1,5 +1,6 @@
 defmodule ZkArcade.PrometheusMetrics do
   use Prometheus.Metric
+  alias ZkArcade.{BeastGames, ParityGames}
 
   def setup() do
     Counter.declare(name: :failed_proofs_count, help: "Failed Proofs")
@@ -12,6 +13,11 @@ defmodule ZkArcade.PrometheusMetrics do
       name: :user_errors_total,
       help: "User errors by type",
       labels: [:type]
+    )
+    Gauge.declare(
+      name: :game_claims_by_index,
+      help: "Game claims by game type and index",
+      labels: [:game_type, :game_index]
     )
 
     # Summary.declare(
@@ -53,8 +59,12 @@ defmodule ZkArcade.PrometheusMetrics do
     increment_with_label(:user_errors_total, type)
   end
 
+  def record_game_claim(game_type, game_index) do
+    Gauge.inc([name: :game_claims_by_index, labels: [normalize_label(game_type), normalize_label(game_index)]])
+  end
+
   defp increment_with_label(counter_name, label) do
-    Counter.inc(name: counter_name, labels: [normalize_label(label)])
+    Counter.inc([name: counter_name, labels: [normalize_label(label)]])
   end
 
   defp normalize_label(label) when is_atom(label), do: Atom.to_string(label)
@@ -63,4 +73,19 @@ defmodule ZkArcade.PrometheusMetrics do
   # def time_to_verify_seconds(seconds) when is_number(seconds) and seconds > 0 do
   #   Summary.observe(name: :time_to_verify_seconds, value: seconds)
   # end
+
+  def initialize_game_counters do
+    beast_count = BeastGames.get_game_indices_count()
+    parity_count = ParityGames.get_game_indices_count()
+
+    # Initialize Beast game counters
+    for index <- 0..(beast_count - 1) do
+      Gauge.set([name: :game_claims_by_index, labels: ["Beast", "#{index}"]], 0)
+    end
+
+    # Initialize Parity game counters
+    for index <- 0..(parity_count - 1) do
+      Gauge.set([name: :game_claims_by_index, labels: ["Parity", "#{index}"]], 0)
+    end
+  end
 end

@@ -1,13 +1,13 @@
-defmodule ZkArcade.MerklePathsPublic do
+defmodule ZkArcade.PublicMerklePaths do
   import Ecto.Query, warn: false
   alias ZkArcade.Repo
 
-  alias ZkArcade.MerklePathsPublic.MerklePathPublic
+  alias ZkArcade.PublicMerklePaths.PublicMerklePath
 
   require Logger
 
   def create_merkle_path(address, proof) do
-    %MerklePathPublic{
+    %PublicMerklePath{
       id: UUID.uuid4(),
       address: address,
       merkle_proof: proof
@@ -16,7 +16,7 @@ defmodule ZkArcade.MerklePathsPublic do
   end
 
   def get_merkle_path(id) do
-    Repo.get(MerklePathPublicPublic, id)
+    Repo.get(PublicMerklePath, id)
   end
 
   def update_merkle_path(id, attrs) do
@@ -26,7 +26,7 @@ defmodule ZkArcade.MerklePathsPublic do
       nil -> {:error, :not_found}
       merkle_path ->
         merkle_path
-        |> MerklePathPublic.changeset(attrs)
+        |> PublicMerklePath.changeset(attrs)
         |> Repo.update()
     end
   end
@@ -41,11 +41,11 @@ defmodule ZkArcade.MerklePathsPublic do
   end
 
   def list_merkle_paths do
-    Repo.all(MerklePathPublic)
+    Repo.all(PublicMerklePath)
   end
 
   def get_merkle_proof_for_address(address) do
-    query = from(mp in MerklePathPublic, where: mp.address == ^address)
+    query = from(mp in PublicMerklePath, where: mp.address == ^address)
     Logger.info("Querying Merkle proof for address: #{address} with query: #{inspect(query)}")
 
     case Repo.one(query) do

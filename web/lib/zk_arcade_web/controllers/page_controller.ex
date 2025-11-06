@@ -54,7 +54,7 @@ defmodule ZkArcadeWeb.PageController do
   end
 
   defp get_user_elegibility_public(address) do
-    case ZkArcade.MerklePathsPublic.get_merkle_proof_for_address(address) do
+    case ZkArcade.PublicMerklePaths.get_merkle_proof_for_address(address) do
         {:ok, _proof, _index} -> "true"
         {:error, :proof_not_found} -> "false"
         _ -> "false"

@@ -1,4 +1,4 @@
-defmodule ZkArcade.MerklePathsPublic.MerklePathPublic do
+defmodule ZkArcade.PublicMerklePaths.PublicMerklePath do
   use Ecto.Schema
   import Ecto.Changeset
 

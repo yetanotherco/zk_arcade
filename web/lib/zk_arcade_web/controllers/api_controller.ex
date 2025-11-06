@@ -104,7 +104,7 @@ defmodule ZkArcadeWeb.ApiController do
   end
 
   defp query_public_eligibility(wallet_address) do
-    case ZkArcade.MerklePathsPublic.get_merkle_proof_for_address(wallet_address) do
+    case ZkArcade.PublicMerklePaths.get_merkle_proof_for_address(wallet_address) do
       {:ok, _proof, _merkle_root_index} ->
         {:ok, true}
 
@@ -129,7 +129,7 @@ defmodule ZkArcadeWeb.ApiController do
   end
 
   def get_public_nft_claim_merkle_proof(conn, %{"address" => address}) do
-    case ZkArcade.MerklePathsPublic.get_merkle_proof_for_address(address) do
+    case ZkArcade.PublicMerklePaths.get_merkle_proof_for_address(address) do
       {:ok, proof, merkle_root_index} ->
         conn |> json(%{merkle_proof: proof, merkle_root_index: merkle_root_index})
       {:error, _} ->

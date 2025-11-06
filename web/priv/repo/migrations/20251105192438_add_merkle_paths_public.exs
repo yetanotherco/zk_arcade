@@ -1,4 +1,4 @@
-defmodule ZkArcade.Repo.Migrations.AddMerklePathsPublic do
+defmodule ZkArcade.Repo.Migrations.AddPublicMerklePaths do
   use Ecto.Migration
 
   def change do

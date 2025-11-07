@@ -314,7 +314,7 @@ export const publicZkArcadeNftAbi = [
 	{
 		type: "function",
 		stateMutability: "view",
-		name: "BASE_PRICE",
+		name: "fullPrice",
 		inputs: [],
 		outputs: [
 			{
@@ -327,7 +327,7 @@ export const publicZkArcadeNftAbi = [
 	{
 		type: "function",
 		stateMutability: "view",
-		name: "DISCOUNT_PERCENTAGE",
+		name: "discountedPrice",
 		inputs: [],
 		outputs: [
 			{
@@ -340,7 +340,7 @@ export const publicZkArcadeNftAbi = [
 	{
 		type: "function",
 		stateMutability: "view",
-		name: "maxSupply",
+		name: "nonWhitelistedMaxSupply",
 		inputs: [],
 		outputs: [
 			{

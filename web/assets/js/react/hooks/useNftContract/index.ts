@@ -14,7 +14,7 @@ import {
 	getUserTokenIds,
 	getTokenURI,
 	processRawMerkleProof,
-	getNftMetadata,
+	getNftMetadataIpfs,
 } from "./utils";
 
 type HookArgs = {
@@ -175,7 +175,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 						mintedTokenId
 					);
 
-					const metadata = await getNftMetadata(
+					const metadata = await getNftMetadataIpfs(
 						tokenURI,
 						contractAddress
 					);

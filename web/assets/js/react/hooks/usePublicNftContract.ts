@@ -1,371 +1,369 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Address, parseEther } from "viem";
 import {
-    useChainId,
-    useReadContract,
-    useWaitForTransactionReceipt,
-    useWriteContract,
-    usePublicClient,
+	useChainId,
+	useReadContract,
+	useWaitForTransactionReceipt,
+	useWriteContract,
+	usePublicClient,
 } from "wagmi";
 import { useToast } from "../state/toast";
 import { publicZkArcadeNftAbi } from "../constants/aligned";
 import { fetchMerkleProofForAddress } from "../utils/aligned";
 import {
-    getUserTokenIds,
-    getTokenURI,
-    processRawMerkleProof,
-    getNftMetadata,
+	getUserTokenIds,
+	getTokenURI,
+	processRawMerkleProof,
+	getNftMetadata,
 } from "./useNftContract/utils";
 
 type HookArgs = {
-    userAddress: Address;
-    contractAddress: Address;
+	userAddress: Address;
+	contractAddress: Address;
 };
 
 export type NftMetadata = {
-    name: string;
-    description: string;
-    image: string;
-    tokenId?: bigint;
-    address?: Address;
+	name: string;
+	description: string;
+	image: string;
+	tokenId?: bigint;
+	address?: Address;
 };
 
-export function usePublicNftContract({ userAddress, contractAddress }: HookArgs) {
-    const chainId = useChainId();
-    const { addToast } = useToast();
-    const publicClient = usePublicClient();
+export function usePublicNftContract({
+	userAddress,
+	contractAddress,
+}: HookArgs) {
+	const chainId = useChainId();
+	const { addToast } = useToast();
+	const publicClient = usePublicClient();
 
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [claimedNftMetadata, setClaimedNftMetadata] =
-        useState<NftMetadata | null>(null);
-    const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
-    const [tokenURIs, setTokenURIs] = useState<string[]>([]);
+	const [showSuccessModal, setShowSuccessModal] = useState(false);
+	const [claimedNftMetadata, setClaimedNftMetadata] =
+		useState<NftMetadata | null>(null);
+	const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
+	const [tokenURIs, setTokenURIs] = useState<string[]>([]);
+	const mintedTokenIdRef = useRef<bigint | null>(null);
 
-    const [claimIsLoading, setClaimIsLoading] = useState(false);
+	const balance = useReadContract({
+		address: contractAddress,
+		abi: publicZkArcadeNftAbi,
+		functionName: "balanceOf",
+		args: userAddress ? [userAddress] : undefined,
+		chainId,
+	});
 
-    const mintedTokenIdRef = useRef<bigint | null>(null);
+	const discountedPrice = useReadContract({
+		address: contractAddress,
+		abi: publicZkArcadeNftAbi,
+		functionName: "discountedPrice",
+		chainId,
+	});
 
-    const balance = useReadContract({
-        address: contractAddress,
-        abi: publicZkArcadeNftAbi,
-        functionName: "balanceOf",
-        args: userAddress ? [userAddress] : undefined,
-        chainId,
-    });
+	const fullPrice = useReadContract({
+		address: contractAddress,
+		abi: publicZkArcadeNftAbi,
+		functionName: "fullPrice",
+		chainId,
+	});
 
-    const discount_percentage = useReadContract({
-        address: contractAddress,
-        abi: publicZkArcadeNftAbi,
-        functionName: "DISCOUNT_PERCENTAGE",
-        chainId,
-    });
+	const totalSupply = useReadContract({
+		address: contractAddress,
+		abi: publicZkArcadeNftAbi,
+		functionName: "totalSupply",
+		chainId,
+	});
 
-    const nft_base_price = useReadContract({
-        address: contractAddress,
-        abi: publicZkArcadeNftAbi,
-        functionName: "BASE_PRICE",
-        chainId,
-    });
+	const maxSupply = useReadContract({
+		address: contractAddress,
+		abi: publicZkArcadeNftAbi,
+		functionName: "nonWhitelistedMaxSupply",
+		chainId,
+	});
 
-    const totalSupply = useReadContract({
-        address: contractAddress,
-        abi: publicZkArcadeNftAbi,
-        functionName: "totalSupply",
-        chainId,
-    });
+	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
+	const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
-    const maxSupply = useReadContract({
-        address: contractAddress,
-        abi: publicZkArcadeNftAbi,
-        functionName: "maxSupply",
-        chainId,
-    });
+	const claimNft = useCallback(
+		async (discountEligibility: boolean) => {
+			if (!userAddress) {
+				addToast({
+					title: "Wallet not connected",
+					desc: "Please connect your wallet to continue.",
+					type: "error",
+				});
+				throw new Error("Wallet not connected");
+			}
 
-    const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
-    const receipt = useWaitForTransactionReceipt({ hash: txHash });
+			const res = await fetchMerkleProofForAddress(userAddress);
+			if (!res) {
+				addToast({
+					title: "Eligibility check failed",
+					desc: "We couldn’t fetch your eligibility proof. Please try again.",
+					type: "error",
+				});
+				return;
+			}
 
-    const claimNft = useCallback(async (discountEligibility: boolean) => {
-        if (!userAddress) {
-            addToast({
-                title: "Wallet not connected",
-                desc: "Please connect your wallet to continue.",
-                type: "error",
-            });
-            throw new Error("Wallet not connected");
-        }
+			let merkleProofArray: `0x${string}`[] = [];
+			if (typeof res !== "string") {
+				try {
+					merkleProofArray = processRawMerkleProof(res.merkle_proof);
+				} catch (e: any) {
+					addToast({
+						title: "Error in eligibility proof",
+						desc: `Could not validate your eligibility to claim your NFT: ${String(
+							e?.message || e
+						)}`,
+						type: "error",
+					});
+					return;
+				}
+			} else {
+				console.warn("Error fetching merkle proof:", res);
+			}
 
-        const res = await fetchMerkleProofForAddress(userAddress);
-        if (!res) {
-            addToast({
-                title: "Eligibility check failed",
-                desc: "We couldn’t fetch your eligibility proof. Please try again.",
-                type: "error",
-            });
-            return;
-        }
+			if (discountEligibility && typeof res !== "string") {
+				// If eligible for discount, call to whitelistedMint
 
-        let merkleProofArray: `0x${string}`[] = [];
-        if (typeof res !== "string") {
-            try {
-                merkleProofArray = processRawMerkleProof(res.merkle_proof);
-            } catch (e: any) {
-                addToast({
-                    title: "Error in eligibility proof",
-                    desc: `Could not validate your eligibility to claim your NFT: ${String(
-                        e?.message || e
-                    )}`,
-                    type: "error",
-                });
-                return;
-            }
-        } else {
-            console.warn("Error fetching merkle proof:", res);
-        }
+				// Here we simulate the call to capture the tokenId returned by claimNFT
+				try {
+					if (publicClient) {
+						const simulation = await publicClient.simulateContract({
+							address: contractAddress,
+							abi: publicZkArcadeNftAbi,
+							functionName: "whitelistedMint",
+							args: [
+								merkleProofArray,
+								BigInt(res.merkle_root_index),
+							],
+							account: userAddress,
+							value: parseEther("0.015"),
+						});
 
-        if (discountEligibility && typeof res !== "string") {
-            // If eligible for discount, call to whitelistedMint
+						mintedTokenIdRef.current =
+							simulation.result as unknown as bigint;
+					}
+				} catch (_) {
+					mintedTokenIdRef.current = null;
+				}
 
-            // Here we simulate the call to capture the tokenId returned by claimNFT
-            try {
-                if (publicClient) {
-                    const simulation = await publicClient.simulateContract({
-                        address: contractAddress,
-                        abi: publicZkArcadeNftAbi,
-                        functionName: "whitelistedMint",
-                        args: [merkleProofArray, BigInt(res.merkle_root_index)],
-                        account: userAddress,
-                        value: parseEther("0.015")
-                    });
+				const hash = await writeContractAsync({
+					address: contractAddress,
+					abi: publicZkArcadeNftAbi,
+					functionName: "whitelistedMint",
+					args: [merkleProofArray, BigInt(res.merkle_root_index)],
+					account: userAddress,
+					chainId,
+					value: parseEther("0.015"),
+				});
 
-                    mintedTokenIdRef.current =
-                        simulation.result as unknown as bigint;
-                }
-            } catch (_) {
-                mintedTokenIdRef.current = null;
-            }
+				addToast({
+					title: "Transaction sent",
+					desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
+						0,
+						8
+					)}...${hash.slice(-6)}`,
+					type: "success",
+				});
 
-            setClaimIsLoading(true);
+				return hash;
+			} else {
+				// If not eligible for discount, call to mint
 
-            const hash = await writeContractAsync({
-                address: contractAddress,
-                abi: publicZkArcadeNftAbi,
-                functionName: "whitelistedMint",
-                args: [merkleProofArray, BigInt(res.merkle_root_index)],
-                account: userAddress,
-                chainId,
-                value: parseEther("0.015"),
-            });
+				// Here we simulate the call to capture the tokenId returned by claimNFT
+				try {
+					if (publicClient) {
+						const simulation = await publicClient.simulateContract({
+							address: contractAddress,
+							abi: publicZkArcadeNftAbi,
+							functionName: "mint",
+							args: [],
+							account: userAddress,
+							value: parseEther("0.03"),
+						});
 
-            setClaimIsLoading(false);
+						mintedTokenIdRef.current =
+							simulation.result as unknown as bigint;
+					}
+				} catch (_) {
+					mintedTokenIdRef.current = null;
+				}
 
-            addToast({
-                title: "Transaction sent",
-                desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
-                    0,
-                    8
-                )}...${hash.slice(-6)}`,
-                type: "success",
-            });
+				const hash = await writeContractAsync({
+					address: contractAddress,
+					abi: publicZkArcadeNftAbi,
+					functionName: "mint",
+					args: [],
+					account: userAddress,
+					chainId,
+					value: parseEther("0.03"),
+				});
 
-            return hash;
-        } else {
-            // If not eligible for discount, call to mint
+				addToast({
+					title: "Transaction sent",
+					desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
+						0,
+						8
+					)}...${hash.slice(-6)}`,
+					type: "success",
+				});
 
-            // Here we simulate the call to capture the tokenId returned by claimNFT
-            try {
-                if (publicClient) {
-                    const simulation = await publicClient.simulateContract({
-                        address: contractAddress,
-                        abi: publicZkArcadeNftAbi,
-                        functionName: "mint",
-                        args: [],
-                        account: userAddress,
-                        value: parseEther("0.03")
-                    });
+				return hash;
+			}
+		},
+		[userAddress, contractAddress, writeContractAsync, chainId, addToast]
+	);
 
-                    mintedTokenIdRef.current =
-                        simulation.result as unknown as bigint;
-                }
-            } catch (_) {
-                mintedTokenIdRef.current = null;
-            }
+	const lastErrorMessage = useRef<string | null>(null);
+	useEffect(() => {
+		if (!txRest.isError) {
+			lastErrorMessage.current = null;
+			return;
+		}
 
-            setClaimIsLoading(true);
+		const message = txRest.error
+			? String(txRest.error.message || txRest.error)
+			: "Transaction failed.";
 
-            const hash = await writeContractAsync({
-                address: contractAddress,
-                abi: publicZkArcadeNftAbi,
-                functionName: "mint",
-                args: [],
-                account: userAddress,
-                chainId,
-                value: parseEther("0.03"),
-            });
+		if (lastErrorMessage.current === message) {
+			return;
+		}
 
-            setClaimIsLoading(false);
+		lastErrorMessage.current = message;
 
-            addToast({
-                title: "Transaction sent",
-                desc: `Your NFT is being minted on-chain. Tx Hash: ${hash.slice(
-                    0,
-                    8
-                )}...${hash.slice(-6)}`,
-                type: "success",
-            });
+		addToast({
+			title: "Claim failed",
+			desc: message,
+			type: "error",
+		});
+	}, [txRest.isError, txRest.error]);
 
-            return hash;
-        }
-    }, [userAddress, contractAddress, writeContractAsync, chainId, addToast]);
+	useEffect(() => {
+		if (receipt.isError) {
+			addToast({
+				title: "Problem with confirmation",
+				desc: "Could not confirm the transaction status. Check your wallet or the block explorer.",
+				type: "error",
+			});
+		}
 
-    const lastErrorMessage = useRef<string | null>(null);
-    useEffect(() => {
-        if (!txRest.isError) {
-            lastErrorMessage.current = null;
-            return;
-        }
+		if (receipt.isSuccess && txHash && processedTxHash !== txHash) {
+			setProcessedTxHash(txHash);
 
-        const message = txRest.error
-            ? String(txRest.error.message || txRest.error)
-            : "Transaction failed.";
+			const fetchLatestNftMetadata = async () => {
+				try {
+					const storageKey = `${userAddress}:hasShownSuccessModal`;
+					let mintedTokenId = mintedTokenIdRef.current;
+					if (mintedTokenId === null) return;
 
-        if (lastErrorMessage.current === message) {
-            return;
-        }
+					const tokenURI = await getTokenURI(
+						publicClient,
+						contractAddress,
+						mintedTokenId
+					);
 
-        lastErrorMessage.current = message;
+					const metadata = await getNftMetadata(
+						tokenURI,
+						contractAddress
+					);
+					setClaimedNftMetadata(metadata);
+					setShowSuccessModal(true);
+					try {
+						localStorage.setItem(storageKey, "true");
+					} catch (_) {}
+				} catch (error) {
+					console.error("Error fetching latest NFT metadata:", error);
+				}
+			};
 
-        addToast({
-            title: "Claim failed",
-            desc: message,
-            type: "error",
-        });
-    }, [txRest.isError, txRest.error]);
+			fetchLatestNftMetadata();
+		}
+	}, [
+		receipt.isSuccess,
+		receipt.isError,
+		txHash,
+		processedTxHash,
+		publicClient,
+		contractAddress,
+		userAddress,
+	]);
 
-    useEffect(() => {
-        if (receipt.isError) {
-            addToast({
-                title: "Problem with confirmation",
-                desc: "Could not confirm the transaction status. Check your wallet or the block explorer.",
-                type: "error",
-            });
-        }
+	const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
 
-        if (receipt.isSuccess && txHash && processedTxHash !== txHash) {
-            setProcessedTxHash(txHash);
+	// When the user has a balance > 0, load cached NFT token IDs from the backend
+	useEffect(() => {
+		if (!userAddress || !balanceMoreThanZero) return;
 
-            const fetchLatestNftMetadata = async () => {
-                try {
-                    const storageKey = `${userAddress}:hasShownSuccessModal`;
-                    let mintedTokenId = mintedTokenIdRef.current;
-                    if (mintedTokenId === null) return;
+		const fetchEvents = async () => {
+			try {
+				if (!publicClient) {
+					console.error("Wagmi publicClient not initialized");
+					return;
+				}
 
-                    const tokenURI = await getTokenURI(
-                        publicClient,
-                        contractAddress,
-                        mintedTokenId
-                    );
+				const userTokenIds = await getUserTokenIds(userAddress);
 
-                    const metadata = await getNftMetadata(
-                        tokenURI,
-                        contractAddress
-                    );
-                    setClaimedNftMetadata(metadata);
-                    setShowSuccessModal(true);
-                    try {
-                        localStorage.setItem(storageKey, "true");
-                    } catch (_) {}
-                } catch (error) {
-                    console.error("Error fetching latest NFT metadata:", error);
-                }
-            };
+				const fetchTokenURIs = async () => {
+					try {
+						if (!publicClient) {
+							return;
+						}
 
-            fetchLatestNftMetadata();
-        }
-    }, [
-        receipt.isSuccess,
-        receipt.isError,
-        txHash,
-        processedTxHash,
-        publicClient,
-        contractAddress,
-        userAddress,
-    ]);
+						const uris: string[] = [];
+						for (let i = 0; i < (balance.data || 0n); i++) {
+							const tokenId = userTokenIds[i];
 
-    const balanceMoreThanZero = (balance.data && balance.data > 0n) || false;
+							if (tokenId === undefined) {
+								continue;
+							}
 
-    // When the user has a balance > 0, load cached NFT token IDs from the backend
-    useEffect(() => {
-        if (!userAddress || !balanceMoreThanZero) return;
+							const tokenURI = await getTokenURI(
+								publicClient,
+								contractAddress,
+								tokenId
+							);
 
-        const fetchEvents = async () => {
-            try {
-                if (!publicClient) {
-                    console.error("Wagmi publicClient not initialized");
-                    return;
-                }
+							uris.push(tokenURI);
+						}
+						setTokenURIs(uris);
+					} catch (e) {
+						console.error("Error fetching token URIs:", e);
+					}
+				};
+				fetchTokenURIs();
+			} catch (e) {
+				console.error("Error fetching events:", e);
+			}
+		};
 
-                const userTokenIds = await getUserTokenIds(userAddress);
+		fetchEvents();
+	}, [
+		userAddress,
+		balanceMoreThanZero,
+		publicClient,
+		balance.data,
+		contractAddress,
+	]);
 
-                const fetchTokenURIs = async () => {
-                    try {
-                        if (!publicClient) {
-                            return;
-                        }
+	const supplyLeft = (maxSupply.data ?? 0n) - (totalSupply.data ?? 0n);
 
-                        const uris: string[] = [];
-                        for (let i = 0; i < (balance.data || 0n); i++) {
-                            const tokenId = userTokenIds[i];
-
-                            if (tokenId === undefined) {
-                                continue;
-                            }
-
-                            const tokenURI = await getTokenURI(
-                                publicClient,
-                                contractAddress,
-                                tokenId
-                            );
-
-                            uris.push(tokenURI);
-                        }
-                        setTokenURIs(uris);
-                    } catch (e) {
-                        console.error("Error fetching token URIs:", e);
-                    }
-                };
-                fetchTokenURIs();
-            } catch (e) {
-                console.error("Error fetching events:", e);
-            }
-        };
-
-        fetchEvents();
-    }, [
-        userAddress,
-        balanceMoreThanZero,
-        publicClient,
-        balance.data,
-        contractAddress,
-    ]);
-
-    const supplyLeft = (maxSupply.data ?? 0n) - (totalSupply.data ?? 0n);
-
-    return {
-        balance,
-        claimNft,
-        receipt,
-        tx: { hash: txHash, ...txRest },
-        balanceMoreThanZero,
-        tokenURIs,
-        showSuccessModal,
-        setShowSuccessModal,
-        claimedNftMetadata,
-        setClaimedNftMetadata,
-        discount_percentage,
-        nft_base_price,
-        totalSupply,
-        maxSupply,
-        supplyLeft,
-        claimIsLoading,
-    };
+	return {
+		balance,
+		claimNft,
+		receipt,
+		tx: { hash: txHash, ...txRest },
+		balanceMoreThanZero,
+		tokenURIs,
+		showSuccessModal,
+		setShowSuccessModal,
+		claimedNftMetadata,
+		setClaimedNftMetadata,
+		discountedPrice,
+		fullPrice,
+		totalSupply,
+		maxSupply,
+		supplyLeft,
+		claimIsLoading: txRest.isPending || receipt.isLoading,
+	};
 }

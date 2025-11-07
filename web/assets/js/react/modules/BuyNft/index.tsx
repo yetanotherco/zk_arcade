@@ -23,7 +23,7 @@ type Props = {
 
 const weiToEth = (wei: Number) => {
 	return Number(wei) / 1e18;
-}
+};
 
 const BuyNftFlow = ({
 	nft_contract_address,
@@ -46,8 +46,8 @@ const BuyNftFlow = ({
 	});
 	const {
 		balanceMoreThanZero: publicHasMinted,
-		discount_percentage,
-		nft_base_price,
+		discountedPrice,
+		fullPrice,
 		supplyLeft,
 		totalSupply,
 		claimNft,
@@ -55,6 +55,7 @@ const BuyNftFlow = ({
 		showSuccessModal,
 		setShowSuccessModal,
 		claimedNftMetadata,
+		maxSupply,
 	} = usePublicNftContract({
 		contractAddress: public_nft_contract_address,
 		userAddress: user_address || "0x0",
@@ -62,19 +63,19 @@ const BuyNftFlow = ({
 	const alreadyMinted =
 		(primaryHasMinted || publicHasMinted) && !!user_address;
 
-	const effectiveDiscount =
-		discount_percentage?.data && discountEligibility ? discount_percentage.data : 0;
-	const priceIsLoading = nft_base_price.isLoading;
+	const priceIsLoading = fullPrice.isLoading;
 	const stockIsLoading = totalSupply.isLoading;
-	const discountedPrice = useMemo(() => {
-		if (nft_base_price.data == null) return null;
-		const base = Number(nft_base_price.data);
-		const pct = Number(effectiveDiscount || 0);
+
+	const discountedPricePercentage = useMemo(() => {
+		if (fullPrice.data == null) return null;
+		const base = Number(fullPrice.data);
+		const pct = Number(discountedPrice.data || 0);
 		return weiToEth(Math.max(base * (1 - pct / 100), 0));
-	}, [nft_base_price.data, effectiveDiscount]);
+	}, [fullPrice.data, discountedPrice.data]);
 
 	// TODO: Move the contract side
-	const nftImage = "https://ipfs.io/ipfs/QmU1TBMfSqRoxt2PfYbYZu9wNZ2emGRNhU5nw7uPkuUi5C";
+	const nftImage =
+		"https://ipfs.io/ipfs/QmU1TBMfSqRoxt2PfYbYZu9wNZ2emGRNhU5nw7uPkuUi5C";
 
 	// If it elligible for the premium nft, redirect to that page
 	useEffect(() => {
@@ -184,7 +185,7 @@ const BuyNftFlow = ({
 				</div>
 				<p className="text-sm text-text-200">
 					{discountEligibility ? (
-						discount_percentage.isLoading ? (
+						discountedPrice.isLoading ? (
 							<span className="animate-pulse">
 								Checking discount…
 							</span>
@@ -193,7 +194,7 @@ const BuyNftFlow = ({
 								You are eligible for a
 								<span className="text-accent-100 font-semibold">
 									{" "}
-									{Number(discount_percentage.data)}%{" "}
+									{Number(discountedPrice.data)}%{" "}
 								</span>
 								discount!
 							</>
@@ -229,13 +230,14 @@ const BuyNftFlow = ({
 							Price:{" "}
 							{priceIsLoading ? (
 								<span className="animate-pulse">Loading…</span>
-							) : discountEligibility && effectiveDiscount ? (
+							) : discountEligibility &&
+							  discountedPricePercentage ? (
 								<span className="text-white">
 									<span className="line-through opacity-70 mr-2">
-										{weiToEth(Number(nft_base_price.data))} ETH
+										{weiToEth(Number(fullPrice.data))} ETH
 									</span>
 									<span className="text-accent-100 font-semibold mr-2">
-										-{Number(effectiveDiscount)}%
+										-{Number(discountedPricePercentage)}%
 									</span>
 									<span>
 										{discountedPrice?.toString()} ETH
@@ -243,7 +245,7 @@ const BuyNftFlow = ({
 								</span>
 							) : (
 								<span className="text-white">
-									{Number(nft_base_price.data)} ETH
+									{Number(fullPrice.data)} ETH
 								</span>
 							)}
 						</p>
@@ -253,7 +255,8 @@ const BuyNftFlow = ({
 								<span className="animate-pulse">Loading…</span>
 							) : (
 								<span className="text-white">
-									{Number(supplyLeft)}/{Number(totalSupply.data)}
+									{Number(supplyLeft)}/
+									{Number(maxSupply.data)}
 								</span>
 							)}
 						</p>

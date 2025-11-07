@@ -50,7 +50,8 @@ export function convertIpfsToHttpUrl(imageUrl: string): string {
 }
 
 // Fetches the NFT metadata from a given JSON URL and the NFT contract address
-export async function getNftMetadata(
+// TOD: create another for aws s3 (non-ipfs url)
+export async function getNftMetadataIpfs(
 	jsonUrl: string,
 	nftContractAddress: Address
 ): Promise<NftMetadata> {
@@ -76,6 +77,35 @@ export async function getNftMetadata(
 			name: data.name,
 			description: data.description,
 			image: imageUrl,
+			tokenId: tokenId,
+			address: nftContractAddress,
+		};
+	} catch (error) {
+		throw error;
+	}
+}
+
+export async function getNftMetadata(
+	jsonUrl: string,
+	nftContractAddress: Address
+): Promise<NftMetadata> {
+	try {
+		const response = await fetch(jsonUrl);
+		if (!response.ok) {
+			throw new Error(`Error fetching metadata: ${response.status}`);
+		}
+
+		const data = await response.json();
+
+		if (!data.name || !data.description || !data.image) {
+			throw new Error("Invalid metadata format");
+		}
+
+		const tokenId = BigInt(jsonUrl.split("/").pop() || 0);
+		return {
+			name: data.name,
+			description: data.description,
+			image: data.iamge,
 			tokenId: tokenId,
 			address: nftContractAddress,
 		};

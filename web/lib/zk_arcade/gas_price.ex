@@ -29,10 +29,10 @@ defmodule ZkArcade.GasPrice do
     case fetch_gas_price() do
       {:ok, gas_price_wei} ->
         gas_price_gwei = wei_to_gwei(gas_price_wei)
-        
+
         # Cache the result
-        Cachex.put(:eth_cache, :gas_price, gas_price_gwei, ttl: @cache_ttl)
-        
+        Cachex.put(:eth_cache, :gas_price, gas_price_gwei, expire: @cache_ttl)
+
         Logger.info("Current gas price: #{Float.round(gas_price_gwei, 1)} gwei")
         {:ok, gas_price_gwei}
 

@@ -9,7 +9,8 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 
 contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     uint256 private _nextTokenId;
-    uint256 public maxSupply;
+    uint256 public nonWhitelistedMaxSupply;
+    uint256 public nonWhitelistedMinted;
     bool public mintingEnabled;
     bytes32[] public merkleRoots;
     mapping(address => bool) public hasClaimed;
@@ -55,7 +56,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         string memory name,
         string memory symbol,
         string memory baseURI,
-        uint256 _maxSupply,
+        uint256 _nonWhitelistedMaxSupply,
         address _mintingFundsRecipientAddress,
         uint256 _fullPrice,
         uint256 _discountedPrice
@@ -64,12 +65,13 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         __Ownable_init(owner);
         __ReentrancyGuard_init();
         _baseTokenURI = baseURI;
-        maxSupply = _maxSupply;
+        nonWhitelistedMaxSupply = _nonWhitelistedMaxSupply;
         fullPrice = _fullPrice;
         discountedPrice = _discountedPrice;
         mintingEnabled = false;
         transfersEnabled = false;
         _mintingFundsRecipient = _mintingFundsRecipientAddress;
+        nonWhitelistedMinted = 0;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -88,10 +90,6 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
         if (balanceOf(msg.sender) > 0) {
             revert AlreadyOwnsNFT();
-        }
-        
-        if (_nextTokenId >= maxSupply) {
-            revert MaxSupplyExceeded();
         }
 
         require(rootIndex < merkleRoots.length, "Invalid root index");
@@ -140,8 +138,8 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         if (balanceOf(msg.sender) > 0) {
             revert AlreadyOwnsNFT();
         }
-        
-        if (_nextTokenId >= maxSupply) {
+
+        if (nonWhitelistedMinted >= nonWhitelistedMaxSupply) {
             revert MaxSupplyExceeded();
         }
 
@@ -154,6 +152,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         hasClaimed[msg.sender] = true;
 
         uint256 tokenId = _nextTokenId++;
+        nonWhitelistedMinted += 1;
         _mint(msg.sender, tokenId);
 
         // If the payment is above the required amount, return the extra funds to the sender

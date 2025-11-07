@@ -9,17 +9,17 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 
 contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     uint256 private _nextTokenId;
+    string private _baseTokenURI;
     uint256 public nonWhitelistedMaxSupply;
     uint256 public nonWhitelistedMinted;
     bool public mintingEnabled;
+    bool public transfersEnabled;
     bytes32[] public merkleRoots;
     mapping(address => bool) public hasClaimed;
-    bool internal transfersEnabled;
-    string private _baseTokenURI;
-    address public _mintingFundsRecipient;
 
     uint256 public fullPrice;
     uint256 public discountedPrice;
+    address public mintingFundsRecipient;
 
     /**
      * Events
@@ -34,6 +34,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     event FullPriceUpdated(uint256 newPrice);
     event DiscountedPriceUpdated(uint256 newPrice);
     event MintingFundsRecipientUpdated(address newRecipient);
+    event FundsWithdrawn(address indexed recipient, uint256 amount);
 
     /**
      * Errors
@@ -42,8 +43,11 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     error MaxSupplyExceeded();
     error AlreadyOwnsNFT();
     error TransfersPaused();
-    error ClaimsPaused();
-    error NotEnoughFundsForMinting();
+    error WrongPaymentValue(uint256 expected, uint256 actual);
+    error InvalidRootIndex();
+    error InvalidMerkleProof();
+    error ZeroAddress();
+    error EmptyMerkleRoot();
 
     // ======== Initialization & Upgrades ========
 
@@ -66,12 +70,15 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         __ReentrancyGuard_init();
         _baseTokenURI = baseURI;
         nonWhitelistedMaxSupply = _nonWhitelistedMaxSupply;
-        fullPrice = _fullPrice;
-        discountedPrice = _discountedPrice;
+        nonWhitelistedMinted = 0;
         mintingEnabled = false;
         transfersEnabled = false;
-        _mintingFundsRecipient = _mintingFundsRecipientAddress;
-        nonWhitelistedMinted = 0;
+        if (_mintingFundsRecipientAddress == address(0)) {
+            revert ZeroAddress();
+        }
+        fullPrice = _fullPrice;
+        discountedPrice = _discountedPrice;
+        mintingFundsRecipient = _mintingFundsRecipientAddress;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -85,23 +92,24 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
             revert MintingPaused();
         }
 
-        require(!hasClaimed[msg.sender], "NFT already claimed for this address");
-
-
-        if (balanceOf(msg.sender) > 0) {
+        if (hasClaimed[msg.sender]) {
             revert AlreadyOwnsNFT();
         }
 
-        require(rootIndex < merkleRoots.length, "Invalid root index");
+        if (rootIndex >= merkleRoots.length) {
+            revert InvalidRootIndex();
+        }
 
         // Verify that the address is whitelisted using Merkle Proof
         bytes32 inner = keccak256(abi.encode(msg.sender));
         bytes32 leaf = keccak256(abi.encode(inner));
-        require(MerkleProof.verify(merkleProof, merkleRoots[rootIndex], leaf), "Invalid merkle proof");
+        if (!MerkleProof.verify(merkleProof, merkleRoots[rootIndex], leaf)) {
+            revert InvalidMerkleProof();
+        }
 
-        // Check if the user has payed the amount required (discountedPrice) for the NFT
-        if (msg.value < discountedPrice) {
-            revert NotEnoughFundsForMinting();
+        // Check if the user has paid the exact amount required (discountedPrice) for the NFT
+        if (msg.value != discountedPrice) {
+            revert WrongPaymentValue(discountedPrice, msg.value);
         }
 
         // Mark as claimed
@@ -110,16 +118,6 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         // Mint the NFT
         uint256 tokenId = _nextTokenId++;
         _mint(msg.sender, tokenId);
-
-        // If the payment is above the required amount, return the extra funds to the sender
-        if (msg.value > discountedPrice) {
-            uint256 refundAmount = msg.value - discountedPrice;
-            payable(msg.sender).transfer(refundAmount);
-        }
-
-        // Forward funds to the minting funds recipient
-        uint256 toForward = msg.value <= discountedPrice ? msg.value : discountedPrice;
-        payable(_mintingFundsRecipient).transfer(toForward);
 
         emit NFTMinted(msg.sender, tokenId);
         return tokenId;
@@ -131,9 +129,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
             revert MintingPaused();
         }
 
-        require(!hasClaimed[msg.sender], "NFT already claimed for this address");
-
-        if (balanceOf(msg.sender) > 0) {
+        if (hasClaimed[msg.sender]) {
             revert AlreadyOwnsNFT();
         }
 
@@ -141,27 +137,17 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
             revert MaxSupplyExceeded();
         }
 
-        // Check if the user has payed the amount required (fullPrice) for the NFT
-         if (msg.value < fullPrice) {
-            revert NotEnoughFundsForMinting();
+        // Check if the user has paid the exact amount required (fullPrice) for the NFT
+        if (msg.value != fullPrice) {
+            revert WrongPaymentValue(fullPrice, msg.value);
         }
 
         // Mark as claimed
         hasClaimed[msg.sender] = true;
 
         uint256 tokenId = _nextTokenId++;
-        nonWhitelistedMinted += 1;
+        nonWhitelistedMinted++;
         _mint(msg.sender, tokenId);
-
-        // If the payment is above the required amount, return the extra funds to the sender
-        if (msg.value > fullPrice) {
-            uint256 refundAmount = msg.value - fullPrice;
-            payable(msg.sender).transfer(refundAmount);
-        }
- 
-        // Forward funds to the minting funds recipient
-        uint256 toForward = msg.value <= fullPrice ? msg.value : fullPrice;
-        payable(_mintingFundsRecipient).transfer(toForward);
 
         emit NFTMinted(msg.sender, tokenId);
         return tokenId;
@@ -189,13 +175,21 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     // ======== Admin Controls ========
 
     function addMerkleRoot(bytes32 _merkleRoot) external onlyOwner returns (uint256 index) {
+        if (_merkleRoot == bytes32(0)) {
+            revert EmptyMerkleRoot();
+        }
         merkleRoots.push(_merkleRoot);
         index = merkleRoots.length - 1;
         emit MerkleRootUpdated(_merkleRoot, index);
     }
 
     function setMerkleRoot(bytes32 _merkleRoot, uint256 rootIndex) external onlyOwner {
-        require(rootIndex < merkleRoots.length, "Invalid root index");
+        if (rootIndex >= merkleRoots.length) {
+            revert InvalidRootIndex();
+        }
+        if (_merkleRoot == bytes32(0)) {
+            revert EmptyMerkleRoot();
+        }
         merkleRoots[rootIndex] = _merkleRoot;
 
         emit MerkleRootUpdated(_merkleRoot, rootIndex);
@@ -237,7 +231,15 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     }
 
     function setMintingFundsRecipient(address newRecipient) external onlyOwner {
-        _mintingFundsRecipient = newRecipient;
+        if (newRecipient == address(0)) {
+            revert ZeroAddress();
+        }
+        mintingFundsRecipient = newRecipient;
         emit MintingFundsRecipientUpdated(newRecipient);
+    }
+
+    function withdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+        payable(mintingFundsRecipient).transfer(balance);
     }
 }

@@ -31,7 +31,11 @@ defmodule ZkArcade.GasPrice do
         gas_price_gwei = wei_to_gwei(gas_price_wei)
 
         # Cache the result
-        Cachex.put(:eth_cache, :gas_price, gas_price_gwei, expire: @cache_ttl)
+        case Cachex.put(:eth_cache, :gas_price, gas_price_gwei, expire: @cache_ttl) do
+          {:ok, true} -> :ok
+          {:ok, false} -> Logger.error("Failed to cache gas price: Cachex put returned false")
+          {:error, reason} -> Logger.error("Failed to cache gas price: #{inspect(reason)}")
+        end
 
         Logger.info("Current gas price: #{Float.round(gas_price_gwei, 1)} gwei")
         {:ok, gas_price_gwei}

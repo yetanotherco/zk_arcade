@@ -5,9 +5,8 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 private _nextTokenId;
     string private _baseTokenURI;
     uint256 public maxSupply;
@@ -66,7 +65,6 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     ) public initializer {
         __ERC721_init(name, symbol);
         __Ownable_init(owner);
-        __ReentrancyGuard_init();
         _baseTokenURI = baseURI;
         maxSupply = _maxSupply;
         mintingEnabled = false;
@@ -85,7 +83,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
     // This mint function allows whitelisted users to mint an NFT for a discounted price. The not whitelisted
     // users can use the mint() function.
-    function whitelistedMint(bytes32[] calldata merkleProof, uint256 rootIndex) public payable nonReentrant returns (uint256) {
+    function whitelistedMint(bytes32[] calldata merkleProof, uint256 rootIndex) public payable returns (uint256) {
         if (!mintingEnabled) {
             revert MintingPaused();
         }
@@ -126,7 +124,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     }
 
     // This mint function allows non-whitelisted users to mint an NFT at the regular price.
-    function mint() public payable nonReentrant returns (uint256) {
+    function mint() public payable returns (uint256) {
         if (!mintingEnabled) {
             revert MintingPaused();
         }

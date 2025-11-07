@@ -10,8 +10,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     uint256 private _nextTokenId;
     string private _baseTokenURI;
-    uint256 public nonWhitelistedMaxSupply;
-    uint256 public nonWhitelistedMinted;
+    uint256 public maxSupply;
     bool public mintingEnabled;
     bool public transfersEnabled;
     bytes32[] public merkleRoots;
@@ -60,7 +59,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         string memory name,
         string memory symbol,
         string memory baseURI,
-        uint256 _nonWhitelistedMaxSupply,
+        uint256 _maxSupply,
         address _mintingFundsRecipientAddress,
         uint256 _fullPrice,
         uint256 _discountedPrice
@@ -69,8 +68,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         __Ownable_init(owner);
         __ReentrancyGuard_init();
         _baseTokenURI = baseURI;
-        nonWhitelistedMaxSupply = _nonWhitelistedMaxSupply;
-        nonWhitelistedMinted = 0;
+        maxSupply = _maxSupply;
         mintingEnabled = false;
         transfersEnabled = false;
         if (_mintingFundsRecipientAddress == address(0)) {
@@ -94,6 +92,10 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
 
         if (hasClaimed[msg.sender]) {
             revert AlreadyOwnsNFT();
+        }
+
+        if (_nextTokenId >= maxSupply) {
+            revert MaxSupplyExceeded();
         }
 
         if (rootIndex >= merkleRoots.length) {
@@ -133,7 +135,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
             revert AlreadyOwnsNFT();
         }
 
-        if (nonWhitelistedMinted >= nonWhitelistedMaxSupply) {
+        if (_nextTokenId >= maxSupply) {
             revert MaxSupplyExceeded();
         }
 
@@ -146,7 +148,6 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         hasClaimed[msg.sender] = true;
 
         uint256 tokenId = _nextTokenId++;
-        nonWhitelistedMinted++;
         _mint(msg.sender, tokenId);
 
         emit NFTMinted(msg.sender, tokenId);

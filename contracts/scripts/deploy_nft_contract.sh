@@ -24,3 +24,9 @@ else
 fi
 
 eval $CMD
+
+# Print the deployed contract address
+nft_contract_proxy=$(jq -r '.addresses.proxy' $NFT_OUTPUT_PATH)
+echo "NFT Contract Proxy Address: $nft_contract_proxy"
+nft_contract_implementation=$(jq -r '.addresses.implementation' $NFT_OUTPUT_PATH)
+echo "NFT Contract Implementation Address: $nft_contract_implementation"

@@ -99,8 +99,8 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
         bytes32 leaf = keccak256(abi.encode(inner));
         require(MerkleProof.verify(merkleProof, merkleRoots[rootIndex], leaf), "Invalid merkle proof");
 
-        // Check if the user has payed the amount required ($50 or 0.015 ETH) for the NFT
-         if (msg.value < discountedPrice) {
+        // Check if the user has payed the amount required (discountedPrice) for the NFT
+        if (msg.value < discountedPrice) {
             revert NotEnoughFundsForMinting();
         }
 
@@ -143,7 +143,7 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
             revert MaxSupplyExceeded();
         }
 
-        // Check if the user has payed the amount required ($100 or 0.030 ETH) for the NFT
+        // Check if the user has payed the amount required (fullPrice) for the NFT
          if (msg.value < fullPrice) {
             revert NotEnoughFundsForMinting();
         }

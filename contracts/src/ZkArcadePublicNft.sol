@@ -21,9 +21,6 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     uint256 public fullPrice;
     uint256 public discountedPrice;
 
-    uint256 public constant BASE_PRICE = 30000000000000000; // 0.03 ETH
-    uint256 public constant DISCOUNT_PERCENTAGE = 50; // 50% discount for whitelisted users
-
     /**
      * Events
      */

@@ -47,9 +47,63 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     {:noreply, socket}
   end
 
+  def utc_hex_to_date(hex_str, is_end_date) when is_binary(hex_str) do
+    # Remove the "0x" prefix if present
+    clean_hex =
+      hex_str
+      |> String.trim()
+      |> String.downcase()
+      |> then(fn
+        "0x" <> rest -> rest
+        other -> other
+      end)
+
+    # Parse the hex string to an integer
+    case Integer.parse(clean_hex, 16) do
+      {seconds, ""} ->
+        # Reduce 2 days (48 hours) for end date (so we don't count the extra claim period)
+        seconds = if is_end_date, do: seconds - (86400 * 2), else: seconds
+        # Convert seconds since epoch to DateTime
+        case DateTime.from_unix(seconds, :second) do
+          {:ok, dt} ->
+            date_str = dt |> DateTime.to_date() |> Date.to_string()
+            date_str
+
+          {:error, reason} ->
+            raise "Error converting seconds to DateTime: #{inspect(reason)}"
+        end
+
+      :error ->
+        raise ArgumentError,
+              "Invalid hex string: #{inspect(clean_hex)}"
+    end
+  end
+
+  defp get_upcoming_games() do
+    case File.read("../games/parity/level_generator/levels/parity_mainnet.json") do
+      {:ok, body} ->
+        case Jason.decode(body) do
+          {:ok, data} ->
+            data["games"]
+            |> Enum.with_index()
+            |> Enum.map(fn {game, index} ->
+              %{
+                round: index + 1,
+                start_time: utc_hex_to_date(game["startsAtTime"], false),
+                end_time: utc_hex_to_date(game["endsAtTime"], true)
+              }
+            end)
+          {:error, reason} -> Logger.error("Error decoding JSON: #{reason}"); []
+        end
+      {:error, reason} -> Logger.error("Error reading file: #{reason}")
+    end
+  end
+
   defp assign_initial_data(socket, session) do
     wallet = get_wallet_from_session(session)
     {username, position} = get_username_and_position(wallet)
+
+    upcoming_games = get_upcoming_games()
 
     socket
     |> assign(:wallet, wallet)
@@ -62,6 +116,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     |> assign(:batcher_url, Application.get_env(:zk_arcade, :batcher_url))
     |> assign(:explorer_url, Application.get_env(:zk_arcade, :explorer_url))
     |> assign(:notifications, [])
+    |> assign(:upcoming_games, upcoming_games)
     |> assign(:eligible, get_user_eligibility(wallet))
   end
 

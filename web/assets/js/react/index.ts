@@ -47,6 +47,7 @@ define(
 			"batcher_url",
 			"leaderboard_address",
 			"nft_contract_address",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -63,6 +64,7 @@ define(
 			"explorer_url",
 			"batcher_url",
 			"nft_contract_address",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -108,6 +110,7 @@ define(
 			"nft_contract_address",
 			"highest_level_reached",
 			"highest_level_reached_proof_id",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -126,6 +129,7 @@ define(
 			"network",
 			"payment_service_address",
 			"nft_contract_address",
+			"public_nft_contract_address",
 			"user_address",
 			"eligible",
 		],
@@ -146,6 +150,7 @@ define(
 			"nft_contract_address",
 			"highest_level_reached",
 			"highest_level_reached_proof_id",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -169,6 +174,7 @@ define(
 			"network",
 			"user_address",
 			"nft_contract_address",
+			"public_nft_contract_address",
 			"is_eligible",
 		],
 	}

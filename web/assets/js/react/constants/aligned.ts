@@ -280,16 +280,28 @@ export const publicZkArcadeNftAbi = [
 		outputs: [{ type: "uint256" }],
 	},
 	{
-		type: "function",
-		stateMutability: "payable",
-		name: "whitelistedMint",
 		inputs: [
-			{ name: "merkleProof", type: "bytes32[]" },
-			{ name: "rootIndex", type: "uint256" },
+			{
+				internalType: "bytes32[]",
+				name: "merkleProof",
+				type: "bytes32[]",
+			},
+			{
+				internalType: "uint256",
+				name: "rootIndex",
+				type: "uint256",
+			},
 		],
+		name: "whitelistedMint",
 		outputs: [
-			{ name: "", type: "uint256", internalType: "uint256" },
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
 		],
+		stateMutability: "payable",
+		type: "function",
 	},
 	{
 		type: "function",

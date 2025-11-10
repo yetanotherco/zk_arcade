@@ -128,14 +128,10 @@ function hexStringToBytes(hex: string): Uint8Array {
 
 export const fetchMerkleProofForAddress = async (
 	address: Address
-): Promise<
-	| {
-			merkle_proof: NFTClaimMerkleProof;
-			merkle_root_index: number;
-	  }
-	| string
-	| null
-> => {
+): Promise<{
+	merkle_proof: NFTClaimMerkleProof;
+	merkle_root_index: number;
+} | null> => {
 	try {
 		const response = await fetch(`/api/nft/proof?address=${address}`, {
 			method: "GET",
@@ -146,8 +142,7 @@ export const fetchMerkleProofForAddress = async (
 		});
 
 		if (!response.ok) {
-			// Note: this is done to avoid returning null in case of an ineligible address
-			return response.statusText;
+			return null;
 		}
 
 		const data = await response.json();

@@ -5,7 +5,7 @@ import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
-import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
+import { NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 import { useNftContract, NftMetadata } from "../../hooks/useNftContract";
 import { getNftMetadata } from "../../hooks/useNftContract/utils";
@@ -196,15 +196,6 @@ export const WalletInfo = ({
 										Buy!
 									</p>
 								)}
-								<EligibilityModal
-									isEligible={is_eligible}
-									open={mintModalOpen}
-									setOpen={setMintModalOpen}
-									onClose={() => setClaimed(true)}
-									claimNft={claimNft}
-									balance={balance.data || 0n}
-									isLoading={receipt.isLoading}
-								/>
 							</div>
 						)}
 

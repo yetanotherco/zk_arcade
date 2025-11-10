@@ -69,8 +69,8 @@ const BuyNftFlow = ({
 	const discountedPricePercentage = useMemo(() => {
 		if (fullPrice.data == null) return null;
 		const base = Number(fullPrice.data);
-		const pct = Number(discountedPrice.data || 0);
-		return weiToEth(Math.max(base * (1 - pct / 100), 0));
+		const discounted = Number(discountedPrice.data || 0);
+		return (discounted / base) * 100;
 	}, [fullPrice.data, discountedPrice.data]);
 
 	// If it elligible for the premium nft, redirect to that page
@@ -190,7 +190,7 @@ const BuyNftFlow = ({
 								You are eligible for a
 								<span className="text-accent-100 font-semibold">
 									{" "}
-									{Number(discountedPrice.data)}%{" "}
+									{discountedPricePercentage}%{" "}
 								</span>
 								discount!
 							</>
@@ -236,7 +236,8 @@ const BuyNftFlow = ({
 										-{Number(discountedPricePercentage)}%
 									</span>
 									<span>
-										{discountedPrice?.toString()} ETH
+										{weiToEth(Number(discountedPrice.data))}{" "}
+										ETH
 									</span>
 								</span>
 							) : (

@@ -11,6 +11,7 @@ type Props = {
 	network: string;
 	payment_service_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	user_address: Address;
 	eligible: string;
 };
@@ -34,6 +35,7 @@ const InitialModals = ({
 	nft_contract_address,
 	user_address,
 	eligible,
+	public_nft_contract_address,
 }: Props) => {
 	const isEligible = eligible === "true";
 	const [eligibilityPending, setEligibilityPending] = useState(true);
@@ -60,6 +62,7 @@ const InitialModals = ({
 					user_address={user_address}
 					isEligible={isEligible}
 					nft_contract_address={nft_contract_address}
+					public_nft_contract_address={public_nft_contract_address}
 				/>
 				<EncourageDepositingModal
 					payment_service_address={payment_service_address}

@@ -27,6 +27,7 @@ export const ProveAndSubmit = ({
 	submittedLevelOnChain,
 	timeRemaining,
 	nft_contract_address,
+	public_nft_contract_address,
 	gameIdx,
 	highestLevelReached,
 	highestLevelReachedProofId,
@@ -41,6 +42,7 @@ export const ProveAndSubmit = ({
 	submittedLevelOnChain: number;
 	timeRemaining?: TimeRemaining | null;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	gameIdx: number;
 	highestLevelReached: number;
 	highestLevelReachedProofId?: string | number;
@@ -87,7 +89,10 @@ export const ProveAndSubmit = ({
 			// generated proof (avoids flashing the generated-proof modal).
 			setIsGeneratingProof(false);
 
-			if (highestLevelReached === currentLevel && highestLevelReachedProofId) {
+			if (
+				highestLevelReached === currentLevel &&
+				highestLevelReachedProofId
+			) {
 				try {
 					const url = `${window.location.pathname}?submitProofId=${highestLevelReachedProofId}`;
 					window.history.pushState({}, "", url);
@@ -330,6 +335,7 @@ export const ProveAndSubmit = ({
 				proofToSubmitData={proofVerificationData}
 				gameName="parity"
 				nft_contract_address={nft_contract_address}
+				public_nft_contract_address={public_nft_contract_address}
 				gameIdx={gameIdx}
 				highestLevelReached={highestLevelReached}
 				highestLevelReachedProofId={highestLevelReachedProofId}

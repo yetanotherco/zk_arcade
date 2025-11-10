@@ -12,9 +12,10 @@ import { publicZkArcadeNftAbi } from "../constants/aligned";
 import { fetchPublicMerkleProofForAddress } from "../utils/aligned";
 import {
 	getUserTokenIds,
-	getTokenURI,
+	getTokenURIIpfs,
 	processRawMerkleProof,
 	getNftMetadata,
+	getTokenURI,
 } from "./useNftContract/utils";
 
 type HookArgs = {
@@ -95,36 +96,29 @@ export function usePublicNftContract({
 				throw new Error("Wallet not connected");
 			}
 
-			const res = await fetchPublicMerkleProofForAddress(userAddress);
-			if (!res) {
-				addToast({
-					title: "Eligibility check failed",
-					desc: "We couldn’t fetch your eligibility proof. Please try again.",
-					type: "error",
-				});
-				return;
-			}
+			if (discountEligibility) {
+				// If eligible for discount, fetch merkle proof and call to whitelistedMint
+				const res = await fetchPublicMerkleProofForAddress(userAddress);
+				if (!res) {
+					addToast({
+						title: "Eligibility check failed",
+						desc: "We couldn’t fetch your eligibility proof. Please try again.",
+						type: "error",
+					});
+					return;
+				}
 
-			let merkleProofArray: `0x${string}`[] = [];
-			if (typeof res !== "string") {
+				let merkleProofArray: `0x${string}`[] = [];
 				try {
 					merkleProofArray = processRawMerkleProof(res.merkle_proof);
 				} catch (e: any) {
 					addToast({
 						title: "Error in eligibility proof",
-						desc: `Could not validate your eligibility to claim your NFT: ${String(
-							e?.message || e
-						)}`,
+						desc: `Could not validate your eligibility to claim your NFT`,
 						type: "error",
 					});
 					return;
 				}
-			} else {
-				console.warn("Error fetching merkle proof:", res);
-			}
-
-			if (discountEligibility && typeof res !== "string") {
-				// If eligible for discount, call to whitelistedMint
 
 				// Here we simulate the call to capture the tokenId returned by claimNFT
 				try {
@@ -138,13 +132,14 @@ export function usePublicNftContract({
 								BigInt(res.merkle_root_index),
 							],
 							account: userAddress,
-							value: parseEther("0.015"),
+							value: discountedPrice.data,
 						});
 
 						mintedTokenIdRef.current =
 							simulation.result as unknown as bigint;
 					}
-				} catch (_) {
+				} catch (err) {
+					console.log(err);
 					mintedTokenIdRef.current = null;
 				}
 
@@ -155,7 +150,7 @@ export function usePublicNftContract({
 					args: [merkleProofArray, BigInt(res.merkle_root_index)],
 					account: userAddress,
 					chainId,
-					value: parseEther("0.015"),
+					value: discountedPrice.data,
 				});
 
 				addToast({
@@ -180,7 +175,7 @@ export function usePublicNftContract({
 							functionName: "mint",
 							args: [],
 							account: userAddress,
-							value: parseEther("0.03"),
+							value: fullPrice.data,
 						});
 
 						mintedTokenIdRef.current =
@@ -197,7 +192,7 @@ export function usePublicNftContract({
 					args: [],
 					account: userAddress,
 					chainId,
-					value: parseEther("0.03"),
+					value: fullPrice.data,
 				});
 
 				addToast({
@@ -318,7 +313,7 @@ export function usePublicNftContract({
 								continue;
 							}
 
-							const tokenURI = await getTokenURI(
+							const tokenURI = await getTokenURIIpfs(
 								publicClient,
 								contractAddress,
 								tokenId

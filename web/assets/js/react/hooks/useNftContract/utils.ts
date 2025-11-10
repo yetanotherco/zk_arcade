@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { zkArcadeNftAbi } from "../../constants/aligned";
+import { publicZkArcadeNftAbi, zkArcadeNftAbi } from "../../constants/aligned";
 import { NftMetadata } from ".";
 
 type Proof = `0x${string}`[] | `0x${string}` | string;
@@ -24,8 +24,23 @@ export async function getUserTokenIds(userAddress: Address): Promise<bigint[]> {
 	}
 }
 
-// Gets the specific token URI requesting it to the NFT contract
 export async function getTokenURI(
+	publicClient: any,
+	contractAddress: Address,
+	tokenId: bigint
+): Promise<string> {
+	const tokenURI = await publicClient.readContract({
+		address: contractAddress,
+		abi: publicZkArcadeNftAbi,
+		functionName: "tokenURI",
+		args: [tokenId],
+	});
+
+	return tokenURI;
+}
+
+// Gets the specific token URI requesting it to the NFT contract
+export async function getTokenURIIpfs(
 	publicClient: any,
 	contractAddress: Address,
 	tokenId: bigint

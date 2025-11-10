@@ -12,7 +12,7 @@ import { zkArcadeNftAbi } from "../../constants/aligned";
 import { fetchMerkleProofForAddress } from "../../utils/aligned";
 import {
 	getUserTokenIds,
-	getTokenURI,
+	getTokenURIIpfs,
 	processRawMerkleProof,
 	getNftMetadataIpfs,
 } from "./utils";
@@ -169,7 +169,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 					let mintedTokenId = mintedTokenIdRef.current;
 					if (mintedTokenId === null) return;
 
-					const tokenURI = await getTokenURI(
+					const tokenURI = await getTokenURIIpfs(
 						publicClient,
 						contractAddress,
 						mintedTokenId
@@ -230,7 +230,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 								continue;
 							}
 
-							const tokenURI = await getTokenURI(
+							const tokenURI = await getTokenURIIpfs(
 								publicClient,
 								contractAddress,
 								tokenId

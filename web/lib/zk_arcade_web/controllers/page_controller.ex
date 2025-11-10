@@ -267,7 +267,7 @@ The goal of the game is to make each number on the board equal.
     wallet = get_wallet_from_session(conn)
     eligible = get_user_eligibility(wallet)
     # To be replaced with whitelist merkle proof
-    eligible_for_discount = "false"
+    eligible_for_discount =  to_string(ZkArcade.PublicMerklePaths.get_eligiblity_for_address(wallet))
     proofs = get_proofs(wallet, 1, 10)
     {username, position} = get_username_and_position(wallet)
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)

@@ -77,7 +77,7 @@ export function usePublicNftContract({
 	const maxSupply = useReadContract({
 		address: contractAddress,
 		abi: publicZkArcadeNftAbi,
-		functionName: "nonWhitelistedMaxSupply",
+		functionName: "maxSupply",
 		chainId,
 	});
 

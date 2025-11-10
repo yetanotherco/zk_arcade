@@ -73,10 +73,6 @@ const BuyNftFlow = ({
 		return weiToEth(Math.max(base * (1 - pct / 100), 0));
 	}, [fullPrice.data, discountedPrice.data]);
 
-	// TODO: Move the contract side
-	const nftImage =
-		"https://ipfs.io/ipfs/QmU1TBMfSqRoxt2PfYbYZu9wNZ2emGRNhU5nw7uPkuUi5C";
-
 	// If it elligible for the premium nft, redirect to that page
 	useEffect(() => {
 		if (!user_address) return;
@@ -221,7 +217,7 @@ const BuyNftFlow = ({
 				</div>
 				<div className="flex gap-4 items-center">
 					<img
-						src={nftImage}
+						src="/images/public_nft_image.jpeg"
 						alt="NFT"
 						className="w-20 h-20 object-cover rounded border border-contrast-100"
 					/>
@@ -245,7 +241,7 @@ const BuyNftFlow = ({
 								</span>
 							) : (
 								<span className="text-white">
-									{Number(fullPrice.data)} ETH
+									{weiToEth(Number(fullPrice.data))} ETH
 								</span>
 							)}
 						</p>

@@ -340,7 +340,7 @@ export const publicZkArcadeNftAbi = [
 	{
 		type: "function",
 		stateMutability: "view",
-		name: "nonWhitelistedMaxSupply",
+		name: "maxSupply",
 		inputs: [],
 		outputs: [
 			{

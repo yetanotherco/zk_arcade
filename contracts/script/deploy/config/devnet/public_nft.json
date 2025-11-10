@@ -1,7 +1,7 @@
 {
 	"permissions": {
 		"owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-		"mintingFundsRecipient": "0x7a65e35BE8553997B646210768E0812e2cC05080"
+		"mintingFundsRecipient": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
 	},
 	"name": "ZK Arcade public NFTs",
 	"symbol": "ZKAP",

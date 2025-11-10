@@ -153,7 +153,7 @@ export async function generateCircomParityProof({
 	// check game configs match
 	for (let i = 32; i < 32 * usedLevels; i++) {
 		if (publicInputsBytes[i] !== Number(gameConfigBytes[i])) {
-			reportParityGameConfigMismatchToTelemetry({
+			await reportParityGameConfigMismatchToTelemetry({
 				gameConfig,
 				gameTrace: {
 					levelsBoards,
@@ -186,7 +186,7 @@ export async function generateCircomParityProof({
 	})();
 
 	if (hasRepeatedGameConfig) {
-		reportParityGameConfigMismatchToTelemetry({
+		await reportParityGameConfigMismatchToTelemetry({
 			gameConfig,
 			gameTrace: {
 				levelsBoards,
@@ -195,7 +195,7 @@ export async function generateCircomParityProof({
 			programInputs: input,
 			publicInputs: toHex(Uint8Array.from(publicInputsBytes)),
 		});
-		throw new Error(`Parity proof validation failed game config mismatch`);
+		throw new Error(`Parity proof validation failed game config repeated`);
 	}
 
 	const vKeyBytes = await fetchTextAsBytes(vkeyPath);

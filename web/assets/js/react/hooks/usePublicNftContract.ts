@@ -313,7 +313,7 @@ export function usePublicNftContract({
 								continue;
 							}
 
-							const tokenURI = await getTokenURIIpfs(
+							const tokenURI = await getTokenURI(
 								publicClient,
 								contractAddress,
 								tokenId

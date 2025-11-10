@@ -5,12 +5,17 @@ import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { Modal } from "../../components";
 import { NftMetadata, useNftContract } from "../../hooks/useNftContract";
-import { getNftMetadata } from "../../hooks/useNftContract/utils";
+import { usePublicNftContract } from "../../hooks/usePublicNftContract";
+import {
+	getNftMetadata,
+	getNftMetadataIpfs,
+} from "../../hooks/useNftContract/utils";
 
 type Props = {
 	network: string;
 	user_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	is_eligible: string;
 };
 
@@ -148,6 +153,7 @@ const NFTCard = ({
 const NFTList = ({
 	is_eligible,
 	nft_contract_address,
+	public_nft_contract_address,
 	user_address,
 }: Omit<Props, "network">) => {
 	const { balance, tokenURIs } = useNftContract({
@@ -155,7 +161,16 @@ const NFTList = ({
 		userAddress: user_address,
 	});
 
+	const { balance: publicNftBalance, tokenURIs: publicNftTokenUris } =
+		usePublicNftContract({
+			contractAddress: public_nft_contract_address,
+			userAddress: user_address,
+		});
+
 	const [nftMetadataList, setNftMetadataList] = useState<NftMetadata[]>([]);
+	const [publicNftMetadataList, setPublicNftMetadataList] = useState<
+		NftMetadata[]
+	>([]);
 
 	const [openNFTModal, setOpenNFTModal] = useState<boolean>(false);
 	const [selectedMetadata, setSelectedMetadata] =
@@ -163,12 +178,18 @@ const NFTList = ({
 
 	useEffect(() => {
 		const fetchNftMetadata = async () => {
-			if (tokenURIs.length === 0) return;
+			if (tokenURIs.length === 0) {
+				setNftMetadataList([]);
+				return;
+			}
 
 			const metadataList = await Promise.all(
 				tokenURIs.map(async uri => {
 					try {
-						return await getNftMetadata(uri, nft_contract_address);
+						return await getNftMetadataIpfs(
+							uri,
+							nft_contract_address
+						);
 					} catch (error) {
 						return null;
 					}
@@ -183,19 +204,51 @@ const NFTList = ({
 		};
 
 		fetchNftMetadata();
-	}, [tokenURIs]);
+	}, [tokenURIs, nft_contract_address]);
 
-	if (is_eligible === "false") {
-		return null;
-	}
+	useEffect(() => {
+		const fetchPublicNftMetadata = async () => {
+			if (publicNftTokenUris.length === 0) {
+				setPublicNftMetadataList([]);
+				return;
+			}
 
-	if (nftMetadataList.length == 0) return null;
+			const metadataList = await Promise.all(
+				publicNftTokenUris.map(async uri => {
+					try {
+						return await getNftMetadata(
+							uri,
+							public_nft_contract_address
+						);
+					} catch (error) {
+						return null;
+					}
+				})
+			);
+
+			setPublicNftMetadataList(
+				metadataList.filter(
+					(metadata): metadata is NftMetadata => metadata !== null
+				)
+			);
+		};
+
+		fetchPublicNftMetadata();
+	}, [publicNftTokenUris, public_nft_contract_address]);
+
+	const combinedNftMetadata = [...nftMetadataList, ...publicNftMetadataList];
+
+	const hasAnyBalance =
+		(balance.data !== undefined && balance.data > 0n) ||
+		(publicNftBalance.data !== undefined && publicNftBalance.data > 0n);
+
+	if (combinedNftMetadata.length === 0) return null;
 
 	return (
 		<div className="section-width section-spacer-md">
 			<div className="flex flex-col gap-8 w-full">
 				<div>
-					{balance.data != undefined && balance.data > 0n && (
+					{hasAnyBalance && (
 						<div className="flex flex-col items-start gap-2">
 							<h1 className="text-3xl text-text-100 font-normal mb-4">
 								Your NFTs:
@@ -204,22 +257,33 @@ const NFTList = ({
 								Here you can view your NFTs that allow you to
 								participate
 							</p>
-							{nftMetadataList.length > 0 && (
+							{combinedNftMetadata.length > 0 && (
 								<div className="grid w-full justify-items-center gap-4 sm:grid-cols-2 lg:grid-cols-3">
-									{nftMetadataList.map((metadata, index) => (
-										<NFTCard
-											key={
-												metadata.tokenId?.toString() ??
-												index
-											}
-											metadata={metadata}
-											index={index}
-											onSelect={selected => {
-												setSelectedMetadata(selected);
-												setOpenNFTModal(true);
-											}}
-										/>
-									))}
+									{combinedNftMetadata.map(
+										(metadata, index) => (
+											<NFTCard
+												key={
+													metadata.address
+														? `${
+																metadata.address
+														  }-${
+																metadata.tokenId?.toString() ??
+																index
+														  }`
+														: metadata.tokenId?.toString() ??
+														  index
+												}
+												metadata={metadata}
+												index={index}
+												onSelect={selected => {
+													setSelectedMetadata(
+														selected
+													);
+													setOpenNFTModal(true);
+												}}
+											/>
+										)
+									)}
 								</div>
 							)}
 						</div>
@@ -240,6 +304,7 @@ export default ({
 	network,
 	user_address,
 	nft_contract_address,
+	public_nft_contract_address,
 	is_eligible,
 }: Props) => {
 	return (
@@ -250,6 +315,7 @@ export default ({
 					user_address={user_address}
 					nft_contract_address={nft_contract_address}
 					is_eligible={is_eligible}
+					public_nft_contract_address={public_nft_contract_address}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

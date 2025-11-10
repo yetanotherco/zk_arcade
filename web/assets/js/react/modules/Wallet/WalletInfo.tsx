@@ -8,7 +8,10 @@ import { useDisconnect } from "wagmi";
 import { NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 import { useNftContract, NftMetadata } from "../../hooks/useNftContract";
-import { getNftMetadata } from "../../hooks/useNftContract/utils";
+import {
+	getNftMetadata,
+	getNftMetadataIpfs,
+} from "../../hooks/useNftContract/utils";
 import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 
 type Props = {
@@ -54,7 +57,10 @@ export const WalletInfo = ({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
-	const { balanceMoreThanZero: hasClaimedPublicNft } = usePublicNftContract({
+	const {
+		balanceMoreThanZero: hasClaimedPublicNft,
+		tokenURIs: publicTokenUris,
+	} = usePublicNftContract({
 		contractAddress: public_nft_contract_address,
 		userAddress: user_address,
 	});
@@ -83,12 +89,28 @@ export const WalletInfo = ({
 
 	useEffect(() => {
 		const fetchNftMetadata = async () => {
-			if (tokenURIs.length === 0) return;
+			if (tokenURIs.length === 0 && publicTokenUris.length === 0) {
+				setNftMetadataList([]);
+				return;
+			}
+
+			const metadataRequests = [
+				...tokenURIs.map(uri => ({
+					uri,
+					fetcher: getNftMetadataIpfs,
+					contract: nft_contract_address,
+				})),
+				...publicTokenUris.map(uri => ({
+					uri,
+					fetcher: getNftMetadata,
+					contract: public_nft_contract_address,
+				})),
+			];
 
 			const metadataList = await Promise.all(
-				tokenURIs.map(async uri => {
+				metadataRequests.map(async ({ uri, fetcher, contract }) => {
 					try {
-						return await getNftMetadata(uri, nft_contract_address);
+						return await fetcher(uri, contract);
 					} catch (error) {
 						console.error(
 							`Error fetching metadata for ${uri}:`,
@@ -101,14 +123,18 @@ export const WalletInfo = ({
 
 			setNftMetadataList(
 				metadataList.filter(
-					(metadata: any): metadata is NftMetadata =>
-						metadata !== null
+					(metadata): metadata is NftMetadata => metadata !== null
 				)
 			);
 		};
 
 		fetchNftMetadata();
-	}, [tokenURIs]);
+	}, [
+		tokenURIs,
+		publicTokenUris,
+		nft_contract_address,
+		public_nft_contract_address,
+	]);
 
 	return (
 		<div className="sm:relative group">

@@ -153,7 +153,7 @@ export async function generateCircomParityProof({
 	// check game configs match
 	// publicInputsBytes: | 32 bytes level reached | 32 bytes game config | 32 bytes address |
 	const gamePublicInput = publicInputsBytes.slice(32, 64);
-	for (let i = 0; i < 32 - 10 * usedLevels; i++) {
+	for (let i = 0; i < 32 - (10 * 3 - usedLevels); i++) {
 		if (gamePublicInput[i] !== Number(gameConfigBytes[i])) {
 			await reportParityGameConfigMismatchToTelemetry({
 				gameConfig,

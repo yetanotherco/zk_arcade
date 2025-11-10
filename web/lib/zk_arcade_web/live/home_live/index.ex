@@ -86,6 +86,27 @@ defmodule ZkArcadeWeb.HomeLive.Index do
           {:ok, data} ->
             data["games"]
             |> Enum.with_index()
+            |> Enum.filter(fn {game, _} ->
+              clean_hex_end =
+              game["endsAtTime"]
+              |> String.trim()
+              |> String.downcase()
+              |> then(fn
+                "0x" <> rest -> rest
+                other -> other
+              end)
+
+              case Integer.parse(clean_hex_end, 16) do
+              {seconds_end, ""} ->
+                # Reduce 2 days (48 hours) for end date (so we don't count the extra claim period)
+                seconds_end = seconds_end - (86400 * 2)
+                current_time_utc = DateTime.utc_now() |> DateTime.to_unix(:second)
+                # keep games that are current or in the future
+                current_time_utc <= seconds_end
+              :error ->
+                false
+              end
+            end)
             |> Enum.map(fn {game, index} ->
               %{
                 round: index + 1,

@@ -1,4 +1,4 @@
-import { getAddress, pad, toBytes, toHex } from "viem";
+import { pad, toBytes, toHex } from "viem";
 import { VerificationData } from "../../types/aligned";
 import { Address } from "../../types/blockchain";
 import * as snarkjs from "snarkjs";
@@ -14,9 +14,45 @@ type GenerateSubmitProofParams = {
 	user_address: Address;
 	userPositions: [number, number][][];
 	levelsBoards: number[][][];
+	gameConfig: string;
 };
 
 const MaxLevels = 3;
+
+const getCsrfToken = () => {
+	if (typeof document === "undefined") return "";
+	return (
+		document.head
+			?.querySelector("[name~=csrf-token]")
+			?.getAttribute("content") || ""
+	);
+};
+
+const reportParityGameConfigMismatchToTelemetry = async (data: {
+	gameConfig: string;
+	gameTrace: {
+		levelsBoards: number[][][];
+		userPositions: number[][][];
+	};
+	programInputs: Record<string, any>;
+	publicInputs: string;
+}): Promise<void> => {
+	try {
+		await fetch("/api/telemetry/error", {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				_csrf_token: getCsrfToken(),
+				name: "Parity game config mismatch",
+				message: "Parity proof public inputs mismatch",
+				details: data,
+			}),
+		});
+	} catch {}
+};
 
 // We clone the positions to avoid overlapping between the round elements of each level
 function clonePos(p: [number, number]): [number, number] {
@@ -60,6 +96,7 @@ export async function generateCircomParityProof({
 	user_address,
 	userPositions,
 	levelsBoards,
+	gameConfig,
 }: GenerateSubmitProofParams): Promise<VerificationData> {
 	const allUserPositions: [number, number][][] = [];
 	const allLevelsBoards: number[][][] = [];
@@ -110,6 +147,55 @@ export async function generateCircomParityProof({
 		let bytes = toBytes(number);
 		bytes.forEach(byte => publicInputsBytes.push(byte));
 	});
+
+	const gameConfigBytes = toBytes(gameConfig);
+	const gameConfigs = [];
+	// check game configs match
+	for (let i = 32; i < 32 * usedLevels; i++) {
+		if (publicInputsBytes[i] !== Number(gameConfigBytes[i])) {
+			reportParityGameConfigMismatchToTelemetry({
+				gameConfig,
+				gameTrace: {
+					levelsBoards,
+					userPositions,
+				},
+				programInputs: input,
+				publicInputs: toHex(Uint8Array.from(publicInputsBytes)),
+			});
+			throw new Error(
+				`Parity proof validation failed game config mismatch`
+			);
+		}
+	}
+
+	// collect each game config and verify they are different
+	for (let i = 0; i < usedLevels; i++) {
+		const game = publicInputsBytes.slice(32 * i, 64 * i);
+		gameConfigs.push(game);
+	}
+
+	const hasRepeatedGameConfig = (() => {
+		const seenConfigs = new Set<string>();
+		for (const config of gameConfigs) {
+			const key = config.join(",");
+			if (seenConfigs.has(key)) return true;
+			seenConfigs.add(key);
+		}
+		return false;
+	})();
+
+	if (hasRepeatedGameConfig) {
+		reportParityGameConfigMismatchToTelemetry({
+			gameConfig,
+			gameTrace: {
+				levelsBoards,
+				userPositions,
+			},
+			programInputs: input,
+			publicInputs: toHex(Uint8Array.from(publicInputsBytes)),
+		});
+		throw new Error(`Parity proof validation failed game config mismatch`);
+	}
 
 	const vKeyBytes = await fetchTextAsBytes(vkeyPath);
 

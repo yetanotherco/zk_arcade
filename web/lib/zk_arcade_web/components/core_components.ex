@@ -468,8 +468,11 @@ defmodule ZkArcadeWeb.CoreComponents do
     <table class="table-fixed border-collapse w-full">
       <thead>
         <tr class="text-text-200 truncate">
-          <th :for={{col, _i} <- Enum.with_index(@col)} class="text-left font-normal">
-          <%= col[:label] %>
+          <th
+            :for={{col, _i} <- Enum.with_index(@col)}
+            class={classes(["text-left font-normal", col[:class]])}
+          >
+            <%= col[:label] %>
           </th>
         </tr>
       </thead>
@@ -483,11 +486,7 @@ defmodule ZkArcadeWeb.CoreComponents do
             :for={{col, _i} <- Enum.with_index(@col)}
             class={classes(["p-0 pr-10", col[:class]])}
           >
-            <div class={
-              classes([
-                "group block normal-case text-base min-w-29"
-              ])
-            }>
+            <div class={classes(["group block normal-case text-base min-w-29"])}>
               <%= render_slot(col, @row_item.(row)) %>
             </div>
           </td>
@@ -795,6 +794,25 @@ defmodule ZkArcadeWeb.CoreComponents do
             <.icon name="hero-trophy" color="#b36839" class="" />
             <% _ ->  %>
           <% end %>
+        </:col>
+      </.table>
+    </div>
+    """
+  end
+
+  attr :upcoming_games, :list, required: true
+  def games_calendar(assigns) do
+    ~H"""
+    <div class="w-full">
+      <.table id="calendar" rows={@upcoming_games}>
+        <:col :let={game} label="Round" class="w-16">
+          <p class="text-text-100 text-md"><%= game.round %></p>
+        </:col>
+        <:col :let={game} label="Start time" class="w-32">
+          <p class="text-text-100 text-md"><%= game.start_time %></p>
+        </:col>
+        <:col :let={game} label="End time" class="w-32">
+          <p class="text-text-100 text-md"><%= game.end_time %></p>
         </:col>
       </.table>
     </div>

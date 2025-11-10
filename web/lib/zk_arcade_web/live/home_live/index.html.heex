@@ -30,39 +30,45 @@
             <.home_statistic label="Total nfts minted" value={@nfts_minted} desc={@desc} />
             <.home_statistic label="Total claimed points" value={@total_claimed_points} desc={@desc} />
           </div>
-          <div class="hidden [@media(min-width:900px)]:block w-[300px] h-full max-h-[270px] overflow-y-scroll shrink-0 bg-contrast-300 rounded px-8 py-6">
-            <p class="mb-2 text-text-200">Top users</p>
-            <.leaderboard_home
-              users={@top_users}
-              current_wallet={@wallet}
-              user_data={@user_data}
-              show_view_all_link={true}
-            />
+          <div>
+            Calendar here.
           </div>
         </div>
       </div>
 
-      <div class="mb-5">
-        <p class="text-3xl mb-5">Games</p>
-        <div class="flex w-full gap-5 overflow-scroll">
-          <.home_game_component_hero
-            tags={[:browser, :circom, :easy]}
-            secondary_tags={[:parity_daily_points]}
-            disabled="false"
-            link="/games/parity"
-            title="Parity"
-            desc="Browser daily puzzles."
-            img={~p"/images/parity.jpg"}
-          />
+      <div class="mb-5 flex flex-row justify-between gap-5">
+        <div>
+          <p class="text-3xl mb-5">Games</p>
+          <div class="flex w-full gap-5 overflow-scroll">
+            <.home_game_component_hero
+              tags={[:browser, :circom, :easy]}
+              secondary_tags={[:parity_daily_points]}
+              disabled="false"
+              link="/games/parity"
+              title="Parity"
+              desc="Browser daily puzzles."
+              img={~p"/images/parity.jpg"}
+            />
 
-          <.home_game_component_hero
-            tags={[:cli, :sp1, :hard]}
-            secondary_tags={[:beast_daily_points]}
-            disabled="false"
-            link="/games/beast"
-            title="Beast 1984"
-            desc="Terminal-based survival game."
-            img={~p"/images/beast.jpg"}
+            <.home_game_component_hero
+              tags={[:cli, :sp1, :hard]}
+              secondary_tags={[:beast_daily_points]}
+              disabled="false"
+              link="/games/beast"
+              title="Beast 1984"
+              desc="Terminal-based survival game."
+              img={~p"/images/beast.jpg"}
+            />
+          </div>
+        </div>
+
+        <div class="hidden [@media(min-width:900px)]:block w-[300px] h-full overflow-y-scroll shrink-0 bg-contrast-300 rounded px-8 py-6">
+          <p class="mb-2 text-text-200">Top users</p>
+          <.leaderboard_home
+            users={@top_users}
+            current_wallet={@wallet}
+            user_data={@user_data}
+            show_view_all_link={true}
           />
         </div>
       </div>

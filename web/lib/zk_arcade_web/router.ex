@@ -39,6 +39,7 @@ defmodule ZkArcadeWeb.Router do
     get "/api/wallet/terms-message", ApiController, :get_terms_message
     get "/api/wallet/:address/nfts", ApiController, :get_wallet_nfts
     get "/api/ethprice", ApiController, :get_eth_price
+    get "/api/gasprice", ApiController, :get_gas_price
     get "/api/nft/proof", ApiController, :get_nft_claim_merkle_proof
     get "/api/nft/eligibility", ApiController, :get_nft_eligibility
     get "/api/games/beast/current", BeastGamesController, :current

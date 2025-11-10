@@ -170,7 +170,8 @@ export async function generateCircomParityProof({
 
 	// collect each game config and verify they are different
 	for (let i = 0; i < usedLevels; i++) {
-		const game = publicInputsBytes.slice(32 * i, 64 * i);
+		// each level takes 10 bytes, and we start from 34 becasue the first two bytes are not used
+		const game = publicInputsBytes.slice(34 + 10 * i, 34 + 10 + 10 * i);
 		gameConfigs.push(game);
 	}
 

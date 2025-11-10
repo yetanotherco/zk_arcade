@@ -3,6 +3,15 @@ defmodule ZkArcade.BeastGames do
   alias ZkArcade.Repo
   alias ZkArcade.BeastGames.BeastGame
 
+  def get_current_and_future_games() do
+    now = DateTime.utc_now()
+
+    BeastGame
+    |> where([bg], bg.ends_at >= ^now)
+    |> order_by([bg], asc: bg.starts_at)
+    |> Repo.all()
+  end
+
   # On levels overlapping, return the one with the greatest starts_at
   def get_current_beast_game do
     now = DateTime.utc_now()

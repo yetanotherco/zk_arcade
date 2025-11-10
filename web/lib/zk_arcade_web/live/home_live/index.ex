@@ -79,6 +79,51 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     end
   end
 
+  def is_current_game(gameStart, gameEnd) do
+    # Remove the "0x" prefix if present
+    clean_hex_start =
+      gameStart
+      |> String.trim()
+      |> String.downcase()
+      |> then(fn
+        "0x" <> rest -> rest
+        other -> other
+      end)
+
+    clean_hex_end =
+      gameEnd
+      |> String.trim()
+      |> String.downcase()
+      |> then(fn
+        "0x" <> rest -> rest
+        other -> other
+      end)
+
+    case Integer.parse(clean_hex_start, 16) do
+      {seconds_start, ""} ->
+        case Integer.parse(clean_hex_end, 16) do
+          {seconds_end, ""} ->
+            # Get current utc seconds
+            current_time_utc =
+              DateTime.utc_now()
+              |> DateTime.to_unix(:second)
+
+            # Reduce 2 days (48 hours) for end date (so we don't count the extra claim period)
+            seconds_end = seconds_end - (86400 * 2)
+
+            # Return whether current time is within [start, end]
+            current_time_utc >= seconds_start and current_time_utc <= seconds_end
+          :error ->
+            raise ArgumentError,
+                  "Invalid hex string: #{inspect(clean_hex_end)}"
+        end
+
+      :error ->
+        raise ArgumentError,
+              "Invalid hex string: #{inspect(clean_hex_start)}"
+    end
+  end
+
   defp get_upcoming_games() do
     case File.read("../games/parity/level_generator/levels/parity_mainnet.json") do
       {:ok, body} ->
@@ -111,7 +156,8 @@ defmodule ZkArcadeWeb.HomeLive.Index do
               %{
                 round: index + 1,
                 start_time: utc_hex_to_date(game["startsAtTime"], false),
-                end_time: utc_hex_to_date(game["endsAtTime"], true)
+                end_time: utc_hex_to_date(game["endsAtTime"], true),
+                is_current: is_current_game(game["startsAtTime"], game["endsAtTime"])
               }
             end)
           {:error, reason} -> Logger.error("Error decoding JSON: #{reason}"); []

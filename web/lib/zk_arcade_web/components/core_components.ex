@@ -806,7 +806,9 @@ defmodule ZkArcadeWeb.CoreComponents do
     <div class="w-full">
       <.table id="calendar" rows={@upcoming_games}>
         <:col :let={game} label="Round" class="w-16">
-          <p class="text-text-100 text-md"><%= game.round %></p>
+          <p class={["text-md", if(game.is_current, do: "text-green-500", else: "text-text-100")]}>
+            <%= game.round %>
+          </p>
         </:col>
         <:col :let={game} label="Start time" class="w-32">
           <p class="text-text-100 text-md"><%= game.start_time %></p>

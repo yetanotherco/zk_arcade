@@ -152,8 +152,9 @@ export async function generateCircomParityProof({
 	const gameConfigs = [];
 	// check game configs match
 	// publicInputsBytes: | 32 bytes level reached | 32 bytes game config | 32 bytes address |
-	for (let i = 32; i < 32 * usedLevels; i++) {
-		if (publicInputsBytes[i] !== Number(gameConfigBytes[i])) {
+	const gamePublicInput = publicInputsBytes.slice(32, 64);
+	for (let i = 0; i < 32 - 10 * usedLevels; i++) {
+		if (gamePublicInput[i] !== Number(gameConfigBytes[i])) {
 			await reportParityGameConfigMismatchToTelemetry({
 				gameConfig,
 				gameTrace: {
@@ -172,8 +173,8 @@ export async function generateCircomParityProof({
 	// collect each game config and verify they are different
 	// publicInputsBytes: | 32 bytes level reached | 2 empty bytes | 10 bytes level 1 | 10 bytes level 2 | 10 bytes level 3 | 32 bytes address |
 	for (let i = 0; i < usedLevels; i++) {
-		// each level takes 10 bytes, and we start from 34 becasue the first two bytes are not used
-		const game = publicInputsBytes.slice(34 + 10 * i, 34 + 10 + 10 * i);
+		// each level takes 10 bytes, and we add two for the first two bytes are not used
+		const game = gamePublicInput.slice(2 + 10 * i, 12 + 10 * i);
 		gameConfigs.push(game);
 	}
 

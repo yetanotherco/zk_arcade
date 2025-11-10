@@ -47,8 +47,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     {:noreply, socket}
   end
 
-  def utc_hex_to_date(%DateTime{} = dt, is_end_date) do
-    dt = if is_end_date, do: DateTime.add(dt, -(86400 * 2), :second), else: dt
+  def utc_hex_to_date(%DateTime{} = dt) do
     dt |> DateTime.to_date() |> Date.to_string()
   end
 
@@ -72,8 +71,8 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     |> Enum.map(fn game ->
       %{
         round: game.game_index,
-        start_time: utc_hex_to_date(game.starts_at, false),
-        end_time: utc_hex_to_date(game.ends_at, true),
+        start_time: utc_hex_to_date(game.starts_at),
+        end_time: utc_hex_to_date(game.ends_at),
         is_current: is_current_game(game.starts_at, game.ends_at)
       }
     end)

@@ -68,6 +68,17 @@ defmodule ZkArcadeWeb.ApiController do
     end
   end
 
+  def get_gas_price(conn, _) do
+    case ZkArcade.GasPrice.get_gas_price_gwei() do
+      {:ok, gas_price_gwei} ->
+        conn |> json(%{gas_price_gwei: gas_price_gwei})
+      {:error, _} ->
+         conn
+          |> put_status(:internal_server_error)
+          |> json(%{error: "Failed to fetch gas price"})
+    end
+  end
+
   def get_nft_eligibility(conn, %{"address" => address}) do
     case query_eligibility(address) do
       {:ok, eligible} ->

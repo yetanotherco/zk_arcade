@@ -8,7 +8,7 @@ cd "$parent_path"
 # At this point we are in contracts
 cd ../
 
-merkle_root=$(jq -r '.root' $MERKLE_OUTPUT_PATH)
+merkle_root=$(jq -r '.root' $MERKLE_OUTPUT_PATH_PUBLIC)
 
 echo "Adding Merkle Root: $merkle_root"
 

@@ -128,10 +128,14 @@ function hexStringToBytes(hex: string): Uint8Array {
 
 export const fetchMerkleProofForAddress = async (
 	address: Address
-): Promise<{
-	merkle_proof: NFTClaimMerkleProof;
-	merkle_root_index: number;
-} | string | null> => {
+): Promise<
+	| {
+			merkle_proof: NFTClaimMerkleProof;
+			merkle_root_index: number;
+	  }
+	| string
+	| null
+> => {
 	try {
 		const response = await fetch(`/api/nft/proof?address=${address}`, {
 			method: "GET",
@@ -153,12 +157,67 @@ export const fetchMerkleProofForAddress = async (
 	}
 };
 
+export const fetchPublicMerkleProofForAddress = async (
+	address: Address
+): Promise<{
+	merkle_proof: NFTClaimMerkleProof;
+	merkle_root_index: number;
+} | null> => {
+	try {
+		const response = await fetch(
+			`/api/nft/public-proof?address=${address}`,
+			{
+				method: "GET",
+				credentials: "include",
+				headers: {
+					Accept: "application/json",
+				},
+			}
+		);
+
+		if (!response.ok) {
+			return null;
+		}
+
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		return null;
+	}
+};
+
 export const fetchNftClaimEligibility = async (
 	address: Address
 ): Promise<{ eligible: boolean } | null> => {
 	try {
 		const response = await fetch(
 			`/api/nft/eligibility?address=${address}`,
+			{
+				method: "GET",
+				credentials: "include",
+				headers: {
+					Accept: "application/json",
+				},
+			}
+		);
+
+		if (!response.ok) {
+			return null;
+		}
+
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		return null;
+	}
+};
+
+export const fetchPublicNftClaimEligibility = async (
+	address: Address
+): Promise<{ eligible: boolean } | null> => {
+	try {
+		const response = await fetch(
+			`/api/nft/public-eligibility?address=${address}`,
 			{
 				method: "GET",
 				credentials: "include",

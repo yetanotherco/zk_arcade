@@ -151,7 +151,6 @@ const NFTCard = ({
 };
 
 const NFTList = ({
-	is_eligible,
 	nft_contract_address,
 	public_nft_contract_address,
 	user_address,

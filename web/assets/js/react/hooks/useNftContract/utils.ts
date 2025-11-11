@@ -71,7 +71,7 @@ export async function getNftMetadataIpfs(
 	nftContractAddress: Address
 ): Promise<NftMetadata> {
 	try {
-		const response = await fetch(jsonUrl);
+		const response = await fetch(convertIpfsToHttpUrl(jsonUrl));
 		if (!response.ok) {
 			throw new Error(`Error fetching metadata: ${response.status}`);
 		}

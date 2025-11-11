@@ -208,6 +208,9 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		if (!userAddress || !balanceMoreThanZero) return;
 
 		const fetchEvents = async () => {
+			if (balance.data == 0n) {
+				return;
+			}
 			try {
 				if (!publicClient) {
 					console.error("Wagmi publicClient not initialized");

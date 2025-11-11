@@ -38,6 +38,7 @@ defmodule ZkArcade.NftPoller do
   @impl true
   def handle_info(:poll, %{from_block: from_block} = state) do
     contract_address = Application.get_env(:zk_arcade, :nft_contract_address)
+    public_contract_address = Application.get_env(:zk_arcade, :public_nft_contract_address)
     rpc_url = Application.get_env(:ethereumex, :url)
 
     cond do
@@ -50,7 +51,7 @@ defmodule ZkArcade.NftPoller do
         with {:ok, latest_hex} <- Ethereumex.HttpClient.eth_block_number(url: rpc_url),
              latest_block <- hex_to_integer(latest_hex) do
           from_block = max(from_block - 10, 0)
-          process_range(contract_address, from_block, latest_block, state)
+          process_range(contract_address, public_contract_address, from_block, latest_block, state)
         else
           error ->
             Logger.error("NFT poller failed to fetch latest block: #{inspect(error)}")
@@ -60,17 +61,17 @@ defmodule ZkArcade.NftPoller do
     end
   end
 
-  defp process_range(_contract, from_block, latest_block, state) when from_block > latest_block do
+  defp process_range(_contract, _public_contract, from_block, latest_block, state) when from_block > latest_block do
     schedule_poll()
     {:noreply, %{state | from_block: latest_block}}
   end
 
-  defp process_range(contract, from_block, latest_block, state) do
+  defp process_range(contract, public_contract, from_block, latest_block, state) do
     to_block = min(from_block + @max_block_range - 1, latest_block)
 
     Logger.info("Polling NFT transfers from block #{from_block} to #{to_block}")
 
-    case fetch_logs(contract, from_block, to_block) do
+    case fetch_logs(contract, public_contract, from_block, to_block) do
       {:ok, logs} ->
         process_logs(logs)
         schedule_poll()
@@ -80,12 +81,14 @@ defmodule ZkArcade.NftPoller do
         Logger.error("NFT poller failed to fetch logs: #{inspect(reason)}")
         schedule_poll()
         {:noreply, state}
-    end
+      end
   end
 
-  def fetch_logs(contract_address, from_block, to_block) do
+  def fetch_logs(contract_address, public_contract_address, from_block, to_block) do
+    addresses = [contract_address, public_contract_address]
+
     filter = %{
-      address: contract_address,
+      address: addresses,
       fromBlock: integer_to_hex(from_block),
       toBlock: integer_to_hex(to_block),
       topics: [[@transfer_topic]]

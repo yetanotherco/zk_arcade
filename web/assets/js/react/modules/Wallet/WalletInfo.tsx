@@ -44,11 +44,8 @@ export const WalletInfo = ({
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const [claimed, setClaimed] = useState(false);
-	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
 	const {
 		balance,
-		claimNft,
-		receipt,
 		tokenURIs,
 		showSuccessModal,
 		setShowSuccessModal,
@@ -112,10 +109,6 @@ export const WalletInfo = ({
 					try {
 						return await fetcher(uri, contract);
 					} catch (error) {
-						console.error(
-							`Error fetching metadata for ${uri}:`,
-							error
-						);
 						return null;
 					}
 				})
@@ -135,6 +128,10 @@ export const WalletInfo = ({
 		nft_contract_address,
 		public_nft_contract_address,
 	]);
+
+	const hasAnyBalance =
+		(balance.data !== undefined && balance.data > 0n) ||
+		hasClaimedPublicNft;
 
 	return (
 		<div className="sm:relative group">
@@ -157,7 +154,7 @@ export const WalletInfo = ({
 				>
 					<div className="flex gap-2 items-center justify-between w-full">
 						<div className="flex gap-2 items-center">
-							{balance.data != undefined && balance.data > 0n ? (
+							{hasAnyBalance ? (
 								<img
 									src={nftMetadataList.at(0)?.image}
 									alt={nftMetadataList.at(0)?.name || "NFT"}
@@ -239,6 +236,9 @@ export const WalletInfo = ({
 						user_address={user_address}
 						batcher_url={batcher_url}
 						nft_contract_address={nft_contract_address}
+						public_nft_contract_address={
+							public_nft_contract_address
+						}
 						highest_level_reached={0}
 					/>
 				</div>

@@ -12,7 +12,6 @@ import { publicZkArcadeNftAbi } from "../constants/aligned";
 import { fetchPublicMerkleProofForAddress } from "../utils/aligned";
 import {
 	getUserTokenIds,
-	getTokenURIIpfs,
 	processRawMerkleProof,
 	getNftMetadata,
 	getTokenURI,

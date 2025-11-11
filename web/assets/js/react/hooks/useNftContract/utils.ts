@@ -65,7 +65,6 @@ export function convertIpfsToHttpUrl(imageUrl: string): string {
 }
 
 // Fetches the NFT metadata from a given JSON URL and the NFT contract address
-// TOD: create another for aws s3 (non-ipfs url)
 export async function getNftMetadataIpfs(
 	jsonUrl: string,
 	nftContractAddress: Address

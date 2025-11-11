@@ -207,6 +207,7 @@ define(
 			"network",
 			"nft_contract_address",
 			"public_nft_contract_address",
+			"is_eligible",
 			"is_eligible_for_discount",
 			"user_address",
 		],

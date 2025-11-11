@@ -77,7 +77,7 @@ const BuyNftFlow = ({
 
 	// If it elligible for the premium nft, redirect to that page
 	useEffect(() => {
-		if (is_eligible) {
+		if (initialEligibility) {
 			addToast({
 				title: "Eligible for free mint",
 				desc: "Redirecting you to the mint page…",
@@ -90,7 +90,7 @@ const BuyNftFlow = ({
 				}, 1000);
 			} catch (_) {}
 		}
-	}, [is_eligible]);
+	}, [initialEligibility]);
 
 	return (
 		<div className="max-w-xl mx-auto bg-contrast-100/40 rounded p-6 flex flex-col gap-6">

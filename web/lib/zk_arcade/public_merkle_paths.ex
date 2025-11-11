@@ -54,6 +54,10 @@ defmodule ZkArcade.PublicMerklePaths do
     end
   end
 
+  def get_eligiblity_for_address(nil) do
+    false
+  end
+
   def get_eligiblity_for_address(address) do
     query =
       from(mp in PublicMerklePath,

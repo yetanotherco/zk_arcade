@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 2,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -1085,12 +1085,200 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 12,
+        "y": 22
+      },
+      "id": 28,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "floor(increase(public_nft_mints_without_discount{job=\"zk_arcade\"}[10y]))",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Public nft mints without discount",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "id": 29,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "floor(increase(public_nft_mints_with_discount{job=\"zk_arcade\"}[10y]))",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Public nft mints with discount",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "",
       "gridPos": {
         "h": 2,
         "w": 22,
         "x": 0,
-        "y": 30
+        "y": 38
       },
       "id": 11,
       "options": {
@@ -1136,7 +1324,7 @@
         "h": 6,
         "w": 3,
         "x": 0,
-        "y": 32
+        "y": 40
       },
       "id": 15,
       "options": {
@@ -1226,7 +1414,7 @@
         "h": 6,
         "w": 3,
         "x": 3,
-        "y": 32
+        "y": 40
       },
       "id": 16,
       "options": {
@@ -1316,7 +1504,7 @@
         "h": 6,
         "w": 3,
         "x": 6,
-        "y": 32
+        "y": 40
       },
       "id": 17,
       "options": {
@@ -1406,7 +1594,7 @@
         "h": 6,
         "w": 3,
         "x": 9,
-        "y": 32
+        "y": 40
       },
       "id": 18,
       "options": {
@@ -1474,7 +1662,7 @@
         "h": 2,
         "w": 22,
         "x": 0,
-        "y": 38
+        "y": 46
       },
       "id": 14,
       "options": {
@@ -1511,7 +1699,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           }
@@ -1522,7 +1711,7 @@
         "h": 13,
         "w": 12,
         "x": 0,
-        "y": 40
+        "y": 48
       },
       "id": 9,
       "options": {
@@ -1669,7 +1858,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           }
@@ -1693,7 +1883,7 @@
         "h": 13,
         "w": 7,
         "x": 12,
-        "y": 40
+        "y": 48
       },
       "id": 10,
       "options": {
@@ -1753,7 +1943,7 @@
         "h": 2,
         "w": 22,
         "x": 0,
-        "y": 53
+        "y": 61
       },
       "id": 7,
       "options": {
@@ -1798,7 +1988,7 @@
         "h": 7,
         "w": 3,
         "x": 0,
-        "y": 55
+        "y": 63
       },
       "id": 24,
       "options": {
@@ -1879,7 +2069,7 @@
         "h": 7,
         "w": 3,
         "x": 3,
-        "y": 55
+        "y": 63
       },
       "id": 25,
       "options": {
@@ -1967,7 +2157,7 @@
         "h": 7,
         "w": 13,
         "x": 6,
-        "y": 55
+        "y": 63
       },
       "id": 26,
       "options": {
@@ -2078,7 +2268,7 @@
         "h": 13,
         "w": 19,
         "x": 0,
-        "y": 62
+        "y": 70
       },
       "id": 5,
       "options": {
@@ -2134,6 +2324,6 @@
   "timezone": "",
   "title": "ZK Arcade",
   "uid": "ec4ebfb9-8757-4fde-9b2b-99917dc9b706",
-  "version": 32,
+  "version": 1,
   "weekStart": ""
 }

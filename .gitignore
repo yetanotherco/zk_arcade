@@ -33,4 +33,6 @@ package.json
 
 **/CLAUDE.md
 
-data/inserted_devnet/inserted_*.csv
+data/discount/inserted_devnet/inserted_*.csv
+data/exclusive/inserted_devnet/inserted_*.csv
+

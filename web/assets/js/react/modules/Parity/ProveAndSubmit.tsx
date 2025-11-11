@@ -77,6 +77,7 @@ export const ProveAndSubmit = ({
 					user_address,
 					userPositions: userGameData.userPositions,
 					levelsBoards: userGameData.levelsBoards,
+					gameConfig: currentGameConfig,
 				}
 			);
 
@@ -87,7 +88,10 @@ export const ProveAndSubmit = ({
 			// generated proof (avoids flashing the generated-proof modal).
 			setIsGeneratingProof(false);
 
-			if (highestLevelReached === currentLevel && highestLevelReachedProofId) {
+			if (
+				highestLevelReached === currentLevel &&
+				highestLevelReachedProofId
+			) {
 				try {
 					const url = `${window.location.pathname}?submitProofId=${highestLevelReachedProofId}`;
 					window.history.pushState({}, "", url);

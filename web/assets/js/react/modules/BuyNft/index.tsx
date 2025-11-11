@@ -56,12 +56,14 @@ const BuyNftFlow = ({
 		setShowSuccessModal,
 		claimedNftMetadata,
 		maxSupply,
+		receipt,
 	} = usePublicNftContract({
 		contractAddress: public_nft_contract_address,
 		userAddress: user_address || "0x0",
 	});
 	const alreadyMinted =
-		(primaryHasMinted || publicHasMinted) && !!user_address;
+		(primaryHasMinted || publicHasMinted || receipt.isSuccess) &&
+		!!user_address;
 
 	const priceIsLoading = fullPrice.isLoading;
 	const stockIsLoading = totalSupply.isLoading;
@@ -75,9 +77,7 @@ const BuyNftFlow = ({
 
 	// If it elligible for the premium nft, redirect to that page
 	useEffect(() => {
-		if (!user_address) return;
-		if (alreadyMinted) return;
-		if (initialEligibility) {
+		if (is_eligible) {
 			addToast({
 				title: "Eligible for free mint",
 				desc: "Redirecting you to the mint page…",
@@ -87,10 +87,10 @@ const BuyNftFlow = ({
 			try {
 				setTimeout(() => {
 					window.location.href = "/mint";
-				}, 600);
+				}, 1000);
 			} catch (_) {}
 		}
-	}, [user_address, alreadyMinted, initialEligibility, addToast]);
+	}, [is_eligible]);
 
 	return (
 		<div className="max-w-xl mx-auto bg-contrast-100/40 rounded p-6 flex flex-col gap-6">
@@ -263,7 +263,7 @@ const BuyNftFlow = ({
 					variant="accent-fill"
 					onClick={() => claimNft(discountEligibility)}
 					isLoading={claimIsLoading}
-					disabled={alreadyMinted}
+					disabled={alreadyMinted || initialEligibility}
 				>
 					{alreadyMinted ? "Already Bought" : "Buy Now"}
 				</Button>

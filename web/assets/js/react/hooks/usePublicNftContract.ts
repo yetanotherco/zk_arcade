@@ -95,6 +95,15 @@ export function usePublicNftContract({
 				throw new Error("Wallet not connected");
 			}
 
+			if (!discountedPrice.data || !fullPrice.data) {
+				addToast({
+					title: "Price not available",
+					desc: `Could not get nfts prices`,
+					type: "error",
+				});
+				return;
+			}
+
 			if (discountEligibility) {
 				// If eligible for discount, fetch merkle proof and call to whitelistedMint
 				const res = await fetchPublicMerkleProofForAddress(userAddress);
@@ -138,7 +147,6 @@ export function usePublicNftContract({
 							simulation.result as unknown as bigint;
 					}
 				} catch (err) {
-					console.log(err);
 					mintedTokenIdRef.current = null;
 				}
 
@@ -206,7 +214,15 @@ export function usePublicNftContract({
 				return hash;
 			}
 		},
-		[userAddress, contractAddress, writeContractAsync, chainId, addToast]
+		[
+			userAddress,
+			contractAddress,
+			discountedPrice,
+			fullPrice,
+			writeContractAsync,
+			chainId,
+			addToast,
+		]
 	);
 
 	const lastErrorMessage = useRef<string | null>(null);

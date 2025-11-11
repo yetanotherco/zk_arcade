@@ -45,8 +45,15 @@ const MintClaimSection = ({
 	initialEligibility?: boolean;
 }) => {
 	const shouldShowBuyCta = initialEligibility === false;
-	const encouragePurchaseMessage =
-		"Your wallet isn't eligible to claim this drop. Buy an access NFT to jump in right away.";
+	const { balanceMoreThanZero: hasBoughtPublicNft } = usePublicNftContract({
+		userAddress: address,
+		contractAddress: publicNftContractAddress,
+	});
+	const alreadyBoughtPublicNft = shouldShowBuyCta && hasBoughtPublicNft;
+	const encouragePurchaseMessage = alreadyBoughtPublicNft
+		? "You already purchased this access NFT. You're good to go."
+		: "Your wallet isn't eligible to claim this drop. Buy an access NFT to jump in right away.";
+	const alreadyBoughtButtonLabel = "Already bought";
 
 	const {
 		claimNft,
@@ -184,6 +191,11 @@ const MintClaimSection = ({
 		window.location.href = "/nft/buy";
 	}, []);
 
+	useEffect(() => {
+		if (!alreadyBoughtPublicNft) return;
+		setMessage(encouragePurchaseMessage);
+	}, [alreadyBoughtPublicNft, encouragePurchaseMessage]);
+
 	const checkLabel = useMemo(() => {
 		if (status === "checking") return "Checking…";
 		if (status === "eligible") return "Re-check eligibility";
@@ -283,8 +295,16 @@ const MintClaimSection = ({
 				</div>
 				<Button
 					variant="accent-fill"
-					onClick={shouldShowBuyCta ? onBuy : onClaim}
-					disabled={shouldShowBuyCta ? false : !canClaim}
+					onClick={
+						shouldShowBuyCta
+							? alreadyBoughtPublicNft
+								? undefined
+								: onBuy
+							: onClaim
+					}
+					disabled={
+						shouldShowBuyCta ? alreadyBoughtPublicNft : !canClaim
+					}
 					isLoading={!shouldShowBuyCta && status === "claiming"}
 					disabledTextOnHover={
 						shouldShowBuyCta
@@ -292,7 +312,11 @@ const MintClaimSection = ({
 							: "Complete eligibility check first"
 					}
 				>
-					{shouldShowBuyCta ? "Go to buy NFT" : claimLabel}
+					{shouldShowBuyCta
+						? alreadyBoughtPublicNft
+							? alreadyBoughtButtonLabel
+							: "Go to buy NFT"
+						: claimLabel}
 				</Button>
 				{claimMessage && (
 					<p className={`text-sm ${claimMessageClass}`}>

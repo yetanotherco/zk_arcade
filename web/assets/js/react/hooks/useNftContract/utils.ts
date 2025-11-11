@@ -105,7 +105,9 @@ export async function getNftMetadata(
 	nftContractAddress: Address
 ): Promise<NftMetadata> {
 	try {
-		const response = await fetch(jsonUrl);
+		const response = await fetch(jsonUrl, {
+			method: "GET",
+		});
 		if (!response.ok) {
 			throw new Error(`Error fetching metadata: ${response.status}`);
 		}
@@ -116,11 +118,13 @@ export async function getNftMetadata(
 			throw new Error("Invalid metadata format");
 		}
 
+		const imageUrl = convertIpfsToHttpUrl(data.image);
+
 		const tokenId = BigInt(jsonUrl.split("/").pop() || 0);
 		return {
 			name: data.name,
 			description: data.description,
-			image: data.iamge,
+			image: imageUrl,
 			tokenId: tokenId,
 			address: nftContractAddress,
 		};

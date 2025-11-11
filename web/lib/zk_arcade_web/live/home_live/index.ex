@@ -75,7 +75,10 @@ defmodule ZkArcadeWeb.HomeLive.Index do
         next_game = Enum.at(current_games, index + 1)
         utc_hex_to_date(next_game.starts_at)
       else
-        utc_hex_to_date(game.ends_at)
+        # For the last game, subtract 48 hours from the original end time
+        game.ends_at
+        |> DateTime.add(-48, :hour)
+        |> utc_hex_to_date()
       end
 
       %{

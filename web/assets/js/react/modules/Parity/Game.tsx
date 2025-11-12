@@ -85,7 +85,7 @@ export const Game = ({
 		const gameData: Record<string, GameStatus> = stored ? JSON.parse(stored) : {};
 
 		const key = gameDataKey(currentGameConfig, user_address);
-		const current: GameStatus = gameData[key] || {
+		const currentGameStatus: GameStatus = gameData[key] || {
 			levelsBoards: [],
 			userPositions: [],
 		};
@@ -97,12 +97,12 @@ export const Game = ({
 		const idx = currentLevel - 1; // 1-based currentLevel -> 0-based index
 
 		// write deterministically at the exact index and truncate tail
-		current.levelsBoards[idx] = snapshotBoards;
-		current.userPositions[idx] = snapshotPositions;
-		current.levelsBoards = current.levelsBoards.slice(0, idx + 1);
-		current.userPositions = current.userPositions.slice(0, idx + 1);
+		currentGameStatus.levelsBoards[idx] = snapshotBoards;
+		currentGameStatus.userPositions[idx] = snapshotPositions;
+		currentGameStatus.levelsBoards = currentGameStatus.levelsBoards.slice(0, idx + 1);
+		currentGameStatus.userPositions = currentGameStatus.userPositions.slice(0, idx + 1);
 
-		gameData[key] = current;
+		gameData[key] = currentGameStatus;
 		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
 
 		// Reset immediately to avoid races with the next level's play

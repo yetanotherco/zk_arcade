@@ -9,7 +9,7 @@ import {
 } from "wagmi";
 import { useToast } from "../state/toast";
 import { publicZkArcadeNftAbi } from "../constants/aligned";
-import { fetchMerkleProofForAddress } from "../utils/aligned";
+import { fetchPublicMerkleProofForAddress } from "../utils/aligned";
 import {
     getUserTokenIds,
     getTokenURI,
@@ -64,7 +64,7 @@ export function usePublicNftContract({ userAddress, contractAddress }: HookArgs)
             throw new Error("Wallet not connected");
         }
 
-        const res = await fetchMerkleProofForAddress(userAddress);
+        const res = await fetchPublicMerkleProofForAddress(userAddress);
         if (!res) {
             addToast({
                 title: "Eligibility check failed",

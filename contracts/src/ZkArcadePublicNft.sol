@@ -240,5 +240,6 @@ contract ZkArcadePublicNft is ERC721Upgradeable, UUPSUpgradeable, OwnableUpgrade
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         payable(mintingFundsRecipient).transfer(balance);
+        emit FundsWithdrawn(mintingFundsRecipient, balance);
     }
 }

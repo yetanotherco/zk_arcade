@@ -79,6 +79,7 @@ export const ProveAndSubmit = ({
 					user_address,
 					userPositions: userGameData.userPositions,
 					levelsBoards: userGameData.levelsBoards,
+					gameConfig: currentGameConfig,
 				}
 			);
 

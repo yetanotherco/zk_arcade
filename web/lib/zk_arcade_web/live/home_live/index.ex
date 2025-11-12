@@ -47,9 +47,54 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     {:noreply, socket}
   end
 
+  def utc_hex_to_date(%DateTime{} = dt) do
+    dt |> DateTime.to_date() |> Date.to_string()
+  end
+
+  def is_current_game(gameStart, gameEnd) do
+    seconds_start = DateTime.to_unix(gameStart, :second)
+    seconds_end = DateTime.to_unix(gameEnd, :second)
+
+    # Reduce 2 days (48 hours) for end date (so we don't count the extra claim period)
+    seconds_end = seconds_end - (86400 * 2)
+
+    # Get current utc seconds
+    current_time_utc = DateTime.utc_now() |> DateTime.to_unix(:second)
+
+    current_time_utc >= seconds_start and current_time_utc <= seconds_end
+  end
+
+  defp get_upcoming_games() do
+    current_games = ZkArcade.BeastGames.get_current_and_future_games()
+
+    current_games
+    |> Enum.with_index()
+    |> Enum.map(fn {game, index} ->
+      # For all games except the last one, use the next game's start time as end time
+      end_time = if index < length(current_games) - 1 do
+        next_game = Enum.at(current_games, index + 1)
+        utc_hex_to_date(next_game.starts_at)
+      else
+        # For the last game, subtract 48 hours from the original end time
+        game.ends_at
+        |> DateTime.add(-48, :hour)
+        |> utc_hex_to_date()
+      end
+
+      %{
+        round: game.game_index + 1, # Because indexing starts at zero
+        start_time: utc_hex_to_date(game.starts_at),
+        end_time: end_time,
+        is_current: is_current_game(game.starts_at, game.ends_at)
+      }
+    end)
+  end
+
   defp assign_initial_data(socket, session) do
     wallet = get_wallet_from_session(session)
     {username, position} = get_username_and_position(wallet)
+
+    upcoming_games = get_upcoming_games()
 
     socket
     |> assign(:wallet, wallet)
@@ -62,6 +107,7 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     |> assign(:batcher_url, Application.get_env(:zk_arcade, :batcher_url))
     |> assign(:explorer_url, Application.get_env(:zk_arcade, :explorer_url))
     |> assign(:notifications, [])
+    |> assign(:upcoming_games, upcoming_games)
     |> assign(:eligible, get_user_eligibility(wallet))
   end
 

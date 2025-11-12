@@ -148,7 +148,7 @@ export async function generateCircomParityProof({
 		bytes.forEach(byte => publicInputsBytes.push(byte));
 	});
 
-	const gameConfigBytes = toBytes(gameConfig);
+	const gameConfigBytes = toBytes(gameConfig, { size: 32 });
 	const gameConfigs = [];
 	// check game configs match
 	// publicInputsBytes: | 32 bytes level reached | 32 bytes game config | 32 bytes address |

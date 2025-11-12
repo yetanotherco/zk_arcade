@@ -91,6 +91,7 @@ export const Game = ({
 		};
 
 		// snapshot deep clones to avoid accidental later mutation
+		// slice() creates a shallow copy, but since our arrays contain primitives, it effectively clones them
 		const snapshotBoards = levelBoards.map(b => b.slice());
 		const snapshotPositions = userPositions.map(([c, r]) => [c, r] as [number, number]);
 

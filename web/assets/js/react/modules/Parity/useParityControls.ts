@@ -47,8 +47,7 @@ export const useParityControls = ({
 				return prev; // invalid move
 			}
 
-			// gate on current move count using levelBoards length (more robust than userPositions)
-			if (levelBoards.length > PARITY_MAX_MOVEMENTS) {
+			if (userPositions.length > PARITY_MAX_MOVEMENTS) {
 				return prev; // max moves reached
 			}
 
@@ -62,19 +61,23 @@ export const useParityControls = ({
 				const next = prevVals.slice();
 				next[idx] = (next[idx] ?? 0) + 1;
 
-				// win?
-				if (next.every(v => v === next[0])) setHasWon(true);
+				// check win: all values equal
+				const allEqual = next.every(v => v === next[0]);
+				if (allEqual) setHasWon(true);
 
-				// append snapshots atomically using prev-* inside the updaters
-				setLevelBoards(prevBoards => {
-					const withStart = prevBoards.length === 0 ? [prevVals.slice()] : prevBoards;
-					return [...withStart, next.slice()];
-				});
+				if (userPositions.length === 0) {
+					setUserPositions(prevPos => [
+						...prevPos,
+						[prev.col, prev.row],
+					]);
+					setLevelBoards(prevBoards => [
+						...prevBoards,
+						prevVals.slice(),
+					]);
+				}
 
-				setUserPositions(prevPos => {
-					const withStart = prevPos.length === 0 ? [[prev.col, prev.row] as [number, number]] : prevPos;
-					return [...withStart, [newCol, newRow]];
-				});
+				setUserPositions(prevPos => [...prevPos, [newCol, newRow]]);
+				setLevelBoards(prevBoards => [...prevBoards, next.slice()]);
 
 				return next;
 			});

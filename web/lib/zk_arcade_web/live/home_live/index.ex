@@ -68,11 +68,23 @@ defmodule ZkArcadeWeb.HomeLive.Index do
     current_games = ZkArcade.BeastGames.get_current_and_future_games()
 
     current_games
-    |> Enum.map(fn game ->
+    |> Enum.with_index()
+    |> Enum.map(fn {game, index} ->
+      # For all games except the last one, use the next game's start time as end time
+      end_time = if index < length(current_games) - 1 do
+        next_game = Enum.at(current_games, index + 1)
+        utc_hex_to_date(next_game.starts_at)
+      else
+        # For the last game, subtract 48 hours from the original end time
+        game.ends_at
+        |> DateTime.add(-48, :hour)
+        |> utc_hex_to_date()
+      end
+
       %{
         round: game.game_index + 1, # Because indexing starts at zero
         start_time: utc_hex_to_date(game.starts_at),
-        end_time: utc_hex_to_date(game.ends_at),
+        end_time: end_time,
         is_current: is_current_game(game.starts_at, game.ends_at)
       }
     end)

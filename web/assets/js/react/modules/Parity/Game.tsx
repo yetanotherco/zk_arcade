@@ -79,71 +79,66 @@ export const Game = ({
 	}, []);
 
 	const saveLevelData = useCallback(() => {
+		if (currentLevel == null) return;
+
 		const stored = localStorage.getItem("parity-game-data");
-		const gameData: { [key: string]: GameStatus } = stored
-			? JSON.parse(stored)
-			: {};
+		const gameData: Record<string, GameStatus> = stored ? JSON.parse(stored) : {};
 
 		const key = gameDataKey(currentGameConfig, user_address);
-		const currentLevelReached: GameStatus = gameData[key] || {
+		const currentGameStatus: GameStatus = gameData[key] || {
 			levelsBoards: [],
 			userPositions: [],
 		};
 
-		// If the current level is lower than the levels reached len, then replace the current and erase all the following levels
-		if (
-			currentLevel &&
-			currentLevelReached.levelsBoards.length > currentLevel
-		) {
-			currentLevelReached.levelsBoards =
-				currentLevelReached.levelsBoards.slice(0, currentLevel);
-			currentLevelReached.userPositions =
-				currentLevelReached.userPositions.slice(0, currentLevel);
-		}
+		// snapshot deep clones to avoid accidental later mutation
+		// slice() creates a shallow copy, but since our arrays contain primitives, it effectively clones them
+		const snapshotBoards = levelBoards.map(b => b.slice());
+		const snapshotPositions = userPositions.map(([c, r]) => [c, r] as [number, number]);
 
-		// If the current level is equal to the levels reached length, then erase the current level data
-		if (
-			currentLevel &&
-			currentLevelReached.levelsBoards.length === currentLevel
-		) {
-			currentLevelReached.levelsBoards.pop();
-			currentLevelReached.userPositions.pop();
-		}
+		const idx = currentLevel - 1; // 1-based currentLevel -> 0-based index
 
-		currentLevelReached.levelsBoards.push(levelBoards);
-		currentLevelReached.userPositions.push(userPositions);
+		// write deterministically at the exact index and truncate tail
+		currentGameStatus.levelsBoards[idx] = snapshotBoards;
+		currentGameStatus.userPositions[idx] = snapshotPositions;
+		currentGameStatus.levelsBoards = currentGameStatus.levelsBoards.slice(0, idx + 1);
+		currentGameStatus.userPositions = currentGameStatus.userPositions.slice(0, idx + 1);
 
-		gameData[key] = currentLevelReached;
+		gameData[key] = currentGameStatus;
 		localStorage.setItem("parity-game-data", JSON.stringify(gameData));
 
-		// Reset levelBoards and userPositions to avoid overlapping data
-		// Do it in a timeout to run it after the animation of moving game states
-		// This way the user does not see the reset on the screen
-		window.setTimeout(() => {
-			reset();
-		}, 1000);
-	}, [currentLevel, currentGameConfig, levelBoards, userPositions]);
+		// Reset immediately to avoid races with the next level's play
+		reset();
+	}, [
+		currentLevel,
+		currentGameConfig,
+		user_address,         // include key inputs in deps
+		levelBoards,
+		userPositions,
+		reset,
+	]);
 
 	const goToNextLevel = useCallback(() => {
 		setCurrentLevel(prev => {
-			if (prev === levels.length) {
-				setGameState("proving");
-				return prev;
-			}
-			const next = prev == null ? 0 : prev + 1;
-			setGameState("running");
+			const next = (prev ?? 0) + 1; // correct 1-based progression
 
+			if (next > levels.length) {
+				setGameState("proving");
+				return prev ?? levels.length;
+			}
+
+			setGameState("running");
 			const nextBoard = levels[next - 1].board;
 			const nextPos = levels[next - 1].initialPos;
 			startLevel(nextPos, nextBoard);
 
 			return next;
 		});
+
 		const newLevelReached = (currentLevel || 0) + 1;
 		if (currentLevel && newLevelReached > playerLevelReached) {
 			setPlayerLevelReached(newLevelReached);
 		}
-	}, [levels, setCurrentLevel, setGameState, startLevel]);
+	}, [levels, setCurrentLevel, setGameState, startLevel, currentLevel, playerLevelReached, setPlayerLevelReached]);
 
 	const gameComponentBasedOnState: {
 		[key in ParityGameState]: ReactNode;

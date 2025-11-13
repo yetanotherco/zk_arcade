@@ -8,6 +8,7 @@ import { NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 import { useNftContract } from "../../hooks/useNftContract";
 import { usePublicNftContract } from "../../hooks/usePublicNftContract";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	network: string;
@@ -37,6 +38,9 @@ const ClaimNFT = ({
 		userAddress: user_address,
 	});
 
+	// Check if public NFT contract is enabled
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
+
 	const { balanceMoreThanZero: publicNftBalanceMoreThanZero } =
 		usePublicNftContract({
 			contractAddress: public_nft_contract_address,
@@ -50,9 +54,14 @@ const ClaimNFT = ({
 
 	const eligibilityText = isEligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: "Buy an NFT to participate in ZKArcade and claim the leaderboard.";
+		: isPublicNftEnabled
+			? "Buy an NFT to participate in ZKArcade and claim the leaderboard."
+			: "You need an NFT to participate in ZKArcade. The public NFT collection is not currently available.";
 
-	if (claimed || balance.data !== 0n || publicNftBalanceMoreThanZero) {
+	// Only consider public NFT balance if the contract is enabled
+	const hasPublicNft = isPublicNftEnabled && publicNftBalanceMoreThanZero;
+
+	if (claimed || balance.data !== 0n || hasPublicNft) {
 		return (
 			<NftSuccessModal
 				open={showSuccessModal}
@@ -74,14 +83,14 @@ const ClaimNFT = ({
 					>
 						Claim!
 					</p>
-				) : (
+				) : isPublicNftEnabled ? (
 					<p
 						className="text-blue cursor-pointer hover:underline font-medium"
 						onClick={() => window.location.assign("/nft/buy")}
 					>
 						Buy!
 					</p>
-				)}
+				) : null}
 
 				<EligibilityModal
 					isEligible={isEligible}

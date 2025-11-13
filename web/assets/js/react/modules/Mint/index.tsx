@@ -10,6 +10,7 @@ import { ToastsProvider } from "../../state/toast";
 import { useNftContract } from "../../hooks/useNftContract";
 import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 import { fetchNftClaimEligibility } from "../../utils/aligned";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	network: string;
@@ -45,14 +46,18 @@ const MintClaimSection = ({
 	initialEligibility?: boolean;
 }) => {
 	const shouldShowBuyCta = initialEligibility === false;
+	const isPublicNftEnabled = isPublicNftContractEnabled(publicNftContractAddress);
+	
 	const { balanceMoreThanZero: hasBoughtPublicNft } = usePublicNftContract({
 		userAddress: address,
 		contractAddress: publicNftContractAddress,
 	});
-	const alreadyBoughtPublicNft = shouldShowBuyCta && hasBoughtPublicNft;
+	const alreadyBoughtPublicNft = shouldShowBuyCta && isPublicNftEnabled && hasBoughtPublicNft;
 	const encouragePurchaseMessage = alreadyBoughtPublicNft
 		? "You already purchased this access NFT. You're good to go."
-		: "Your wallet isn't eligible to claim this drop. Buy an access NFT to jump in right away.";
+		: isPublicNftEnabled
+			? "Your wallet isn't eligible to claim this drop. Buy an access NFT to jump in right away."
+			: "Your wallet isn't eligible to claim this drop. The public NFT collection is not currently available.";
 	const alreadyBoughtButtonLabel = "Already bought";
 
 	const {
@@ -297,25 +302,29 @@ const MintClaimSection = ({
 					variant="accent-fill"
 					onClick={
 						shouldShowBuyCta
-							? alreadyBoughtPublicNft
+							? alreadyBoughtPublicNft || !isPublicNftEnabled
 								? undefined
 								: onBuy
 							: onClaim
 					}
 					disabled={
-						shouldShowBuyCta ? alreadyBoughtPublicNft : !canClaim
+						shouldShowBuyCta ? (alreadyBoughtPublicNft || !isPublicNftEnabled) : !canClaim
 					}
 					isLoading={!shouldShowBuyCta && status === "claiming"}
 					disabledTextOnHover={
 						shouldShowBuyCta
-							? undefined
+							? !isPublicNftEnabled
+								? "NFT collection not available"
+								: undefined
 							: "Complete eligibility check first"
 					}
 				>
 					{shouldShowBuyCta
 						? alreadyBoughtPublicNft
 							? alreadyBoughtButtonLabel
-							: "Go to buy NFT"
+							: isPublicNftEnabled
+								? "Go to buy NFT"
+								: "NFT not available"
 						: claimLabel}
 				</Button>
 				{claimMessage && (

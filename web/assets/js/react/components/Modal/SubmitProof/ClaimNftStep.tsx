@@ -83,7 +83,7 @@ export const ClaimNft: React.FC<Props> = ({
 		if (status === "eligible") {
 			window.location.href = "/mint";
 		} else if (status === "ineligible") {
-			window.location.href = "/nft/buy";
+			window.location.href = "/nft/mint";
 		} else if (status === "error") {
 			checkEligibility();
 		}
@@ -97,7 +97,7 @@ export const ClaimNft: React.FC<Props> = ({
 			case "eligible":
 				return "Mint NFT";
 			case "ineligible":
-				return "Buy NFT";
+				return "Mint NFT";
 			case "claiming":
 				return "Claiming…";
 			case "claimed":
@@ -124,7 +124,7 @@ export const ClaimNft: React.FC<Props> = ({
 			)}
 			{status === "ineligible" && (
 				<p className="bg-blue/20 rounded p-2 text-blue">
-					You can buy the NFT now to start participating.
+					You can mint the NFT now to start participating.
 				</p>
 			)}
 			{status === "error" && (

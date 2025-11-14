@@ -95,11 +95,7 @@ const BuyNftFlow = ({
 	return (
 		<div className="max-w-xl mx-auto bg-contrast-100/40 rounded p-6 flex flex-col gap-6">
 			<div className="flex flex-col gap-2">
-				<h2 className="text-2xl font-semibold">Buy limited NFT</h2>
-				<p className="text-sm text-text-200">
-					Complete the steps to purchase from the limited collection
-					and participate in ZK Arcade.
-				</p>
+				<h2 className="text-2xl font-semibold">Mint limited NFT</h2>
 			</div>
 
 			{alreadyMinted && (
@@ -111,7 +107,7 @@ const BuyNftFlow = ({
 			<div className="border border-contrast-100 rounded p-4 flex flex-col gap-3">
 				<div className="flex items-center justify-between text-sm">
 					<span className="font-semibold text-base">
-						Step 1: Connect wallet
+						Connect wallet
 					</span>
 					<span
 						className={
@@ -163,49 +159,12 @@ const BuyNftFlow = ({
 				</ConnectKitButton.Custom>
 			</div>
 
-			{/* Step 2: Discount eligibility */}
-			<div className="border border-contrast-100 rounded p-4 flex flex-col gap-3">
-				<div className="flex items-center justify-between text-sm">
-					<span className="font-semibold text-base">
-						Step 2: Check discount eligibility
-					</span>
-					<span
-						className={
-							discountEligibility
-								? "text-accent-100"
-								: "text-text-200"
-						}
-					>
-						{discountEligibility ? "Eligible" : "Not eligible"}
-					</span>
-				</div>
-				<p className="text-sm text-text-200">
-					{discountEligibility ? (
-						discountedPrice.isLoading ? (
-							<span className="animate-pulse">
-								Checking discount…
-							</span>
-						) : (
-							<>
-								You are eligible for a
-								<span className="text-accent-100 font-semibold">
-									{" "}
-									{discountedPricePercentage}%{" "}
-								</span>
-								discount!
-							</>
-						)
-					) : (
-						"You aren't eligible for a discount but you can still buy it!"
-					)}
-				</p>
-			</div>
 
 			{/* Step 3: Buy */}
 			<div className="border border-contrast-100 rounded p-4 flex flex-col gap-3">
 				<div className="flex items-center justify-between text-sm">
 					<span className="font-semibold text-base">
-						Step 3: Buy NFT
+						Mint NFT
 					</span>
 					<span
 						className={
@@ -215,24 +174,24 @@ const BuyNftFlow = ({
 						{alreadyMinted ? "Completed" : "Pending"}
 					</span>
 				</div>
-				<div className="flex gap-4 items-center">
+				<div className="flex flex-col md:flex-row gap-6 md:items-center">
 					<img
 						src="/images/public_nft_image.jpeg"
 						alt="NFT"
-						className="w-20 h-20 object-cover rounded border border-contrast-100"
+						className="w-64 h-64 object-cover rounded border border-contrast-100 mx-auto md:mx-0"
 					/>
-					<div className="flex flex-col gap-1">
-						<p className="text-sm text-text-200">
+					<div className="flex flex-col gap-2">
+						<p className="text-base text-text-200">
 							Price:{" "}
 							{priceIsLoading ? (
 								<span className="animate-pulse">Loading…</span>
 							) : discountEligibility &&
 							  discountedPricePercentage ? (
-								<span className="text-white">
-									<span className="line-through opacity-70 mr-2">
+								<span className="text-white text-lg font-semibold">
+									<span className="line-through opacity-70 mr-2 text-sm">
 										{weiToEth(Number(fullPrice.data))} ETH
 									</span>
-									<span className="text-accent-100 font-semibold mr-2">
+									<span className="text-accent-100 font-semibold mr-2 text-sm whitespace-nowrap">
 										-{Number(discountedPricePercentage)}%
 									</span>
 									<span>
@@ -241,17 +200,17 @@ const BuyNftFlow = ({
 									</span>
 								</span>
 							) : (
-								<span className="text-white">
+								<span className="text-white text-lg font-semibold">
 									{weiToEth(Number(fullPrice.data))} ETH
 								</span>
 							)}
 						</p>
-						<p className="text-sm text-text-200">
+						<p className="text-base text-text-200">
 							Stock:{" "}
 							{stockIsLoading ? (
 								<span className="animate-pulse">Loading…</span>
 							) : (
-								<span className="text-white">
+								<span className="text-white text-lg font-semibold">
 									{Number(supplyLeft)}/
 									{Number(maxSupply.data)}
 								</span>
@@ -265,7 +224,7 @@ const BuyNftFlow = ({
 					isLoading={claimIsLoading}
 					disabled={alreadyMinted || initialEligibility}
 				>
-					{alreadyMinted ? "Already Bought" : "Buy Now"}
+					{alreadyMinted ? "Already Minted" : "Mint Now"}
 				</Button>
 			</div>
 

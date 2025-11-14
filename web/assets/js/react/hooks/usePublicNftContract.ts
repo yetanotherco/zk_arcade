@@ -16,6 +16,7 @@ import {
 	getNftMetadata,
 	getTokenURI,
 } from "./useNftContract/utils";
+import { isPublicNftContractEnabled } from "../utils/publicNftContract";
 
 type HookArgs = {
 	userAddress: Address;
@@ -45,12 +46,18 @@ export function usePublicNftContract({
 	const [tokenURIs, setTokenURIs] = useState<string[]>([]);
 	const mintedTokenIdRef = useRef<bigint | null>(null);
 
+	// Check if the contract is enabled
+	const isContractEnabled = isPublicNftContractEnabled(contractAddress);
+
 	const balance = useReadContract({
 		address: contractAddress,
 		abi: publicZkArcadeNftAbi,
 		functionName: "balanceOf",
 		args: userAddress ? [userAddress] : undefined,
 		chainId,
+		query: {
+			enabled: isContractEnabled, // Only query if contract is enabled
+		},
 	});
 
 	const discountedPrice = useReadContract({
@@ -58,6 +65,9 @@ export function usePublicNftContract({
 		abi: publicZkArcadeNftAbi,
 		functionName: "discountedPrice",
 		chainId,
+		query: {
+			enabled: isContractEnabled,
+		},
 	});
 
 	const fullPrice = useReadContract({
@@ -65,6 +75,9 @@ export function usePublicNftContract({
 		abi: publicZkArcadeNftAbi,
 		functionName: "fullPrice",
 		chainId,
+		query: {
+			enabled: isContractEnabled,
+		},
 	});
 
 	const totalSupply = useReadContract({
@@ -72,6 +85,9 @@ export function usePublicNftContract({
 		abi: publicZkArcadeNftAbi,
 		functionName: "totalSupply",
 		chainId,
+		query: {
+			enabled: isContractEnabled,
+		},
 	});
 
 	const maxSupply = useReadContract({
@@ -79,6 +95,9 @@ export function usePublicNftContract({
 		abi: publicZkArcadeNftAbi,
 		functionName: "maxSupply",
 		chainId,
+		query: {
+			enabled: isContractEnabled,
+		},
 	});
 
 	const { writeContractAsync, data: txHash, ...txRest } = useWriteContract();
@@ -86,6 +105,15 @@ export function usePublicNftContract({
 
 	const claimNft = useCallback(
 		async (discountEligibility: boolean) => {
+			if (!isContractEnabled) {
+				addToast({
+					title: "Contract not available",
+					desc: "The public NFT is not yet available.",
+					type: "error",
+				});
+				throw new Error("Public NFT contract not enabled");
+			}
+
 			if (!userAddress) {
 				addToast({
 					title: "Wallet not connected",
@@ -222,6 +250,7 @@ export function usePublicNftContract({
 			writeContractAsync,
 			chainId,
 			addToast,
+			isContractEnabled,
 		]
 	);
 

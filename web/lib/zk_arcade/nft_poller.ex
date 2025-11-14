@@ -85,20 +85,27 @@ defmodule ZkArcade.NftPoller do
   end
 
   def fetch_logs(contract_address, public_contract_address, from_block, to_block) do
+    # Filter out 0x0 addresses to avoid unnecessary queries
     addresses = [contract_address, public_contract_address]
+    |> Enum.filter(&(&1 != "0x0"))
 
-    filter = %{
-      address: addresses,
-      fromBlock: integer_to_hex(from_block),
-      toBlock: integer_to_hex(to_block),
-      topics: [[@transfer_topic]]
-    }
+    # If no valid addresses, return empty logs
+    if Enum.empty?(addresses) do
+      {:ok, []}
+    else
+      filter = %{
+        address: addresses,
+        fromBlock: integer_to_hex(from_block),
+        toBlock: integer_to_hex(to_block),
+        topics: [[@transfer_topic]]
+      }
 
-    rpc_url = Application.get_env(:ethereumex, :url)
+      rpc_url = Application.get_env(:ethereumex, :url)
 
-    case Ethereumex.HttpClient.eth_get_logs(filter, url: rpc_url) do
-      {:ok, logs} -> {:ok, logs}
-      error -> error
+      case Ethereumex.HttpClient.eth_get_logs(filter, url: rpc_url) do
+        {:ok, logs} -> {:ok, logs}
+        error -> error
+      end
     end
   end
 

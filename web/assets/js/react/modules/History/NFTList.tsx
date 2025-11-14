@@ -10,6 +10,7 @@ import {
 	getNftMetadata,
 	getNftMetadataIpfs,
 } from "../../hooks/useNftContract/utils";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	network: string;
@@ -155,6 +156,8 @@ const NFTList = ({
 	public_nft_contract_address,
 	user_address,
 }: Omit<Props, "network">) => {
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
+	
 	const { balance, tokenURIs } = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
@@ -207,7 +210,7 @@ const NFTList = ({
 
 	useEffect(() => {
 		const fetchPublicNftMetadata = async () => {
-			if (publicNftTokenUris.length === 0) {
+			if (!isPublicNftEnabled || publicNftTokenUris.length === 0) {
 				setPublicNftMetadataList([]);
 				return;
 			}
@@ -233,13 +236,14 @@ const NFTList = ({
 		};
 
 		fetchPublicNftMetadata();
-	}, [publicNftTokenUris, public_nft_contract_address]);
+	}, [publicNftTokenUris, public_nft_contract_address, isPublicNftEnabled]);
 
-	const combinedNftMetadata = [...nftMetadataList, ...publicNftMetadataList];
+	const publicNftMetadataToUse = isPublicNftEnabled ? publicNftMetadataList : [];
+	const combinedNftMetadata = [...nftMetadataList, ...publicNftMetadataToUse];
 
 	const hasAnyBalance =
 		(balance.data !== undefined && balance.data > 0n) ||
-		(publicNftBalance.data !== undefined && publicNftBalance.data > 0n);
+		(isPublicNftEnabled && publicNftBalance.data !== undefined && publicNftBalance.data > 0n);
 
 	if (combinedNftMetadata.length === 0) return null;
 

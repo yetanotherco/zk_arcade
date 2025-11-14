@@ -9,6 +9,7 @@ import { useNftContract } from "../../hooks/useNftContract";
 import { useToast } from "../../state/toast";
 import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 import { NftSuccessModal } from "../../components/Modal";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	nft_contract_address: Address;
@@ -39,11 +40,16 @@ const BuyNftFlow = ({
 			? is_eligible_for_discount === "true"
 			: !!is_eligible_for_discount;
 
+	// Check if public NFT contract is enabled (not 0x0)
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
+
 	const { addToast } = useToast();
 	const { balanceMoreThanZero: primaryHasMinted } = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address || "0x0",
 	});
+
+	// Only use public NFT contract if it's enabled
 	const {
 		balanceMoreThanZero: publicHasMinted,
 		discountedPrice,
@@ -61,8 +67,9 @@ const BuyNftFlow = ({
 		contractAddress: public_nft_contract_address,
 		userAddress: user_address || "0x0",
 	});
+	
 	const alreadyMinted =
-		(primaryHasMinted || publicHasMinted || receipt.isSuccess) &&
+		(primaryHasMinted || (isPublicNftEnabled && publicHasMinted) || receipt.isSuccess) &&
 		!!user_address;
 
 	const priceIsLoading = fullPrice.isLoading;
@@ -91,6 +98,23 @@ const BuyNftFlow = ({
 			} catch (_) {}
 		}
 	}, [initialEligibility]);
+
+	// If public NFT contract is not enabled, show unavailable message
+	if (!isPublicNftEnabled) {
+		return (
+			<div className="max-w-xl mx-auto bg-contrast-100/40 rounded p-6 flex flex-col gap-6">
+				<div className="flex flex-col gap-2">
+					<h2 className="text-2xl font-semibold">Buy limited NFT</h2>
+					<p className="text-sm text-text-200">
+						The limited NFT collection is not currently available.
+					</p>
+				</div>
+				<div className="border border-yellow-500/40 rounded p-3 text-sm text-yellow-400 bg-yellow-500/5">
+					The public NFT is not yet available. Please check back later.
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="max-w-xl mx-auto bg-contrast-100/40 rounded p-6 flex flex-col gap-6">

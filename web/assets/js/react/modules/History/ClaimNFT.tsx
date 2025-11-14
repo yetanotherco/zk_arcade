@@ -8,6 +8,7 @@ import { NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 import { useNftContract } from "../../hooks/useNftContract";
 import { usePublicNftContract } from "../../hooks/usePublicNftContract";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	network: string;
@@ -37,6 +38,9 @@ const ClaimNFT = ({
 		userAddress: user_address,
 	});
 
+	// Check if public NFT contract is enabled
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
+
 	const { balanceMoreThanZero: publicNftBalanceMoreThanZero } =
 		usePublicNftContract({
 			contractAddress: public_nft_contract_address,
@@ -46,13 +50,20 @@ const ClaimNFT = ({
 	const isEligible = is_eligible === "true";
 	const eligibilityClasses = isEligible
 		? "bg-accent-100/20 border-accent-100 text-accent-100"
-		: "bg-blue/20 border-blue text-blue";
+		: isPublicNftEnabled
+		? "bg-blue/20 border-blue text-blue"
+		: "bg-yellow/20 border-yellow text-yellow";
 
 	const eligibilityText = isEligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: "Buy an NFT to participate in ZKArcade and claim the leaderboard.";
+		: isPublicNftEnabled
+			? "Buy an NFT to participate in ZKArcade and claim the leaderboard."
+			: "You are not currently eligible to mint the NFT and participate in the contest.";
 
-	if (claimed || balance.data !== 0n || publicNftBalanceMoreThanZero) {
+	// Only consider public NFT balance if the contract is enabled
+	const hasPublicNft = isPublicNftEnabled && publicNftBalanceMoreThanZero;
+
+	if (claimed || balance.data !== 0n || hasPublicNft) {
 		return (
 			<NftSuccessModal
 				open={showSuccessModal}
@@ -74,14 +85,14 @@ const ClaimNFT = ({
 					>
 						Claim!
 					</p>
-				) : (
+				) : isPublicNftEnabled ? (
 					<p
 						className="text-blue cursor-pointer hover:underline font-medium"
 						onClick={() => window.location.assign("/nft/buy")}
 					>
 						Buy!
 					</p>
-				)}
+				) : null}
 
 				<EligibilityModal
 					isEligible={isEligible}

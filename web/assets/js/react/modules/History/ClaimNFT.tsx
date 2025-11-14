@@ -50,7 +50,7 @@ const ClaimNFT = ({
 
 	const eligibilityText = isEligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: "Buy an NFT to participate in ZKArcade and claim the leaderboard.";
+		: "Mint an NFT to participate in ZKArcade and claim the leaderboard.";
 
 	if (claimed || balance.data !== 0n || publicNftBalanceMoreThanZero) {
 		return (
@@ -77,9 +77,9 @@ const ClaimNFT = ({
 				) : (
 					<p
 						className="text-blue cursor-pointer hover:underline font-medium"
-						onClick={() => window.location.assign("/nft/buy")}
+						onClick={() => window.location.assign("/nft/mint")}
 					>
-						Buy!
+						Mint!
 					</p>
 				)}
 

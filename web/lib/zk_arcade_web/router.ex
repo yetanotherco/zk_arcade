@@ -18,7 +18,7 @@ defmodule ZkArcadeWeb.Router do
     get "/games/:name", PageController, :game
     live "/history", HistoryLive.Index, :index
     get "/mint", PageController, :mint
-    get "/nft/buy", PageController, :buy_nft
+    get "/nft/mint", PageController, :buy_nft
     post "/wallet/sign", WalletController, :connect_wallet
     get "/wallet/disconnect", WalletController, :disconnect_wallet
     post "/wallet/username", WalletController, :set_username

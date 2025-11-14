@@ -82,7 +82,7 @@ export const WalletInfo = ({
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: "Buy an NFT to participate in ZKArcade and claim the leaderboard.";
+		: "Mint an NFT to participate in ZKArcade and claim the leaderboard.";
 
 	useEffect(() => {
 		const fetchNftMetadata = async () => {
@@ -213,10 +213,10 @@ export const WalletInfo = ({
 									<p
 										className="text-blue cursor-pointer hover:underline font-medium"
 										onClick={() =>
-											window.location.assign("/nft/buy")
+											window.location.assign("/nft/mint")
 										}
 									>
-										Buy!
+										Mint!
 									</p>
 								)}
 							</div>

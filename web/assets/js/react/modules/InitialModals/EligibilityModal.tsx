@@ -121,6 +121,7 @@ export const ShowEligibilityModal = ({
 				claimNft={claimNft}
 				balance={balance.data || 0n}
 				isLoading={receipt.isLoading}
+				isPublicNftEnabled={isPublicNftEnabled}
 			/>
 			<NftSuccessModal
 				nftMetadata={claimedNftMetadata}

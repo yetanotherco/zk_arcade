@@ -117,7 +117,7 @@ export const ClaimNft: React.FC<Props> = ({
 
 	return (
 		<div className="flex flex-col gap-4 justify-between h-full">
-			<p className="bg-blue/20 rounded p-2 text-blue">
+			<p className="bg-yellow/20 rounded p-2 text-yellow">
 				To participate in the game and submit your proofs, you need to
 				be eligible and mint your NFT. This NFT acts as your access
 				pass.
@@ -128,12 +128,9 @@ export const ClaimNft: React.FC<Props> = ({
 					Your wallet is eligible to claim this NFT and participate.
 				</p>
 			)}
-			{status === "ineligible" && (
+			{status === "ineligible" && isPublicNftEnabled && (
 				<p className="bg-blue/20 rounded p-2 text-blue">
-					{isPublicNftEnabled 
-						? "You can buy the NFT now to start participating."
-						: "The public NFT is not yet available. Please check back later."
-					}
+					You can buy the NFT now to start participating.
 				</p>
 			)}
 			{status === "error" && (

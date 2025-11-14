@@ -81,13 +81,15 @@ export const WalletInfo = ({
 
 	const eligibilityClasses = is_eligible
 		? "bg-accent-100/20 border-accent-100 text-accent-100"
-		: "bg-blue/20 border-blue text-blue";
+		: isPublicNftEnabled
+		? "bg-blue/20 border-blue text-blue"
+		: "bg-yellow/20 border-yellow text-yellow";
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
 		: isPublicNftEnabled 
 			? "Buy an NFT to participate in ZKArcade and claim the leaderboard."
-			: "You need an NFT to participate in ZKArcade. The public NFT collection is not currently available.";
+			: "You are not currently eligible to mint the NFT and participate in the contest.";
 
 	useEffect(() => {
 		const fetchNftMetadata = async () => {

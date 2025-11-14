@@ -6,6 +6,8 @@ defmodule ZkArcade.PrometheusMetrics do
     Counter.declare(name: :failed_proofs_count, help: "Failed Proofs")
     Counter.declare(name: :claims, help: "Gets incremented after every claim event")
     Counter.declare(name: :nft_mints, help: "Gets incremented after every nft mint event")
+    Counter.declare(name: :public_nft_mints_without_discount, help: "Gets incremented after every public nft mint event without discount")
+    Counter.declare(name: :public_nft_mints_with_discount, help: "Gets incremented after every public nft mint event with discount")
     Counter.declare(name: :users_registered_count, help: "Users Registered")
     Gauge.declare(name: :open_batcher_connections, help: "Active Batcher Connections")
     Counter.declare(name: :bumped_proofs_count, help: "Total Bumped Proofs")
@@ -33,6 +35,14 @@ defmodule ZkArcade.PrometheusMetrics do
 
   def increment_nft_mints() do
     Counter.inc(name: :nft_mints)
+  end
+
+  def increment_public_nft_mints_without_discount() do
+    Counter.inc(name: :public_nft_mints_without_discount)
+  end
+
+  def increment_public_nft_mints_with_discount() do
+    Counter.inc(name: :public_nft_mints_with_discount)
   end
 
   def failed_proof() do

@@ -1,9 +1,9 @@
+use csv;
 use dotenvy::{dotenv, from_filename};
 use merkle_tree_rs::standard::{LeafType, StandardMerkleTree};
 use serde::Serialize;
 use sqlx::{Postgres, postgres::PgPoolOptions};
 use std::{env, fs};
-use csv;
 
 #[derive(Serialize)]
 struct ProofEntry {
@@ -46,10 +46,7 @@ fn build_tree_and_proofs(addresses: &[String]) -> Output {
         panic!("No addresses provided for Merkle tree");
     }
 
-    let values: Vec<Vec<String>> = addresses
-        .iter()
-        .map(|a| vec![a.clone()])
-        .collect();
+    let values: Vec<Vec<String>> = addresses.iter().map(|a| vec![a.clone()]).collect();
 
     println!("Building Merkle tree for {} addresses...", addresses.len());
 
@@ -93,16 +90,32 @@ async fn insert_merkle_proofs(
     pool: &sqlx::Pool<Postgres>,
     merkle_proofs: &Vec<ProofEntry>,
     merkle_root_index: i32,
+    is_public_nft: bool,
 ) {
-    let mut query_builder =
-        sqlx::QueryBuilder::<Postgres>::new("INSERT INTO merkle_paths (id, address, merkle_proof, merkle_root_index)");
-    query_builder.push_values(merkle_proofs.iter(), |mut b, ProofEntry { address, proof }| {
-        b.push_bind(uuid::Uuid::new_v4())
-            .push_bind(address)
-            .push_bind(proof)
-            .push_bind(merkle_root_index);
-    });
-    let _result = query_builder.build().execute(pool).await.expect("Failed to insert data into database");
+    let table_name = if is_public_nft {
+        "merkle_paths_public"
+    } else {
+        "merkle_paths"
+    };
+
+    let mut query_builder = sqlx::QueryBuilder::<Postgres>::new(&format!(
+        "INSERT INTO {} (id, address, merkle_proof, merkle_root_index)",
+        table_name
+    ));
+    query_builder.push_values(
+        merkle_proofs.iter(),
+        |mut b, ProofEntry { address, proof }| {
+            b.push_bind(uuid::Uuid::new_v4())
+                .push_bind(address)
+                .push_bind(proof)
+                .push_bind(merkle_root_index);
+        },
+    );
+    let _result = query_builder
+        .build()
+        .execute(pool)
+        .await
+        .expect("Failed to insert data into database");
     println!("Data successfully inserted into database!");
 }
 
@@ -112,17 +125,19 @@ async fn handle_merkle_processing(
     output_path: &str,
     merkle_root_index: i32,
     inserted_directory: &str,
+    is_public_nft: bool,
 ) {
     let output = build_tree_and_proofs(&addresses);
 
     // Insert the merkle proofs into the database
     println!("Connecting to database...");
     let pool = setup_database_connection().await;
-    insert_merkle_proofs(&pool, &output.proofs, merkle_root_index).await;
+    insert_merkle_proofs(&pool, &output.proofs, merkle_root_index, is_public_nft).await;
 
     // Write the output to a JSON file
     let serialized = serde_json::to_string_pretty(&output).expect("Failed to serialize output");
-    fs::write(output_path, &serialized).unwrap_or_else(|e| panic!("Failed to write {}: {}", output_path, e));
+    fs::write(output_path, &serialized)
+        .unwrap_or_else(|e| panic!("Failed to write {}: {}", output_path, e));
     println!("Merkle proof data written to {}", output_path);
 
     let inserted_path = format!("{}/inserted_{}.csv", inserted_directory, merkle_root_index);
@@ -141,6 +156,7 @@ async fn main() {
             std::process::exit(1);
         });
         let inserted_directory = &args[3];
+        let is_public_nft = input_path.contains("discount");
 
         let addresses: Vec<String> = read_addresses_from_file(input_path)
             .into_iter()
@@ -152,9 +168,18 @@ async fn main() {
             std::process::exit(1);
         }
 
-        handle_merkle_processing(addresses, output_path, merkle_root_index, inserted_directory).await;
+        handle_merkle_processing(
+            addresses,
+            output_path,
+            merkle_root_index,
+            inserted_directory,
+            is_public_nft,
+        )
+        .await;
     } else {
-        eprintln!("Usage: merkle_json_cli <input.csv> <output.json> <merkle_root_index> <inserted_directory>");
+        eprintln!(
+            "Usage: merkle_json_cli <input.csv> <output.json> <merkle_root_index> <inserted_directory>"
+        );
         std::process::exit(1);
     }
 }

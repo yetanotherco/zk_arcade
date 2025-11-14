@@ -149,7 +149,7 @@ defmodule ZkArcade.BatcherConnection do
 
       %{"InvalidProof" => reason} ->
         PrometheusMetrics.record_user_error(:batcher_invalid_proof)
-        Logger.error("There was a problem with the submited proof: #{reason}")
+        Logger.error("There was a problem with the submited proof: #{inspect(reason)}")
         close_connection(conn_pid, stream_ref)
         {:error, {:invalid_proof, reason}}
 

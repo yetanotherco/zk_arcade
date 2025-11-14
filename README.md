@@ -129,6 +129,8 @@ systemctl restart zk_arcade --user
 
 ## Address Whitelisting
 
+This process works for both exclusive and public NFT whitelists. Note that the first option allows the user to claim the original NFT for free (although they still need to pay the transaction fee), while the second option gives the user a discount on the public NFT price.
+
 First, we run a preprocessing step on the address whitelist to ensure it contains no duplicate or invalid addresses. Then, we use the valid addresses to generate the Merkle proof data for the new campaign, which will be stored in the database and added to the NFT contract.
 
 ### Prerequisites
@@ -160,8 +162,8 @@ To run the preprocessing:
    make preprocess_whitelist WHITELIST_PATH=<whitelist_path> INSERTED_DIRECTORY=<inserted_directory>
    ```
    Where:
-   - `WHITELIST_PATH`: Path to the CSV file containing the addresses to whitelist
-   - `INSERTED_DIRECTORY`: Directory containing previously inserted addresses (default: `data/inserted`, for devnet use: `data/inserted_devnet`)
+   - `WHITELIST_PATH`: Path to the CSV file containing the addresses to whitelist. You can use the whitelist_addresses.csv file in discount or exclusive folder, or use your own csv file.
+   - `INSERTED_DIRECTORY`: Directory containing previously inserted addresses (default: `data/exclusive/inserted`, for devnet use: `data/inserted_devnet`)
 4. Removed addresses will be written to `removed_addresses.csv`, and the addresses to generate Merkle proof data will be written to `new_addresses.csv` into `data` directory.
 
 ### Merkle Proof Data Generation
@@ -175,7 +177,7 @@ To run the preprocessing:
    make generate_merkle_tree WHITELIST_PATH=data/new_addresses.csv OUTPUT_FILE=./merkle_tree/merkle_output.json MERKLE_ROOT_INDEX=<campaign_number> INSERTED_DIRECTORY=<directory>
    ```  
    Where:
-   - `WHITELIST_PATH`: Path to the CSV file with addresses (usually `data/new_addresses.csv` from preprocessing)
+   - `WHITELIST_PATH`: Path to the CSV file with addresses (usually `data/exclusive/new_addresses.csv` or `data/discount/new_addresses.csv` from preprocessing)
    - `OUTPUT_FILE`: Path where the Merkle proof JSON will be written
    - `MERKLE_ROOT_INDEX`: Campaign number (must match the index the merkle root will take in the contract)
    - `INSERTED_DIRECTORY`: Directory where filtered addresses CSV will be saved as `inserted_<MERKLE_ROOT_INDEX>.csv`
@@ -185,6 +187,10 @@ To run the preprocessing:
 4. Add the new campaign Merkle root to the NFT contract by running:  
    ```shell
    make add_merkle_root NETWORK=<network>
+   ```
+   or, if you are adding the root for the public NFT discount whitelist:
+   ```shell
+   make add_merkle_root_public NETWORK=<network>
    ```
 
 ## Mark pending proofs as failed

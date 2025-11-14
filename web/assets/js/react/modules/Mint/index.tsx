@@ -8,12 +8,14 @@ import { NftSuccessModal } from "../../components/Modal";
 import { ToastContainer } from "../../components/Toast";
 import { ToastsProvider } from "../../state/toast";
 import { useNftContract } from "../../hooks/useNftContract";
+import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 import { fetchNftClaimEligibility } from "../../utils/aligned";
 
 type Props = {
 	network: string;
 	user_address?: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	is_eligible?: string;
 };
 
@@ -34,10 +36,12 @@ const formatAddress = (addr: Address) =>
 const MintClaimSection = ({
 	address,
 	nftContractAddress,
+	publicNftContractAddress,
 	initialEligibility,
 }: {
 	address: Address;
 	nftContractAddress: Address;
+	publicNftContractAddress: Address;
 	initialEligibility?: boolean;
 }) => {
 	const {
@@ -48,7 +52,7 @@ const MintClaimSection = ({
 		showSuccessModal,
 		setShowSuccessModal,
 		claimedNftMetadata,
-	} = useNftContract({
+	 } = useNftContract({
 		contractAddress: nftContractAddress,
 		userAddress: address,
 	});
@@ -288,6 +292,7 @@ const MintClaimSection = ({
 const MintFlow = ({
 	user_address,
 	nft_contract_address,
+	public_nft_contract_address,
 	is_eligible,
 }: MintFlowProps) => {
 	const isConnected = !!user_address;
@@ -366,6 +371,7 @@ const MintFlow = ({
 				<MintClaimSection
 					address={activeAddress}
 					nftContractAddress={nft_contract_address}
+					publicNftContractAddress={public_nft_contract_address}
 					initialEligibility={initialEligibility}
 				/>
 			) : (

@@ -1,11 +1,11 @@
 {
 	"permissions": {
-		"owner": "",
-		"mintingFundsRecipient": ""
+		"owner": "0x771C1aB81C81A774B66C4386Eb50D6DFC8538106",
+		"mintingFundsRecipient": "0x16F961122e2097F08A24568d2350AdD754c80Ca5"
 	},
 	"name": "ZK Arcade public NFTs",
 	"symbol": "ZKAP",
-    "tokenURI": "ipfs://bafybeihs6wi6iaqtcjnolku63w7w6hxaixftftgdd57jf5gjd2pjn57ht4/",
+    "tokenURI": "https://testnft.zkarcade.com/",
 	"maxSupply": 10000,
 	"prices": {
 		"full": 30000000000000000,

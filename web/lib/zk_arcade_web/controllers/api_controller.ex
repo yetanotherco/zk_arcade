@@ -1,5 +1,6 @@
 defmodule ZkArcadeWeb.ApiController do
   use ZkArcadeWeb, :controller
+    require Logger
 
   def check_agreement_status(conn, %{"address" => address}) do
     case ZkArcade.Accounts.fetch_wallet_by_address(String.downcase(address)) do
@@ -90,8 +91,32 @@ defmodule ZkArcadeWeb.ApiController do
     end
   end
 
+  def get_public_nft_eligibility(conn, %{"address" => address}) do
+    case query_public_eligibility(address) do
+      {:ok, eligible} ->
+        conn |> json(%{eligible: eligible})
+      {:error, _} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: "Failed to fetch eligibility"})
+    end
+  end
+
   defp query_eligibility(wallet_address) do
     case ZkArcade.MerklePaths.get_merkle_proof_for_address(wallet_address) do
+      {:ok, _proof, _merkle_root_index} ->
+        {:ok, true}
+
+      {:error, :proof_not_found} ->
+        {:ok, false}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp query_public_eligibility(wallet_address) do
+    case ZkArcade.PublicMerklePaths.get_merkle_proof_for_address(wallet_address) do
       {:ok, _proof, _merkle_root_index} ->
         {:ok, true}
 
@@ -106,6 +131,17 @@ defmodule ZkArcadeWeb.ApiController do
 
   def get_nft_claim_merkle_proof(conn, %{"address" => address}) do
     case ZkArcade.MerklePaths.get_merkle_proof_for_address(address) do
+      {:ok, proof, merkle_root_index} ->
+        conn |> json(%{merkle_proof: proof, merkle_root_index: merkle_root_index})
+      {:error, _} ->
+         conn
+          |> put_status(:internal_server_error)
+          |> json(%{error: "Failed to fetch merkle proof"})
+    end
+  end
+
+  def get_public_nft_claim_merkle_proof(conn, %{"address" => address}) do
+  case ZkArcade.PublicMerklePaths.get_merkle_proof_for_address(address) do
       {:ok, proof, merkle_root_index} ->
         conn |> json(%{merkle_proof: proof, merkle_root_index: merkle_root_index})
       {:error, _} ->

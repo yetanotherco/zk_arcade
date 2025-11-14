@@ -8,12 +8,15 @@ import { NftSuccessModal } from "../../components/Modal";
 import { ToastContainer } from "../../components/Toast";
 import { ToastsProvider } from "../../state/toast";
 import { useNftContract } from "../../hooks/useNftContract";
+import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 import { fetchNftClaimEligibility } from "../../utils/aligned";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	network: string;
 	user_address?: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	is_eligible?: string;
 };
 
@@ -34,12 +37,29 @@ const formatAddress = (addr: Address) =>
 const MintClaimSection = ({
 	address,
 	nftContractAddress,
+	publicNftContractAddress,
 	initialEligibility,
 }: {
 	address: Address;
 	nftContractAddress: Address;
+	publicNftContractAddress: Address;
 	initialEligibility?: boolean;
 }) => {
+	const shouldShowBuyCta = initialEligibility === false;
+	const isPublicNftEnabled = isPublicNftContractEnabled(publicNftContractAddress);
+	
+	const { balanceMoreThanZero: hasBoughtPublicNft } = usePublicNftContract({
+		userAddress: address,
+		contractAddress: publicNftContractAddress,
+	});
+	const alreadyBoughtPublicNft = shouldShowBuyCta && isPublicNftEnabled && hasBoughtPublicNft;
+	const encouragePurchaseMessage = alreadyBoughtPublicNft
+		? "You already purchased this access NFT. You're good to go."
+		: isPublicNftEnabled
+			? "Your wallet isn't eligible to claim this drop. Buy an access NFT to jump in right away."
+			: "Your wallet isn't eligible to claim this drop. The public NFT collection is not currently available.";
+	const alreadyBoughtButtonLabel = "Already bought";
+
 	const {
 		claimNft,
 		receipt,
@@ -63,7 +83,7 @@ const MintClaimSection = ({
 			return "Your wallet is eligible to mint this NFT.";
 		}
 		if (initialEligibility === false) {
-			return "You're not eligible yet, but more waves are on the way.";
+			return encouragePurchaseMessage;
 		}
 		return null;
 	});
@@ -93,7 +113,9 @@ const MintClaimSection = ({
 			} else {
 				setStatus("ineligible");
 				setMessage(
-					"You're not eligible yet, but more waves are on the way."
+					shouldShowBuyCta
+						? encouragePurchaseMessage
+						: "You're not eligible yet, but more waves are on the way."
 				);
 			}
 		} catch (err: any) {
@@ -102,7 +124,12 @@ const MintClaimSection = ({
 				err?.message ?? "Failed to check eligibility. Please retry."
 			);
 		}
-	}, [address, balanceMoreThanZero]);
+	}, [
+		address,
+		balanceMoreThanZero,
+		encouragePurchaseMessage,
+		shouldShowBuyCta,
+	]);
 
 	useEffect(() => {
 		checkEligibility();
@@ -163,6 +190,16 @@ const MintClaimSection = ({
 			);
 		}
 	}, [status, claimNft]);
+
+	const onBuy = useCallback(() => {
+		if (typeof window === "undefined") return;
+		window.location.href = "/nft/buy";
+	}, []);
+
+	useEffect(() => {
+		if (!alreadyBoughtPublicNft) return;
+		setMessage(encouragePurchaseMessage);
+	}, [alreadyBoughtPublicNft, encouragePurchaseMessage]);
 
 	const checkLabel = useMemo(() => {
 		if (status === "checking") return "Checking…";
@@ -263,12 +300,32 @@ const MintClaimSection = ({
 				</div>
 				<Button
 					variant="accent-fill"
-					onClick={onClaim}
-					disabled={!canClaim}
-					isLoading={status === "claiming"}
-					disabledTextOnHover="Complete eligibility check first"
+					onClick={
+						shouldShowBuyCta
+							? alreadyBoughtPublicNft || !isPublicNftEnabled
+								? undefined
+								: onBuy
+							: onClaim
+					}
+					disabled={
+						shouldShowBuyCta ? (alreadyBoughtPublicNft || !isPublicNftEnabled) : !canClaim
+					}
+					isLoading={!shouldShowBuyCta && status === "claiming"}
+					disabledTextOnHover={
+						shouldShowBuyCta
+							? !isPublicNftEnabled
+								? "NFT collection not available"
+								: undefined
+							: "Complete eligibility check first"
+					}
 				>
-					{claimLabel}
+					{shouldShowBuyCta
+						? alreadyBoughtPublicNft
+							? alreadyBoughtButtonLabel
+							: isPublicNftEnabled
+								? "Go to buy NFT"
+								: "NFT not available"
+						: claimLabel}
 				</Button>
 				{claimMessage && (
 					<p className={`text-sm ${claimMessageClass}`}>
@@ -288,6 +345,7 @@ const MintClaimSection = ({
 const MintFlow = ({
 	user_address,
 	nft_contract_address,
+	public_nft_contract_address,
 	is_eligible,
 }: MintFlowProps) => {
 	const isConnected = !!user_address;
@@ -366,6 +424,7 @@ const MintFlow = ({
 				<MintClaimSection
 					address={activeAddress}
 					nftContractAddress={nft_contract_address}
+					publicNftContractAddress={public_nft_contract_address}
 					initialEligibility={initialEligibility}
 				/>
 			) : (

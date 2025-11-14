@@ -9,9 +9,11 @@ import { useNftContract } from "../../../hooks/useNftContract";
 import { Address } from "../../../types/blockchain";
 import { Button } from "../../Button";
 import { fetchNftClaimEligibility } from "../../../utils/aligned";
+import { isPublicNftContractEnabled } from "../../../utils/publicNftContract";
 
 type Props = {
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	user_address: Address;
 	updateState: () => void;
 	setOpen: (open: boolean) => void;
@@ -28,21 +30,27 @@ type Status =
 
 export const ClaimNft: React.FC<Props> = ({
 	nft_contract_address,
+	public_nft_contract_address,
 	user_address,
 	setOpen,
 	updateState,
 }) => {
-	const { claimNft, receipt, balance } = useNftContract({
+	const { balance } = useNftContract({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
+
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
 
 	const [status, setStatus] = useState<Status>("idle");
 	const [message, setMessage] = useState<string | null>(null);
 	const didMountRef = useRef(false);
 
 	const isBusy = status === "checking" || status === "claiming";
-	const isClaimDisabled = status !== "eligible";
+	const isPrimaryDisabled =
+		isBusy ||
+		(status !== "eligible" && status !== "ineligible" && status !== "error") ||
+		(status === "ineligible" && !isPublicNftEnabled);
 
 	const checkEligibility = useCallback(async () => {
 		setMessage(null);
@@ -56,7 +64,6 @@ export const ClaimNft: React.FC<Props> = ({
 				setStatus("eligible");
 			} else {
 				setStatus("ineligible");
-				setMessage("Your wallet isn't eligible to claim this NFT.");
 			}
 		} catch (err: any) {
 			setStatus("error");
@@ -78,40 +85,15 @@ export const ClaimNft: React.FC<Props> = ({
 		checkEligibility();
 	}, [checkEligibility, nft_contract_address, user_address]);
 
-	const onClaim = useCallback(async () => {
-		if (status !== "eligible") return;
-		try {
-			setMessage(null);
-			setStatus("claiming");
-			await claimNft();
-		} catch (err: any) {
-			setStatus("error");
-			setMessage(err?.message ?? "Failed to submit claim transaction.");
+	const onClaim = useCallback(() => {
+		if (status === "eligible") {
+			window.location.href = "/mint";
+		} else if (status === "ineligible" && isPublicNftEnabled) {
+			window.location.href = "/nft/buy";
+		} else if (status === "error") {
+			checkEligibility();
 		}
-	}, [status, claimNft]);
-
-	const { isLoading: txLoading, isSuccess, error } = receipt;
-
-	useEffect(() => {
-		if (txLoading) setStatus("claiming");
-	}, [txLoading]);
-
-	useEffect(() => {
-		if (isSuccess) {
-			setStatus("claimed");
-			setMessage("Your NFT was claimed successfully.");
-			updateState();
-		}
-	}, [isSuccess, updateState]);
-
-	useEffect(() => {
-		if (error) {
-			setStatus("error");
-			const text =
-				typeof error === "string" ? error : (error as any)?.message;
-			setMessage(text ?? "Transaction failed.");
-		}
-	}, [error]);
+	}, [status, checkEligibility, isPublicNftEnabled]);
 
 	const ctaLabel = useMemo(() => {
 		switch (status) {
@@ -119,9 +101,9 @@ export const ClaimNft: React.FC<Props> = ({
 			case "checking":
 				return "Checking eligibility…";
 			case "eligible":
-				return "Claim NFT";
+				return "Mint NFT";
 			case "ineligible":
-				return "Not eligible";
+				return isPublicNftEnabled ? "Buy NFT" : "NFT not available";
 			case "claiming":
 				return "Claiming…";
 			case "claimed":
@@ -131,7 +113,7 @@ export const ClaimNft: React.FC<Props> = ({
 			default:
 				return "Claim NFT";
 		}
-	}, [status]);
+	}, [status, isPublicNftEnabled]);
 
 	return (
 		<div className="flex flex-col gap-4 justify-between h-full">
@@ -147,8 +129,11 @@ export const ClaimNft: React.FC<Props> = ({
 				</p>
 			)}
 			{status === "ineligible" && (
-				<p className="bg-red/20 rounded p-2 text-red">
-					Your wallet isn't eligible to claim this NFT.
+				<p className="bg-blue/20 rounded p-2 text-blue">
+					{isPublicNftEnabled 
+						? "You can buy the NFT now to start participating."
+						: "The public NFT is not yet available. Please check back later."
+					}
 				</p>
 			)}
 			{status === "error" && (
@@ -168,7 +153,7 @@ export const ClaimNft: React.FC<Props> = ({
 				<Button
 					variant="accent-fill"
 					isLoading={isBusy}
-					disabled={isBusy || isClaimDisabled}
+					disabled={isPrimaryDisabled}
 					onClick={onClaim}
 				>
 					{ctaLabel}

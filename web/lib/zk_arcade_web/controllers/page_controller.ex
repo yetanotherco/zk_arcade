@@ -49,6 +49,18 @@ defmodule ZkArcadeWeb.PageController do
     end
   end
 
+  defp get_user_elegibility_public(nil) do
+    "false"
+  end
+
+  defp get_user_elegibility_public(address) do
+    case ZkArcade.PublicMerklePaths.get_merkle_proof_for_address(address) do
+        {:ok, _proof, _index} -> "true"
+        {:error, :proof_not_found} -> "false"
+        _ -> "false"
+    end
+  end
+
   def games(conn, _params) do
     wallet = get_wallet_from_session(conn)
     eligible = get_user_eligibility(wallet)
@@ -134,6 +146,7 @@ defmodule ZkArcadeWeb.PageController do
     wallet = get_wallet_from_session(conn)
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
     eligible = get_user_eligibility(wallet)
+    discount_eligible = get_user_elegibility_public(wallet)
     acknowledgements = [
       %{text: "Original Parity game repository", link: "https://github.com/abejfehr/parity/"},
       %{text: "Original Parity game author", link: "https://github.com/abejfehr"}
@@ -148,6 +161,7 @@ defmodule ZkArcadeWeb.PageController do
     conn
       |> assign(:wallet, wallet)
       |> assign(:eligible, eligible)
+      |> assign(:discount_eligible, discount_eligible)
       |> assign(:game, %{
         image: "/images/parity.jpg",
         name: "Parity",
@@ -172,6 +186,7 @@ The goal of the game is to make each number on the board equal.
   def leaderboard(conn, params) do
     wallet = get_wallet_from_session(conn)
     eligible = get_user_eligibility(wallet)
+    discount_eligible = get_user_elegibility_public(wallet)
     proofs = get_proofs(wallet, 1, 10)
 
     entries_per_page = 10
@@ -207,6 +222,7 @@ The goal of the game is to make each number on the board equal.
     conn
     |> assign(:wallet, wallet)
     |> assign(:eligible, eligible)
+    |> assign(:discount_eligible, discount_eligible)
     |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:top_users, top_users)
     |> assign(:user_data, user_data)
@@ -228,6 +244,7 @@ The goal of the game is to make each number on the board equal.
   def mint(conn, _params) do
     wallet = get_wallet_from_session(conn)
     eligible = get_user_eligibility(wallet)
+    discount_eligible = get_user_elegibility_public(wallet)
     proofs = get_proofs(wallet, 1, 10)
     {username, position} = get_username_and_position(wallet)
     explorer_url = Application.get_env(:zk_arcade, :explorer_url)
@@ -236,11 +253,36 @@ The goal of the game is to make each number on the board equal.
     |> assign(:network, Application.get_env(:zk_arcade, :network))
     |> assign(:wallet, wallet)
     |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+    |> assign(:public_nft_contract_address, Application.get_env(:zk_arcade, :public_nft_contract_address))
     |> assign(:eligible, eligible)
+    |> assign(:discount_eligible, discount_eligible)
     |> assign(:submitted_proofs, Jason.encode!(proofs))
     |> assign(:username, username)
     |> assign(:user_position, position)
     |> assign(:explorer_url, explorer_url)
     |> render(:mint)
+  end
+
+  def buy_nft(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    eligible = get_user_eligibility(wallet)
+    # To be replaced with whitelist merkle proof
+    eligible_for_discount =  to_string(ZkArcade.PublicMerklePaths.get_eligiblity_for_address(wallet))
+    proofs = get_proofs(wallet, 1, 10)
+    {username, position} = get_username_and_position(wallet)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+
+    conn
+    |> assign(:network, Application.get_env(:zk_arcade, :network))
+    |> assign(:wallet, wallet)
+    |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+    |> assign(:public_nft_contract_address, Application.get_env(:zk_arcade, :public_nft_contract_address))
+    |> assign(:eligible, eligible)
+    |> assign(:eligible_for_discount, eligible_for_discount)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:username, username)
+    |> assign(:user_position, position)
+    |> assign(:explorer_url, explorer_url)
+    |> render(:buy_nft)
   end
 end

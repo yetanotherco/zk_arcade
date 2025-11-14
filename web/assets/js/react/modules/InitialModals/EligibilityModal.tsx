@@ -4,10 +4,13 @@ import { useNftContract } from "../../hooks/useNftContract";
 import { Address } from "../../types/blockchain";
 import { EligibilityModal } from "../../components/Modal/EligibilityModal";
 import { NftSuccessModal } from "../../components/Modal";
+import { usePublicNftContract } from "../../hooks/usePublicNftContract";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	user_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	isEligible: boolean;
 };
 
@@ -37,6 +40,7 @@ const hasUserViewed = (key: string, userAddress: string): boolean => {
 export const ShowEligibilityModal = ({
 	user_address,
 	nft_contract_address,
+	public_nft_contract_address,
 	isEligible,
 }: Props) => {
 	const { open, setOpen } = useModal();
@@ -52,9 +56,16 @@ export const ShowEligibilityModal = ({
 		contractAddress: nft_contract_address,
 	});
 
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
+	
+	const { balance: publicNftBalance } = usePublicNftContract({
+		contractAddress: public_nft_contract_address,
+		userAddress: user_address,
+	});
+
 	useEffect(() => {
-		// if undefined, wait until it is loaded
-		if (balance.data === undefined) {
+		// if undefined, wait until it is loaded (skip public NFT if contract not enabled)
+		if (balance.data === undefined || (isPublicNftEnabled && publicNftBalance.data === undefined)) {
 			return;
 		}
 
@@ -67,7 +78,14 @@ export const ShowEligibilityModal = ({
 				user_address
 			);
 
-			if (viewedHowItWorks && !viewedEligibility && balance.data === 0n) {
+			const publicNftBalanceToCheck = isPublicNftEnabled ? publicNftBalance.data : 0n;
+			
+			if (
+				viewedHowItWorks &&
+				!viewedEligibility &&
+				balance.data === 0n &&
+				publicNftBalanceToCheck === 0n
+			) {
 				setOpen(true);
 			}
 		};

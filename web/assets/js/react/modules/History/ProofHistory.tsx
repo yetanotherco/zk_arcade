@@ -31,6 +31,7 @@ type Props = {
 	explorer_url: string;
 	batcher_url: string;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 };
 
 const Entry = ({
@@ -41,12 +42,14 @@ const Entry = ({
 	batcher_url,
 	explorer_url,
 	nft_contract_address,
+	public_nft_contract_address,
 	proofsToBump,
 	proofsToBumpIsLoading,
 }: {
 	payment_service_address: Address;
 	leaderboard_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	user_address: Address;
 	proof: ProofSubmission;
 	batcher_url: string;
@@ -135,6 +138,7 @@ const Entry = ({
 				proof={proof}
 				proofToSubmitData={null}
 				nft_contract_address={nft_contract_address}
+				public_nft_contract_address={public_nft_contract_address}
 				gameIdx={proof.game_idx}
 			/>
 
@@ -158,6 +162,7 @@ export const ProofHistory = ({
 	payment_service_address,
 	explorer_url,
 	nft_contract_address,
+	public_nft_contract_address,
 }: Props) => {
 	useProofSentMessageReader();
 	const { proofsToBump, isLoading: proofsToBumpIsLoading } =
@@ -211,6 +216,9 @@ export const ProofHistory = ({
 						leaderboard_address={leaderboard_address}
 						payment_service_address={payment_service_address}
 						nft_contract_address={nft_contract_address}
+						public_nft_contract_address={
+							public_nft_contract_address
+						}
 						proof={proof}
 						user_address={user_address}
 						proofsToBump={proofsToBump}

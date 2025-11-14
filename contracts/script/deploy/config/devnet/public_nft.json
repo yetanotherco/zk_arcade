@@ -5,8 +5,8 @@
 	},
 	"name": "ZK Arcade public NFTs",
 	"symbol": "ZKAP",
-    "tokenURI": "ipfs://bafybeihs6wi6iaqtcjnolku63w7w6hxaixftftgdd57jf5gjd2pjn57ht4/",
-    "maxSupply": 10000,
+	"tokenURI": "https://testnft.zkarcade.com/",
+	"maxSupply": 10000,
 	"prices": {
 		"full": 30000000000000000,
 		"discounted": 15000000000000000

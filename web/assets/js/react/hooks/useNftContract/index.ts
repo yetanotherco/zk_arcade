@@ -12,9 +12,9 @@ import { zkArcadeNftAbi } from "../../constants/aligned";
 import { fetchMerkleProofForAddress } from "../../utils/aligned";
 import {
 	getUserTokenIds,
-	getTokenURI,
+	getTokenURIIpfs,
 	processRawMerkleProof,
-	getNftMetadata,
+	getNftMetadataIpfs,
 } from "./utils";
 
 type HookArgs = {
@@ -169,13 +169,13 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 					let mintedTokenId = mintedTokenIdRef.current;
 					if (mintedTokenId === null) return;
 
-					const tokenURI = await getTokenURI(
+					const tokenURI = await getTokenURIIpfs(
 						publicClient,
 						contractAddress,
 						mintedTokenId
 					);
 
-					const metadata = await getNftMetadata(
+					const metadata = await getNftMetadataIpfs(
 						tokenURI,
 						contractAddress
 					);
@@ -208,6 +208,9 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 		if (!userAddress || !balanceMoreThanZero) return;
 
 		const fetchEvents = async () => {
+			if (balance.data == 0n) {
+				return;
+			}
 			try {
 				if (!publicClient) {
 					console.error("Wagmi publicClient not initialized");
@@ -230,7 +233,7 @@ export function useNftContract({ userAddress, contractAddress }: HookArgs) {
 								continue;
 							}
 
-							const tokenURI = await getTokenURI(
+							const tokenURI = await getTokenURIIpfs(
 								publicClient,
 								contractAddress,
 								tokenId

@@ -14,6 +14,7 @@ type Props = {
 	user_address: Address;
 	batcher_url: string;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 };
 
 const textBasedOnNotEntry = {
@@ -28,6 +29,7 @@ const NotificationEntry = ({
 	user_address,
 	batcher_url,
 	nft_contract_address,
+	public_nft_contract_address,
 }: {
 	proof: ProofSubmission;
 	leaderboard_address: Address;
@@ -35,6 +37,7 @@ const NotificationEntry = ({
 	user_address: Address;
 	batcher_url: string;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 }) => {
 	const { open, setOpen, toggleOpen } = useModal();
 
@@ -72,6 +75,7 @@ const NotificationEntry = ({
 				proof={proof}
 				proofToSubmitData={null}
 				nft_contract_address={nft_contract_address}
+				public_nft_contract_address={public_nft_contract_address}
 			/>
 		</>
 	);
@@ -84,6 +88,7 @@ export const NotificationBell = ({
 	user_address,
 	batcher_url,
 	nft_contract_address,
+	public_nft_contract_address,
 }: Props) => {
 	const [proofsReady, setProofsReady] = useState<ProofSubmission[]>([]);
 	const [allProofs, setAllProofs] = useState<ProofSubmission[]>([]);
@@ -136,6 +141,9 @@ export const NotificationBell = ({
 									user_address={user_address}
 									batcher_url={batcher_url}
 									nft_contract_address={nft_contract_address}
+									public_nft_contract_address={
+										public_nft_contract_address
+									}
 								/>
 							))
 						) : (

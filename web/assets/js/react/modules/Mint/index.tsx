@@ -44,6 +44,17 @@ const MintClaimSection = ({
 	publicNftContractAddress: Address;
 	initialEligibility?: boolean;
 }) => {
+	const shouldShowBuyCta = initialEligibility === false;
+	const { balanceMoreThanZero: hasBoughtPublicNft } = usePublicNftContract({
+		userAddress: address,
+		contractAddress: publicNftContractAddress,
+	});
+	const alreadyBoughtPublicNft = shouldShowBuyCta && hasBoughtPublicNft;
+	const encouragePurchaseMessage = alreadyBoughtPublicNft
+		? "You already purchased this access NFT. You're good to go."
+		: "Your wallet isn't eligible to claim this drop. Buy an access NFT to jump in right away.";
+	const alreadyBoughtButtonLabel = "Already bought";
+
 	const {
 		claimNft,
 		receipt,
@@ -52,7 +63,7 @@ const MintClaimSection = ({
 		showSuccessModal,
 		setShowSuccessModal,
 		claimedNftMetadata,
-	 } = useNftContract({
+	} = useNftContract({
 		contractAddress: nftContractAddress,
 		userAddress: address,
 	});
@@ -67,7 +78,7 @@ const MintClaimSection = ({
 			return "Your wallet is eligible to mint this NFT.";
 		}
 		if (initialEligibility === false) {
-			return "You're not eligible yet, but more waves are on the way.";
+			return encouragePurchaseMessage;
 		}
 		return null;
 	});
@@ -97,7 +108,9 @@ const MintClaimSection = ({
 			} else {
 				setStatus("ineligible");
 				setMessage(
-					"You're not eligible yet, but more waves are on the way."
+					shouldShowBuyCta
+						? encouragePurchaseMessage
+						: "You're not eligible yet, but more waves are on the way."
 				);
 			}
 		} catch (err: any) {
@@ -106,7 +119,12 @@ const MintClaimSection = ({
 				err?.message ?? "Failed to check eligibility. Please retry."
 			);
 		}
-	}, [address, balanceMoreThanZero]);
+	}, [
+		address,
+		balanceMoreThanZero,
+		encouragePurchaseMessage,
+		shouldShowBuyCta,
+	]);
 
 	useEffect(() => {
 		checkEligibility();
@@ -167,6 +185,16 @@ const MintClaimSection = ({
 			);
 		}
 	}, [status, claimNft]);
+
+	const onBuy = useCallback(() => {
+		if (typeof window === "undefined") return;
+		window.location.href = "/nft/buy";
+	}, []);
+
+	useEffect(() => {
+		if (!alreadyBoughtPublicNft) return;
+		setMessage(encouragePurchaseMessage);
+	}, [alreadyBoughtPublicNft, encouragePurchaseMessage]);
 
 	const checkLabel = useMemo(() => {
 		if (status === "checking") return "Checking…";
@@ -267,12 +295,28 @@ const MintClaimSection = ({
 				</div>
 				<Button
 					variant="accent-fill"
-					onClick={onClaim}
-					disabled={!canClaim}
-					isLoading={status === "claiming"}
-					disabledTextOnHover="Complete eligibility check first"
+					onClick={
+						shouldShowBuyCta
+							? alreadyBoughtPublicNft
+								? undefined
+								: onBuy
+							: onClaim
+					}
+					disabled={
+						shouldShowBuyCta ? alreadyBoughtPublicNft : !canClaim
+					}
+					isLoading={!shouldShowBuyCta && status === "claiming"}
+					disabledTextOnHover={
+						shouldShowBuyCta
+							? undefined
+							: "Complete eligibility check first"
+					}
 				>
-					{claimLabel}
+					{shouldShowBuyCta
+						? alreadyBoughtPublicNft
+							? alreadyBoughtButtonLabel
+							: "Go to buy NFT"
+						: claimLabel}
 				</Button>
 				{claimMessage && (
 					<p className={`text-sm ${claimMessageClass}`}>

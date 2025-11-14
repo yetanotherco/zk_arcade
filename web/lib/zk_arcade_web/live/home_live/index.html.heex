@@ -6,7 +6,8 @@
       network={Application.get_env(:zk_arcade, :network)}
       payment_service_address={Application.get_env(:zk_arcade, :payment_service_address)}
       nft_contract_address={Application.get_env(:zk_arcade, :nft_contract_address)}
-      user_address={@wallet}
+      public_nft_contract_address={Application.get_env(:zk_arcade, :public_nft_contract_address)}
+      user_address={@wallet} 
       eligible={@eligible}
     />
   <% end %>

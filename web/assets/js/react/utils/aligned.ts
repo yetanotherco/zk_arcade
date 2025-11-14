@@ -179,7 +179,7 @@ export const fetchPublicMerkleProofForAddress = async (
 	} catch (error) {
 		return null;
 	}
-}
+};
 
 export const fetchNftClaimEligibility = async (
 	address: Address

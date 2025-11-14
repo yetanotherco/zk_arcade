@@ -10,6 +10,7 @@ import { DepositStep } from "./DepositStep";
 import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
 import { ClaimNft } from "./ClaimNftStep";
+import { usePublicNftContract } from "../../../hooks/usePublicNftContract";
 
 type Props = {
 	modal: Omit<ModalProps, "maxWidth">;
@@ -18,6 +19,7 @@ type Props = {
 	batcher_url: string;
 	leaderboard_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	proof?: ProofSubmission;
 	proofToSubmitData: VerificationData | null;
 	gameName?: string;
@@ -79,6 +81,7 @@ export const SubmitProofModal = ({
 	leaderboard_address,
 	proofToSubmitData,
 	nft_contract_address,
+	public_nft_contract_address,
 	gameName,
 	gameIdx,
 	highestLevelReached,
@@ -125,6 +128,10 @@ export const SubmitProofModal = ({
 
 	const { balance: nftBalance } = useNftContract({
 		contractAddress: nft_contract_address,
+		userAddress: user_address,
+	});
+	const { balance: publicNftBalance } = usePublicNftContract({
+		contractAddress: public_nft_contract_address,
 		userAddress: user_address,
 	});
 	const { currentGame: beastCurrentGame } = useBeastLeaderboardContract({
@@ -217,7 +224,10 @@ export const SubmitProofModal = ({
 				setStep("claim");
 			}
 		} else {
-			if (Number(nftBalance.data) == 0) {
+			if (
+				Number(nftBalance.data) == 0 &&
+				Number(publicNftBalance.data) == 0
+			) {
 				setStep("claim-nft");
 				return;
 			}

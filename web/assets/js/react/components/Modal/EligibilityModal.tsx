@@ -14,7 +14,6 @@ type Props = {
 
 export const EligibilityModal = ({
 	isEligible,
-	claimNft,
 	isLoading,
 	balance,
 	onClose,
@@ -66,9 +65,8 @@ export const EligibilityModal = ({
 							</Button>
 							<Button
 								variant="accent-fill"
-								onClick={async () => {
-									await claimNft();
-									dismiss();
+								onClick={() => {
+									window.location.href = "/mint";
 								}}
 								isLoading={isLoading}
 								disabled={balance !== 0n}
@@ -81,44 +79,12 @@ export const EligibilityModal = ({
 					<>
 						<div>
 							<h3 className="text-xl mb-1 font-semibold text-center">
-								You are not eligible yet,
-								<br />
-								but don't worry
+								Buy the NFT to Join
 							</h3>
 							<p className="text-text-100 text-center">
-								More waves are incoming
+								You can purchase the NFT now and start playing.
 							</p>
 						</div>
-						<p className="text-text-200 text-center text-sm leading-relaxed">
-							Follow{" "}
-							<a
-								href="https://x.com/alignedlayer"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-accent-100 hover:underline"
-							>
-								Aligned on X
-							</a>
-							, subscribe to our{" "}
-							<a
-								href="https://blog.alignedlayer.com/"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-accent-100 hover:underline"
-							>
-								newsletter
-							</a>
-							, and join the{" "}
-							<a
-								href="https://discord.gg/alignedlayer"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-accent-100 hover:underline"
-							>
-								Discord
-							</a>{" "}
-							to hear when the next wave of access opens up.
-						</p>
 						<div className="flex w-full justify-center relative group">
 							<span className="text-white text-sm underline cursor-help">
 								What is this?
@@ -134,9 +100,17 @@ export const EligibilityModal = ({
 								</div>
 							</div>
 						</div>
-						<div className="text-center mt-4">
-							<Button variant="accent-fill" onClick={dismiss}>
-								Ok
+						<div className="flex mt-4 gap-8 justify-center items-center text-center">
+							<Button variant="text" onClick={dismiss}>
+								Maybe later
+							</Button>
+							<Button
+								variant="accent-fill"
+								onClick={() => {
+									window.location.href = "/nft/buy";
+								}}
+							>
+								Buy NFT
 							</Button>
 						</div>
 					</>

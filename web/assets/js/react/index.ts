@@ -15,6 +15,7 @@ import { MuteBackgroundBtn } from "./modules/BackgroundMusic/MuteBtn";
 import NFTList from "./modules/History/NFTList";
 import { Mint } from "./modules/Mint";
 import HomeNextGamesTimer from "./modules/HomeNextGameTimer";
+import { BuyNft } from "./modules/BuyNft";
 
 define(
 	{ "x-app-user-wallet": Wallet },
@@ -31,6 +32,7 @@ define(
 			"batcher_url",
 			"is_eligible",
 			"nft_contract_address",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -45,6 +47,7 @@ define(
 			"batcher_url",
 			"leaderboard_address",
 			"nft_contract_address",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -61,6 +64,7 @@ define(
 			"explorer_url",
 			"batcher_url",
 			"nft_contract_address",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -88,6 +92,7 @@ define(
 			"payment_service_address",
 			"user_address",
 			"nft_contract_address",
+			"public_nft_contract_address",
 			"is_eligible",
 		],
 	}
@@ -105,6 +110,7 @@ define(
 			"nft_contract_address",
 			"highest_level_reached",
 			"highest_level_reached_proof_id",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -123,6 +129,7 @@ define(
 			"network",
 			"payment_service_address",
 			"nft_contract_address",
+			"public_nft_contract_address",
 			"user_address",
 			"eligible",
 		],
@@ -143,6 +150,7 @@ define(
 			"nft_contract_address",
 			"highest_level_reached",
 			"highest_level_reached_proof_id",
+			"public_nft_contract_address",
 		],
 	}
 );
@@ -166,6 +174,7 @@ define(
 			"network",
 			"user_address",
 			"nft_contract_address",
+			"public_nft_contract_address",
 			"is_eligible",
 		],
 	}
@@ -188,5 +197,19 @@ define(
 	{ "x-app-home-next-games-timer": HomeNextGamesTimer },
 	{
 		attributes: ["network", "leaderboard_address"],
+	}
+);
+
+define(
+	{ "x-app-buy-nft": BuyNft },
+	{
+		attributes: [
+			"network",
+			"nft_contract_address",
+			"public_nft_contract_address",
+			"is_eligible",
+			"is_eligible_for_discount",
+			"user_address",
+		],
 	}
 );

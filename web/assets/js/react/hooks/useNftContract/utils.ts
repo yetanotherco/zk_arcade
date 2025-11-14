@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { zkArcadeNftAbi } from "../../constants/aligned";
+import { publicZkArcadeNftAbi, zkArcadeNftAbi } from "../../constants/aligned";
 import { NftMetadata } from ".";
 
 type Proof = `0x${string}`[] | `0x${string}` | string;
@@ -24,8 +24,23 @@ export async function getUserTokenIds(userAddress: Address): Promise<bigint[]> {
 	}
 }
 
-// Gets the specific token URI requesting it to the NFT contract
 export async function getTokenURI(
+	publicClient: any,
+	contractAddress: Address,
+	tokenId: bigint
+): Promise<string> {
+	const tokenURI = await publicClient.readContract({
+		address: contractAddress,
+		abi: publicZkArcadeNftAbi,
+		functionName: "tokenURI",
+		args: [tokenId],
+	});
+
+	return tokenURI;
+}
+
+// Gets the specific token URI requesting it to the NFT contract
+export async function getTokenURIIpfs(
 	publicClient: any,
 	contractAddress: Address,
 	tokenId: bigint
@@ -50,12 +65,12 @@ export function convertIpfsToHttpUrl(imageUrl: string): string {
 }
 
 // Fetches the NFT metadata from a given JSON URL and the NFT contract address
-export async function getNftMetadata(
+export async function getNftMetadataIpfs(
 	jsonUrl: string,
 	nftContractAddress: Address
 ): Promise<NftMetadata> {
 	try {
-		const response = await fetch(jsonUrl);
+		const response = await fetch(convertIpfsToHttpUrl(jsonUrl));
 		if (!response.ok) {
 			throw new Error(`Error fetching metadata: ${response.status}`);
 		}
@@ -72,6 +87,39 @@ export async function getNftMetadata(
 		// Get the tokenID from url last digits (separated by /)
 		const tokenId = BigInt(jsonUrl.split("/").pop() || 0);
 
+		return {
+			name: data.name,
+			description: data.description,
+			image: imageUrl,
+			tokenId: tokenId,
+			address: nftContractAddress,
+		};
+	} catch (error) {
+		throw error;
+	}
+}
+
+export async function getNftMetadata(
+	jsonUrl: string,
+	nftContractAddress: Address
+): Promise<NftMetadata> {
+	try {
+		const response = await fetch(jsonUrl, {
+			method: "GET",
+		});
+		if (!response.ok) {
+			throw new Error(`Error fetching metadata: ${response.status}`);
+		}
+
+		const data = await response.json();
+
+		if (!data.name || !data.description || !data.image) {
+			throw new Error("Invalid metadata format");
+		}
+
+		const imageUrl = convertIpfsToHttpUrl(data.image);
+
+		const tokenId = BigInt(jsonUrl.split("/").pop() || 0);
 		return {
 			name: data.name,
 			description: data.description,

@@ -6,12 +6,12 @@ import { ToastsProvider } from "../../state/toast";
 import { ToastContainer } from "../../components/Toast";
 import { EncourageDepositingModal } from "./EncourageDepositingModal";
 import { ShowEligibilityModal } from "./EligibilityModal";
-import { NftSuccessClaim } from "./NFTSuccessClaim";
 
 type Props = {
 	network: string;
 	payment_service_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	user_address: Address;
 	eligible: string;
 };
@@ -35,6 +35,7 @@ const InitialModals = ({
 	nft_contract_address,
 	user_address,
 	eligible,
+	public_nft_contract_address,
 }: Props) => {
 	const isEligible = eligible === "true";
 	const [eligibilityPending, setEligibilityPending] = useState(true);
@@ -61,15 +62,12 @@ const InitialModals = ({
 					user_address={user_address}
 					isEligible={isEligible}
 					nft_contract_address={nft_contract_address}
+					public_nft_contract_address={public_nft_contract_address}
 				/>
 				<EncourageDepositingModal
 					payment_service_address={payment_service_address}
 					user_address={user_address}
 					blocked={eligibilityPending}
-				/>
-				<NftSuccessClaim
-					userAddress={user_address}
-					contractAddress={nft_contract_address}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

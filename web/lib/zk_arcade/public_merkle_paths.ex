@@ -53,4 +53,19 @@ defmodule ZkArcade.PublicMerklePaths do
       merkle_path -> {:ok, merkle_path.merkle_proof, merkle_path.merkle_root_index}
     end
   end
+
+  def get_eligiblity_for_address(nil) do
+    false
+  end
+
+  def get_eligiblity_for_address(address) do
+    query =
+      from(mp in PublicMerklePath,
+        where: mp.address == ^address,
+        select: 1
+      )
+
+    Logger.info("Checking eligibility for address: #{address} with query: #{inspect(query)}")
+    Repo.exists?(query)
+  end
 end

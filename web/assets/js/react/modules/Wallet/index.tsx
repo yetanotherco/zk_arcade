@@ -24,6 +24,7 @@ type Props = {
 	batcher_url: string;
 	is_eligible: string;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 };
 
 const WalletContent = ({
@@ -38,6 +39,7 @@ const WalletContent = ({
 	batcher_url,
 	is_eligible,
 	nft_contract_address,
+	public_nft_contract_address,
 }: Omit<Props, "needs_agreement">) => {
 	const { address, isConnected } = useAccount();
 	const [needsAgreement, setNeedsAgreement] = useState(false);
@@ -97,6 +99,7 @@ const WalletContent = ({
 					batcher_url={batcher_url}
 					is_eligible={is_eligible === "true"}
 					nft_contract_address={nft_contract_address}
+					public_nft_contract_address={public_nft_contract_address}
 				/>
 			</div>
 		);
@@ -123,6 +126,7 @@ export default ({
 	batcher_url,
 	is_eligible,
 	nft_contract_address,
+	public_nft_contract_address,
 }: Omit<Props, "needs_agreement">) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -140,6 +144,7 @@ export default ({
 					batcher_url={batcher_url}
 					is_eligible={is_eligible}
 					nft_contract_address={nft_contract_address}
+					public_nft_contract_address={public_nft_contract_address}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

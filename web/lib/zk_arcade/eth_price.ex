@@ -45,7 +45,7 @@ defmodule ZkArcade.EthPrice do
         case fetch_from_cryptoprices() do
           {:ok, price} ->
             {:ok, price}
-          {:error, reason} ->
+          {:error, _} ->
             # As a last option, try to get from environment variable
 
             Logger.error("Failed to get the initial ETH price from coingecko and cryptoprices, using environment set value as fallback")

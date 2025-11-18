@@ -46,7 +46,22 @@ defmodule ZkArcade.EthPrice do
           {:ok, price} ->
             {:ok, price}
           {:error, reason} ->
-            {:error, reason}
+            # As a last option, try to get from environment variable
+
+            Logger.error("Failed to get the initial ETH price from coingecko and cryptoprices, using environment set value as fallback")
+
+            case Application.get_env(:zk_arcade, :eth_usd_price_fallback) do
+              nil ->
+                {:error, "ETH_PRICE_USD environment variable is not set"}
+              price_str ->
+                case Float.parse(price_str) do
+                  {price, ""} when is_float(price) and price > 0 ->
+                    Logger.info("Successfully fetched ETH price from environment variable: #{price}")
+                    {:ok, price}
+                  _ ->
+                    {:error, "Invalid ETH_PRICE_USD environment variable format"}
+                end
+            end
         end
     end
   end

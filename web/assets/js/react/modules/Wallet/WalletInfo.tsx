@@ -13,6 +13,7 @@ import {
 	getNftMetadataIpfs,
 } from "../../hooks/useNftContract/utils";
 import { usePublicNftContract } from "../../hooks/usePublicNftContract";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	network: string;
@@ -54,6 +55,8 @@ export const WalletInfo = ({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
+
 	const {
 		balanceMoreThanZero: hasClaimedPublicNft,
 		tokenURIs: publicTokenUris,
@@ -78,15 +81,21 @@ export const WalletInfo = ({
 
 	const eligibilityClasses = is_eligible
 		? "bg-accent-100/20 border-accent-100 text-accent-100"
-		: "bg-blue/20 border-blue text-blue";
+		: isPublicNftEnabled
+		? "bg-blue/20 border-blue text-blue"
+		: "bg-yellow/20 border-yellow text-yellow";
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: "Mint an NFT to participate in ZKArcade and claim the leaderboard.";
+		: isPublicNftEnabled
+			? "Mint a NFT to participate in ZKArcade and climb the leaderboard."
+			: "You are not currently eligible to mint the NFT and participate in the contest.";
 
 	useEffect(() => {
 		const fetchNftMetadata = async () => {
-			if (tokenURIs.length === 0 && publicTokenUris.length === 0) {
+			const publicTokenUrisToUse = isPublicNftEnabled ? publicTokenUris : [];
+
+			if (tokenURIs.length === 0 && publicTokenUrisToUse.length === 0) {
 				setNftMetadataList([]);
 				return;
 			}
@@ -97,7 +106,7 @@ export const WalletInfo = ({
 					fetcher: getNftMetadataIpfs,
 					contract: nft_contract_address,
 				})),
-				...publicTokenUris.map(uri => ({
+				...publicTokenUrisToUse.map(uri => ({
 					uri,
 					fetcher: getNftMetadata,
 					contract: public_nft_contract_address,
@@ -131,7 +140,7 @@ export const WalletInfo = ({
 
 	const hasAnyBalance =
 		(balance.data !== undefined && balance.data > 0n) ||
-		hasClaimedPublicNft;
+		(isPublicNftEnabled && hasClaimedPublicNft);
 
 	return (
 		<div className="sm:relative group">
@@ -193,7 +202,7 @@ export const WalletInfo = ({
 
 					{!claimed &&
 						balance.data === 0n &&
-						!hasClaimedPublicNft && (
+						!(isPublicNftEnabled && hasClaimedPublicNft) && (
 							<div
 								className={`flex flex-col items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
 							>
@@ -209,7 +218,7 @@ export const WalletInfo = ({
 									>
 										Claim!
 									</p>
-								) : (
+								) : isPublicNftEnabled ? (
 									<p
 										className="text-blue cursor-pointer hover:underline font-medium"
 										onClick={() =>
@@ -218,7 +227,7 @@ export const WalletInfo = ({
 									>
 										Mint!
 									</p>
-								)}
+								) : null}
 							</div>
 						)}
 

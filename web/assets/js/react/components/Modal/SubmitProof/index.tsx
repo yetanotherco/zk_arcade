@@ -11,6 +11,7 @@ import { SubmitProofStep } from "./SubmitStep";
 import { ClaimStep } from "./ClaimStep";
 import { ClaimNft } from "./ClaimNftStep";
 import { usePublicNftContract } from "../../../hooks/usePublicNftContract";
+import { isPublicNftContractEnabled } from "../../../utils/publicNftContract";
 
 type Props = {
 	modal: Omit<ModalProps, "maxWidth">;
@@ -130,6 +131,9 @@ export const SubmitProofModal = ({
 		contractAddress: nft_contract_address,
 		userAddress: user_address,
 	});
+	
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
+	
 	const { balance: publicNftBalance } = usePublicNftContract({
 		contractAddress: public_nft_contract_address,
 		userAddress: user_address,
@@ -224,9 +228,11 @@ export const SubmitProofModal = ({
 				setStep("claim");
 			}
 		} else {
+			const publicNftBalanceToCheck = isPublicNftEnabled ? Number(publicNftBalance.data) : 0;
+			
 			if (
 				Number(nftBalance.data) == 0 &&
-				Number(publicNftBalance.data) == 0
+				publicNftBalanceToCheck == 0
 			) {
 				setStep("claim-nft");
 				return;
@@ -300,6 +306,7 @@ export const SubmitProofModal = ({
 		"claim-nft": () => (
 			<ClaimNft
 				nft_contract_address={nft_contract_address}
+				public_nft_contract_address={public_nft_contract_address}
 				user_address={user_address}
 				setOpen={modal.setOpen}
 				updateState={goToNextStep}

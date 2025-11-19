@@ -191,9 +191,10 @@ const BuyNftFlow = ({
 									<span className="line-through opacity-70 mr-2 text-sm">
 										{weiToEth(Number(fullPrice.data))} ETH
 									</span>
-									<span className="text-accent-100 font-semibold mr-2 text-sm whitespace-nowrap">
+									<span className="text-accent-100 font-semibold mr-2 text-sm">
 										-{Number(discountedPricePercentage)}%
 									</span>
+									<br />
 									<span>
 										{weiToEth(Number(discountedPrice.data))}{" "}
 										ETH

@@ -164,7 +164,7 @@ defmodule ZkArcade.Accounts do
     end
   end
 
-  def add_owned_token(nil, _token_id), do: {:ok, :not_found}
+  def add_owned_token(nil, _token_id), do: {:error, :not_found}
   def add_owned_token(address, token_id) do
     update_token_ids(address, fn tokens ->
       tokens
@@ -193,11 +193,10 @@ defmodule ZkArcade.Accounts do
         updated_tokens = fun.(current_tokens)
 
         if updated_tokens == current_tokens do
-          {:ok, wallet}
+          {:ok, :no_change}
         else
           case wallet |> Wallet.token_ids_changeset(%{owned_token_ids: updated_tokens}) |> Repo.update() do
             {:ok, updated_wallet} ->
-              ZkArcade.PrometheusMetrics.increment_nft_mints()
               {:ok, updated_wallet}
             {:error, changeset} -> {:error, changeset}
           end

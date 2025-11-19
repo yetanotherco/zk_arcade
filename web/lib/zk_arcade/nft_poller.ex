@@ -110,22 +110,31 @@ defmodule ZkArcade.NftPoller do
   end
 
   defp process_logs(logs) do
-    Enum.each(logs, &process_log/1)
+    contract_address = config_address(:nft_contract_address)
+    public_contract_address = config_address(:public_nft_contract_address)
+
+    Enum.each(logs, &process_log(&1, contract_address, public_contract_address))
   end
 
-  defp process_log(%{"topics" => [@transfer_topic, from_topic, to_topic, token_topic]}) do
-    from_address = decode_address(from_topic)
-    to_address = decode_address(to_topic)
+  defp process_log(%{"address" => log_address, "topics" => [@transfer_topic, from_topic, to_topic, token_topic]}, contract_address, public_contract_address) do
     token_id = decode_token_id(token_topic)
 
-    maybe_remove_token(from_address, token_id)
-    maybe_add_token(to_address, token_id)
+    from_topic
+    |> decode_address()
+    |> maybe_remove_token(token_id)
+
+    to_address = decode_address(to_topic)
+
+    case maybe_add_token(to_address, token_id) do
+      :ok -> increment_mint_metric(log_address, contract_address, public_contract_address, to_address)
+      _ -> :ok
+    end
   rescue
     error ->
       Logger.warning("Failed to process NFT transfer log: #{inspect(error)}")
   end
 
-  defp process_log(_log), do: :ok
+  defp process_log(_log, _contract_address, _public_contract_address), do: :ok
 
   defp maybe_remove_token(nil, _token_id), do: :ok
   defp maybe_remove_token(@zero_address, _token_id), do: :ok
@@ -138,15 +147,57 @@ defmodule ZkArcade.NftPoller do
     end
   end
 
-  defp maybe_add_token(nil, _token_id), do: :ok
-  defp maybe_add_token(@zero_address, _token_id), do: :ok
-  defp maybe_add_token(_address, nil), do: :ok
+  defp maybe_add_token(nil, _token_id), do: {:error, :invalid_address}
+  defp maybe_add_token(@zero_address, _token_id), do: {:error, :invalid_address}
+  defp maybe_add_token(_address, nil), do: {:error, :invalid_token}
 
   defp maybe_add_token(address, token_id) do
     case Accounts.add_owned_token(address, token_id) do
-      {:ok, _} -> :ok
-      {:error, reason} -> Logger.warning("Failed to add token #{token_id} for #{address}: #{inspect(reason)}")
+      {:ok, :no_change} ->
+        {:ok, :no_change}
+      {:ok, _} ->
+        :ok
+      {:error, reason} ->
+        Logger.warning("Failed to add token #{token_id} for #{address}: #{inspect(reason)}")
+        {:error, reason}
     end
+  end
+
+  defp increment_mint_metric(log_address, contract_address, public_contract_address, to_address) do
+    log_address
+    |> normalize_address()
+    |> case do
+      addr when not is_nil(public_contract_address) and addr == public_contract_address ->
+        increment_public_mint_metric(to_address)
+
+      addr when not is_nil(contract_address) and addr == contract_address ->
+        ZkArcade.PrometheusMetrics.increment_nft_mints()
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp increment_public_mint_metric(address) do
+    address
+    |> eligible_for_discount?()
+    |> case do
+      true -> ZkArcade.PrometheusMetrics.increment_public_nft_mints_with_discount()
+      false -> ZkArcade.PrometheusMetrics.increment_public_nft_mints_without_discount()
+    end
+  end
+
+  defp eligible_for_discount?(address) do
+    address
+    |> normalize_address()
+    |> case do
+      nil -> false
+      normalized -> ZkArcade.PublicMerklePaths.get_eligiblity_for_address(normalized)
+    end
+  end
+
+  defp config_address(key) do
+    Application.get_env(:zk_arcade, key) |> normalize_address()
   end
 
   defp decode_address("0x" <> topic) when byte_size(topic) >= 40 do
@@ -165,6 +216,9 @@ defmodule ZkArcade.NftPoller do
   end
 
   defp decode_token_id(_), do: nil
+
+  defp normalize_address(nil), do: nil
+  defp normalize_address(address) when is_binary(address), do: String.downcase(address)
 
   defp integer_to_hex(int) when int < 0, do: "0x0"
 

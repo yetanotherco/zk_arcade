@@ -271,6 +271,48 @@ export const zkArcadeNftAbi = [
 	}
 ] as const;
 
+export const publicZkArcadeNftAbi = [
+	{
+		type: "function",
+		stateMutability: "view",
+		name: "balanceOf",
+		inputs: [{ name: "owner", type: "address" }],
+		outputs: [{ type: "uint256" }],
+	},
+	{
+		type: "function",
+		stateMutability: "payable",
+		name: "whitelistedMint",
+		inputs: [
+			{ name: "merkleProof", type: "bytes32[]" },
+			{ name: "rootIndex", type: "uint256" },
+		],
+		outputs: [
+			{ name: "", type: "uint256", internalType: "uint256" },
+		],
+	},
+	{
+		type: "function",
+		stateMutability: "payable",
+		name: "mint",
+		inputs: [],
+		outputs: [
+			{ name: "", type: "uint256", internalType: "uint256" },
+		],
+	},
+	{
+		type:"function",
+		stateMutability:"view",
+		name:"tokenURI",
+		inputs:[
+			{ name:"tokenId", type:"uint256", internalType:"uint256" }
+		],
+		outputs:[
+			{ name:"", type:"string", internalType:"string" }
+		],
+	}
+] as const;
+
 export const eip712Domain = (
 	chainId: number,
 	batcherPaymentServiceAddress: Address

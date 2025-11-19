@@ -81,10 +81,10 @@ export const EligibilityModal = ({
 					<>
 						<div>
 							<h3 className="text-xl mb-1 font-semibold text-center">
-								Buy the NFT to Join
+								Mint the NFT to Join
 							</h3>
 							<p className="text-text-100 text-center">
-								You can purchase the NFT now and start playing.
+								You can mint the NFT now and start playing.
 							</p>
 						</div>
 						<div className="flex w-full justify-center relative group">
@@ -109,10 +109,10 @@ export const EligibilityModal = ({
 							<Button
 								variant="accent-fill"
 								onClick={() => {
-									window.location.href = "/nft/buy";
+									window.location.href = "/nft/mint";
 								}}
 							>
-								Buy NFT
+								Mint NFT
 							</Button>
 						</div>
 					</>

@@ -56,7 +56,7 @@ export const WalletInfo = ({
 		userAddress: user_address,
 	});
 	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
-	
+
 	const {
 		balanceMoreThanZero: hasClaimedPublicNft,
 		tokenURIs: publicTokenUris,
@@ -87,14 +87,14 @@ export const WalletInfo = ({
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: isPublicNftEnabled 
-			? "Buy an NFT to participate in ZKArcade and claim the leaderboard."
+		: isPublicNftEnabled
+			? "Mint a NFT to participate in ZKArcade and climb the leaderboard."
 			: "You are not currently eligible to mint the NFT and participate in the contest.";
 
 	useEffect(() => {
 		const fetchNftMetadata = async () => {
 			const publicTokenUrisToUse = isPublicNftEnabled ? publicTokenUris : [];
-			
+
 			if (tokenURIs.length === 0 && publicTokenUrisToUse.length === 0) {
 				setNftMetadataList([]);
 				return;
@@ -222,10 +222,10 @@ export const WalletInfo = ({
 									<p
 										className="text-blue cursor-pointer hover:underline font-medium"
 										onClick={() =>
-											window.location.assign("/nft/buy")
+											window.location.assign("/nft/mint")
 										}
 									>
-										Buy!
+										Mint!
 									</p>
 								) : null}
 							</div>

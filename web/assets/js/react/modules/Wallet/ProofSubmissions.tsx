@@ -18,6 +18,7 @@ type ProofProps = {
 	explorer_url: string;
 	nft_contract_address: Address;
 	highest_level_reached: number;
+	public_nft_contract_address: Address;
 };
 
 const Proof = ({
@@ -29,6 +30,7 @@ const Proof = ({
 	nft_contract_address,
 	user_address,
 	highest_level_reached,
+	public_nft_contract_address,
 }: ProofProps) => {
 	const { open, setOpen, toggleOpen } = useModal();
 	const proofHashShorten = `${proof.verification_data_commitment.slice(
@@ -62,6 +64,7 @@ const Proof = ({
 				user_address={user_address}
 				proofToSubmitData={null}
 				nft_contract_address={nft_contract_address}
+				public_nft_contract_address={public_nft_contract_address}
 				gameIdx={proof.game_idx}
 				highestLevelReached={highest_level_reached}
 				gameName={proof.game}
@@ -76,6 +79,7 @@ type Props = {
 	user_address: Address;
 	payment_service_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	explorer_url: string;
 	batcher_url: string;
 	highest_level_reached: number;
@@ -89,7 +93,8 @@ export const ProofSubmissions = ({
 	nft_contract_address,
 	user_address,
 	payment_service_address,
-	highest_level_reached
+	highest_level_reached,
+	public_nft_contract_address,
 }: Props) => {
 	return (
 		<div>
@@ -140,7 +145,12 @@ export const ProofSubmissions = ({
 											nft_contract_address={
 												nft_contract_address
 											}
-											highest_level_reached={highest_level_reached}
+											highest_level_reached={
+												highest_level_reached
+											}
+											public_nft_contract_address={
+												public_nft_contract_address
+											}
 										/>
 									);
 								})}

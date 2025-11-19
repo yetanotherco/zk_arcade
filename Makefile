@@ -156,7 +156,9 @@ enable_minting_public_nft_devnet: submodules
 	cast send $$(jq -r '.addresses.proxy' contracts/script/output/devnet/public_nft.json) "enableMinting()" --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
 set_public_nft_contract_address_devnet: submodules
-	@. contracts/scripts/.devnet.env && \
+	@jq ".zkArcadeNftContract = \"$$(jq -r '.addresses.proxy' contracts/script/output/devnet/public_nft.json)\"" \
+		contracts/script/deploy/config/devnet/leaderboard.json \
+		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
 	cast send $$(jq -r '.addresses.proxy' contracts/script/output/devnet/leaderboard.json) "setZkArcadePublicNftAddress(address)" $$(jq -r '.addresses.proxy' contracts/script/output/devnet/public_nft.json) --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
 gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen_levels web_db web_seed_games_devnet
@@ -171,7 +173,9 @@ gen_levels_and_deploy_contracts_devnet: web_clean_db beast_gen_levels parity_gen
 	@$(MAKE) deploy_nft_contract NETWORK=devnet
 	@$(MAKE) deploy_public_nft_contract NETWORK=devnet
 	@$(MAKE) enable_minting_public_nft_devnet
-	@$(MAKE) set_public_nft_contract_address_devnet
+	@jq ".publicZkArcadeNftContract = \"$$(jq -r '.addresses.proxy' contracts/script/output/devnet/public_nft.json)\"" \
+		contracts/script/deploy/config/devnet/leaderboard.json \
+		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json
 	@jq ".zkArcadeNftContract = \"$$(jq -r '.addresses.proxy' contracts/script/output/devnet/nft.json)\"" \
 		contracts/script/deploy/config/devnet/leaderboard.json \
 		> tmp.$$.json && mv tmp.$$.json contracts/script/deploy/config/devnet/leaderboard.json

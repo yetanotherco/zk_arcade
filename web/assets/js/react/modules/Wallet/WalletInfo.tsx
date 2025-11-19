@@ -5,16 +5,22 @@ import { ProofSubmissions } from "./ProofSubmissions";
 import { ProofSubmission } from "../../types/aligned";
 import { Button } from "../../components";
 import { useDisconnect } from "wagmi";
-import { EligibilityModal, NftSuccessModal } from "../../components/Modal";
+import { NftSuccessModal } from "../../components/Modal";
 import { useModal } from "../../hooks";
 import { useNftContract, NftMetadata } from "../../hooks/useNftContract";
-import { getNftMetadata } from "../../hooks/useNftContract/utils";
+import {
+	getNftMetadata,
+	getNftMetadataIpfs,
+} from "../../hooks/useNftContract/utils";
+import { usePublicNftContract } from "../../hooks/usePublicNftContract";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	network: string;
 	payment_service_address: Address;
 	leaderboard_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 	user_address: Address;
 	proofs: ProofSubmission[];
 	username: string;
@@ -35,20 +41,27 @@ export const WalletInfo = ({
 	explorer_url,
 	batcher_url,
 	is_eligible,
+	public_nft_contract_address,
 }: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const [claimed, setClaimed] = useState(false);
-	const { open: mintModalOpen, setOpen: setMintModalOpen } = useModal();
 	const {
 		balance,
-		claimNft,
-		receipt,
 		tokenURIs,
 		showSuccessModal,
 		setShowSuccessModal,
 		claimedNftMetadata,
 	} = useNftContract({
 		contractAddress: nft_contract_address,
+		userAddress: user_address,
+	});
+	const isPublicNftEnabled = isPublicNftContractEnabled(public_nft_contract_address);
+
+	const {
+		balanceMoreThanZero: hasClaimedPublicNft,
+		tokenURIs: publicTokenUris,
+	} = usePublicNftContract({
+		contractAddress: public_nft_contract_address,
 		userAddress: user_address,
 	});
 
@@ -68,25 +81,43 @@ export const WalletInfo = ({
 
 	const eligibilityClasses = is_eligible
 		? "bg-accent-100/20 border-accent-100 text-accent-100"
+		: isPublicNftEnabled
+		? "bg-blue/20 border-blue text-blue"
 		: "bg-yellow/20 border-yellow text-yellow";
 
 	const eligibilityText = is_eligible
 		? "You are eligible to mint the NFT and participate in the contest."
-		: "You are not currently eligible to mint the NFT and participate in the contest.";
+		: isPublicNftEnabled
+			? "Mint a NFT to participate in ZKArcade and climb the leaderboard."
+			: "You are not currently eligible to mint the NFT and participate in the contest.";
 
 	useEffect(() => {
 		const fetchNftMetadata = async () => {
-			if (tokenURIs.length === 0) return;
+			const publicTokenUrisToUse = isPublicNftEnabled ? publicTokenUris : [];
+
+			if (tokenURIs.length === 0 && publicTokenUrisToUse.length === 0) {
+				setNftMetadataList([]);
+				return;
+			}
+
+			const metadataRequests = [
+				...tokenURIs.map(uri => ({
+					uri,
+					fetcher: getNftMetadataIpfs,
+					contract: nft_contract_address,
+				})),
+				...publicTokenUrisToUse.map(uri => ({
+					uri,
+					fetcher: getNftMetadata,
+					contract: public_nft_contract_address,
+				})),
+			];
 
 			const metadataList = await Promise.all(
-				tokenURIs.map(async uri => {
+				metadataRequests.map(async ({ uri, fetcher, contract }) => {
 					try {
-						return await getNftMetadata(uri, nft_contract_address);
+						return await fetcher(uri, contract);
 					} catch (error) {
-						console.error(
-							`Error fetching metadata for ${uri}:`,
-							error
-						);
 						return null;
 					}
 				})
@@ -94,14 +125,22 @@ export const WalletInfo = ({
 
 			setNftMetadataList(
 				metadataList.filter(
-					(metadata: any): metadata is NftMetadata =>
-						metadata !== null
+					(metadata): metadata is NftMetadata => metadata !== null
 				)
 			);
 		};
 
 		fetchNftMetadata();
-	}, [tokenURIs]);
+	}, [
+		tokenURIs,
+		publicTokenUris,
+		nft_contract_address,
+		public_nft_contract_address,
+	]);
+
+	const hasAnyBalance =
+		(balance.data !== undefined && balance.data > 0n) ||
+		(isPublicNftEnabled && hasClaimedPublicNft);
 
 	return (
 		<div className="sm:relative group">
@@ -124,7 +163,7 @@ export const WalletInfo = ({
 				>
 					<div className="flex gap-2 items-center justify-between w-full">
 						<div className="flex gap-2 items-center">
-							{balance.data != undefined && balance.data > 0n ? (
+							{hasAnyBalance ? (
 								<img
 									src={nftMetadataList.at(0)?.image}
 									alt={nftMetadataList.at(0)?.name || "NFT"}
@@ -161,32 +200,36 @@ export const WalletInfo = ({
 						</div>
 					</div>
 
-					{!claimed && balance.data === 0n && (
-						<div
-							className={`flex flex-col items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
-						>
-							<p className="text-sm leading-5">
-								{eligibilityText}{" "}
-							</p>
-							{is_eligible && (
-								<p
-									className="text-accent-100 cursor-pointer hover:underline font-medium"
-									onClick={() => setMintModalOpen(true)}
-								>
-									Claim!
+					{!claimed &&
+						balance.data === 0n &&
+						!(isPublicNftEnabled && hasClaimedPublicNft) && (
+							<div
+								className={`flex flex-col items-start gap-2 border rounded p-3 ${eligibilityClasses}`}
+							>
+								<p className="text-sm leading-5">
+									{eligibilityText}{" "}
 								</p>
-							)}
-							<EligibilityModal
-								isEligible={is_eligible}
-								open={mintModalOpen}
-								setOpen={setMintModalOpen}
-								onClose={() => setClaimed(true)}
-								claimNft={claimNft}
-								balance={balance.data || 0n}
-								isLoading={receipt.isLoading}
-							/>
-						</div>
-					)}
+								{is_eligible ? (
+									<p
+										className="text-accent-100 cursor-pointer hover:underline font-medium"
+										onClick={() =>
+											window.location.assign("/mint")
+										}
+									>
+										Claim!
+									</p>
+								) : isPublicNftEnabled ? (
+									<p
+										className="text-blue cursor-pointer hover:underline font-medium"
+										onClick={() =>
+											window.location.assign("/nft/mint")
+										}
+									>
+										Mint!
+									</p>
+								) : null}
+							</div>
+						)}
 
 					<BalanceScoreInAligned
 						payment_service_address={payment_service_address}
@@ -202,6 +245,9 @@ export const WalletInfo = ({
 						user_address={user_address}
 						batcher_url={batcher_url}
 						nft_contract_address={nft_contract_address}
+						public_nft_contract_address={
+							public_nft_contract_address
+						}
 						highest_level_reached={0}
 					/>
 				</div>

@@ -262,4 +262,27 @@ The goal of the game is to make each number on the board equal.
     |> assign(:explorer_url, explorer_url)
     |> render(:mint)
   end
+
+  def buy_nft(conn, _params) do
+    wallet = get_wallet_from_session(conn)
+    eligible = get_user_eligibility(wallet)
+    # To be replaced with whitelist merkle proof
+    eligible_for_discount =  to_string(ZkArcade.PublicMerklePaths.get_eligiblity_for_address(wallet))
+    proofs = get_proofs(wallet, 1, 10)
+    {username, position} = get_username_and_position(wallet)
+    explorer_url = Application.get_env(:zk_arcade, :explorer_url)
+
+    conn
+    |> assign(:network, Application.get_env(:zk_arcade, :network))
+    |> assign(:wallet, wallet)
+    |> assign(:nft_contract_address, Application.get_env(:zk_arcade, :nft_contract_address))
+    |> assign(:public_nft_contract_address, Application.get_env(:zk_arcade, :public_nft_contract_address))
+    |> assign(:eligible, eligible)
+    |> assign(:eligible_for_discount, eligible_for_discount)
+    |> assign(:submitted_proofs, Jason.encode!(proofs))
+    |> assign(:username, username)
+    |> assign(:user_position, position)
+    |> assign(:explorer_url, explorer_url)
+    |> render(:buy_nft)
+  end
 end

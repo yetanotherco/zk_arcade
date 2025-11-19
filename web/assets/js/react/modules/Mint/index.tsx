@@ -10,6 +10,7 @@ import { ToastsProvider } from "../../state/toast";
 import { useNftContract } from "../../hooks/useNftContract";
 import { usePublicNftContract } from "../../hooks/usePublicNftContract";
 import { fetchNftClaimEligibility } from "../../utils/aligned";
+import { isPublicNftContractEnabled } from "../../utils/publicNftContract";
 
 type Props = {
 	network: string;
@@ -44,6 +45,21 @@ const MintClaimSection = ({
 	publicNftContractAddress: Address;
 	initialEligibility?: boolean;
 }) => {
+	const shouldShowBuyCta = initialEligibility === false;
+	const isPublicNftEnabled = isPublicNftContractEnabled(publicNftContractAddress);
+
+	const { balanceMoreThanZero: hasBoughtPublicNft } = usePublicNftContract({
+		userAddress: address,
+		contractAddress: publicNftContractAddress,
+	});
+	const alreadyBoughtPublicNft = shouldShowBuyCta && isPublicNftEnabled && hasBoughtPublicNft;
+	const encouragePurchaseMessage = alreadyBoughtPublicNft
+		? "You already purchased this access NFT. You're good to go."
+		: isPublicNftEnabled
+			? "You can mint a NFT to jump in right away."
+			: "Your wallet isn't eligible to claim this drop. The public NFT collection is not currently available.";
+	const alreadyBoughtButtonLabel = "Already bought";
+
 	const {
 		claimNft,
 		receipt,
@@ -52,7 +68,7 @@ const MintClaimSection = ({
 		showSuccessModal,
 		setShowSuccessModal,
 		claimedNftMetadata,
-	 } = useNftContract({
+	} = useNftContract({
 		contractAddress: nftContractAddress,
 		userAddress: address,
 	});
@@ -67,7 +83,7 @@ const MintClaimSection = ({
 			return "Your wallet is eligible to mint this NFT.";
 		}
 		if (initialEligibility === false) {
-			return "You're not eligible yet, but more waves are on the way.";
+			return encouragePurchaseMessage;
 		}
 		return null;
 	});
@@ -97,7 +113,9 @@ const MintClaimSection = ({
 			} else {
 				setStatus("ineligible");
 				setMessage(
-					"You're not eligible yet, but more waves are on the way."
+					shouldShowBuyCta
+						? encouragePurchaseMessage
+						: "You're not eligible yet, but more waves are on the way."
 				);
 			}
 		} catch (err: any) {
@@ -106,7 +124,12 @@ const MintClaimSection = ({
 				err?.message ?? "Failed to check eligibility. Please retry."
 			);
 		}
-	}, [address, balanceMoreThanZero]);
+	}, [
+		address,
+		balanceMoreThanZero,
+		encouragePurchaseMessage,
+		shouldShowBuyCta,
+	]);
 
 	useEffect(() => {
 		checkEligibility();
@@ -168,6 +191,16 @@ const MintClaimSection = ({
 		}
 	}, [status, claimNft]);
 
+	const onBuy = useCallback(() => {
+		if (typeof window === "undefined") return;
+		window.location.href = "/nft/mint";
+	}, []);
+
+	useEffect(() => {
+		if (!alreadyBoughtPublicNft) return;
+		setMessage(encouragePurchaseMessage);
+	}, [alreadyBoughtPublicNft, encouragePurchaseMessage]);
+
 	const checkLabel = useMemo(() => {
 		if (status === "checking") return "Checking…";
 		if (status === "eligible") return "Re-check eligibility";
@@ -207,49 +240,53 @@ const MintClaimSection = ({
 					You already claimed this NFT.
 				</div>
 			)}
-			<div className="border border-contrast-100 rounded p-4 flex flex-col gap-3">
-				<div className="flex items-center justify-between text-sm">
-					<span className="font-semibold text-base">
-						Step 2: Check eligibility
-					</span>
-					<span className="text-text-200">
-						{status === "eligible"
-							? "Eligible"
-							: status === "ineligible"
-							? "Not eligible"
-							: status === "checking"
-							? "Checking…"
-							: status === "claimed"
-							? "Claimed"
-							: status === "error" && lastAction !== "claim"
-							? "Error"
-							: "Not checked"}
-					</span>
+			{status === "eligible" ? (
+				<div className="border border-accent-100/40 rounded p-3 text-sm text-accent-100 bg-accent-100/5">
+					Your wallet is eligible to mint this NFT.
 				</div>
-				<p className="text-sm text-text-200">
-					We verify whether your wallet can claim the access NFT.
-				</p>
-				<Button
-					variant="contrast"
-					onClick={checkEligibility}
-					disabled={isEligibilityBusy}
-				>
-					{checkLabel}
-				</Button>
-				{eligibilityMessage && (
-					<p className={`text-sm ${eligibilityMessageClass}`}>
-						{eligibilityMessage}
+			) : (
+				<div className="border border-contrast-100 rounded p-4 flex flex-col gap-3">
+					<div className="flex items-center justify-between text-sm">
+						<span className="font-semibold text-base">
+							Check eligibility
+						</span>
+						<span className="text-text-200">
+							{status === "ineligible"
+								? "Not eligible"
+								: status === "checking"
+								? "Checking…"
+								: status === "claimed"
+								? "Claimed"
+								: status === "error" && lastAction !== "claim"
+								? "Error"
+								: "Not checked"}
+						</span>
+					</div>
+					<p className="text-sm text-text-200">
+						We verify whether your wallet can claim the access NFT.
 					</p>
-				)}
-				{status === "ineligible" && (
-					<SocialLinks className="text-center" />
-				)}
-			</div>
+					<Button
+						variant="contrast"
+						onClick={checkEligibility}
+						disabled={isEligibilityBusy}
+					>
+						{checkLabel}
+					</Button>
+					{eligibilityMessage && (
+						<p className={`text-sm ${eligibilityMessageClass}`}>
+							{eligibilityMessage}
+						</p>
+					)}
+					{status === "ineligible" && (
+						<SocialLinks className="text-center" />
+					)}
+				</div>
+			)}
 
 			<div className="border border-contrast-100 rounded p-4 flex flex-col gap-3">
 				<div className="flex items-center justify-between text-sm">
 					<span className="font-semibold text-base">
-						Step 3: Claim NFT
+						Mint NFT
 					</span>
 					<span
 						className={
@@ -267,12 +304,32 @@ const MintClaimSection = ({
 				</div>
 				<Button
 					variant="accent-fill"
-					onClick={onClaim}
-					disabled={!canClaim}
-					isLoading={status === "claiming"}
-					disabledTextOnHover="Complete eligibility check first"
+					onClick={
+						shouldShowBuyCta
+							? alreadyBoughtPublicNft || !isPublicNftEnabled
+								? undefined
+								: onBuy
+							: onClaim
+					}
+					disabled={
+						shouldShowBuyCta ? (alreadyBoughtPublicNft || !isPublicNftEnabled) : !canClaim
+					}
+					isLoading={!shouldShowBuyCta && status === "claiming"}
+					disabledTextOnHover={
+						shouldShowBuyCta
+							? !isPublicNftEnabled
+								? "NFT collection not available"
+								: undefined
+							: "Complete eligibility check first"
+					}
 				>
-					{claimLabel}
+					{shouldShowBuyCta
+						? alreadyBoughtPublicNft
+							? alreadyBoughtButtonLabel
+							: isPublicNftEnabled
+								? "Go to mint NFT"
+								: "NFT not available"
+						: claimLabel}
 				</Button>
 				{claimMessage && (
 					<p className={`text-sm ${claimMessageClass}`}>
@@ -313,7 +370,7 @@ const MintFlow = ({
 			<div className="border border-contrast-100 rounded p-4 flex flex-col gap-3">
 				<div className="flex items-center justify-between text-sm">
 					<span className="font-semibold text-base">
-						Step 1: Connect wallet
+						Connect wallet
 					</span>
 					<span
 						className={

@@ -10,16 +10,17 @@ type Props = {
 	claimNft: () => Promise<`0x${string}` | void>;
 	isLoading: boolean;
 	balance: BigInt;
+	isPublicNftEnabled?: boolean;
 };
 
 export const EligibilityModal = ({
 	isEligible,
-	claimNft,
 	isLoading,
 	balance,
 	onClose,
 	open,
 	setOpen,
+	isPublicNftEnabled,
 }: Props) => {
 	const dismiss = () => {
 		setOpen(false);
@@ -66,9 +67,8 @@ export const EligibilityModal = ({
 							</Button>
 							<Button
 								variant="accent-fill"
-								onClick={async () => {
-									await claimNft();
-									dismiss();
+								onClick={() => {
+									window.location.href = "/mint";
 								}}
 								isLoading={isLoading}
 								disabled={balance !== 0n}
@@ -77,48 +77,16 @@ export const EligibilityModal = ({
 							</Button>
 						</div>
 					</>
-				) : (
+				) : isPublicNftEnabled ? (
 					<>
 						<div>
 							<h3 className="text-xl mb-1 font-semibold text-center">
-								You are not eligible yet,
-								<br />
-								but don't worry
+								Mint the NFT to Join
 							</h3>
 							<p className="text-text-100 text-center">
-								More waves are incoming
+								You can mint the NFT now and start playing.
 							</p>
 						</div>
-						<p className="text-text-200 text-center text-sm leading-relaxed">
-							Follow{" "}
-							<a
-								href="https://x.com/alignedlayer"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-accent-100 hover:underline"
-							>
-								Aligned on X
-							</a>
-							, subscribe to our{" "}
-							<a
-								href="https://blog.alignedlayer.com/"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-accent-100 hover:underline"
-							>
-								newsletter
-							</a>
-							, and join the{" "}
-							<a
-								href="https://discord.gg/alignedlayer"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-accent-100 hover:underline"
-							>
-								Discord
-							</a>{" "}
-							to hear when the next wave of access opens up.
-						</p>
 						<div className="flex w-full justify-center relative group">
 							<span className="text-white text-sm underline cursor-help">
 								What is this?
@@ -134,9 +102,79 @@ export const EligibilityModal = ({
 								</div>
 							</div>
 						</div>
-						<div className="text-center mt-4">
+						<div className="flex mt-4 gap-8 justify-center items-center text-center">
+							<Button variant="text" onClick={dismiss}>
+								Maybe later
+							</Button>
+							<Button
+								variant="accent-fill"
+								onClick={() => {
+									window.location.href = "/nft/mint";
+								}}
+							>
+								Mint NFT
+							</Button>
+						</div>
+					</>
+				) : (
+					<>
+						<div>
+							<h3 className="text-xl mb-1 font-semibold text-center">
+								You are not eligible yet,<br />
+								but don't worry
+							</h3>
+							<p className="text-text-100 text-center mb-4">
+								More waves are incoming
+							</p>
+							<p className="text-text-200 text-center text-sm leading-relaxed">
+								Follow{" "}
+								<a
+									href="https://x.com/alignedlayer"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-accent-100 hover:underline"
+								>
+									Aligned on X
+								</a>
+								, subscribe to our{" "}
+								<a
+									href="https://blog.alignedlayer.com/"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-accent-100 hover:underline"
+								>
+									newsletter
+								</a>
+								, and join the{" "}
+								<a
+									href="https://discord.gg/alignedlayer"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-accent-100 hover:underline"
+								>
+									Discord
+								</a>{" "}
+								to hear when the next wave of access opens up.
+							</p>
+						</div>
+						<div className="flex w-full justify-center relative group">
+							<span className="text-white text-sm underline cursor-help">
+								What is this?
+							</span>
+							<div className="absolute top-full transform  translate-y-2 hidden group-hover:block z-10">
+								<div
+									className="bg-white text-black text-sm rounded shadow-lg px-6 py-4
+															opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+															break-words whitespace-normal max-w-sm min-w-[400px] pointer-events-none"
+								>
+									Minting this NFT proves your eligibility and
+									unlocks access to ZK Arcade.
+								</div>
+							</div>
+						</div>
+						<div className="flex mt-4 gap-8 justify-center items-center text-center">
 							<Button variant="accent-fill" onClick={dismiss}>
-								Ok
+								OK
 							</Button>
 						</div>
 					</>

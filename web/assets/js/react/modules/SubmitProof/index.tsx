@@ -16,6 +16,7 @@ type Props = {
 	batcher_url: string;
 	leaderboard_address: Address;
 	nft_contract_address: Address;
+	public_nft_contract_address: Address;
 };
 
 const SubmitModal = ({
@@ -24,6 +25,7 @@ const SubmitModal = ({
 	payment_service_address,
 	batcher_url,
 	nft_contract_address,
+	public_nft_contract_address,
 }: Omit<Props, "network">) => {
 	const { open: currentProofOpen, setOpen: currentProofSetOpen } = useModal();
 
@@ -61,6 +63,7 @@ const SubmitModal = ({
 					leaderboard_address={leaderboard_address}
 					payment_service_address={payment_service_address}
 					nft_contract_address={nft_contract_address}
+					public_nft_contract_address={public_nft_contract_address}
 					user_address={user_address}
 					proof={currentProof}
 					proofToSubmitData={null}
@@ -79,6 +82,7 @@ export default ({
 	batcher_url,
 	leaderboard_address,
 	nft_contract_address,
+	public_nft_contract_address,
 }: Props) => {
 	return (
 		<Web3EthProvider network={network}>
@@ -90,6 +94,7 @@ export default ({
 					batcher_url={batcher_url}
 					leaderboard_address={leaderboard_address}
 					nft_contract_address={nft_contract_address}
+					public_nft_contract_address={public_nft_contract_address}
 				/>
 			</ToastsProvider>
 		</Web3EthProvider>

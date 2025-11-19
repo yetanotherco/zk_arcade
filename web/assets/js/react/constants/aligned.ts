@@ -254,21 +254,15 @@ export const zkArcadeNftAbi = [
 			{ name: "merkleProof", type: "bytes32[]" },
 			{ name: "rootIndex", type: "uint256" },
 		],
-		outputs: [
-			{ name: "", type: "uint256", internalType: "uint256" },
-		],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
 	},
 	{
-		type:"function",
-		stateMutability:"view",
-		name:"tokenURI",
-		inputs:[
-			{ name:"tokenId", type:"uint256", internalType:"uint256" }
-		],
-		outputs:[
-			{ name:"", type:"string", internalType:"string" }
-		],
-	}
+		type: "function",
+		stateMutability: "view",
+		name: "tokenURI",
+		inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+		outputs: [{ name: "", type: "string", internalType: "string" }],
+	},
 ] as const;
 
 export const publicZkArcadeNftAbi = [
@@ -281,36 +275,88 @@ export const publicZkArcadeNftAbi = [
 	},
 	{
 		type: "function",
-		stateMutability: "payable",
 		name: "whitelistedMint",
 		inputs: [
-			{ name: "merkleProof", type: "bytes32[]" },
-			{ name: "rootIndex", type: "uint256" },
+			{
+				name: "merkleProof",
+				type: "bytes32[]",
+				internalType: "bytes32[]",
+			},
+			{
+				name: "rootIndex",
+				type: "uint256",
+				internalType: "uint256",
+			},
 		],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+		stateMutability: "payable",
+	},
+	{
+		type: "function",
+		name: "mint",
+		inputs: [],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+		stateMutability: "payable",
+	},
+	{
+		type: "function",
+		stateMutability: "view",
+		name: "tokenURI",
+		inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+		outputs: [{ name: "", type: "string", internalType: "string" }],
+	},
+	{
+		type: "function",
+		stateMutability: "view",
+		name: "fullPrice",
+		inputs: [],
 		outputs: [
-			{ name: "", type: "uint256", internalType: "uint256" },
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
 		],
 	},
 	{
 		type: "function",
-		stateMutability: "payable",
-		name: "mint",
+		stateMutability: "view",
+		name: "discountedPrice",
 		inputs: [],
 		outputs: [
-			{ name: "", type: "uint256", internalType: "uint256" },
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
 		],
 	},
 	{
-		type:"function",
-		stateMutability:"view",
-		name:"tokenURI",
-		inputs:[
-			{ name:"tokenId", type:"uint256", internalType:"uint256" }
+		type: "function",
+		stateMutability: "view",
+		name: "maxSupply",
+		inputs: [],
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
 		],
-		outputs:[
-			{ name:"", type:"string", internalType:"string" }
+	},
+	{
+		type: "function",
+		stateMutability: "view",
+		name: "totalSupply",
+		inputs: [],
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
 		],
-	}
+	},
 ] as const;
 
 export const eip712Domain = (

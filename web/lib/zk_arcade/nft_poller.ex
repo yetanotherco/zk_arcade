@@ -146,9 +146,10 @@ defmodule ZkArcade.NftPoller do
 
   defp maybe_add_token(address, token_id) do
     case Accounts.add_owned_token(address, token_id) do
+      {:ok, :no_change} ->
+        {:ok, :no_change}
       {:ok, _} ->
         :ok
-
       {:error, reason} ->
         Logger.warning("Failed to add token #{token_id} for #{address}: #{inspect(reason)}")
         {:error, reason}

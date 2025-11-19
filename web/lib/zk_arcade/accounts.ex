@@ -193,7 +193,7 @@ defmodule ZkArcade.Accounts do
         updated_tokens = fun.(current_tokens)
 
         if updated_tokens == current_tokens do
-          {:error, :no_change}
+          {:ok, :no_change}
         else
           case wallet |> Wallet.token_ids_changeset(%{owned_token_ids: updated_tokens}) |> Repo.update() do
             {:ok, updated_wallet} ->

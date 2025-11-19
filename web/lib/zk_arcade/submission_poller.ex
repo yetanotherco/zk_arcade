@@ -105,9 +105,6 @@ defmodule ZkArcade.SubmissionPoller do
 
     Logger.info("New #{event_type} event: user #{user}, level #{level}, score #{score}, game config #{game_config_hex}, tx #{transaction_hash}")
 
-    event_proof = ZkArcade.Proofs.get_proofs_by_address(user)
-                  |> Enum.find(fn proof -> proof.level_reached == level and proof.game_config == game_config_hex end)
-
     case ZkArcade.Leaderboard.insert_or_update_entry(%{
            "user_address" => user,
            "score" => score
@@ -119,11 +116,14 @@ defmodule ZkArcade.SubmissionPoller do
         Logger.error("Failed to create/update leaderboard entry: #{inspect(changeset)}")
     end
 
-    if event_proof.status != "claimed" do
-      ZkArcade.Proofs.update_proof_status_claimed(user, event_proof.id, transaction_hash)
-      Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} marked as claimed.")
-    else
-      Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} already set as claimed.")
+    event_proof = ZkArcade.Proofs.get_verified_proof_by_address_level_config(user, level, game_config_hex)
+
+    case event_proof do
+      nil ->
+        Logger.info("Proof already set as claimed for user #{user}, level #{level}, game config #{game_config_hex}")
+      proof ->
+        ZkArcade.Proofs.update_proof_status_claimed(user, proof.id, transaction_hash)
+        Logger.info("Proof for user #{user}, level #{level}, game config #{game_config_hex} marked as claimed.")
     end
   end
 

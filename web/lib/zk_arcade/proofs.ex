@@ -123,6 +123,22 @@ defmodule ZkArcade.Proofs do
     |> Repo.aggregate(:count, :id)
   end
 
+  @doc """
+  Gets a verified proof by wallet address, level reached, and game config.
+  """
+  def get_verified_proof_by_address_level_config(nil, _, _), do: nil
+  def get_verified_proof_by_address_level_config(address, level, game_config) do
+    downcased_addr = String.downcase(address)
+
+    from(p in Proof, 
+      where: p.wallet_address == ^downcased_addr and 
+             p.level_reached == ^level and 
+             p.game_config == ^game_config and 
+             p.status == "verified"
+    )
+    |> Repo.one()
+  end
+
   def get_pending_proofs_to_bump(nil), do: []
   def get_pending_proofs_to_bump(address) do
     downcased_addr = String.downcase(address)

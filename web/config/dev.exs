@@ -107,6 +107,7 @@ config :zk_arcade, :beast_bash_command, "beast"
 
 config :zk_arcade, :nft_contract_address, "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6"
 
+config :zk_arcade, :public_nft_contract_address, "0xCace1b78160AE76398F486c8a18044da0d66d86D"
 
 config :zk_arcade, :ip_info_api_key, "<IP_INFO_API_KEY>"
 config :zk_arcade, :ipgeolocation_api_key, "<IPGEOLOCATION_API_KEY>"

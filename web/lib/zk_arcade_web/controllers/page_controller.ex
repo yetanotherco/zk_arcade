@@ -92,7 +92,7 @@ defmodule ZkArcadeWeb.PageController do
 
     game_idx_result = ZkArcade.LeaderboardContract.get_current_game_idx("Beast")
     
-    {game_idx, highest_level_reached_proof} = case game_idx_result do
+    {_game_idx, highest_level_reached_proof} = case game_idx_result do
       {:ok, game_idx} ->
         proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Beast") else nil end
         {game_idx, proof}
@@ -164,7 +164,7 @@ defmodule ZkArcadeWeb.PageController do
 
     game_idx_result = ZkArcade.LeaderboardContract.get_current_game_idx("Parity")
     
-    {game_idx, highest_level_reached_proof} = case game_idx_result do
+    {_game_idx, highest_level_reached_proof} = case game_idx_result do
       {:ok, game_idx} ->
         proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, game_idx, "Parity") else nil end
         {game_idx, proof}

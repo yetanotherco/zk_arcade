@@ -9,6 +9,7 @@ import { useChainId, useReadContract } from "wagmi";
 import { leaderboardAbi } from "../../../constants/aligned";
 import { SocialLinks } from "../../SocialLinks";
 import { Modal } from "..";
+import { useQuestNumber } from "../../../hooks/useQuestNumber";
 
 type ClaimComponentProps = {
 	gameHasExpired: boolean;
@@ -61,6 +62,10 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 			claimExpiryUtc;
 
 		const canClaim = !gameHasExpired && proofStatus === "verified";
+		
+		// Get deduplicated quest number
+		const gameType = proofSubmission.game === "Beast" ? "beast" : "parity";
+		const { data: questNumber } = useQuestNumber(gameType, proofSubmission.game_idx);
 
 		return (
 			<div className="flex flex-col gap-4 justify-between h-full">
@@ -115,7 +120,7 @@ const ClaimComponent = React.forwardRef<HTMLFormElement, ClaimComponentProps>(
 
 				<div className="flex flex-col gap-2">
 					<p>Game: {proofSubmission.game}</p>
-					<p>Quest number: {Number(proofSubmission.game_idx) + 1}</p>
+					<p>Quest number: {questNumber ?? Number(proofSubmission.game_idx) + 1}</p>
 					<p>Level reached: {proofSubmission.level_reached}</p>
 					<p>
 						Points to claim:{" "}

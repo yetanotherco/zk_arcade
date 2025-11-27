@@ -65,8 +65,25 @@ defmodule ZkArcadeWeb.HomeLive.Index do
   end
 
   defp get_upcoming_games() do
-    current_games = ZkArcade.BeastGames.get_current_and_future_games()
-
+    # Get all games to build complete config mapping
+    all_games = ZkArcade.BeastGames.get_all_games()
+    
+    # Build config map from all games (including expired ones)
+    config_map = 
+      all_games
+      |> Enum.reduce(%{}, fn game, acc ->
+        case Map.get(acc, game.game_config) do
+          nil -> Map.put(acc, game.game_config, game.game_index + 1)
+          _ -> acc  # Keep the first occurrence
+        end
+      end)
+    
+    # Now get only current and future games for display
+    now = DateTime.utc_now()
+    current_games = 
+      all_games
+      |> Enum.filter(fn game -> DateTime.compare(game.ends_at, now) != :lt end)
+    
     current_games
     |> Enum.with_index()
     |> Enum.map(fn {game, index} ->
@@ -81,8 +98,11 @@ defmodule ZkArcadeWeb.HomeLive.Index do
         |> utc_hex_to_date()
       end
 
+      # Get the round display from the config map (shows first occurrence)
+      round_display = Map.get(config_map, game.game_config)
+
       %{
-        round: game.game_index + 1, # Because indexing starts at zero
+        round: round_display,
         start_time: utc_hex_to_date(game.starts_at),
         end_time: end_time,
         is_current: is_current_game(game.starts_at, game.ends_at)

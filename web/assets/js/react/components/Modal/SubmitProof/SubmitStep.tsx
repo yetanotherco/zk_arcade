@@ -28,6 +28,7 @@ import { usePendingProofsToBump } from "../../../hooks/usePendingProofsToBump";
 import { SocialLinks } from "../../SocialLinks";
 import { useProofStopFlag } from "../../../hooks/useProofStopFlag";
 import { useGasBasedTimeEstimate } from "../../../hooks/useGasBasedTimeEstimate";
+import { useQuestNumber } from "../../../hooks/useQuestNumber";
 
 type Game = {
 	id: "beast" | string;
@@ -125,6 +126,11 @@ export const SubmitProofStep = ({
 	const [invalidGameConfig, setInvalidGameConfig] = useState(false);
 	const [levelAlreadyReached, setLevelAlreadyReached] = useState(false);
 	const [gameIdx, setGameIdx] = useState(initialGameIdx);
+	
+	// Get deduplicated quest number
+	const gameType = gameName === "Beast" ? "beast" : "parity";
+	const { data: questNumber } = useQuestNumber(gameType, gameIdx);
+	
 	const { price: ethPrice } = useEthPrice();
 	const {
 		proofsToBump,
@@ -475,7 +481,7 @@ export const SubmitProofStep = ({
 
 				<div className="flex flex-col gap-2">
 					<p>Game: {gameName}</p>
-					<p>Quest number: {Number(gameIdx) + 1}</p>
+					<p>Quest number: {questNumber ?? (gameIdx !== undefined ? Number(gameIdx) + 1 : "N/A")}</p>
 					<p>Level reached: {parsedPublicInputs?.level}</p>
 					<p>Prover: {provingSystem}</p>
 				</div>

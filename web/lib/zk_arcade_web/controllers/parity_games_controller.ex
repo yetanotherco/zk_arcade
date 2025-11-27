@@ -45,4 +45,18 @@ defmodule ZkArcadeWeb.ParityGamesController do
         |> json(%{error: "Invalid game index"})
     end
   end
+
+  def quest_number(conn, %{"index" => index}) do
+    case Integer.parse(index) do
+      {game_index, ""} ->
+        quest_number = ParityGames.get_deduplicated_quest_number(game_index)
+        json(conn, %{quest_number: quest_number})
+
+      _ ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "Invalid game index"})
+    end
+  end
+
 end

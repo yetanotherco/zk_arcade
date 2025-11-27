@@ -32,14 +32,24 @@ defmodule ZkArcade.LeaderboardContract do
 
     case game do
       "Parity" ->
-        {:ok, [_game_config, game_idx]} = get_current_parity_game() |> Ethers.call(to: contract_address)
-        Logger.info("Current Parity game idx: #{inspect(game_idx)}")
-        game_idx
+        case get_current_parity_game() |> Ethers.call(to: contract_address) do
+          {:ok, [_game_config, game_idx]} ->
+            Logger.info("Current Parity game idx: #{inspect(game_idx)}")
+            {:ok, game_idx}
+          {:error, error} ->
+            Logger.warning("No active Parity game: #{inspect(error)}")
+            {:error, :no_active_game}
+        end
 
       "Beast" ->
-        {:ok, [_game_config, game_idx]} = get_current_beast_game() |> Ethers.call(to: contract_address)
-        Logger.info("Current Beast game idx: #{inspect(game_idx)}")
-        game_idx
+        case get_current_beast_game() |> Ethers.call(to: contract_address) do
+          {:ok, [_game_config, game_idx]} ->
+            Logger.info("Current Beast game idx: #{inspect(game_idx)}")
+            {:ok, game_idx}
+          {:error, error} ->
+            Logger.warning("No active Beast game: #{inspect(error)}")
+            {:error, :no_active_game}
+        end
       _ -> {:error, :unknown_game}
     end
   end

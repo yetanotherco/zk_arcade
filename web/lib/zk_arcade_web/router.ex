@@ -46,8 +46,10 @@ defmodule ZkArcadeWeb.Router do
     get "/api/nft/public-eligibility", ApiController, :get_public_nft_eligibility
     get "/api/games/beast/current", BeastGamesController, :current
     get "/api/games/beast/:index", BeastGamesController, :by_index
+    get "/api/games/beast/:index/quest-number", BeastGamesController, :quest_number
     get "/api/games/parity/current", ParityGamesController, :current
     get "/api/games/parity/:index", ParityGamesController, :by_index
+    get "/api/games/parity/:index/quest-number", ParityGamesController, :quest_number
     post "/api/telemetry/error", TelemetryApiController, :log_error
   end
 

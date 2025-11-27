@@ -25,4 +25,33 @@ defmodule ZkArcade.ParityGames do
     |> select([pg], count(pg.game_index, :distinct))
     |> Repo.one()
   end
+
+  def get_all_games() do
+    ParityGame
+    |> order_by([pg], asc: pg.starts_at)
+    |> Repo.all()
+  end
+
+  def get_deduplicated_quest_number(game_index) do
+    all_games = get_all_games()
+    
+    # Build config map from all games
+    config_map = 
+      all_games
+      |> Enum.reduce(%{}, fn game, acc ->
+        case Map.get(acc, game.game_config) do
+          nil -> Map.put(acc, game.game_config, game.game_index + 1)
+          _ -> acc  # Keep the first occurrence
+        end
+      end)
+    
+    # Find the game with the given index and return its deduplicated quest number
+    game = get_parity_game_by_index(game_index)
+    if game do
+      Map.get(config_map, game.game_config, game_index + 1)
+    else
+      game_index + 1  # Fallback
+    end
+  end
+
 end

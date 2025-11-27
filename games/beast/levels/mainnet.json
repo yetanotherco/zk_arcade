@@ -398,5 +398,85 @@
     "game_config": "d00a0500b51f0802963308050000000000000000000000000000000000000000",
     "from_time": 1764288000,
     "to_time": 1764720000
+  },
+  {
+    "levels": [
+      {
+        "blocks": 210,
+        "static_blocks": 10,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 150,
+        "completion_score": 5
+      },
+      {
+        "blocks": 176,
+        "static_blocks": 30,
+        "common_beasts": 8,
+        "super_beasts": 2,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 150,
+        "completion_score": 7
+      },
+      {
+        "blocks": 157,
+        "static_blocks": 50,
+        "common_beasts": 8,
+        "super_beasts": 5,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 7
+      }
+    ],
+    "game_config": "d20a0500b01e08029d3208050000000000000000000000000000000000000000",
+    "from_time": 1764547200,
+    "to_time": 1765065600
+  },
+  {
+    "levels": [
+      {
+        "blocks": 208,
+        "static_blocks": 10,
+        "common_beasts": 5,
+        "super_beasts": 0,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 16,
+        "time": 150,
+        "completion_score": 5
+      },
+      {
+        "blocks": 179,
+        "static_blocks": 31,
+        "common_beasts": 8,
+        "super_beasts": 2,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 42,
+        "time": 150,
+        "completion_score": 7
+      },
+      {
+        "blocks": 155,
+        "static_blocks": 52,
+        "common_beasts": 8,
+        "super_beasts": 5,
+        "eggs": 0,
+        "egg_hatching_time": 20000,
+        "beast_starting_distance": 27,
+        "time": 300,
+        "completion_score": 7
+      }
+    ],
+    "game_config": "d00a0500b31f08029b3408050000000000000000000000000000000000000000",
+    "from_time": 1764892800,
+    "to_time": 1765324800
   }
 ]

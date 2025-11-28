@@ -20,11 +20,14 @@ async function fetchQuestNumber(
   return data.quest_number;
 }
 
-export function useQuestNumber(gameType: "beast" | "parity", gameIndex: number | undefined) {
+export function useQuestNumber(gameType: "beast" | "parity", gameIndex: number | bigint | undefined) {
+  // Convert BigInt to number to avoid JSON.stringify errors in query key serialization
+  const normalizedGameIndex = gameIndex !== undefined ? Number(gameIndex) : undefined;
+  
   return useQuery({
-    queryKey: ["quest-number", gameType, gameIndex],
-    queryFn: () => fetchQuestNumber(gameType, gameIndex!),
-    enabled: gameIndex !== undefined,
+    queryKey: ["quest-number", gameType, normalizedGameIndex],
+    queryFn: () => fetchQuestNumber(gameType, normalizedGameIndex!),
+    enabled: normalizedGameIndex !== undefined,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });

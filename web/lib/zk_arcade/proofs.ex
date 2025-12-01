@@ -223,7 +223,7 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
-  def get_highest_level_proof(address, game_idx, game) do
+  def get_highest_level_proof(address, game) do
     downcased_addr = String.downcase(address)
     six_hours_ago = DateTime.add(DateTime.utc_now(), -21600, :second)
 

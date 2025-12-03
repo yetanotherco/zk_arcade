@@ -223,14 +223,17 @@ defmodule ZkArcade.Proofs do
     |> Repo.all()
   end
 
-  def get_highest_level_proof(address, game) do
+  def get_highest_level_proof(address, game, game_config) do
     downcased_addr = String.downcase(address)
     six_hours_ago = DateTime.add(DateTime.utc_now(), -21600, :second)
+
+    # Remove 0x prefix from game_config for comparison
+    normalized_game_config = String.replace_prefix(game_config, "0x", "")
 
     Proof
       |> where(
         [p],
-        p.wallet_address == ^downcased_addr and p.game == ^game and
+        p.wallet_address == ^downcased_addr and p.game == ^game and p.game_config == ^normalized_game_config and
           (
             (p.status not in ["failed", "pending", "invalidated"]) or
             # This means we only consider those pending proofs that were submitted in the last 6 hours

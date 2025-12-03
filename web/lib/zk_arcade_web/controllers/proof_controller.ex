@@ -170,7 +170,7 @@ defmodule ZkArcadeWeb.ProofController do
     %{level: level, game: game_config, proving_system: proving_system, max_fee: max_fee} = parsed_data
 
     # Check if exists a proof with a higher or equal level for the same game config
-    existing_proof = Proofs.get_highest_level_proof(address, game)
+    existing_proof = Proofs.get_highest_level_proof(address, game, game_config)
 
     Logger.info(
       "Existing proof for address #{address}, game_idx #{game_idx} and game #{game}, with level reached #{ if existing_proof do existing_proof.level_reached else "none" end}"

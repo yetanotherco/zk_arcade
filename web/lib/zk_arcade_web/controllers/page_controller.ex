@@ -90,16 +90,14 @@ defmodule ZkArcadeWeb.PageController do
 
     {username, position} = get_username_and_position(wallet)
 
-    game_idx_result = ZkArcade.LeaderboardContract.get_current_game_idx("Beast")
+    current_beast_game = ZkArcade.BeastGames.get_current_beast_game()
 
-    {_game_idx, highest_level_reached_proof} = case game_idx_result do
-      {:ok, game_idx} ->
-        proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, "Beast") else nil end
-        {game_idx, proof}
-      {:error, :no_active_game} ->
+    {_game_idx, highest_level_reached_proof} = case current_beast_game do
+      nil ->
         {nil, nil}
-      {:error, :unknown_game} ->
-        {nil, nil}
+      game ->
+        proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, "Beast", game.game_config) else nil end
+        {game.game_index, proof}
     end
 
     conn
@@ -162,16 +160,14 @@ defmodule ZkArcadeWeb.PageController do
     {username, position} = get_username_and_position(wallet)
     proofs = get_proofs(wallet, 1, 5)
 
-    game_idx_result = ZkArcade.LeaderboardContract.get_current_game_idx("Parity")
+    current_parity_game = ZkArcade.ParityGames.get_current_parity_game()
 
-    {_game_idx, highest_level_reached_proof} = case game_idx_result do
-      {:ok, game_idx} ->
-        proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, "Parity") else nil end
-        {game_idx, proof}
-      {:error, :no_active_game} ->
+    {_game_idx, highest_level_reached_proof} = case current_parity_game do
+      nil ->
         {nil, nil}
-      {:error, :unknown_game} ->
-        {nil, nil}
+      game ->
+        proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, "Parity", game.game_config) else nil end
+        {game.game_index, proof}
     end
 
     conn

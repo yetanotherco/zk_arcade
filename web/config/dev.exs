@@ -111,3 +111,5 @@ config :zk_arcade, :public_nft_contract_address, "0xCace1b78160AE76398F486c8a180
 
 config :zk_arcade, :ip_info_api_key, "<IP_INFO_API_KEY>"
 config :zk_arcade, :ipgeolocation_api_key, "<IPGEOLOCATION_API_KEY>"
+
+config :zk_arcade, :eth_usd_price_fallback, System.get_env("ETH_PRICE_USD")

@@ -110,6 +110,8 @@ if config_env() == :prod do
   config :zk_arcade, :ip_info_api_key, System.get_env("IP_INFO_API_KEY")
   config :zk_arcade, :ipgeolocation_api_key, System.get_env("IPGEOLOCATION_API_KEY")
 
+  config :zk_arcade, :eth_usd_price_fallback, String.to_float(System.get_env("ETH_PRICE_USD"))
+
   newrelic_license_key = System.get_env("NEWRELIC_KEY")
   newrelic_app_name = System.get_env("NEWRELIC_APP_NAME")
 

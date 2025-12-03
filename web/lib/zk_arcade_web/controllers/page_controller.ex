@@ -92,6 +92,7 @@ defmodule ZkArcadeWeb.PageController do
 
     current_beast_game = ZkArcade.BeastGames.get_current_beast_game()
 
+    # Assigns the highest level reached proof if current beast game and wallet exist
     highest_level_reached_proof = current_beast_game && wallet &&
       ZkArcade.Proofs.get_highest_level_proof(wallet, "Beast", current_beast_game.game_config)
 
@@ -157,6 +158,7 @@ defmodule ZkArcadeWeb.PageController do
 
     current_parity_game = ZkArcade.ParityGames.get_current_parity_game()
 
+    # Assigns the highest level reached proof if current parity game and wallet exist
     highest_level_reached_proof = current_parity_game && wallet &&
       ZkArcade.Proofs.get_highest_level_proof(wallet, "Parity", current_parity_game.game_config)
 

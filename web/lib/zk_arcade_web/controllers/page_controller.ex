@@ -92,12 +92,12 @@ defmodule ZkArcadeWeb.PageController do
 
     current_beast_game = ZkArcade.BeastGames.get_current_beast_game()
 
-    {_game_idx, highest_level_reached_proof} = case current_beast_game do
+    highest_level_reached_proof = case current_beast_game do
       nil ->
-        {nil, nil}
+        nil
       game ->
         proof = if wallet do ZkArcade.Proofs.get_highest_level_proof(wallet, "Beast", game.game_config) else nil end
-        {game.game_index, proof}
+        proof
     end
 
     conn

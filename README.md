@@ -2,6 +2,11 @@
 
 Zk arcade repo
 
+> [!NOTE]
+> The ZK Arcade campaign has finished. The site now serves the static page in
+> [`site/`](./site) via Cloudflare Pages; the Phoenix app in [`web/`](./web) is
+> kept for reference and is no longer deployed.
+
 ## Games
 
 - [Beast](./games/beast)

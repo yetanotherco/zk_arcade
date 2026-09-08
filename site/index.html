@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZK Arcade — Campaign finished</title>
+    <meta
+      name="description"
+      content="The Aligned ZK Arcade campaign has finished. Thank you to everyone who played, proved and competed."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ZK Arcade — Campaign finished" />
+    <meta
+      property="og:description"
+      content="The Aligned ZK Arcade campaign has finished. Thank you to everyone who played, proved and competed."
+    />
+    <!-- Absolute URLs required by most scrapers - update if the domain changes. -->
+    <meta property="og:url" content="https://zkarcade.com/" />
+    <meta property="og:image" content="https://zkarcade.com/og-image.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@alignedlayer" />
+
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #060606;
+        --text-100: rgb(255 255 255);
+        --text-150: rgb(224 224 224);
+        --text-200: rgb(193 193 193);
+        --accent-100: rgb(24 255 127);
+        --border: rgba(193, 193, 193, 0.2);
+        --border-strong: rgba(193, 193, 193, 0.55);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        background-color: var(--bg);
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text-100);
+        font-size: 1rem;
+        line-height: 1.375rem;
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+      }
+
+      ::selection {
+        background-color: var(--accent-100);
+        color: #000;
+      }
+
+      /* Same radial glow the app used behind its hero. */
+      .glow {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: radial-gradient(
+              66.17% 57.92% at 50% 48.52%,
+              rgba(6, 6, 6, 0) 0%,
+              #060606 100%
+            ),
+            radial-gradient(
+              105.06% 110.34% at 48.01% 63.49%,
+              rgba(139, 252, 189, 0.1) 12.74%,
+              rgba(86, 237, 153, 0) 100%
+            ),
+            radial-gradient(
+              73.48% 38.32% at 50.94% 52.83%,
+              rgba(255, 255, 255, 0.08) 12.74%,
+              rgba(255, 255, 255, 0) 100%
+            ),
+            radial-gradient(
+              40.81% 33.22% at 47.55% 46.99%,
+              rgba(139, 252, 189, 0.1) 12.74%,
+              rgba(86, 237, 153, 0) 100%
+            ),
+            linear-gradient(to bottom, rgba(6, 6, 6, 0) 0%, #060606 100%);
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+
+      .wrap {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      header {
+        padding-top: 40px;
+      }
+
+      .wordmark .name {
+        display: block;
+        font-size: 1.25rem;
+        line-height: 2rem;
+        font-weight: 700;
+      }
+
+      .wordmark .tagline {
+        display: block;
+        color: var(--accent-100);
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 80px 0 100px;
+      }
+
+      .eyebrow {
+        margin: 0 0 20px;
+        font-size: 0.875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-150);
+      }
+
+      h1 {
+        margin: 0 0 24px;
+        font-weight: 700;
+        font-size: clamp(1.75rem, 5.5vw, 2.5rem);
+        line-height: 1.2;
+        max-width: 22ch;
+      }
+
+      h1 .accent {
+        color: var(--accent-100);
+      }
+
+      .lede {
+        margin: 0 0 16px;
+        max-width: 62ch;
+        color: var(--text-150);
+      }
+
+      .lede strong {
+        color: var(--text-100);
+        font-weight: 400;
+      }
+
+      /* One hairline-divided strip rather than three opaque cards - a flat grey
+         fill reads as pasted onto the gradient, so the glow shows through. */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        margin: 48px 0 0;
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 24px;
+        border-left: 1px solid var(--border-strong);
+      }
+
+      .stat:first-child {
+        border-left: 0;
+      }
+
+      .stat dt {
+        color: var(--text-200);
+        font-size: 0.75rem;
+        line-height: 1.375rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      /* Values align across cells even when a label wraps to two lines. */
+      .stat dd {
+        margin: 0;
+        font-size: clamp(1.875rem, 4vw, 2.5rem);
+        line-height: 1.15;
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+        color: var(--accent-100);
+        text-shadow: 0 0 32px rgba(24, 255, 127, 0.25);
+      }
+
+      @media (max-width: 720px) {
+        .stats {
+          grid-template-columns: 1fr;
+        }
+
+        .stat {
+          border-left: 0;
+          border-top: 1px solid var(--border-strong);
+        }
+
+        .stat:first-child {
+          border-top: 0;
+        }
+      }
+
+      footer {
+        border-top: 1px solid var(--border);
+      }
+
+      .footer-top {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+        padding: 40px 0;
+      }
+
+      .footer-powered {
+        flex: 1;
+        min-width: 160px;
+      }
+
+      .footer-powered p {
+        margin: 0;
+      }
+
+      .footer-powered .accent {
+        display: block;
+        margin-top: 6px;
+        color: var(--accent-100);
+      }
+
+      .footer-cols {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+      }
+
+      @media (min-width: 768px) {
+        .footer-cols {
+          gap: 8rem;
+        }
+      }
+
+      .footer-col h3 {
+        margin: 0 0 8px;
+        font-size: 1.125rem;
+        font-weight: 700;
+      }
+
+      .footer-col ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .footer-col a {
+        color: var(--text-200);
+        font-size: 0.875rem;
+        text-decoration: none;
+      }
+
+      .footer-col a:hover {
+        text-decoration: underline;
+      }
+
+      .footer-bottom {
+        border-top: 1px solid rgba(193, 193, 193, 0.35);
+        padding: 12px 0 24px;
+      }
+
+      .footer-bottom p {
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.4;
+        color: rgba(193, 193, 193, 0.75);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="glow"></div>
+
+    <header>
+      <div class="wrap">
+        <div class="wordmark">
+          <span class="name">ZK Arcade</span>
+          <span class="tagline">Powered by ALIGNED</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <p class="eyebrow">Seasons 1–6 · Complete</p>
+
+        <h1>The ZK Arcade campaign has <span class="accent">finished</span>.</h1>
+
+        <p class="lede">
+          The arcade is closed. Parity and Beast 1984 are no longer accepting
+          plays, proof submissions or leaderboard updates.
+        </p>
+
+        <p class="lede">
+          <strong
+            >Thank you to everyone who played, proved, verified and
+            competed.</strong
+          >
+          Every proof you submitted was verified on Aligned, and the games
+          remain open source on GitHub.
+        </p>
+
+        <dl class="stats">
+          <div class="stat">
+            <dt>Proofs verified</dt>
+            <dd>5643</dd>
+          </div>
+          <div class="stat">
+            <dt>Total nfts minted</dt>
+            <dd>608</dd>
+          </div>
+          <div class="stat">
+            <dt>Total claimed points</dt>
+            <dd>657.22M</dd>
+          </div>
+        </dl>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div class="footer-top">
+          <div class="footer-powered">
+            <p>
+              Powered By
+              <span class="accent">Aligned</span>
+            </p>
+          </div>
+
+          <div class="footer-cols">
+            <div class="footer-col">
+              <h3>Social</h3>
+              <ul>
+                <li>
+                  <a href="https://x.com/alignedlayer" target="_blank" rel="noopener noreferrer">Twitter</a>
+                </li>
+                <li>
+                  <a href="https://github.com/yetanotherco/zk_arcade" target="_blank" rel="noopener noreferrer">Github</a>
+                </li>
+                <li>
+                  <a href="https://youtube.com/@alignedlayer" target="_blank" rel="noopener noreferrer">Youtube</a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="footer-col">
+              <h3>Resources</h3>
+              <ul>
+                <li>
+                  <a href="https://alignedlayer.com/" target="_blank" rel="noopener noreferrer">Aligned</a>
+                </li>
+                <li>
+                  <a href="https://blog.alignedlayer.com/" target="_blank" rel="noopener noreferrer">Blog</a>
+                </li>
+                <li>
+                  <a href="https://tos.zkarcade.com/" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+                </li>
+                <li>
+                  <a href="https://privacy.zkarcade.com/" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>© 2026 ZK Arcade. Powered by Aligned.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

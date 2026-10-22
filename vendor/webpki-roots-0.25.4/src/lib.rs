@@ -2925,34 +2925,6 @@ pub const TLS_SERVER_ROOTS: &[TrustAnchor] = &[
   },
 
   /*
-   * Issuer: CN=emSign ECC Root CA - G3 O=eMudhra Technologies Limited OU=emSign PKI
-   * Subject: CN=emSign ECC Root CA - G3 O=eMudhra Technologies Limited OU=emSign PKI
-   * Label: "emSign ECC Root CA - G3"
-   * Serial: 287880440101571086945156
-   * SHA256 Fingerprint: 86:a1:ec:ba:08:9c:4a:8d:3b:be:27:34:c6:12:ba:34:1d:81:3e:04:3c:f9:e8:a8:62:cd:5c:57:a3:6b:be:6b
-   * -----BEGIN CERTIFICATE-----
-   * MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG
-   * EwJJTjETMBEGA1UECxMKZW1TaWduIFBLSTElMCMGA1UEChMcZU11ZGhyYSBUZWNo
-   * bm9sb2dpZXMgTGltaXRlZDEgMB4GA1UEAxMXZW1TaWduIEVDQyBSb290IENBIC0g
-   * RzMwHhcNMTgwMjE4MTgzMDAwWhcNNDMwMjE4MTgzMDAwWjBrMQswCQYDVQQGEwJJ
-   * TjETMBEGA1UECxMKZW1TaWduIFBLSTElMCMGA1UEChMcZU11ZGhyYSBUZWNobm9s
-   * b2dpZXMgTGltaXRlZDEgMB4GA1UEAxMXZW1TaWduIEVDQyBSb290IENBIC0gRzMw
-   * djAQBgcqhkjOPQIBBgUrgQQAIgNiAAQjpQy4LRL1KPOxst3iAhKAnjlfSU2fySU0
-   * WXTsuwYc58Byr+iuL+FBVIcUqEqy6HyC5ltqtdyzdc6LBtCGI79G1Y4PPwT01xyS
-   * fvalY8L1X44uT6EYGQIrMgqCZH0Wk9GjQjBAMB0GA1UdDgQWBBR8XQKEE9TMipuB
-   * zhccLikenEhjQjAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAKBggq
-   * hkjOPQQDAwNpADBmAjEAvvNhzwIQHWSVB7gYboiFBS+DCBeQyh+KTOgNG3qxrdWB
-   * CUfvO6wIBHxcmbHtRwfSAjEAnbpV/KlK6O3t5nYBQnvI+GDZjVGLVTv7jHvrZQnD
-   * +JbNR6iC8hZVdyR+EhCVBCyj
-   * -----END CERTIFICATE-----
-   */
-  TrustAnchor {
-    subject: b"1\x0b0\t\x06\x03U\x04\x06\x13\x02IN1\x130\x11\x06\x03U\x04\x0b\x13\nemSign PKI1%0#\x06\x03U\x04\n\x13\x1ceMudhra Technologies Limited1 0\x1e\x06\x03U\x04\x03\x13\x17emSign ECC Root CA - G3",
-    spki: b"0\x10\x06\x07*\x86H\xce=\x02\x01\x06\x05+\x81\x04\x00\"\x03b\x00\x04#\xa5\x0c\xb8-\x12\xf5(\xf3\xb1\xb2\xdd\xe2\x02\x12\x80\x9e9_IM\x9f\xc9%4Yt\xec\xbb\x06\x1c\xe7\xc0r\xaf\xe8\xae/\xe1AT\x87\x14\xa8J\xb2\xe8|\x82\xe6[j\xb5\xdc\xb3u\xce\x8b\x06\xd0\x86#\xbfF\xd5\x8e\x0f?\x04\xf4\xd7\x1c\x92~\xf6\xa5c\xc2\xf5_\x8e.O\xa1\x18\x19\x02+2\n\x82d}\x16\x93\xd1",
-    name_constraints: None
-  },
-
-  /*
    * Issuer: CN=QuoVadis Root CA 3 G3 O=QuoVadis Limited
    * Subject: CN=QuoVadis Root CA 3 G3 O=QuoVadis Limited
    * Label: "QuoVadis Root CA 3 G3"
@@ -4522,44 +4494,6 @@ pub const TLS_SERVER_ROOTS: &[TrustAnchor] = &[
   TrustAnchor {
     subject: b"1\x0b0\t\x06\x03U\x04\x06\x13\x02FR1\x120\x10\x06\x03U\x04\n\x0c\tDhimyotis1\x1c0\x1a\x06\x03U\x04\x0b\x0c\x130002 481463081000361\x190\x17\x06\x03U\x04\x03\x0c\x10Certigna Root CA",
     spki: b"0\r\x06\t*\x86H\x86\xf7\r\x01\x01\x01\x05\x00\x03\x82\x02\x0f\x000\x82\x02\n\x02\x82\x02\x01\x00\xcd\x189e\x1aY\xb1\xead\x16\x0e\x8c\x94$\x95|\x83\xd3\xc59&\xdc\x0c\xef\x16W\x8d\xd7\xd8\xac\xa3B\x7f\x82\xca\xed\xcd[\xdb\x0e\xb7-\xedE\x08\x17\xb2\xd9\xb3\xcb\xd6\x17Rr(\xdb\x8eN\x9e\x8a\xb6\x0b\xf9\x9e\x84\x9aMv\xde\")\\\xd2\xb3\xd2\x06>09\xa9t\xa3\x92V\x1c\xa1oL\n m\x9f#z\xb4\xc6\xda,\xe4\x1d,\xdc\xb3(\xd0\x13\xf2LN\x02I\xa1T@\x9e\xe6\xe5\x05\xa0-\x84\xc8\xff\x98l\xd0\xeb\x8a\x1a\x84\x08\x1e\xb7h#\xee#\xd5p\xcemQi\x10\xee\xa1z\xc2\xd1\"1\xc2\x82\x85\xd2\xf2UvP|%z\xc9\x84\\\x0b\xac\xddBN+\xe7\x82\xa2$\x89\xcb\x90\xb2\xd0\xee#\xbafL\xbbb\xa4\xf9SZd{|\x98\xfa\xa3H\x9e\x0f\x95\xae\xa7\x18\xf4j\xec.\x03E\xaf\xf0t\xf8*\xcdz]\xd1\xbeD&2)\xf1\xf1\xf5l\xcc~\x02!\x0b\x9fo\xa4?\xbe\x9dS\xe2\xcf}\xa9,|X\x1a\x97\xe1=77\x18f(\xd2@\xc5Q\x8a\x8c\xc3-\xceS\x88$Xd0\x16\xc5\xaa\xe0\xd6\n\xa6@\xdfx\xf6\xf5\x04|i\x13\x84\xbc\xd1\xd1\xa7\x06\xcf\x01\xf7h\xc0\xa8W\xbb:a\xad\x04\x8c\x93\xe3\xad\xfc\xf0\xdbDmY\xdcIY\xae\xac\x9a\x9960A{v3\"\x87\xa3\xc2\x92\x86n\xf9p\xee\xae\x87\x87\x95\x1b\xc4z\xbd1\xf3\xd4\xd2\xe5\x99\xff\xbeH\xecu\xf5x\x16\x1d\xa6p\xc1\x7f<\x1b\xa1\x92\xfb\xcf\xc8<\xd6\xc5\x93\n\x8f\xf5U:v\x95\xceY\x98\x8a\t\x95w2\x9a\x83\xba,\x04:\x97\xbd\xd4/\xbe\xd7l\x9b\xa2\xca}m&\xc9U\xd5\xcf\xc3yR\x08\t\x99\x07$-d%k\xa6!i\x9bj\xddtMk\x97zA\xbd\xab\x17\xf9\x90\x17H\x8f6\xf9-\xd5\xc5\xdb\xee\xaa\x85EA\xfa\xcd:E\xb1h\xe66L\x9b\x90W\xec#\xb9\x87\x08\xc2\xc4\t\xf1\x97\x86*(M\xe2t\xc0\xda\xc4\x8c\xdb\xdf\xe2\xa1\x17Y\xce$Yt1\xda\x7f\xfd0m\xd9\xdc\xe1j\xe1\xfc_\x02\x03\x01\x00\x01",
-    name_constraints: None
-  },
-
-  /*
-   * Issuer: CN=AAA Certificate Services O=Comodo CA Limited
-   * Subject: CN=AAA Certificate Services O=Comodo CA Limited
-   * Label: "AAA Certificate Services"
-   * Serial: 1
-   * SHA256 Fingerprint: d7:a7:a0:fb:5d:7e:27:31:d7:71:e9:48:4e:bc:de:f7:1d:5f:0c:3e:0a:29:48:78:2b:c8:3e:e0:ea:69:9e:f4
-   * -----BEGIN CERTIFICATE-----
-   * MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb
-   * MBkGA1UECAwSR3JlYXRlciBNYW5jaGVzdGVyMRAwDgYDVQQHDAdTYWxmb3JkMRow
-   * GAYDVQQKDBFDb21vZG8gQ0EgTGltaXRlZDEhMB8GA1UEAwwYQUFBIENlcnRpZmlj
-   * YXRlIFNlcnZpY2VzMB4XDTA0MDEwMTAwMDAwMFoXDTI4MTIzMTIzNTk1OVowezEL
-   * MAkGA1UEBhMCR0IxGzAZBgNVBAgMEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UE
-   * BwwHU2FsZm9yZDEaMBgGA1UECgwRQ29tb2RvIENBIExpbWl0ZWQxITAfBgNVBAMM
-   * GEFBQSBDZXJ0aWZpY2F0ZSBTZXJ2aWNlczCCASIwDQYJKoZIhvcNAQEBBQADggEP
-   * ADCCAQoCggEBAL5AnfRu4ep2hxxNRUSOvkbIgwadwSr+GB+O5AL686tdUIoWMQua
-   * BtDFcCLNSS1UY8y2bmhGC1Pqy0wkwLxyTurxFa70VJoSCsN6sjNg4tqJVfMiWPPe
-   * 3M/vg4aijJRPn2jymJBGhCfHdr/jzDUsi14HZGWCwEiwqJH5YZ92IFCokcdmtet4
-   * YgNW8IoaE+oxox6gmf049vYnMlhvB/VruPsUK6+3qszWY19zjNoFmag4qMsXeDZR
-   * rOme9Hg6jc8P2ULimAyrL58OAd7vn5lJ8S3frHRNG5i1R8XlKdH5kBjHYpy+g8cm
-   * ez6KJcfA3Z3mNWgQIJ2P2N7Sw4ScDV7oL8kCAwEAAaOBwDCBvTAdBgNVHQ4EFgQU
-   * oBEKIz6W8Qfs4q8p74Klf9AwpLQwDgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQF
-   * MAMBAf8wewYDVR0fBHQwcjA4oDagNIYyaHR0cDovL2NybC5jb21vZG9jYS5jb20v
-   * QUFBQ2VydGlmaWNhdGVTZXJ2aWNlcy5jcmwwNqA0oDKGMGh0dHA6Ly9jcmwuY29t
-   * b2RvLm5ldC9BQUFDZXJ0aWZpY2F0ZVNlcnZpY2VzLmNybDANBgkqhkiG9w0BAQUF
-   * AAOCAQEACFb8AvCb6P+k+tZ7xkSAzk/ExfYAWMymtrwUSWgEdujm7l3sAg9g1o1Q
-   * GE8mTgHj5rCl7r+8dFRBv/38ErjHT1r0iWAFf2C3BUrz9vHCv8S5dIa2LX1rzNLz
-   * Rt0vxuBqw8M0Ayx9lt1awg6nCpnBBYurDC/zXDrPbDdVCYfeU0BsWO/8tqtlbgT2
-   * G9w84FoVxp7Z8VlIMCFlA2zs6SFz7JsDoeA3raAVGI/6ugLOpyypEBMs1OUIJqsi
-   * l2D4kF501KKaU73yqWjgom7C12yxow+ev+to51byrvLjKzg6CYG1a4XXvi3tPxq3
-   * smPi9WIsgtRqAEFQ8TmDn5XpNpaYbg==
-   * -----END CERTIFICATE-----
-   */
-  TrustAnchor {
-    subject: b"1\x0b0\t\x06\x03U\x04\x06\x13\x02GB1\x1b0\x19\x06\x03U\x04\x08\x0c\x12Greater Manchester1\x100\x0e\x06\x03U\x04\x07\x0c\x07Salford1\x1a0\x18\x06\x03U\x04\n\x0c\x11Comodo CA Limited1!0\x1f\x06\x03U\x04\x03\x0c\x18AAA Certificate Services",
-    spki: b"0\r\x06\t*\x86H\x86\xf7\r\x01\x01\x01\x05\x00\x03\x82\x01\x0f\x000\x82\x01\n\x02\x82\x01\x01\x00\xbe@\x9d\xf4n\xe1\xeav\x87\x1cMED\x8e\xbeF\xc8\x83\x06\x9d\xc1*\xfe\x18\x1f\x8e\xe4\x02\xfa\xf3\xab]P\x8a\x161\x0b\x9a\x06\xd0\xc5p\"\xcdI-Tc\xcc\xb6nhF\x0bS\xea\xcbL$\xc0\xbcrN\xea\xf1\x15\xae\xf4T\x9a\x12\n\xc3z\xb23`\xe2\xda\x89U\xf3\"X\xf3\xde\xdc\xcf\xef\x83\x86\xa2\x8c\x94O\x9fh\xf2\x98\x90F\x84\'\xc7v\xbf\xe3\xcc5,\x8b^\x07de\x82\xc0H\xb0\xa8\x91\xf9a\x9fv P\xa8\x91\xc7f\xb5\xebxb\x03V\xf0\x8a\x1a\x13\xea1\xa3\x1e\xa0\x99\xfd8\xf6\xf6\'2Xo\x07\xf5k\xb8\xfb\x14+\xaf\xb7\xaa\xcc\xd6c_s\x8c\xda\x05\x99\xa88\xa8\xcb\x17x6Q\xac\xe9\x9e\xf4x:\x8d\xcf\x0f\xd9B\xe2\x98\x0c\xab/\x9f\x0e\x01\xde\xef\x9f\x99I\xf1-\xdf\xactM\x1b\x98\xb5G\xc5\xe5)\xd1\xf9\x90\x18\xc7b\x9c\xbe\x83\xc7&{>\x8a%\xc7\xc0\xdd\x9d\xe65h\x10 \x9d\x8f\xd8\xde\xd2\xc3\x84\x9c\r^\xe8/\xc9\x02\x03\x01\x00\x01",
     name_constraints: None
   },
 

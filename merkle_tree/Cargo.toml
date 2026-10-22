@@ -21,3 +21,8 @@ features = [
     "fast-rng",
     "macro-diagnostics",
 ]
+
+# webpki-roots 0.25 (pulled in by ethers) without the roots affected by the
+# eMudhra CA compromise. See vendor/webpki-roots-0.25.4/README.md.
+[patch.crates-io]
+webpki-roots = { path = "../vendor/webpki-roots-0.25.4" }
